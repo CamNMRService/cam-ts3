@@ -1,0 +1,161 @@
+/*** ^^A -*-C++-*- **********************************************/
+/*	coiltemp		19.01.2000			*/
+/****************************************************************/
+/*	Short Description :					*/
+/*	Program to read the Shim Coil Temparature		*/
+/****************************************************************/
+/*	Keywords :						*/
+/*	BSMS, Shim Coil Temperature				*/
+/****************************************************************/
+/*	Description/Usage :					*/
+/*	Program to read the Shim Coil Temparature		*/
+/****************************************************************/
+/*	Author(s) :						*/
+/*	Name		: Gabriella Schmidt			*/
+/*	Organisation	: Bruker BioSpin GmbH			*/
+/*	Email		: gabriella.schmidt@bruker-biospin.de	*/
+/****************************************************************/
+/*	Name		Date	Modification:			*/
+/*	gsc		971112	created				*/
+/*	roe		980512	revised for NT			*/
+/****************************************************************/
+/*
+$Id: coiltemp,v 1.17 2010/04/21 06:45:52 wem Exp $
+*/
+AUERR = COIL_program(curdat);
+GETCURDATA;
+QUIT
+
+#include <signal.h>
+
+static int terminate_loop = 0;
+static void interupt_handler (int argc, char **argv)
+{
+    char *whoami = i_argv[0];
+
+    /* wrong no of args */
+    if (argc < 4)
+	return;
+
+    /* its an AU program */
+    if (strcmp (argv[1], "exec") == 0) /* || strcmp (argv[1], "a.out")) */
+    {
+	/* its not for me */
+	if (strcmp (whoami,argv[3]))
+	    return;
+
+	/* terminate requested */
+	if (argv[2] && ! strcmp (argv[2], "stop"))
+	    terminate_loop = 1;
+    }
+}
+
+
+int COIL_program(
+    const char *curdat	/* current data path name			*/
+    )
+
+{
+    FILE *Fpntr;
+    char filename[PATH_MAX];
+    char timestring[64];
+    int delta_t = 10;
+    int loop = 0;
+
+#ifdef	HAS_UNIX_FEATURES
+    sigset_t mask;
+
+    (void)sigemptyset(&mask);
+    (void)sigaddset(&mask, SIGUSR1);
+    (void)sigprocmask(SIG_BLOCK, &mask, 0);
+#endif	/* HAS_UNIX_FEATURES */
+
+    /* enable loop termination with cpr command 'coiltemp stop' */
+    if (i_argc > 2  &&  strncmp(i_argv[2],"stop",4) == 0)
+    {
+	char cprcmd[PATH_MAX];
+	/* send 'stop' signal to myself */
+	snprintf(cprcmd,sizeof(cprcmd),"int m %s stop %s",i_argv[0],i_argv[0]);
+	CPR_exec(cprcmd, CONT_EX);
+	Exit_unimar(NORM_TERM);
+    }
+
+    Setint (interupt_handler);
+
+    GETINT("Time Interval [sec] ",delta_t);
+    if (delta_t <= 0)
+	delta_t = 10;
+
+    sprintf(filename,"%s/coiltemp",PathSystemHome());
+
+    if (i_argc > 2  &&  strncmp(i_argv[2],"acqu",4) == 0)
+    {
+	strcpy(filename,ACQUPATH("coiltemp"));
+    }
+
+    if ( ( Fpntr = fopen(filename,"wt")) == NULL)
+    {
+	Perror(ERROR_OPT,filename);
+	return(-1);
+    }
+
+    StrfLocalTimeMillisec(timestring,sizeof(timestring),"%Y-%m-%d %H:%M:%S %z");
+    fprintf(Fpntr,"# Start time: %s\n",timestring);
+    fprintf(Fpntr,"# Increment: %d seconds\n",delta_t);
+    fprintf(Fpntr,"      time            coil-temp\n");
+
+    while (++loop)
+    {
+	char command[256];
+	const char *exchangeFilePath;
+	const char *options[4];
+	const char *result;
+	time_t clock = time(0);
+
+
+	(void)strftime(timestring,sizeof(timestring), "%H:%M:%S",
+			localtime(&clock));
+
+	exchangeFilePath = getCPR_exchange_file_args(options);
+
+	sprintf(command,"bsmscmd %s %s SHIMTEMP",options[0],options[1]);
+
+	(void)unlink(exchangeFilePath); /* ignore nonexisting error */
+
+	if (CPR_exec(command, WAIT_TERM) < 0)
+	    return -1;
+
+	/* import result from file */
+	if ((result = getCPR_exchange_message(exchangeFilePath)) != NULL)
+	{
+	    double coiltemp;
+	    char *pt = strchr(result,'=');
+
+	    if ( (pt != 0) && sscanf(++pt,"%lf",&coiltemp) == 1)
+		fprintf(Fpntr,"%8d: %s  %8.0f\n",loop,timestring,coiltemp);
+	    else
+		fprintf(Fpntr,"%8d: %s  %s\n",loop,timestring,result);
+
+	    (void)unlink(exchangeFilePath);
+	}
+	fflush(Fpntr);
+
+#ifdef	HAS_UNIX_FEATURES
+	(void)sigprocmask(SIG_UNBLOCK, &mask, 0);
+#endif	/* HAS_UNIX_FEATURES */
+
+	WaitForUextrMessage (delta_t);
+
+#ifdef	HAS_UNIX_FEATURES
+	(void)sigprocmask(SIG_BLOCK, &mask, 0);
+#endif	/* HAS_UNIX_FEATURES */
+
+	if (terminate_loop)
+	    break;
+    }
+    StrfLocalTimeMillisec(timestring,sizeof(timestring),"%Y-%m-%d %H:%M:%S %z");
+    fprintf(Fpntr,"# End time: %s\n",timestring);
+    fflush(Fpntr);
+    fclose(Fpntr);
+    return 0;
+}

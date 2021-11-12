@@ -1,0 +1,44 @@
+/*
+Program:	as_prochsqc
+Version:	1.0
+Author:		Sean Lynn
+Date:     12/1/2007
+Description:	process to get correct phase and reference parameters,
+              set layout.
+
+Modded by djh 2013,2018
+*/
+int new_exp,finish=0,suffix=1;
+float hsr;
+char pdfname[PATH_MAX]="";
+
+GETCURDATA 
+STOREPAR("mdd_mod",1);
+STOREPAR("layout", "+/service-hsqc-ed.xwp");
+XAU("proc_2dphf2het",cmd) 
+XAU("serv_projref",cmd)  
+ABS1
+ABS2
+XCMD("clev")
+FETCHPAR("SR",&hsr)
+hsr=hsr-1.0; /* Sean thinks this is due to an isotope shift */
+STOREPAR("SR",hsr)
+
+while (finish==0)
+{
+	sprintf( pdfname, "%s/%s-13c-ed-%d.pdf",PROCPATH(0),name,suffix);
+	//sprintf(pdfname, "%s%s/%s/%d/pdata/%d/%s-%d.pdf", disk, user, name, expno, procno, name,suffix );
+	if(access(pdfname, R_OK) != 0) // if we can't read pdf file assume its not there
+	{
+		finish=1;
+	}
+	else
+	{
+		suffix++;
+		
+	}
+}
+AUTOPLOT_TO_FILE(pdfname);
+
+QUIT
+

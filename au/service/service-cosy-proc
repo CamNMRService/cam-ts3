@@ -1,0 +1,35 @@
+int suffix=1;
+int finish=0;
+char pdf_Name[PATH_MAX] = "";
+char szFileStatus[20] = "";
+char szTypeOfData[20] = "";
+char cmdstr[200] = "";
+char procnoPath[PATH_MAX] = "";
+char pdfname[PATH_MAX]="";
+float baselev=128.0;
+GETCURDATA
+STOREPAR("mdd_mod",1);
+XCMD("serv_projref")
+STOREPAR("lev0", baselev)
+XFB
+ABS1
+ABS2
+XAU("clev",cmd);
+STOREPAR("layout", "+/service-cosy.xwp")
+while (finish==0)
+{
+	sprintf( pdfname, "%s/%s-cosy-%d.pdf",PROCPATH(0),name,suffix);
+	//sprintf(pdfname, "%s%s/%s/%d/pdata/%d/%s-%d.pdf", disk, user, name, expno, procno, name,suffix );
+	if(access(pdfname, R_OK) != 0) // if we can't read pdf file assume its not there
+	{
+		finish=1;
+	}
+	else
+	{
+		suffix++;
+		
+	}
+}
+AUTOPLOT_TO_FILE(pdfname);
+
+QUIT

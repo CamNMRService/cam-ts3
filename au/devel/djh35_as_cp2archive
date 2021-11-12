@@ -1,0 +1,28 @@
+/*
+Copies the whole data set to archroot
+Can't help feeling that making the batchfile is a terrible hack
+but I don't think the 'system' command understands \
+....
+
+*/
+
+char archroot[] = "D:\\checked"; 
+char batfile[]="c:\\windows\\top-copy.bat";
+char batcmd[100]="c:/windows/top-copy.bat";
+FILE *fbat = NULL;
+char subdir[6], archpath[40], cmd_str[200];
+int cmdstatus;
+
+GETCURDATA
+strcpy ( subdir, name);
+
+//make path to correct archive directory
+
+sprintf( archpath, "%s\\%s",archroot,subdir);
+sprintf( cmd_str, "xcopy  D:\\disk2\\data\\%s\\nmr\\%s %s  /i /a /e /k /y",user,name,archpath);
+//Proc_err(INFO_OPT, cmd_str);
+fbat = fopen(batfile, "w");
+fputs( cmd_str, fbat);
+fclose( fbat);
+system(batcmd);
+QUIT

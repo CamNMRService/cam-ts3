@@ -1,0 +1,13 @@
+char intrng_ref[PATH_MAX];
+char ref_int_name[20]="zzz_intrng_ref"; //copy a reference integral to this file name, in the directory above the exp name
+char param_name[255];
+
+GETCURDATA;
+Proc_err(QUESTION_OPT,"Prepare the reference dataset.\n Zoom to the region of interest. Right click choose - Save Display region to - STSI \n Then integrate and save the peak of choice");
+sprintf( param_name, "region-wet-proc",name);
+sprintf(intrng_ref,"%s/../../%s",ACQUPATH(0),ref_int_name);
+WPAR(param_name,"proc")
+WMISC("intrng",intrng_ref)
+QUIT
+
+

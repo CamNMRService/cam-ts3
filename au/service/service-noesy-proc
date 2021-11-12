@@ -1,0 +1,63 @@
+/*AU program by DJH35 @ Cambridge Univeristy Chemistry dept to process a NOESY/ROESY/TOCSY*/
+
+
+char pdf_Name[PATH_MAX] = "";
+char szFileStatus[20] = "";
+char szTypeOfData[20] = "";
+char cmdstr[200] = "";
+char procnoPath[PATH_MAX] = "";
+char pdfname[PATH_MAX]="";
+char pul[128]="";
+char exp_type[16]="";
+char layout_name[128]="";
+char nuc1[8]="";
+char nuc2[8]="";
+
+int suffix=1;
+int finish=0;
+GETCURDATA
+STOREPAR("mdd_mod",1);
+XAU("serv_projref",cmd)
+XAU("service_phase_noesy",cmd)
+ABS1
+ABS2
+LEVCALC
+FETCHPAR("PULPROG", &pul)
+FETCHPAR("NUC1",nuc1)
+FETCHPAR("NUC2",nuc2)
+
+/*Now set the layout and make a pdf.*/
+
+//if ( (!strcmp(nuc1,"1H")) && ( (!strcmp(nuc2,"1H")) || (!strcmp(nuc2,"off"))  )  //Okay, if its not some wierd multi nuclear exp...
+if ( (!strcmp(nuc1,"1H")) &&  ( (!strcmp(nuc2,"off")) || (!strcmp(nuc2,"off"))) )
+{
+		if ( (strstr(pul, "roesy")) || (strstr(pul, "noesy")) )
+		{	
+			sprintf (exp_type, "noesy");
+			sprintf (layout_name, "+/service-%s.xwp",exp_type);		
+		}
+		if  ( (strstr(pul, "mlevph")) || (strstr(pul, "dipsi")) ) 
+		{
+			sprintf (exp_type, "cosy");
+			sprintf (layout_name, "+/service-%s.xwp",exp_type);
+			sprintf (exp_type, "tocsy"); //Okay, we used the cosy layout, but set back to tocsy for pdf name
+		}
+		STOREPAR("layout", layout_name)
+		/*Now create the pdf name. If there's a pdf already there, don't overwrite it*/
+		while (finish==0)
+		{
+			sprintf( pdfname, "%s/%s-%s-%d.pdf",PROCPATH(0),name,exp_type,suffix);
+			if(access(pdfname, R_OK) != 0) // if we can't read pdf file assume its not there
+			{
+				finish=1;
+			}
+			else
+			{
+				suffix++;
+		
+			}
+		}
+		AUTOPLOT_TO_FILE(pdfname);
+	}
+/*sleep(5);*/
+QUIT

@@ -1,0 +1,234 @@
+/*********-*-C++-*-**********************************************/
+/*  calctemp        01.10.2008                                  */
+/****************************************************************/
+/*  Short Description :                                         */
+/*  AU program to calculate the temperature in the probe        */
+/*  using the chemical shift difference between the             */
+/*  aliphatic and OH protons of a sample.                       */
+/****************************************************************/
+/*  Keywords :                                                  */
+/*  temperature methanol glycol                                 */
+/****************************************************************/
+/*  Description/Usage :                                         */
+/*  AU program to calculate the temperature in the probe        */
+/*  using the chemical shift difference between the             */
+/*  aliphatic and OH protons.                                   */
+/*  It asks for the used substance: glycol or methanol.         */
+/*  The sample type may be passed on the commandline.           */
+/*  Reference for Methanol-d4: Findeisen, Brand, Berger         */
+/*  Magn. Reson. Chem. 2007; 45: 175-178                        */
+/****************************************************************/
+/*  Author(s) :                                                 */
+/*  Name            : Rainer Kerssebaum                         */
+/*  Organisation    : Bruker BioSpin GmbH                       */
+/*  Email           : rainer.kerssebaum@bruker-biospin.de       */
+/****************************************************************/
+/*  Name        Date    Modification:                           */
+/*  jmt,ber,rke 950922  created                                 */
+/*  eng         000403  made NT compliant                       */
+/*  rke         070619  minor revision, sample MeOD added       */
+/*  rke         071005  LB check for MeOD-d4                    */
+/*  ge        20071211  readPeakList		                */
+/*  rke       20081001  PP region changed                       */
+/****************************************************************/
+/*
+$Id: calctemp,v 1.8 2008/10/01 09:53:55 rke Exp $
+*/
+local_au(curdat, text);
+QUIT
+
+#define GLYCOL    1     /* G */
+#define GLYCOLP   2     /* GP */
+#define METHANOL  3     /* M */
+#define METHANOLP 4     /* MP */
+#define METHANOLD 5     /* D or MD */
+
+/* valid temperature range for 80% Glycol and Glycol pure: 300 - 380 K */
+/* valid temperature range for 4% Methanol: 181.2 - 300 K */
+/* valid temperature range for Methanol pure: 180.1 - 299.9 K */
+/* valid temperature range for 99.8% Methanol-d4: 282 - 330 K */
+static const double MethDef[3][4]=  {{1.7600,1.4965,-114.83,471.85},
+                                     {2.0800,1.7600,-125.00,490.00},
+                                     {2.4300,2.0800,-140.00,521.33}};
+static const double MethPDef[3][4]= {{1.8240,1.5488,-108.60,468.10},
+                                     {2.1474,1.8240,-124.98,498.40},
+                                     {2.5028,2.1474,-142.80,537.40}};
+static const char* const samples[] = {"",
+        "80% Glycol in DMSO-d6",
+        "Glycol pure",
+        "4% Methanol in Methanol-d4",
+        "Methanol pure",
+        "99.8% Methanol-d4"};
+
+int local_au(const char* curdat, char* text)
+{
+    int     sample, pscal_save, psign_save, i, peak, quiet=0, nargs;
+    float   te, tecalc=0.0, delta;
+    float   mi_save, maxi_save;
+    float   ppm1, ppm2, lb;
+    double  f1p_save, f2p_save, cy_save;
+    char    answer[100];
+    char    pp_dest_save[PATH_MAX], pp_file[PATH_MAX];
+
+    GETCURDATA;
+    
+/* evaluate cmd line */
+    nargs=i_argc-2;
+    if ( nargs > 0 )
+    {   
+	if (nargs>2)    nargs=2;
+	for (i=1; i<=nargs; i++)
+	{
+	    strlwr(i_argv[i+1]);
+	    if (0 == strcmp("quiet",i_argv[i+1]))   quiet=1;
+	    else    strcpy(answer,i_argv[i+1]); 
+	}
+    }
+    else
+    {
+	FETCHPARS("TE",&te);
+	if (te >= 320.0) 
+	{
+	    (void) strcpy (answer,"G");     /* default answer for higher temps */
+	}
+	else
+	{
+	    (void) strcpy (answer,"D");     /* default answer */
+	}
+	sprintf(text,"Which sample ?\n%s\t\t(G)\n%s\t\t\t(GP)\n%s\t(M)\n%s\t\t(MP)\n%s\t\t(D) :",
+		samples[1],samples[2],samples[3],samples[4],samples[5]);
+	GETSTRING(text,answer);
+    }
+    strupr(answer);
+
+
+/* evaluate answer */
+
+    switch (answer[0])
+    {
+    case 'G' :  if (answer[1] == 'P') sample = GLYCOLP;
+	else sample = GLYCOL;
+	break;
+    case 'M' :  if (answer[1] == 'D') sample = METHANOLD;
+	else if (answer[1] == 'P') sample = METHANOLP;
+	else sample = METHANOL;
+	break;
+    case 'D' :  sample = METHANOLD;
+	break;
+    default  : STOPMSG("calctemp failed\n\n Unknown sample");
+    }
+
+
+/***** Set some parameters for PP *****/
+
+    FETCHPAR("CURPRIN",pp_dest_save);
+    STOREPAR("CURPRIN","peaklist");
+    FETCHPAR("MI",&mi_save);
+    STOREPAR("MI",100.0);
+    FETCHPAR("PSCAL",&pscal_save);
+    STOREPAR("PSCAL",0);
+    FETCHPAR("MAXI",&maxi_save);
+    STOREPAR("MAXI",10000.0);
+    FETCHPAR("CY",&cy_save);
+    STOREPAR("CY",1000.0);
+    FETCHPAR("PSIGN",&psign_save);
+    STOREPAR("PSIGN",0);
+    FETCHPAR("F1P",&f1p_save);
+    FETCHPAR("F2P",&f2p_save);
+    STOREPAR("F1P", 6.0);
+    STOREPAR("F2P", 3.0);
+    FETCHPARS("LB",&lb);
+    
+    if ((sample == METHANOLD) && (lb < 2))
+    {
+	Proc_err(ERROPT_AK_OK,"used LB might be too small,\ncouplings may be resolved.");
+    }
+    
+
+/***** Calculate NMR Temperature using PP *****/
+
+    PP;
+    strncpy(pp_file,PROCPATH(0),sizeof(pp_file));
+    peak = readPeakList(pp_file);
+    if (peak < 2)
+    {
+	STOPMSG("calctemp failed\n\n Couldn't find 2 peaks ");
+    }
+/***** Read first peak *****/
+    ppm1 = getPeakFreqPPM(0);
+
+/***** Read second peak *****/
+    ppm2 = getPeakFreqPPM(1);
+    freePeakList();
+
+/***** Do calculation *****/
+
+    delta = ppm1 - ppm2;
+
+    switch (sample)
+    {
+    case GLYCOL    :    tecalc = -108.33 * delta + 460.41;
+	if ((tecalc < 295.0) || (tecalc > 380.0))   tecalc=0.0;
+	break;
+    case GLYCOLP   :    tecalc = -99.00 * delta + 463.00;
+	if ((tecalc < 295.0) || (tecalc > 380.0))   tecalc=0.0;
+	break;
+    case METHANOL  :    for (i=0; i < 3; i++)
+	{
+	    if ((delta >= MethDef[i][1]) && (delta <= MethDef[i][0]))
+	    {
+		tecalc = MethDef[i][2] * delta + MethDef[i][3];
+	    }
+	}
+	break;
+    case METHANOLP :    for (i=0; i < 3; i++)
+	{
+	    if ((delta >= MethPDef[i][1]) && (delta <= MethPDef[i][0]))
+	    {
+		tecalc = MethPDef[i][2] * delta + MethPDef[i][3];
+	    }
+	}
+	break;
+    case METHANOLD :    tecalc= (-16.7467 * delta - 52.5130) * delta + 419.1381;
+	if ((tecalc < 282.0) || (tecalc > 330.0))   tecalc=0.0;
+	break;
+    }
+
+
+/***** Restore some parameters *****/
+
+    STOREPAR("CURPRIN",pp_dest_save);
+    STOREPAR("MI",mi_save);
+    STOREPAR("PSCAL",pscal_save);
+    STOREPAR("MAXI",maxi_save);
+    STOREPAR("PSIGN",psign_save);
+    STOREPAR("CY",cy_save);
+    STOREPAR("F1P",f1p_save);
+    STOREPAR("F2P",f2p_save);
+    
+    if (tecalc == 0)
+    {
+	if (! quiet) 
+	{
+	    Proc_err(DEF_ERR_OPT,
+		     "Sample: %s\n\n"
+		     "chemical shift difference = %.3f ppm\n\n"
+		     "temperature out of valid range", 
+		     samples[sample], delta); 
+	}
+	ABORT;
+    }
+    else
+    {
+	STOREPARS("TE",tecalc);
+	if (! quiet) 
+	{ 
+	    Proc_err(DEF_ERR_OPT,
+		     "Sample: %s\n\n"
+		     "chemical shift difference = %.3f ppm\n\n"
+		     "actual temperature = %.2f\n ", 
+		     samples[sample], delta, tecalc); 
+	}
+    }
+    return 0;
+}

@@ -1,0 +1,51 @@
+
+int new_exp,finish=0,suffix=1;
+char titlefile[512], titletext[512], titletextnew[512]; 
+char pdfname[PATH_MAX]="";
+float absf1,absf2;
+FILE *ftitle = NULL;
+
+GETCURDATA
+VIEWDATA_SAMEWIN
+EFP
+APKS
+STOREPAR("F1P", -30.0);
+STOREPAR("F2P", -230.0);
+STOREPAR("MI", 0.5);
+STOREPAR("PC", 1.2);
+STOREPAR("CY",19.0);
+STOREPAR("MAXI", 2000.0);
+STOREPAR("PSCAL", 0);
+STOREPAR("layout", "+/service-fluorine.xwp")
+//XCMD("19fref");
+PP
+
+ABS
+APK
+ABS
+APKS
+
+while (finish==0)
+{
+	sprintf( pdfname, "%s/%s-19f-%d.pdf",PROCPATH(0),name,suffix);
+	//sprintf(pdfname, "%s%s/%s/%d/pdata/%d/%s-%d.pdf", disk, user, name, expno, procno, name,suffix );
+	if(access(pdfname, R_OK) != 0) // if we can't read pdf file assume its not there
+	{
+		finish=1;
+	}
+	else
+	{
+		suffix++;
+		
+	}
+}
+//Proc_err(INFO_OPT,"pdfname=%s",pdfname);
+AUTOPLOT_TO_FILE(pdfname);
+
+
+/*
+sprintf( pdfname, "d:/disk2/data/service/pdf/%s-19f.pdf", name );
+AUTOPLOT_TO_FILE(pdfname);
+*/
+
+QUIT

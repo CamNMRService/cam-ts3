@@ -1,0 +1,46 @@
+#include <inc/sysutil>
+#include <sys/time.h>
+char command[255];
+double seconds;
+float ticks=1.0;
+time_t start_t, end_t;
+
+/* Floating point nanoseconds per second */
+#define NANO_PER_SEC 1000000000.0
+
+
+GETCURDATA
+if (i_argc == 3) {
+	strcpy(command,i_argv[2]);
+} else
+{
+
+	GETSTRING("Enter command to run and time execution of", command);
+
+}
+i1 = Proc_err(QUESTION_OPT,"Continue with the command - %s?\n\
+Click OK to continue, click cancel stop",command);
+if ( i1 == ERR_OK )
+{	
+   time(&start_t);
+    // Your code here
+    //XCMD(command);
+  // to adjust ticks to suit your systems time interval
+   sleep(10);
+ //
+   time(&end_t);
+   
+    seconds = difftime(end_t, start_t);
+    //seconds *= NANO_PER_SEC;
+    Proc_err(INFO_OPT,"The operation took %.8f seconds\n", seconds);
+} 
+if ( i1 == ERR_CANCEL )
+{
+	Proc_err(INFO_OPT,"Aborting...");
+ABORT
+}
+QUIT
+
+
+
+

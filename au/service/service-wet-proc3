@@ -1,0 +1,85 @@
+/*Program to automatically process WET data for SMC Group*/
+/*mod to use the output of service-prep-wet-proc*/
+/*this does away with the macro*/
+
+float phigh=25.0;
+float plow=-10.0;
+float hsr=0.0;
+int finish=0;
+int suffix=1;
+char titlefile[PATH_MAX], titletext[512], titletextnew[512];
+char intrng_ref[PATH_MAX];
+char ref_int_name[20]="zzz_intrng_ref"; //copy a reference integral to this file name, in the directory above the exp name
+char param_name[255]="region-wet-proc";
+//remove char sys_command[PATH_MAX];
+char pdfname[PATH_MAX]="";
+char pul[255],nuc1[7];
+FILE *ftitle = NULL; 
+
+GETCURDATA;
+VIEWDATA_SAMEWIN
+RPAR(param_name,"proc")
+FETCHPAR("PULPROG", &pul)
+FETCHPAR("NUC1",nuc1)
+
+STOREPAR("cy", 20.0);
+STOREPAR("mi",0.5);
+EFP
+APK
+ABSN
+APKS
+ABSN
+//remove XMAC("wet-proc");
+sprintf( intrng_ref, "%s/../../%s",ACQUPATH(0),ref_int_name);
+//Proc_err(QUESTION_OPT,"%s",intrng_ref);
+if(access(intrng_ref, R_OK) == 0) //there is a reference intrng region saved
+{
+	 //remove sprintf(sys_command, " cp %s %s/intrng",intrng_ref, PROCPATH(0) );
+   //remove Proc_err(QUESTION_OPT,"%s",sys_command);
+	 //removesystem(sys_command); //not sure which is best, cp or RMISC
+	 //I think RMISC is more portable
+	 RMISC("intrng",intrng_ref);
+	 ABSN
+	 STOREPAR("INTSCL",-1.0)
+	SM_INT;
+	STOREPAR("CURPRIN","integrals.txt")
+	LIPP
+}
+else {
+		Proc_err(QUESTION_OPT,"Reference integral %s not found. Run service-prep-wet-proc",intrng_ref);
+}
+
+XCMD("sendgui .int");
+XCMD("sendgui .sret");
+XCMD("sendgui .int");
+XCMD("sendgui .sret");
+PP;
+
+
+
+DATASET( name, expno, procno, disk, user);
+STOREPAR("layout", "+/service-proton.xwp")
+sprintf( titlefile, "%s%s/%s/%i/pdata/1/title", disk, user, name, expno); 
+sprintf(titletextnew, "\n%s\n", name);
+ftitle = fopen( titlefile, "a");
+fputs( titletextnew, ftitle); /*add new text to it*/
+fclose( ftitle);
+
+
+while (finish==0)
+{
+	sprintf( pdfname, "%s/%s-%s-%s-%d.pdf",PROCPATH(0),name, pul, nuc1, suffix);
+	if(access(pdfname, R_OK) != 0) // if we can't read pdf file assume its not there
+	{
+		finish=1;
+	}
+	else
+	{
+		suffix++;
+		
+	}
+}
+AUTOPLOT_TO_FILE(pdfname);
+QUIT
+
+

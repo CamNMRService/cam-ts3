@@ -1,0 +1,418 @@
+/*--------------------------------------------------------------*/
+/* Title	: Program janus4_sx				*/
+/* Date		: 02-Aug-2001					*/
+/* Version	: 1.0 - Version for Janus4 front-end		*/
+/* Author	: John Hollerton				*/
+/* Contents	: Main program					*/
+/*--------------------------------------------------------------*/
+/* Description	:						*/
+/*		  Controls Bruker sample changer for XWin-NMR 	*/
+/*		  with JCH PC control program.			*/
+/*								*/
+/* External module : None.					*/
+/* Internal module : None.					*/
+/*								*/
+/* This revision reads the defaults from a file...		*/
+/* This version works on IRIX6.5 or later only!!!!		*/
+/* ...it also works in XWinNMR 2.5 or later only!!!!		*/
+/*--------------------------------------------------------------*/
+/*Proc_err(INFO_OPT,"Right at the beginning!");*/
+/*sleep(delaytime);*/
+
+   int     expt=1, curloop=1, cpos, specno, jexpt, jsolv, finish=FALSE,i=1;
+   int     LastSample, FatalError=FALSE, nexpt, parmo, proderrcount, sthou;
+   int     skipsample, pid, x;
+   float   delaytime=0.1;
+   char    oi[20], juser[50], prodfile[80], in_data[100], tmp_fname[100];
+   char    shimfile[80], acqufile[80], errorfile[80], warnfile[80];
+   char    experiment[40], solvent[40], tunefile[40], sxfile[80];
+   char    tmp_str[180], waitfile[80], titlefile[80], titletext[80];
+   char    exptfile[80], protfile[80], diskunit[40], logfile[80];
+   char    prefix[40], shimset[40], defaultsfile[80], hdwerr[80];
+   char    archpath[80], archive[20], jcmd_str[120], outpath[80];
+   char    janusup[80], expttime[40], exptsfile[80], protocol[80];
+   char    sxcmd[80], gradshim[20], comments[30], command[100], snostr[100];
+   char    statusstr[80], awmfile[80],tmparchpath[80];
+   char   *env_name, *file_data, *field, *ed;
+   char		samplename[80], snamefile[255];
+   FILE   *fprod = NULL, *facqu = NULL, *ferror = NULL, *fwarn = NULL;
+   FILE   *fshim = NULL, *fwait = NULL, *ftitle = NULL, *fsx = NULL;
+   FILE   *fexpt = NULL, *fprot = NULL, *flog = NULL, *fdef = NULL;
+   FILE   *fjup = NULL, *fexpts = NULL, *pidfile = NULL, *fawm = NULL;
+   FILE		*sname = NULL;
+   time_t lt;
+
+GETCURDATA;
+Proc_err ( INFO_OPT, "Starting program");
+sleep(delaytime);
+XCMD("setdef ackn no");
+
+/*
+if ( (pidfile = fopen("jrlock.txt", "rt")) != NULL)
+{
+	fscanf(pidfile, "%d", &pid);
+	fclose(pidfile);
+	Proc_err(INFO_OPT, "killing PID = %d !", pid);
+	sprintf(command, "kill %d", pid);
+	CPR_exec(command, CONT_EX);
+	sname= fopen("%s/data/%s/nmr/%s/%d/pdata/%d/samplename",disk,user,name,expno,procno);
+	fscanf(sname, "%s", &samplename);
+	fclaose(sname)
+}
+
+ CPR_exec("xau janus_reproc",CONT_EX);*/
+
+/*--------------------------------------------------------------*/
+/*--- Get defaults from the defaults file ----------------------*/
+strcpy( defaultsfile, "defaults.txt" );
+fdef = fopen( defaultsfile, "r" );
+fgets( prefix, 40, fdef );
+fgets( diskunit, 40, fdef );
+fgets( tunefile, 40, fdef );
+fgets( shimset, 40, fdef );
+fgets( archpath, 80, fdef );
+fgets( archive, 20, fdef );
+fgets( gradshim, 20, fdef );
+fclose( fdef );
+
+/*--------------------------------------------------------------*/
+/*--- Remove the trailing LF -----------------------------------*/
+prefix[strlen(prefix)-1]=NULL;
+diskunit[strlen(diskunit)-1]=NULL;
+tunefile[strlen(tunefile)-1]=NULL;
+shimset[strlen(shimset)-1]=NULL;
+archpath[strlen(archpath)-1]=NULL;
+archive[strlen(archive)-1]=NULL;
+gradshim[strlen(gradshim)-1]=NULL;
+/*--------------------------------------------------------------*/
+
+Proc_err ( INFO_OPT, "Shimset is (%s)",shimset);
+sleep(delaytime);
+Proc_err ( INFO_OPT, "Archpath is (%s)",archpath);
+sleep(delaytime);
+Proc_err ( INFO_OPT, "diskunit is (%s)",diskunit);
+sleep(delaytime);
+Proc_err ( INFO_OPT, "Archive is (%s)",archive);
+sleep(delaytime);
+Proc_err ( INFO_OPT, "Tunefile is (%s)",tunefile);
+sleep(delaytime);
+Proc_err ( INFO_OPT, "Gradshim is (%s)",gradshim);
+sleep(delaytime);
+Proc_err ( INFO_OPT, "Waiting for sample...");
+
+DATASET ( "junk", 10, 1, diskunit, "chemist")
+GETCURDATA
+XCMD("ii")
+
+/*--------------------------------------------------------------*/
+/*--- Assign filenames for signalling etc.----------------------*/
+strcpy ( prodfile, "c:/chemist/prod.txt" );
+strcpy ( errorfile, "c:/chemist/error.txt" );
+strcpy ( warnfile, "c:/chemist/warn.txt" );
+strcpy ( waitfile, "c:/chemist/wait.txt" );
+strcpy ( protfile, "c:/chemist/prot.txt" );
+strcpy ( logfile, "c:/chemist/jchlog.txt" );
+/*--------------------------------------------------------------*/
+
+/*----Remove redundant plotfiles--(SML 24/04/02)----------------*/
+/*----sprintf(tmp_str, "rm -r %s/data/chemist/plotfiles/*",diskunit);
+system(tmp_str);-----*/
+/*--------------------------------------------------------------*/
+
+finish = FALSE;
+proderrcount=0;
+while ( finish != TRUE )
+{
+	/*--- Let everyone know that the loop is running -*/
+/*	Proc_err ( INFO_OPT, "Waiting for sample...Loop(%d)",curloop); */
+	sleep(delaytime);
+	/*------------------------------------------------*/
+	if ( access(prodfile,R_OK)!=0)
+	{
+		sleep( 10 );
+		Show_status( "is running...");
+		curloop++;
+		continue;
+	}
+	/*--- Reset the loop counter ---------------------*/
+	curloop=1;
+	skipsample=0;
+	/*------------------------------------------------*/
+
+	/*---Get the sample data from the prod file-------*/
+	Show_status( "About to read data from prod file");
+	fprod=fopen(prodfile,"r");
+	file_data = fgets(in_data, 100, fprod);
+	/*------------------------------------------------*/
+
+	/*------------------------------------------------*/
+
+	/*---Now extract the data from the line-----------*/
+	if ( file_data == NULL )
+	{
+		fclose( fprod );
+		proderrcount++;
+		if (proderrcount>2)
+		{
+			sprintf( tmp_str, "rm %s", prodfile );  
+        		system ( tmp_str );
+			proderrcount=0;
+		}
+		Proc_err ( INFO_OPT, "***ERROR - No data on line***" );
+		sleep( 10 );
+		ferror = fopen(errorfile,"w");
+		fputs( "Prod file format error", ferror);
+		fclose( ferror );
+		flog = fopen(logfile,"a+");
+		fputs( "PROD FILE ERROR\n", flog);
+		fclose( flog );
+		exit(1);
+	}
+	proderrcount=0;
+	
+	field = strtok( in_data, "," );
+	sscanf( field, "%d", &cpos );
+	
+	field = strtok(NULL, "," );
+	strcpy( tmp_fname, field );	
+
+	field = strtok(NULL, "," );
+	strcpy( oi, field );	
+
+	field = strtok( NULL, "," );
+	strcpy( juser, field );
+
+	field = strtok( NULL, "," );
+	strcpy( solvent, field );
+
+	field = strtok( NULL, "," );
+	strcpy( protocol, field );
+
+	field = strtok( NULL, ",");
+	strcpy( comments, field);
+	
+	flog = fopen(logfile,"a+");
+	lt=time(NULL);
+	sprintf(expttime, ctime(&lt));
+	fputs( expttime, flog);
+	sprintf( tmp_str, " Specno: %s,Sample: %s, User: %s, Sol= %s, Expt= %s, Cpos= %d\n", tmp_fname, oi, juser, solvent, protocol, cpos); 
+	fputs( tmp_str, flog);
+	fclose( flog );
+	
+	
+	sprintf( sxcmd, "sx %d ",cpos);
+	AUERR=CPR_exec(sxcmd, WAIT_TERM);
+
+/* TEMPORARY FIX FOR SAMPLE CHANGER PROBLEM - DELETE AFTER FIX!!! 
+
+	if (AUERR <0) 
+		{flog = fopen(logfile,"a+");
+		fputs( "SAMPLE CHANGER ERROR - TEMP FIX\n", flog);
+		fclose( flog );
+		exit(1);
+		}
+ END OF TEMPORARY FIX */
+
+	if ( AUERR <0 )
+
+	{
+		sprintf( hdwerr, "SAMPLE CHANGER ERROR! Error: %d, trying again...\n", AUERR);
+		flog = fopen(logfile,"a+");
+		fputs( hdwerr, flog);
+		fclose( flog );
+		sleep( 60 );
+		sprintf( sxcmd, "sx %d ",cpos);
+		AUERR=CPR_exec(sxcmd, WAIT_TERM);
+
+		/*SX( cpos );*/
+	}
+	if ( AUERR <0 )
+	{
+	  sprintf(statusstr, "***Warning - could not find samples(%d)***",AUERR);
+  	Show_status(statusstr );
+		fwarn = fopen( warnfile,"w" );
+		sprintf( hdwerr, "Could not find sample: %d\n", AUERR);
+		fputs( hdwerr, fwarn );
+		fclose( fwarn );
+		flog = fopen(logfile,"a+");
+		fputs( hdwerr, flog);
+		fclose( flog );
+		skipsample=1;
+	}
+
+	if (skipsample==0)
+	{
+		DATASET ( "junk", 10, 1, diskunit, "chemist")
+		GETCURDATA
+		STOREPAR( "SOLVENT", solvent)
+		ROT
+		RSH ( shimset )
+/* Andy Gibbs au program for locking - old LOCK command has been commented out */ 
+		//LOCK
+		XCMD("csslock")
+
+		if ( AUERR <0 )
+		{
+			Show_status( "***Warning - did not lock***" );
+			/*fwarn = fopen( warnfile,"w" );*/
+			sprintf( hdwerr, "Sample did not lock Error: %d\n", AUERR);
+			/*fputs( hdwerr, fwarn );
+			fclose( fwarn );*/
+			flog = fopen(logfile,"a+");
+			fputs( hdwerr, flog);
+			fclose( flog );
+		}
+		if (strncmp(gradshim,"true",3)==0)
+		{
+			CPR_exec("gradshimau", WAIT_TERM);
+		}
+		if (strncmp(gradshim,"true",3)!=0)
+		{
+		  XCMD("cssshim")  
+		}
+		nexpt=10;
+		while ((fgets( experiment, 40, fprod)!=NULL)&&(strlen(experiment)>2))
+		{
+			experiment[strlen(experiment)-1]=NULL;
+			/*--Get that data acquiring!----------------------*/
+			sprintf(statusstr,"Sample: %s, Expt: %s, solvent: %s",oi,experiment,solvent);
+			Show_status(statusstr );
+			sleep(delaytime);
+			DATASET ( tmp_fname, nexpt, 1, diskunit, "chemist")
+			GETCURDATA
+			RPAR( experiment, "all" )
+			GETCURDATA
+			STOREPAR( "SOLVENT", solvent )
+			if( nexpt != 10) { ROT }
+			XAUA
+			if ( AUERR <0 )
+			{
+				Show_status( "***Acquisition failed***" );
+				fwarn = fopen(warnfile,"w");
+				fputs( "Acquisition failed", fwarn);
+				fclose( fwarn );
+				flog = fopen(logfile,"a+");
+				fputs( "ACQUISITION FAILED!\n", flog);
+				fclose( flog );
+			}
+			CPR_exec("ro off",WAIT_TERM);
+			lt=time(NULL);
+			sprintf(expttime, ctime(&lt));
+			expttime[strlen(expttime)-1]=NULL;
+			if (strncmp(archive,"true",3)==0)
+			{
+				sprintf(janusup,"%sjup.txt",archpath);
+				sprintf(statusstr,"janusup = (%s)", janusup);
+				Show_status( statusstr );
+				sleep(delaytime);
+				fjup = fopen(janusup, "a+");
+				Show_status( "opening remote janusup to append");
+				sleep(delaytime);
+				sprintf( tmp_str, "%s,%d,%s,%s,%s,%s,%d,%s,%s\n", tmp_fname, nexpt, oi, juser, solvent, experiment, cpos, expttime, protocol); 
+				fputs( tmp_str, fjup);
+				fclose( fjup );
+			}
+			sprintf(janusup, "c:/chemist/jup.txt");
+			Show_status( "opening local janusup to append");
+			sleep(delaytime);
+			fjup = fopen(janusup, "a+");
+			sprintf( tmp_str, "%s,%d,%s,%s,%s,%s,%d,%s,%s\n", tmp_fname, nexpt, oi, juser, solvent, experiment, cpos, expttime, protocol); 
+			fputs( tmp_str, fjup);
+			fclose( fjup );
+			sprintf( titlefile, "%s/data/chemist/nmr/%s/%d/pdata/1/title", diskunit, tmp_fname, nexpt );
+			ftitle = fopen( titlefile, "w" );
+			sprintf( titletext, "%s\n%s\n%s\n%s\n%s\nPosition: %d\n%s", tmp_fname, oi, juser, experiment, solvent, cpos, comments );
+			fputs ( titletext, ftitle );
+			fclose ( ftitle );
+			
+			sprintf( samplename, "%s", oi );
+			for( i = 0; i < strlen(samplename); i++ )
+   		 {
+    		  if( samplename[i] == '\\' || samplename[i] == '/' || samplename[i] == ':' || samplename[i] == '*' ||
+          	samplename[i] == '?' || samplename[i] == '\"' || samplename[i] == '<' || samplename[i] == '>' ||
+           	samplename[i]== '#' || samplename[i]=='$' || samplename[i]=='%' || samplename[i]=='^' || samplename[i]=='&' ||
+          	samplename[i]=='(' || samplename[i]==')' || samplename[i]=='{' || samplename[i]=='}' || samplename[i]=='[' ||
+          	samplename[i]==']' || samplename[i]==';' || samplename[i]=='@' || samplename[i]=='~' || samplename[i]=='!' )
+     		 		{
+        			samplename[i] = '_';
+     		 		}
+   		 }
+   	  sprintf(snamefile, "%s/data/%s/nmr/%s/%d/pdata/%d/samplename",disk,user,name,expno,procno);
+   	  sname=fopen(snamefile,"w");
+			fprintf(sname, "%s", samplename);
+			fclose(sname);
+			
+			
+			parmo=1;
+			FETCHPAR ("PARMODE", &parmo)
+			if (parmo==1)
+			{
+				STOREPAR ("PF2DU", diskunit)
+				STOREPAR ("PF2NAME", tmp_fname)
+				STOREPAR ("PF2EXP", 10)
+				STOREPAR ("PF2PROC", 1)
+			}
+			XAUP
+			if ( AUERR <0 )
+			{
+				Show_status( "***Processing failed***" );
+				fwarn = fopen(warnfile,"w");
+				fputs( "Processing failed", fwarn);
+				fclose( fwarn );
+				flog = fopen(logfile,"a+");
+				fputs( "PROCESSING FAILED\n", flog);
+				fclose( flog );
+			}
+			nexpt++;
+		}
+		fclose(fprod);
+		LastSample=FALSE;
+		if ( access(waitfile,R_OK)!=0)
+	        {
+	           /*PUT_SAMPLE_BACK*/
+		   CPR_exec("sx ej",WAIT_TERM);
+	           LastSample=TRUE;
+		   sleep( 10 );
+	        }
+		if (strncmp(archive,"true",3)==0)
+		{
+			strcpy(snostr,tmp_fname);
+			for (x=1;x<strlen(tmp_fname);x++)
+			{
+			  snostr[x-1]=tmp_fname[x];
+			  snostr[x]=NULL;
+			}
+
+			specno=atoi(snostr);
+			sthou=(int)specno/1000;
+			sprintf(outpath,"%s%s%d",archpath,prefix,sthou);
+			sprintf(jcmd_str,"cp -r %s/data/chemist/nmr/%s %s",diskunit,tmp_fname,outpath);
+			Show_status( jcmd_str);
+			sleep(1);
+			system (jcmd_str);
+			sprintf(tmparchpath,"//stvdsntp001/dis-casschemist/nmr/dpx250/");
+			sprintf(outpath,"%s%s%d",tmparchpath,prefix,sthou);
+			sprintf(jcmd_str,"cp -r %s/data/chemist/nmr/%s %s",diskunit,tmp_fname,outpath);
+			Show_status( jcmd_str);
+			sleep(1);
+			system (jcmd_str);
+		}
+		sprintf( tmp_str, "rm %s", prodfile );
+		system( tmp_str );
+		flog = fopen(logfile,"a+");
+		fputs( "Sample completed...\n", flog);
+		fclose( flog );
+	}
+	if (skipsample!=0)
+	{
+		fclose( fprod );
+		sprintf( tmp_str, "rm %s", prodfile);
+		system( tmp_str );
+		flog = fopen(logfile,"a+");
+		fputs("Sample missing and skipped...\n", flog);
+		fclose( flog );
+	}
+	Proc_err ( INFO_OPT, "Waiting for sample...");
+}/*End while*/
+Show_status( "Program aborted!" );
+QUIT

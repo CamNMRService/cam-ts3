@@ -1,0 +1,61 @@
+/*program to do a baseline correction in chunks, 13 by default*/
+
+/*written by gsk first I think, modded by duncan Howe djh35@cam.ac.uk*/
+
+/*now takes a command line argument*/
+/*update jan 2018; prints info and correction/adjustment to calculation*/
+/*update jun 2018; fix bug of unitialised absf2 and type difference between absf1,2 and left,right etc*/
+/*cuased compiler/system errors, would do any correction or stop before the end...*/ 
+
+
+
+double SW,O1P,left,right,chunksize;
+
+double absf1, absf2;
+
+int chunks = 13;
+int loop = 1;
+
+//Now get the left and right spectral limits
+
+FETCHPAR("O1P",&O1P);
+
+FETCHPAR("SW",&SW);
+
+left=(SW/2)+O1P;
+
+right=O1P-(SW/2);
+
+
+
+if (*cmd != '\0') chunks = atoi(cmd);
+
+if (chunks<1) chunks = 1;
+
+chunksize=SW/chunks;
+
+
+
+Proc_err(INFO_OPT,"left = %f, right = %f, chunksize = %f, chunks = %i",left,right,chunksize,chunks);
+
+//...and walk through the spectrum optimising the baseline in chunks
+
+absf1 = left;
+absf2 = left;
+
+while (loop <= chunks)
+
+{
+  loop++;
+  absf2 = absf1-chunksize;
+ // Proc_err(INFO_OPT,"asf1=%f, absf2=%f",absf1,absf2);
+  STOREPAR("ABSF1", absf1)
+  STOREPAR("ABSF2", absf2)
+
+  ABSF
+
+  absf1=absf1-chunksize;
+
+}
+
+QUIT

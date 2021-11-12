@@ -1,0 +1,81 @@
+/*Copied from GSK work, modded by DJH
+Checks for our pulse programs
+adds 600 to 13C exp no. as we backwards predict to remove baseline roll)
+
+*/
+
+
+#include <stdio.h>
+#include <inc/sysutil>
+
+char homepul[40], pul[40], directory[40], data_File[80];
+int mode, dexpno, i_expno, i_limit, Hexpno, Cexpno;
+float Hsr, Csr;
+
+Hexpno=0;
+Cexpno=0;
+i_expno=10;
+Hsr=0.0;
+Csr=0.0;
+
+GETCURDATA
+dexpno = expno;
+FETCHPAR("PPARMOD", &mode)
+if ( mode != 1 )
+{
+	Proc_err (INFO_OPT, "This is not a 2D dataset \npparmod = %d ", mode);
+	sleep(2);
+	exit(1);
+}
+
+FETCHPAR("PULPROG", &homepul)
+
+(void) sprintf(directory, "%s/data/%s/nmr/%s", disk, user, name);
+i_limit = gethighest(directory);
+
+if( i_limit > 999 ) i_limit = 999;
+
+while (i_expno < i_limit)
+{
+sprintf( data_File, "%s/data/%s/nmr/%s/%d/fid", disk, user, name, i_expno );
+if( access( data_File, R_OK ) == 0 )
+ {
+ DATASET(name, i_expno, procno, disk, user)
+ FETCHPAR("PULPROG", &pul)
+
+ if  (strstr(pul, "zg30" ))
+	{
+	SETCURDATA
+	/*XAUPW*/	/*optional process 1H, if required*/
+	Hexpno = expno;
+	}
+  if ((strstr(pul, "zgpg30")) || (strstr(pul, "zgdc30")))
+	{
+	SETCURDATA
+	/*XAUPW*/	/*optional process 13C, if required*/
+	Cexpno = expno+6000;
+	}
+ }	
+i_expno++;
+}
+
+if ((strstr(homepul, "cosygpmfqf")) || (strstr(homepul, "roesy"))  || (strstr(homepul, "noesygpph")) ) Cexpno = Hexpno;	/*test for homo 2D*/
+
+if ( Cexpno != 0)
+{
+DATASET(name,Cexpno,procno,disk,user)
+FETCHPAR("SR",&Csr)
+}
+DATASET(name,Hexpno,procno,disk,user)
+FETCHPAR("SR",&Hsr)
+DATASET(name,dexpno,procno,disk,user)
+if ( Cexpno  != 0)
+{
+STOREPAR1("SR",Csr)
+DATASET3(name,Cexpno,procno,disk,user)
+}
+STOREPAR("SR",Hsr)
+DATASET2(name,Hexpno,procno,disk,user)
+DATASET(name,dexpno,procno,disk,user)
+
+QUIT

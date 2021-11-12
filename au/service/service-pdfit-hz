@@ -1,0 +1,27 @@
+char pdfname[PATH_MAX]="null";
+int finish=0;
+int suffix=1;
+GETCURDATA;
+DATASET( name, expno, procno, disk, user);
+STOREPAR("layout", "+/service-proton-hz.xwp")
+XCMD("dpl1");
+/*below line debuggered from TS 1 & 2... the disk variable now returns a different value!
+was sprintf( pdfname, "%s/data/%s/nmr/%s/%d/pdata/%d/%s.pdf", disk, user, name, expno, procno, name );*/
+//sprintf(pdfname, "%s%s/%s/%d/pdata/%d/%s-%d.pdf", disk, user, name, expno, procno, name,suffix );
+while (finish==0)
+{
+	sprintf( pdfname, "%s/%s-13c-ed-%d.pdf",PROCPATH(0),name,suffix);
+	if(access(pdfname, R_OK) != 0) // if we can't read pdf file assume its not there
+	{
+		finish=1;
+	}
+	else
+	{
+		suffix++;
+		
+	}
+}
+
+AUTOPLOT_TO_FILE(pdfname);
+
+QUIT

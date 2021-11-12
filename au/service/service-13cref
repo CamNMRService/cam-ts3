@@ -1,0 +1,57 @@
+/*AU program by DJH35 at Dept. Chemistry, Cambridge University*/
+/*Fixes 13C chemical shift on Aberlour*/
+
+char solvent[32];
+char inst[32];
+
+GETCURDATA
+FETCHPAR("SOLVENT",solvent);
+FETCHPARS("INSTRUM", inst);
+if (strstr(inst,"aberlour"))
+{
+	if (strcmp(solvent,"DMSO")==0) 
+		{
+			STOREPAR("SR", 48.8);
+		}
+	if (strcmp(solvent,"MeOD")==0) 
+		{
+		STOREPAR("SR", -177.3);
+		}
+	if (strcmp(solvent,"MEOD")==0) 
+		{
+		STOREPAR("SR", -177.3);
+		}
+	if (strcmp(solvent,"meod")==0) 
+		{
+		STOREPAR("SR", -177.3);
+		}
+	if (strcmp(solvent,"CDCl3")==0) 
+		{
+		STOREPAR("SR", 2.2);
+		}
+	if (strcmp(solvent,"CD3CN")==0) 
+		{
+		STOREPAR("SR", -114.48);
+		}
+	if (strcmp(solvent,"C6D6")==0) 
+		{
+		STOREPAR("SR", -21.00);
+		} 
+	if (strcmp(solvent,"Acetone")==0) 
+		{
+		STOREPAR("SR", -159.30);
+		}
+	if (strcmp(solvent,"Tol")==0) 
+		{
+		STOREPAR("SR", 	-37.54);	
+	  }
+	if (strcmp(solvent,"CD2Cl2")==0) 
+		{
+		STOREPAR("SR", 	-36.61);
+		}
+	if (strcmp(solvent,"THF")==0) 
+		{
+		STOREPAR("SR", 	-121.19);
+		}
+}
+QUIT

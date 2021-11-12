@@ -1,0 +1,108 @@
+/*program to automatically process 13c spectra*/
+/*runs a CONVDTA to do a backwards prediction to remove n points*/
+/*n being entered at the command line or 24 by default*/
+int new_exp,orig_exp; 
+
+int bp=24; /*number back-predicted points*/
+int suffix=1;
+int finish=0;
+char titlefile[PATH_MAX], titletext[512], titletextnew[512];  
+char pdfname[PATH_MAX]="";
+char auproc[127]="null_proc";
+char up1[127];
+FILE *ftitle = NULL;
+
+/*get the command line value if present*/
+if (*cmd != '\0') bp = atoi(cmd);
+
+GETCURDATA
+orig_exp=expno;
+FETCHPAR("USERP1",&up1)
+STOREPAR("layout", "+/service-carbon.xwp")
+/*convert the data into exp+6000, and backwards predict the first 16 points*/
+VIEWDATA_SAMEWIN
+new_exp=expno+6000;
+CONVDTA(new_exp)
+expno=new_exp;
+VIEWDATA_SAMEWIN
+STOREPAR("TDOFF",bp);
+/*XCMD("me_mod LPbr");*/
+XCMD("sendgui me_mod LPbr");
+STOREPAR("NCOEF", 1024);
+XCMD("sendgui phc0 0")
+XCMD("sendgui phc1 0")
+
+sprintf( titlefile, "%s%s/%s/%i/pdata/1/title", disk, user, name, new_exp);
+sprintf(titletextnew, "Data has been converted to analogue. Backwards predicted %i points to remove cryoprobe baseline roll.", bp );
+sprintf(titletext, "\n%s\n", name);
+ftitle = fopen( titlefile, "a");
+fputs( titletextnew, ftitle);
+fputs( titletext, ftitle); 
+fclose( ftitle);
+
+/*set sr value to solvent. Need to edit the AU per instrument*/
+
+XAU("service-13cref","");
+
+/*do a bit of processing to check the result*/
+EFP
+STOREPAR("F1P", 250.0);
+STOREPAR("F2P", -10.0);
+STOREPAR("MI", 0.5);
+STOREPAR("PC", 1.2);
+STOREPAR("CY",200);
+STOREPAR("MAXI", 2000.0);
+PP
+/*XAU("as_phase1d",cmd);
+STOREPAR("CY",200);
+STOREPAR("MAXI", 2000.0);
+STOREPAR("MI", 1.0);
+STOREPAR("PC", 2.0);
+PP
+*/
+
+XAU("service_cycalc13c",0);
+STOREPAR("F1P", 250.0);
+STOREPAR("F2P", -10.0);
+STOREPAR("MI", 1.0);
+STOREPAR("PC", 0.2);
+
+ABS
+XCMD("apkm");
+PP
+APKS
+XAU("service_nohump","");
+PP
+while (finish==0)
+{
+	sprintf( pdfname, "%s/%s-13c-%d.pdf",PROCPATH(0),name,suffix);
+	//sprintf(pdfname, "%s%s/%s/%d/pdata/%d/%s-%d.pdf", disk, user, name, expno, procno, name,suffix );
+	if(access(pdfname, R_OK) != 0) // if we can't read pdf file assume its not there
+	{
+		finish=1;
+	}
+	else
+	{
+		suffix++;
+		
+	}
+}
+//sprintf( pdfname, "%s%s/%s/%d/pdata/%d/%s.pdf", disk, user, name, expno, procno, name );
+AUTOPLOT_TO_FILE(pdfname);
+/*sleep(2);*/
+GETCURDATA
+STOREPAR("AUNMP",auproc)
+STOREPAR("USERP5",auproc)
+STOREPAR("USERP1",up1)
+DATASET(name,orig_exp,procno,disk,user);
+VIEWDATA_SAMEWIN
+XAU("service-13cref","");
+EFP
+ABS
+XCMD("apkm");
+PP
+APKS
+XAU("service_nohump","");
+PP
+//AUTOPLOT;
+QUIT

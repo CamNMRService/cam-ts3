@@ -1,0 +1,80 @@
+/****************************************/
+/*The default way this is supposed to work is to send an email under automation, at a defined point in the experiment run
+/*MOD TO DELETE A PDF*/
+/*update feb 2021 - now works properly on windows, fixed cludgy dealing with / in path name*/
+/*added support for non-windows environments*/
+/*to do - clear out legacy cruft*/
+
+#include <stdio.h>
+#include <inc/sysutil>
+//#include <dos.h>
+
+
+
+/*the directory to output pdfs to.*/
+char pdfdir[127]="",pdfname[511]="";
+char samplename[255], directory[255],snamepath[255]="e:",data_File[255];
+char orig_au[255],proc_au[255];
+char id[127]="camnmrservice@gmail.com", password[127]="pgamdjh2012";
+char email[255],title[255],message[255],body[255]="DO NOT REPLY";
+char batfile[127]="c:\\top-copy.bat",batcmd[127]="c:/top-copy.bat";
+char subdir[255], archpath[511], cmd_str[1023]="\n";
+
+int cmdstatus,orig_expno,i_limit,i_exp=1,pdfthere=0;
+int i;
+
+FILE *fbat = NULL;
+FILE *sname = NULL;
+FILE *statusprint = NULL;
+
+
+XCMD("setdef ackn yes")
+XCMD("setdef stderr on")
+XCMD("setdef stdout on")
+
+/*first thing to do is process the data in the directory we're in*/
+GETCURDATA
+
+
+//sprintf( pdfname, "e:\\data\\nmrservice\\\\nmr\\%s\\%d\\pdata\\%d\\%s.pdf", name, expno, procno,name );
+//sprintf( pdfname, "e:\\data\\nmrservice\\nmr\\%s\\%d\\pdata\\%d\\*.pdf", name, expno, procno,name );
+sprintf (pdfname, "%s/*.pdf", PROCPATH(0) ); //gets it wrong for dos... \ is repleced by /
+Proc_err(INFO_OPT,"pdfname=%s",pdfname);
+
+/*****************************************************/
+/*SET BELOW TO CORRECT DATA DIR*/
+/**************************************************/
+
+	
+/*Now delete the pdf if there is one.*/
+
+#ifdef HAS_WINDOWS_FEATURES
+
+  	for(i = 0; i <= strlen(pdfname); i++)
+  	{
+  		if(pdfname[i] == '/')  
+		  {
+  			pdfname[i] = '\\';
+ 		  }
+  	}
+    sprintf (cmd_str, "del %s", pdfname);
+    Proc_err(INFO_OPT,"%s",cmd_str);
+
+    /*write a dos batch file with the cmd_str and run it*/
+    fbat = fopen(batfile, "w");
+    fputs( cmd_str, fbat);
+    fclose( fbat);
+   //Show_status(cmd_str);
+   system(batcmd);
+		  
+#else
+  sprintf (cmd_str, "rm %s", pdfname);
+  Proc_err(INFO_OPT,"%s",cmd_str);
+  system(cmd_str);
+#endif
+
+XCMD("setdef ackn no")
+XCMD("setdef stderr off")
+XCMD("setdef stdout off")
+
+QUIT

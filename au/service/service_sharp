@@ -1,0 +1,96 @@
+/*Au program to sharpen spectra*/
+/*based on an idea by Mark Vine*/
+
+
+#include <inc/sysutil>
+int finish=0;
+int orig_proc_dir=1;
+int orig_td,new_td;
+int orig_si,new_si;
+float orig_lb,new_lb=-0.5,orig_gb,new_gb=0.5;
+char proc_name[PATH_MAX];
+char arg1[PATH_MAX];
+char cmd_line[PATH_MAX];
+
+GETCURDATA;
+DATASET( name, expno, procno, disk, user);
+//May need these
+FETCHPAR("TD",&orig_td);
+FETCHPAR("SI",&orig_si);
+FETCHPAR("LB",&orig_lb);
+FETCHPAR("GB",&orig_gb);
+
+
+
+if (i_argc == 3 )  //lets assume as called with 1 argument, theres a cry for help.
+  {
+	strcpy(arg1,i_argv[2]); 
+	if (strstr(arg1,"help") ) 
+	{
+		Proc_err(INFO_OPT, "Service_sharp takes two arguments for guassian enhancement. \n \
+			The first is the LB, second is the GB.\n \
+			Suggested values are :-\n \
+			\t lb=%f and must be negative\n \
+			\t gb=%f ballpark is decimal fraction where FID reaches zero. \
+			It then tries to find an empty processing directory to write to.\n \
+			The original data is copied to 9999, then copied back to where the program was called from. \n \
+			You are then shown the new enhanced spectra",new_lb,new_gb);
+		exit(1);
+	}
+}
+if (i_argc == 4)
+{
+    new_lb = atof(i_argv[2]);
+    new_gb = atof(i_argv[3]);
+}
+
+int proc_dir=procno+1; //look for n plus one first!
+
+//now look for an empty proc_dir to put the result it.
+while (finish==0)
+{
+	sprintf(proc_name, "%s/%s/%i/pdata/%i/1r",disk,name,expno,proc_dir);
+	Proc_err(DEF_ERR_OPT, "proc_name is :- %s", proc_name);
+	if(access(proc_name, R_OK) != 0) // if we can't read ir file, assume its not there
+	{
+		finish=1;
+	}
+	else
+	{
+		proc_dir++;
+		if (proc_dir > 999)
+		{
+			finish=1;
+			Proc_err(DEF_ERR_OPT, "didn't find an empty procno to write to before :- %i", proc_dir);
+			ABORT
+		}
+		
+	}
+}
+
+WRP(9999) //make a copy to switch later
+
+STOREPAR("WDW",2);
+STOREPAR("LB",new_lb);
+STOREPAR("GB",new_gb);
+new_si=2*(pow_next(orig_td));
+STOREPAR("SI",new_si);
+XCMD("sendgui me_mod no");
+GFP;
+WRP(proc_dir);
+
+VIEWDATA;
+//now have to go 9999 and copy it back 
+	DATASET(name,expno,9999,disk,user);
+	SETCURDATA;
+	GETCURDATA;
+	VIEWDATA_SAMEWIN;
+WRP(orig_proc_dir);
+DATASET(name,expno,proc_dir,disk,user);
+DATASET2(name,expno,orig_proc_dir,disk,user);
+VIEWDATA;
+sprintf(cmd_line, "sendgui .md %s/%s/%i/pdata/%i %s/%s/%i/pdata/%i",disk,name,expno,orig_proc_dir,disk,name,expno,proc_dir);
+
+XCMD(cmd_line);
+QUIT
+

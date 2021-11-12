@@ -1,0 +1,698 @@
+ÿ/***********************************************-*-C++-*-********/
+/*	plotx					          	*/
+/****************************************************************/
+/*	Short Description :					*/
+/* 	Plots all integral regions separately with same     	*/
+/*	scaling of x axis. 				 	*/
+/****************************************************************/
+/*	Keywords :						*/
+/*	1D, autoplot, XWIN-PLOT					*/
+/****************************************************************/
+/*	Description/Usage :					*/
+/*	Plotting AU program for 1D spectra,plotting 	        */
+/*	all integral ranges with same axis scaling.		*/
+/*	If possible uses same page for several regions until	*/
+/*	no more space left. plotx uses a default scaling  	*/
+/*	in dependance of the sweep width. You can override the  */
+/*	default by giving another scaling in 'Hz/cm' as first   */
+/*	argument.						*/
+/*	If the region does not fit to page scaling is	        */
+/*	mutliplied by 2, 5, etc. until it does fit.		*/
+/*	Peak Picking must be done before running this program.	*/
+/****************************************************************/
+/*	Author(s) :						*/
+/*	Name		: Peter-Rene Steiner         		*/
+/*	Organisation	: Bruker BioSpin GmbH 			*/
+/*	Email		: nmr-software-support@bruker.de	*/
+/****************************************************************/
+/*
+$Id: plotx,v 1.23 2009/01/19 06:55:13 wem Exp $
+/*Mod by djh35 Feb 2021 to output to pdf using 'service-pdfit' au program*/
+/*note int showPeaksInPPM = 1; to have PP in ppm*/
+
+
+#include <inc/layout_package>
+
+
+#define PLOTX_SHOW_PLOT_OVERVIEW 	0
+#define PLOTX_SHOW_RULER_ON_RIGHT	0
+#define PLOTX_SHOW_ALL_PAGES_AT_ONCE	1
+#define MAX_INT_SECTIONS	      100
+
+/*********************************************/
+/* Declare functions                         */
+int getOptimumScaling(double);
+void writeLayoutBegin(const char*, LayoutPaperSize, const char*);
+void writeLayoutEnd(int, int, double, double, LayoutPaperSize);
+
+/*********************************************/
+/* Declare variables                         */
+double f1p, f2p, sf, sw_p;
+double optionXScaling;
+int optionAutoplot = 0;
+int optionNoIntegrals = 0;
+int optionMulti = 0;
+int portfolioDataSets = 0;
+
+char intrngfile[PATH_MAX];
+char plotxname[PATH_MAX];
+char printerName[512];
+char currentlayout[PATH_MAX];
+char line[PATH_MAX];
+char nucl[10];
+double sectionLeft[MAX_INT_SECTIONS], sectionRight[MAX_INT_SECTIONS], sectionMaxInt[MAX_INT_SECTIONS];
+double globalMaxInt;
+int xdim, ydim, xpos, ypos, number = 0, numberbegin = 1;
+float offset;
+double xScaling, cx, cx1;
+int showPeaksInPPM = 0;
+int showIntegralTraces = 0;
+int showIntegralLabels = 0;
+int i, numSections, firstspec, scaling, layoutCounter = 1;
+LayoutPaperSize layoutFormat = LayoutPaperSizeA4;
+double usablePaperWidth = 25.0;	/* space available on paper to place integral sections in */
+int numPeaks;
+FILE *fp;
+
+/* preset printerName - the default "PostScript" causes plot to use the default printer */
+strcpy(printerName, "PostScript");
+
+/*********************************************/
+/* Evaluate command line                     */
+if(strstr(cmd, "?") || strstr(cmd, "/?"))
+{
+	Proc_err(DEF_ERR_OPT, "Usage: plotx [Hertz_per_cm] [nointegrals] [A3] [multi=n] [auto]\n"
+		"\nwhere 'plotx 100' overrides default with 100"
+		"\n'nointegrals' suppresses integrals"
+		"\n'A3' uses DIN A3 as paper size instead of A4"
+		"\n(target printer is taken from parameter CURPLOT then)"
+		"\n'multi=n' shows n data sets in stacked view using the portfolio"
+		"\nand 'auto' prints without preview.\n\n"
+		"Please edit the AU program to adapt the plotx functionality.");
+	return -1;
+}
+if(strstr(cmd, "A3") || strstr(cmd, "a3"))
+{
+	layoutFormat = LayoutPaperSizeA3;
+	usablePaperWidth = 35.0;
+	FETCHPAR("CURPLOT", printerName);
+}
+
+if(strstr(cmd, "auto"))
+	optionAutoplot = 1;
+
+if(strstr(cmd, "nointegrals"))
+	optionNoIntegrals = 1;
+
+if(strstr(cmd, "multi="))
+	optionMulti = 1;
+
+if(optionMulti)
+{
+	char* pend;
+	char* pbegin = strstr(cmd, "multi=");
+	pbegin += strlen("multi=");
+	pend = strchr(pbegin, ' ');
+	if(!pend)
+		pend = cmd + strlen(cmd);
+
+	portfolioDataSets = atoi(pbegin);
+	if(portfolioDataSets < 1)
+	{
+	    Proc_err(DEF_ERR_OPT, "Number of datasets for option 'multi' must be >= 1");
+	    return -1;
+	}
+}
+
+/* Save current layout selection */
+FETCHPAR("LAYOUT", currentlayout);
+
+/* Locate temporary layout in user's home directory to ensure we have write permission */
+strcpy(intrngfile, PROCPATH("intrng"));
+
+/*********************************************/
+/* Get optimal CX                            */
+FETCHPARS("OFFSET", &offset);
+f1p = offset;
+FETCHPARS("SW_p",&sw_p)
+FETCHPARS("SF",&sf)
+f2p=f1p-(sw_p/sf);
+
+FETCHPARS("NUC1",nucl)
+
+/*********************************************/
+/* Select how to display peaks and integrals */
+
+if(!strcmp(nucl,"13C"))
+{
+	showPeaksInPPM = 1;
+	showIntegralTraces = 0;
+	showIntegralLabels = 0;
+}
+else
+{
+	showPeaksInPPM = 0;
+	showIntegralTraces = 1;
+	showIntegralLabels = 1;
+}
+
+if(optionNoIntegrals)
+{
+	showIntegralTraces = 0;
+	showIntegralLabels = 0;
+}
+
+/*********************************************/
+/* Estimate default for x scaling            */
+xScaling = 200.0;
+if(f1p - f2p <  50.0)
+    xScaling = 100.0;
+
+/* If scaling has been given on command line it overrides estimated value */
+optionXScaling = atof(cmd);
+if(optionXScaling != 0.0)
+    xScaling = optionXScaling;
+
+cx = 1000.0 / xScaling * sf;
+
+/*********************************************/
+/* Read integral sections from file intrng   */
+fp = fopen(intrngfile, "r");
+if(fp == NULL)
+{
+    Proc_err(DEF_ERR_OPT, "Cannot open file\n%s\n\nPlease define integral regions before using 'plotx'.", intrngfile);
+    return -1;
+}
+
+fgets(line, sizeof(line), fp);
+fgets(line, sizeof(line), fp);
+
+while (line[0] == '#'  &&  fgets(line, sizeof(line), fp))
+    ;			/* skip comment lines */
+
+i = 0;
+while(!feof(fp))
+{
+    if (sscanf(line, "%lf %lf", &sectionLeft[i], &sectionRight[i]) < 2)
+	break;
+
+    sectionMaxInt[i] = 0.0;
+    i++;
+    if (i >= MAX_INT_SECTIONS)
+        break;
+    fgets(line, sizeof(line), fp);
+}
+numSections = i;
+fclose(fp);
+
+/*********************************************/
+/* Read peaks				     */
+numPeaks = readPeakList(PROCPATH(0));
+
+if (numPeaks <= 0)
+{
+    Proc_err(DEF_ERR_OPT, "%s\nPlease do peak picking before using 'plotx'",
+	     getPeakError());
+    return -1;
+}
+
+globalMaxInt = 0.0;
+
+for (i = 0; i < numPeaks; i++)
+{
+    int j;
+    double pint = getPeakIntensity(i);
+    double pppm = getPeakFreqPPM(i);
+
+    for (j = 0; j < numSections; j++)
+	if (pppm <= sectionLeft[j] && pppm >= sectionRight[j])
+	{
+	    if (pint > sectionMaxInt[j])
+		sectionMaxInt[j] = pint;
+	    if (pint > globalMaxInt)
+		globalMaxInt = pint;
+	}
+}
+
+freePeakList();
+
+/*********************************************/
+/* Normalize section maximum intensities     */
+for (i = 0; i < numSections; i++)
+    sectionMaxInt[i] /= globalMaxInt;
+
+
+/*********************************************/
+/* Now generate layout file                  */
+
+number = 0;
+numberbegin = 1;
+sprintf(plotxname, "%s/plotx-output-%d.xwp", PathSystemHome(), layoutCounter++);
+writeLayoutBegin(plotxname, layoutFormat, printerName);
+
+/****************************************************************/
+/* Setup a range of attributes for text in the layout		*/
+
+{
+LAYOUT_ATTRIBUTES	axisAttributes		= LAYOUT_ATTRIBUTES_DEFAULTS;
+LAYOUT_ATTRIBUTES	integralsAttributes	= LAYOUT_ATTRIBUTES_DEFAULTS;
+LAYOUT_ATTRIBUTES	peaksAttributes		= LAYOUT_ATTRIBUTES_DEFAULTS;
+LAYOUT_ATTRIBUTES	curveAttributes		= LAYOUT_ATTRIBUTES_DEFAULTS;
+LAYOUT_ATTRIBUTES	vert_scale_attributes	= LAYOUT_ATTRIBUTES_DEFAULTS;
+LAYOUT_ATTRIBUTES	horiz_scale_attributes	= LAYOUT_ATTRIBUTES_DEFAULTS;
+LAYOUT_OBJ_1D		my_1d = LAYOUT_1D_DEFAULTS;
+
+curveAttributes.lineColor = LayoutColorBlack;
+curveAttributes.lineWidth  = LayoutLineWidth1;  /* alternative: LayoutLineWidthSuperThin */
+
+axisAttributes.fontType  = LayoutFontTypeCourierNormal;
+axisAttributes.fontSize  = 10;
+axisAttributes.lineColor = LayoutColorBlue;
+
+integralsAttributes.fontType  = LayoutFontTypeCourierNormal;
+integralsAttributes.fontSize  = 8;
+integralsAttributes.lineColor = LayoutColorRed;
+
+peaksAttributes.fontType  = LayoutFontTypeCourierNormal;
+peaksAttributes.fontSize  = 10;
+peaksAttributes.lineColor = LayoutColorBlue;
+
+vert_scale_attributes.fontType  = LayoutFontTypeHelveticaNormal;
+
+horiz_scale_attributes.fontType = LayoutFontTypeHelveticaNormal;
+
+
+/*********************************************************************/
+/* Setup properties of 1D objects used to show the integral sections */
+
+my_1d.offsetXAxis			= 0.2;
+my_1d.resetActionX			= LayoutResetActionAxisDontChange;
+my_1d.resetActionY			= LayoutResetActionIntensitySetToMinMax;
+my_1d.useRegionFile			= 1;
+my_1d.regionType			= LayoutResetRegionTypeIntrng;
+my_1d.showPeaks				= 1;
+my_1d.showPeakMarks			= 0;
+my_1d.showIntegralLabels	= 0;
+my_1d.showIntegralTraces	= 0;
+if(showPeaksInPPM)
+	my_1d.peaksUnit			= LayoutAxisUnitPPM;
+else
+	my_1d.peaksUnit			= LayoutAxisUnitHz;
+my_1d.showIntegralTraces	= showIntegralTraces;
+my_1d.showIntegralLabels	= showIntegralLabels;
+my_1d.keepIntegralsFixed	= 0;			/* set this to 1 to use the offset setting below */
+my_1d.integralsOffsetPercent = 10;
+
+LAYOUT_ADD_ATTRIBUTES(curveAttributes);
+LAYOUT_ADD_ATTRIBUTES(axisAttributes);
+LAYOUT_ADD_ATTRIBUTES(integralsAttributes);
+LAYOUT_ADD_ATTRIBUTES(peaksAttributes);
+LAYOUT_ADD_ATTRIBUTES(vert_scale_attributes);
+LAYOUT_ADD_ATTRIBUTES(horiz_scale_attributes);
+my_1d.axisAttributeId		= axisAttributes.attributeId;
+my_1d.peaksAttributeId		= peaksAttributes.attributeId;
+my_1d.integralsAttributeId	= integralsAttributes.attributeId;
+my_1d.curveAttributeId		= curveAttributes.attributeId;
+
+/* Setup position for the first section = left */
+xpos = -2000;
+xdim = 0;
+ypos =  2600;
+ydim = 11000;
+cx1 = cx;
+firstspec = 1;
+if(layoutFormat == LayoutPaperSizeA3)
+{
+	ydim = 21000;
+}
+
+while(number < numSections)
+{
+        char stringbuf[256];
+	cx = cx1;
+	f1p = sectionLeft[number];
+	f2p = sectionRight[number];
+	xpos = xpos + xdim + 2000;
+	xdim = (int)((f1p - f2p) * cx);	/* x dim in 1/1000 cm	*/
+
+	/* If current region cannot be displayed in available space on paper */
+	/* reduce x scaling factor until it fits                  */
+	{
+	   while (xdim > usablePaperWidth * 1000.0)
+	   {
+	      xdim = xdim / 2;
+	      cx = cx / 2;
+	   }
+	}
+
+	/* If right end of current region does not fit in available space on paper */
+	/* finalize current page and start a new one       */
+	if(xpos > 0 && xpos + xdim > usablePaperWidth * 1000.0)
+	{
+		writeLayoutEnd(numberbegin, number, cx, sf, layoutFormat);
+
+#if !(PLOTX_SHOW_ALL_PAGES_AT_ONCE)
+		STOREPAR("LAYOUT", plotxname);
+		if(optionAutoplot == 0)
+		    CPR_exec("plot -r", WAIT_TERM);    /* start Plot Editor and wait until closed by user */
+		else
+		    CPR_exec("autoplot", WAIT_TERM);   /* or send to printer immediately */
+		STOREPAR("LAYOUT", currentlayout);
+#endif
+		sprintf(plotxname, "%s/plotx-output-%d.xwp", PathSystemHome(), layoutCounter++);
+		writeLayoutBegin(plotxname, layoutFormat, printerName); /* start new layout, write/assign attributes again! */
+		LAYOUT_ADD_ATTRIBUTES(curveAttributes);
+		LAYOUT_ADD_ATTRIBUTES(axisAttributes);
+		LAYOUT_ADD_ATTRIBUTES(integralsAttributes);
+		LAYOUT_ADD_ATTRIBUTES(peaksAttributes);
+		LAYOUT_ADD_ATTRIBUTES(vert_scale_attributes);
+		LAYOUT_ADD_ATTRIBUTES(horiz_scale_attributes);
+		my_1d.axisAttributeId		= axisAttributes.attributeId;
+		my_1d.peaksAttributeId		= peaksAttributes.attributeId;
+		my_1d.integralsAttributeId	= integralsAttributes.attributeId;
+		my_1d.curveAttributeId		= curveAttributes.attributeId;
+
+		firstspec = 1;
+
+		xpos = 0;
+		numberbegin = number + 1;
+	}
+	else
+		firstspec = 0;
+
+	scaling = getOptimumScaling(sectionMaxInt[number]);
+
+	/* Set position/limits for current integral section and place object in layout */
+
+	my_1d.xPos = xpos / 1000.0;
+	my_1d.yPos = ypos / 1000.0;
+	my_1d.xDim = xdim / 1000.0;
+	my_1d.yDim = ydim / 1000.0;
+	my_1d.xMin = f1p;
+	my_1d.xMax = f2p;
+	my_1d.scalingAfterResetPercent = scaling * 100.0;
+	my_1d.axisBottom = 1;
+	my_1d.showPeaks = 1;
+	my_1d.showIntegralTraces = showIntegralTraces;
+	my_1d.showIntegralLabels = showIntegralLabels;
+	my_1d.showScalingInfo = 1;
+	my_1d.dataSetNumber = 1;
+	my_1d.useRegionFile = 1;
+	LAYOUT_ADD_1D_OBJECT(my_1d);
+
+	if(optionMulti && portfolioDataSets > 0)
+	{
+		for(i = 2; i <= portfolioDataSets; i++)
+		{
+			my_1d.axisBottom = 0;
+			my_1d.showPeaks = 0;
+			my_1d.showIntegralTraces = 0;
+			my_1d.showIntegralLabels = 0;
+			my_1d.showScalingInfo = 0;
+			my_1d.dataSetNumber = i;
+			my_1d.useRegionFile = 1;
+			my_1d.yPos += 2.0;
+#if 0
+			my_1d.xPos += 0.3;  /* would give a small horizontal shift */
+#endif
+			LAYOUT_ADD_1D_OBJECT(my_1d);
+		}
+	}
+
+	/* Create text object for vertical scale, and place object in layout */
+        {
+	    LAYOUT_OBJ_TEXT	vert_scale_text	= LAYOUT_TEXT_DEFAULTS;
+	    vert_scale_text.attributeId	= vert_scale_attributes.attributeId;
+	    vert_scale_text.content		= stringbuf;
+	    vert_scale_text.xPos		= xpos / 1000.0;
+	    vert_scale_text.yPos		= 17.4;
+	    if(layoutFormat == LayoutPaperSizeA3)
+		vert_scale_text.yPos = 17.4 + 8.8;
+	    vert_scale_text.xDim		= 20.0;
+	    vert_scale_text.yDim		= 0.5;
+	    vert_scale_text.fontSize	= 10;
+	    vert_scale_text.allowAutomaticFontResize = 0;
+	    sprintf(stringbuf, "%g Hz/cm", sf * 1000.0 / cx);
+	    LAYOUT_ADD_TEXT(vert_scale_text);
+	}
+
+	/* Create text object for horizontal scale, and place object in layout if different from "1.0" */
+
+	{
+	    LAYOUT_OBJ_TEXT	horiz_scale_text = LAYOUT_TEXT_DEFAULTS;
+	    horiz_scale_text.attributeId	= horiz_scale_attributes.attributeId;
+	    horiz_scale_text.content = stringbuf;
+	    sprintf(stringbuf, "x%d", scaling);		/* Show vertical scaling factor */
+	    horiz_scale_text.xPos	= (xpos + xdim - 300) / 1000.0;
+	    horiz_scale_text.yPos		= 2.886;
+	    horiz_scale_text.xDim		= 1.778;
+	    horiz_scale_text.yDim		= 0.446;
+	    horiz_scale_text.fontSize	= 10;
+	    horiz_scale_text.allowAutomaticFontResize = 0;
+	    if(scaling != 1.0)
+	    {
+		LAYOUT_ADD_TEXT(horiz_scale_text);
+	    }
+	}
+	number++;
+}
+
+writeLayoutEnd(numberbegin, number, cx, sf, layoutFormat);
+
+/*********************************************/
+/* Start Plot Editor or autoplot with this   */
+/* layout then restore original setting      */
+
+{
+#if PLOTX_SHOW_ALL_PAGES_AT_ONCE
+	char command[512];
+	char arg[512];
+	if(optionAutoplot == 0)
+		strcpy(command, "plot -r");
+	else
+		strcpy(command, "autoplot");
+	for(i = layoutCounter - 1; i; i--)
+	{
+#ifdef HAS_WINDOWS_FEATURES
+		sprintf(arg, " \"%s/plotx-output-%d.xwp\"", PathSystemHome(), i);
+#else
+		sprintf(arg, " %s/plotx-output-%d.xwp", PathSystemHome(), i);
+#endif
+		strcat(command, arg);
+   	STOREPAR("LAYOUT", arg);
+		XAU("service-pdfit",cmd);
+		STOREPAR("LAYOUT", currentlayout);
+	}
+	CPR_exec(command, WAIT_TERM);
+
+#else
+
+	STOREPAR("LAYOUT", plotxname);
+
+	if(optionAutoplot == 0)
+		CPR_exec("plot -r", WAIT_TERM);
+			XAU("service-pdfit",cmd);
+	else
+		CPR_exec("autoplot", WAIT_TERM);
+			XAU("service-pdfit",cmd);
+STOREPAR("LAYOUT", currentlayout);
+#endif
+}
+}
+QUIT
+
+
+/*-------------------------------------------*/
+/* Functions                                 */
+
+/*********************************************/
+/* This determines how regions with small    */
+/* peaks only shall be magnified             */
+int getOptimumScaling(double maxPeak)
+{
+	if(maxPeak == 0.0)	return   1;
+	if(maxPeak < 0.01)	return 100;
+	if(maxPeak < 0.05)	return  30;
+	if(maxPeak < 0.1)	return  10;
+	if(maxPeak < 0.2)	return   5;
+	return 1;
+}
+
+/*********************************************/
+/* Write header of a layout file             */
+void writeLayoutBegin(const char* fn, LayoutPaperSize layoutFormat, const char* printerName)
+{
+	/* Setup the paper format */
+	LAYOUT_FORMAT my_format = LAYOUT_FORMAT_DEFAULTS;
+
+	LAYOUT_OBJ_RECTANGLE my_rect = 	LAYOUT_RECTANGLE_DEFAULTS;
+	LAYOUT_OBJ_1D	my_1d = LAYOUT_1D_DEFAULTS;
+	LAYOUT_OBJ_TEXT my_text = LAYOUT_TEXT_DEFAULTS;
+	LAYOUT_OBJ_LINE my_line = LAYOUT_LINE_DEFAULTS;
+	LAYOUT_ATTRIBUTES my_att = LAYOUT_ATTRIBUTES_DEFAULTS;
+
+	my_format.marginBottom	= 1.0;
+	my_format.size	= layoutFormat;
+	my_format.usesDefaultPrinter = 0;
+	strcpy(my_format.printerName, printerName);
+	LAYOUT_BEGIN_FILE(fn, my_format);
+
+#if PLOTX_SHOW_PLOT_OVERVIEW
+	/*********************************************************/
+	/* This would create a overview plot if enabled          */
+	my_rect.attributeId = 12;
+	my_rect.xPos = 21.9;
+	my_rect.yPos = 16.74;
+	if(layoutFormat == LayoutPaperSizeA3)
+		my_rect.yPos = 16.74 + 8.8;
+
+	my_rect.xDim = 4.553;
+	my_rect.yDim = 1.7391;
+	LAYOUT_ADD_RECTANGLE(my_rect);
+	my_rect.attributeId = 13;
+	my_rect.xPos = 19.65;
+	my_rect.yPos = 16.777;
+	if(layoutFormat == LayoutPaperSizeA3)
+		my_rect.yPos = 16.777 + 8.8;
+	my_rect.xDim = 6.8;
+	my_rect.yDim = 1.688;
+	LAYOUT_ADD_RECTANGLE(my_rect);
+
+	my_att.fontSize = 2;
+	my_att.lineColor = LayoutColorBlue;
+	my_att.fillStyle = LayoutFillStyleUnfilled;
+	my_att.fontType =  LayoutFontTypeHelveticaNormal;
+	LAYOUT_ADD_ATTRIBUTES(my_att);
+
+	my_1d.xPos = 21.9;
+	my_1d.xDim =  4.6;
+	my_1d.yPos = 17.3;
+	if(layoutFormat == LayoutPaperSizeA3)
+		my_1d.yPos = 17.3 + 8.8;
+	my_1d.yDim =  1.0;
+	my_1d.axisBottom = 0;
+	my_1d.showPeaks = 0;
+	my_1d.showPeakMarks = 0;
+	my_1d.integralsAttributeId = my_att.attributeId;
+	LAYOUT_ADD_1D_OBJECT(my_1d);
+
+#ifdef HAS_WINDOWS_FEATURES
+	fputs("NMRMeta 0 13 (20000|18200) (21600|17300) 0 t t t \"$XWINNMRHOME/plot/meta/bruker.wmf\"\n", lcsFileHandle);
+#else
+	fputs("NMREpsi 0 13 (20000|18200) (21600|17300) 0 t t \"$XWINNMRHOME/plot/epsi/bruker.epsi\"\n", lcsFileHandle);
+#endif
+	my_text.content = "TOPSPIN";
+	my_text.xPos = 20.0;
+	my_text.yPos = 17.25;
+	if(layoutFormat == LayoutPaperSizeA3)
+		my_text.yPos = 17.25 + 8.8;
+
+	my_text.xDim = 1.778;
+	my_text.yDim = 0.446;
+	my_text.attributeId = my_att.attributeId;	/* to get the Helvetica font */
+	my_text.fontSize = 10;						/* with 10pt size            */
+	LAYOUT_ADD_TEXT(my_text);
+#endif
+
+#if PLOTX_SHOW_RULER_ON_RIGHT
+	/*********************************************************/
+	/* This would create a ruler on the right if enabled     */
+	my_line.xBegin  = 26.6;
+	my_line.yBegin	=  3.1;
+	my_line.xEnd	= 26.6;
+	my_line.yEnd	= 13.1;
+	LAYOUT_ADD_LINE(my_line);
+
+	int i;
+	for(i = 0; i <= 10; i++)
+	{
+		my_line.xBegin	= 26.6;
+		my_line.xEnd	= 26.1;
+		my_line.yBegin  =  3.1 + i;
+		my_line.yEnd	=  3.1 + i;
+		LAYOUT_ADD_LINE(my_line);
+	}
+
+	my_text.content = "10";
+	my_text.xPos = 26.1;
+	my_text.yPos = 13.0;
+	my_text.xDim = 0.5;
+	my_text.yDim = 0.5;
+	LAYOUT_ADD_TEXT(my_text);
+	my_text.content = "5";
+	my_text.xPos = 26.2;
+	my_text.yPos = 8.0;
+	LAYOUT_ADD_TEXT(my_text);
+#endif
+}
+
+/*********************************************/
+/* Write end of a layout file                */
+void writeLayoutEnd(int numFrom, int numTo, double cx, double sf, LayoutPaperSize layoutFormat)
+{
+	char stringbuf[PATH_MAX];
+	LAYOUT_OBJ_TITLE 	my_title 	= LAYOUT_TITLE_DEFAULTS;
+	LAYOUT_OBJ_TEXT 	my_text 	= LAYOUT_TEXT_DEFAULTS;
+
+	/* Setup up attributes for title, dataset name, integral identifiers */
+
+	LAYOUT_ATTRIBUTES 	title_attributes	= LAYOUT_ATTRIBUTES_DEFAULTS;
+	LAYOUT_ATTRIBUTES 	dataset_attributes	= LAYOUT_ATTRIBUTES_DEFAULTS;
+	LAYOUT_ATTRIBUTES 	identifier_attributes	= LAYOUT_ATTRIBUTES_DEFAULTS;
+
+	title_attributes.fontType = LayoutFontTypeHelveticaNormal;
+	title_attributes.lineColor = LayoutColorBlack;
+	LAYOUT_ADD_ATTRIBUTES(title_attributes);
+
+	dataset_attributes.fontType = LayoutFontTypeHelveticaNormal;
+	dataset_attributes.fontType = LayoutFontTypeHelveticaNormal;
+	dataset_attributes.lineColor = LayoutColorBlack;
+	LAYOUT_ADD_ATTRIBUTES(dataset_attributes);
+
+	identifier_attributes.fontType = LayoutFontTypeHelveticaNormal;
+	identifier_attributes.fontType = LayoutFontTypeHelveticaNormal;
+	identifier_attributes.lineColor = LayoutColorBlack;
+	LAYOUT_ADD_ATTRIBUTES(identifier_attributes);
+
+	/* Place title object in layout */
+
+	my_title.xPos = 0.0;
+	my_title.yPos = 16.4;
+	if(layoutFormat == LayoutPaperSizeA3)
+		my_title.yPos = 25.2;
+
+	my_title.xDim = 19.740;
+	my_title.yDim = 2.1;
+	my_title.fontSize = 12;
+	my_title.allowAutomaticFontResize = 0;
+	my_title.attributeId = title_attributes.attributeId;
+	LAYOUT_ADD_TITLE(my_title);
+
+	/* Place text with data set name in layout */
+
+	my_text.xPos = 0.0;
+	my_text.yPos = 18.0;
+	if(layoutFormat == LayoutPaperSizeA3)
+		my_text.yPos = 26.8;
+ 	my_text.xDim = 20.0;
+	my_text.yDim = 0.5;
+	my_text.attributeId = dataset_attributes.attributeId;
+	my_text.allowAutomaticFontResize = 0;
+	my_text.content = stringbuf;
+	sprintf(stringbuf, "%s/%s/%s/%d/%d", disk, user, name, expno, procno);
+	LAYOUT_ADD_TEXT(my_text);
+
+	/* Place integral identifiers in layout */
+
+	my_text.yPos = 17.7;
+	if(layoutFormat == LayoutPaperSizeA3)
+		my_text.yPos = 26.5;
+	my_text.xDim = 20.0;
+	my_text.yDim = 0.5;
+	my_text.fontSize = 8;
+	sprintf(stringbuf, "Integral regions #%d to #%d", numFrom, numTo);
+	my_text.attributeId = identifier_attributes.attributeId;
+	LAYOUT_ADD_TEXT(my_text);
+
+	LAYOUT_END_FILE;
+}

@@ -1,0 +1,28 @@
+/*program to do a baseline correction in chunks, 23 by default*/
+/*written by gsk i think first, modded by duncan Howe djh35@cam.ac.uk*/
+/*now takes a command line argument*/
+
+double SW,O1P,left,right,step;
+float absf1, absf2;
+int chunk=13;
+//Now get the left and right spectral limits
+FETCHPAR("O1P",&O1P);
+FETCHPAR("SW",&SW);
+left=(SW/2)+O1P;
+right=O1P-(SW/2);
+
+if (*cmd != '\0') chunk = atoi(cmd);
+if (chunk<1) chunk = 1;
+step=SW/chunk;
+
+//...and walk through the spectrum optimising the baseline in chunks
+absf1 = left+0.1;
+while (absf1 > right+1)
+{
+  absf2 = absf1-step;
+  STOREPAR("ABSF1", absf1)
+  STOREPAR("ABSF2", absf2)
+  ABSF
+  absf1=absf1-step;
+}
+QUIT

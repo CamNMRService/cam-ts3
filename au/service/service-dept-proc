@@ -1,0 +1,44 @@
+
+int new_exp,finish=0,suffix=1;
+char titlefile[512], titletext[512], titletextnew[512]; 
+char pdfname[PATH_MAX]="";
+FILE *ftitle = NULL;
+
+GETCURDATA
+VIEWDATA_SAMEWIN
+
+
+/*set sr value*/
+XCMD("service-13cref");
+STOREPAR("layout", "+/service-dept.xwp")
+EFP
+APKS
+STOREPAR("F1P", 250.0);
+STOREPAR("F2P", -10.0);
+STOREPAR("MI", 0.5);
+STOREPAR("PC", 1.2);
+STOREPAR("CY",11.0);
+STOREPAR("MAXI", 2000.0);
+PP
+APK
+ABS
+PP
+
+while (finish==0)
+{
+	sprintf( pdfname, "%s/%s-13c-ed-%d.pdf",PROCPATH(0),name,suffix);
+	//sprintf(pdfname, "%s%s/%s/%d/pdata/%d/%s-%d.pdf", disk, user, name, expno, procno, name,suffix );
+	if(access(pdfname, R_OK) != 0) // if we can't read pdf file assume its not there
+	{
+		finish=1;
+	}
+	else
+	{
+		suffix++;
+		
+	}
+}
+
+AUTOPLOT_TO_FILE(pdfname);
+
+QUIT

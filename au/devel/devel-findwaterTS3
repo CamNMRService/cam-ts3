@@ -1,0 +1,180 @@
+/****************************************************************/
+/*	Findwater		22.08.2008																			*/
+/****************************************************************/
+/*	Short Description :																					*/
+/*	AU program to automatically determine optimum presat 	*/
+/*	frequency for solvent suppression, e.g. on inverse probes 	*/		
+/*  where radiation damping is significant and picking the peak top */
+/*  gives a wrong result */
+/****************************************************************/
+/*	Keywords :						*/
+/*	water suppression					*/
+/****************************************************************/
+/*	Description/Usage :					*/
+/*	AU program using residual signal after 360 degree pulse */
+/*  to optimise presaturation frequency in cases where radiation */
+/*  damping is significant. Uses pulsecal for 90 degree pulse */
+/*  length determination  */
+/*	Does rga and zg, but limits rg to maximum of 128 						*/ 
+/*  Run this from a dataset with pulprog set to the solvent  		*/
+/*  suppression sequence of your choice!												*/
+/****************************************************************/
+/*	Author(s) :						*/
+/*	Name		: Peter Gierth, Andrew Gibbs			*/
+/*	Organisation	: Bruker UK		*/
+/*	Email		: peter.gierth@bruker.co.uk	*/
+/****************************************************************/
+/*	Name		Date			Modification:			*/
+/*	ptg/agi 20080822	created						*/
+/*	ptg			20100528	Updated for topsin 3 PROCPATH() syntax    */
+/*										and power level parameters								*/
+/****************************************************************/
+
+
+float PSH, PSP, IPS, maxpsh, maxpsp, maxips;
+char del[PATH_MAX], path[PATH_MAX], curp[PATH_MAX];
+double sf, sfo1, o1, sfo1real;
+int noofscans, pscal_save;
+FILE *fptr;
+char pulprog[50];
+int noofdummy;
+int digmod;
+char cmdsave[BUFSIZ];
+char solvent[100];
+int expnosave;
+float p1, pl1, pl9;
+float rg;
+GETCURDATA
+expnosave = expno;
+
+
+// run pulsecal to find 90 - also take rough o1 
+
+XAU("puc", "quiet") 
+
+FETCHPAR("P 1", &p1)
+FETCHPAR("PLdB 1", &pl1)
+expno=99999;
+SETCURDATA
+FETCHPAR("O1", &o1)
+expno=99998;
+SETCURDATA
+
+// setup proton dataset with found p1 and approx o1
+
+RPAR("PROTON", "all")
+STOREPAR("PULPROG", "zg")
+STOREPAR("O1", o1)
+STOREPAR("P 1", p1*4)
+STOREPAR("PLdB 1", pl1)
+STOREPAR("NS",1)
+STOREPAR("DS",0)
+STOREPAR("RG",1.0)
+ZG
+
+// Convdta, and use pack prediction/ negative lb
+// to emphasise sharp component. Process with magnitude
+// calculation and pick peak.
+
+CONVDTA(99997)
+expno=99997; SETCURDATA
+
+STOREPAR("PSCAL",0)
+STOREPAR("NCOEF", 512)
+STOREPAR("ME_mod", 4) /* LP_bc */
+STOREPAR("TDoff", 8192)
+
+// For observe probes where broad component in 360 degree spectrum
+// is very significant, you can turn on large negative LB to
+// emphasise the sharp component further. 
+// Try reprocessing expno 99997 with negative LB 
+//  This might mess things up, but seems OK - provided 
+// no zero filling.....
+//STOREPAR("LB", -1.0)
+
+EF
+MC 
+STOREPAR("F1P", 10.0)
+STOREPAR("F2P", 0.0)
+
+PP 
+XCMD("sendgui convertpeaklist txt");
+(void)sprintf(path,PROCPATH("peak.txt"));
+fptr=fopen(path,"r");
+if (fptr==NULL)
+  {
+  Proc_err(DEF_ERR_OPT,"peakfile not found");
+  STOP
+  }
+TIMES(4)
+  fgets(del,120,fptr);
+END
+maxips=0.0;
+maxpsh=0.0;
+while (fscanf(fptr,"%*d %*f %f %f %f",&PSH,&PSP,&IPS)>2)
+{
+  if(IPS > maxips)
+  {
+    maxips=IPS;
+    maxpsh=PSH;
+    maxpsp=PSP;
+  }
+}
+fclose(fptr);
+
+
+
+
+
+expno=expnosave;
+SETCURDATA
+
+// update real dataset with pulsecal results
+
+sprintf(text, "sendgui getprosol 1H %f %f", p1, pl1);
+CPR_exec(text, WAIT_TERM);
+
+// calculate and store correct o1
+
+FETCHPARS("BF1",&sf)
+sfo1=sf + maxpsh * 1.0e-6;
+STOREPAR("SFO1",sfo1);
+
+// test results:
+FETCHPAR("SFO1",&sfo1real);
+//Proc_err(DEF_ERR_OPT,"expno=%d, sf= %lf, maxpsh= %lf, sfo1=%lf, realsfo1=%lf", expno,sf,maxpsh,sfo1,sfo1real);
+
+
+FETCHPAR("SOLVENT", solvent)
+// check if solvent is 90% protonated or not - if not just use 12.5Hz presat
+/* Uncomment this section if you want to use this...
+*/
+
+if ( !(strcmp( solvent, "H2O+D2O" ) != 0 || strcmp( solvent, "CH3CN+D2O" ) != 0 || strcmp( solvent, "CH3OH+D2O" ) != 0 || strcmp( solvent, "HDMSO" ) != 0) )
+{
+	FETCHPAR("PLdB 9", &pl9)
+	STOREPAR("PLdB 9", pl9+12.0) 
+}
+
+
+// Do rga, but limit used rga to 128
+// No need for higher values with AVIII, even with cryoprobe
+
+sleep(3);
+// Optional autophase, comment next line out if not desired...
+
+AUTOPHASE
+
+sleep(3);
+
+
+RGA
+FETCHPAR("RG",&rg)
+if (rg>128)
+{
+	STOREPAR("RG",128.0);
+}
+
+ZG
+
+QUIT

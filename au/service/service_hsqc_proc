@@ -1,0 +1,41 @@
+/*
+Program:	as_prochsqc
+Version:	1.0
+Author:		Sean Lynn
+Date:     12/1/2007
+Description:	process to get correct phase and reference parameters,
+              set layout.
+modified by djh35@cam.ac.uk to output a pdf
+*/
+
+float hsr;
+char pdfname[PATH_MAX]="";
+
+GETCURDATA
+STOREPAR("mdd_mod",1);
+XCMD("proc_2dphf2het")
+XCMD("serv_projref")
+FETCHPAR("SR",&hsr)
+hsr=hsr-1.0; /* Sean thinks this is due to an isotope shift */
+STOREPAR("SR",hsr)
+XCMD("ABS1")
+XCMD("ABS2")
+XCMD("clev")
+//check for 13c and set layout accordingly
+GETCURDATA3
+if ( expno3 == expno )
+	{
+	STOREPAR("layout", "+/hsqc-ed.xwp")
+	}
+if ( expno3 != expno)
+	{
+	STOREPAR("layout", "+/hsqc-ed.xwp")
+	}
+sprintf( pdfname, "%s/%s.pdf",PROCPATH(0),name);
+
+//sprintf( pdfname, "%s%s/%s/%d/pdata/%d/%s.pdf", disk, user, name, expno, procno, name );
+AUTOPLOT_TO_FILE(pdfname);
+
+
+QUIT
+

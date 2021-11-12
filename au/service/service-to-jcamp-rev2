@@ -1,0 +1,40 @@
+/*exports the ENTIRE DATASET, which includes processed data*/
+/*puts the jcamp file in a folder called jcamp above the working data directory*/
+/*this jcamp directory must exist before the program is called*/
+/*djh35@cam.ac.uk June 2016*/
+
+char data_path[PATH_MAX], exp_path[PATH_MAX], fid_path[PATH_MAX], ser_path[PATH_MAX];
+char exp_name[PATH_MAX], jdx_name[PATH_MAX], jdx_path[PATH_MAX];
+char nuc1[20], nuc2[20],au_p[128],cmd_str[256];
+signed int jdx_type=6;
+GETCURDATA;
+
+for (;;)
+{
+	(void)sprintf(text,"What percentage sparsity would you like? Type -1 (thats minus one) for help.\n", jdx_type);
+	GETINT(text, jdx_type);
+        if (jdx_type == -1)
+        {
+        	Proc_err( DEF_ERR_OPT, "For the included data types, you have the following choices:-\n 0 = FID raw data \n"
+"1 = RSPEC, real processed data\n "
+"2 = RSPEC+ISPEC, real and imaginary processed data\n "
+"3 = PARAMS, parameter files\n "
+"4 = FID+RSPEC+ISPEC, raw data + real and imaginary processed data\n "
+"5 = FID+ALL_PROCNOS, Raw data +real and imaginary processed data of all PROCNO’s under the current EXPNO\n "
+"6 = ALL_EXPNOS_DIM_1_2, Raw data +real and imaginary processed data of all EXPNO’s under the current NAME\n " );
+	}
+	if ( jdx_type >= 0 && jdx_type <= 6 )
+	break;
+}
+sprintf( jdx_name, "%s-jcamp-%i.dx",name,jdx_type);
+sprintf( jdx_path, "%s/../jcamp/%s", disk,jdx_name);
+//Proc_err(DEF_ERR_OPT, "disk=%s,user=%s,i_expno=%i,expname=%s,jdx_name=%s,jdx_path=%s",disk,user,i_expno,exp_name,jdx_name,jdx_path);
+TOJDX(jdx_path,jdx_type,2,"*","*","*");
+ //Proc_err(DEF_ERR_OPT, "loop=%i,i_expno=%i",loop,i_expno);
+
+
+QUIT
+
+#include <stdio.h>
+#include <string.h>
+#include <inc/sysutil>

@@ -1,0 +1,90 @@
+/*made by GSK originally, heavily modded by DJH at Cambridge Uni	*/
+/*Will run through a dataset (up to exp no 999) and process each exp 	*/
+/*according to the pulse program and nucei				*/
+
+#include <stdio.h>
+#include <inc/sysutil>
+
+char homepul[128], pul[128], directory[PATH_MAX], data_File[PATH_MAX], nuc1[20], nuc2[20],au_p[128];
+
+int mode, dexpno, i_expno, i_limit, Hexpno, Cexpno;
+float Hsr, Csr;
+
+Hexpno=0;
+Cexpno=0;
+i_expno=1;
+Hsr=0.0;
+Csr=0.0;
+
+GETCURDATA
+dexpno = expno;
+
+FETCHPAR("PULPROG", &homepul)
+
+(void) sprintf(directory, "%s%s/%s", disk, user, name);
+Proc_err(INFO_OPT,"%s",directory);
+i_limit = gethighest(directory);
+
+if( i_limit > 999 ) i_limit = 999;
+
+while (i_expno < i_limit)
+{
+	sprintf( data_File, "%s%s/%s/%d/pulseprogram", disk, user, name, i_expno );
+	if( access( data_File, R_OK ) == 0 )
+	 {
+	 	 DATASET(name, i_expno, procno, disk, user)
+	 	 VIEWDATA_SAMEWIN
+	 	 SETCURDATA
+	 	 FETCHPAR("PULPROG", &pul)
+	 	 FETCHPAR("NUC1",nuc1)
+	 	 FETCHPAR("NUC2",nuc2)
+	 	 if  ((strstr(pul, "zg30" ) || (strstr(pul, "noesypr1d"))) && (!strcmp(nuc1,"1H")))
+	 	 {
+	 	 	  sprintf(au_p,"service-1h-proc");
+	 	 	  STOREPAR("AUNMP", au_p)
+	 	 	  XAU("service-1h-proc",cmd);
+	 	 	  goto next;
+	 	 }
+		 if ((strstr(pul, "zgpg") || (strstr(pul, "zgdc30")) || (strstr(pul,"udeft")) ) && (!strcmp(nuc1,"13C")) )
+		 {
+			 sprintf(au_p,"service-13c-proc");
+			 STOREPAR("AUNMP", au_p)
+			 XAU("service-13c-proc",cmd);
+		 }
+		 if ((strstr(pul, "dept")) || (strstr(pul, "apt")) || (strstr(pul, "jmod")))
+		 {
+			 sprintf(au_p,"service-dept-proc");
+			 STOREPAR("AUNMP", au_p)
+			 XAU("service-dept-proc",cmd);
+		 }
+		 if ((strstr(pul, "cosygpmfqf")) || (strstr (pul, "cosygpmf.pg")) || (strstr (pul,"cosygpppqf")) || (strstr (pul,"cosygpmfppqf"))  )
+		 {
+			 sprintf(au_p,"service-cosy-proc");
+			 STOREPAR("AUNMP", au_p);
+			 XAU("service-cosy-proc",cmd);
+		 }
+		 if ((strstr(pul, "hsqc")) || (strstr (pul, "hmqc")))
+		 {
+			 sprintf(au_p,"service-hsqc-ed-proc");
+			 STOREPAR("AUNMP", au_p);
+			 XAU("service-hsqc-ed-proc",cmd)
+		 }
+		 if ((strstr(pul, "hmbc")) || (strstr (pul, "impact")))
+		 {
+			 sprintf(au_p,"service-hmbc-proc");
+			 STOREPAR("AUNMP", au_p)
+			 XAU("service-hmbc-proc",cmd)
+		 }
+		 if ((strstr(pul, "roesy")) || (strstr(pul, "noesy")) || (strstr(pul, "mlevph")) || (strstr(homepul, "dipsi")))
+		 {
+			 sprintf(au_p,"service-noesy-proc");
+			 STOREPAR("AUNMP", au_p)
+			 XAU("service-noesy-proc",cmd)
+		 }
+	 }
+ 	next:
+ 	i_expno++;
+}
+
+
+QUIT

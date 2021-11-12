@@ -1,0 +1,153 @@
+/*--------------------------------------------------------------*/
+/*Designed to delete the prod file  Janus uses                  */
+
+/****************************************/
+/*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/ 
+/**!!!!!!!!Change to test on djh mac!!!!!!!!!*/
+
+//char def_file[255]="e:/chemist/defaults-csv.txt"; //janus software defaults
+char def_file[255]="/Users/duncanhowe/janus-test/defaults-csv.txt"; //janus software defaults
+/**!!!!!!!!Change to test on djh mac!!!!!!!!!*/ 
+
+float   delaytime=10.0;
+int     expt=1, curloop=1, cpos, specno, jexpt, jsolv,i=1, finish=0;
+
+int     prod_access=0; //0 if we can't access the prod file
+
+char    oi[20], juser[50], suser[40], in_data[1024], tmp_fname[1024];
+char    shimfile[80], acqufile[80];
+char     tunefile[40];
+char    tmp_str[1024], titlefile[80], titletext[80];
+char    exptfile[80], diskunit[40], archive[40], gradshim[40];
+char    archpath[PATH_MAX], prefix[40], shimset[40], defaultsfile[PATH_MAX]; 
+char    command[1024], snostr[1024], tmpcmd[256];
+
+char    exset_filename[PATH_MAX];
+
+
+char   *env_name, *file_data, *field, *ed;
+FILE   *fprod = NULL, *facqu = NULL, *ferror = NULL, *fwarn = NULL;
+FILE   *fshim = NULL, *fwait = NULL, *ftitle = NULL, *fsx = NULL;
+FILE   *fexpt = NULL, *fprot = NULL, *flog = NULL, *fdef = NULL;
+FILE   *fjup = NULL, *fexpts = NULL, *pidfile = NULL, *fawm = NULL;
+FILE  *sname = NULL;
+FILE 	*fbat=NULL;
+FILE  *f_extset=NULL;
+
+char  samplename[80], snamefile[255];
+
+
+/*--- Assign filenames for signalling etc.----------------------*/
+
+char batfile[127],batcmd[127];
+char prodfile[255];
+char prodfiletxt[255];
+char errorfile[255];
+char warnfile[255];
+char waitfile[255];
+char protfile[255];
+char logfile[255];
+char extset_filename[PATH_MAX];
+
+char email[80]="camnmrservice@gmail.com";
+
+
+time_t lt;
+
+
+Proc_err ( INFO_OPT, "Starting program");
+sleep(delaytime);
+//XCMD("setdef ackn no");
+//XCMD("setdef stdout no");
+//XCMD("setdef stderr no");
+
+/*--------------------------------------------------------------*/
+/*--- Get defaults from the defaults file ----------------------*/
+strcpy( defaultsfile, def_file );
+fdef = fopen( defaultsfile, "r" );
+Proc_err ( INFO_OPT, "reading defaultsfile %s",defaultsfile);
+strcpy( defaultsfile, def_file );
+fdef = fopen( defaultsfile, "r" );
+Proc_err( INFO_OPT, "reading defaults");
+Proc_err(INFO_OPT,"file is not empty, so do something");
+rewind(fdef); //go to begining of file
+file_data = fgets(in_data, 1024, fdef); //read in file as a continuous string
+fclose(fdef); //close the file
+Proc_err(INFO_OPT,"parsing %s file",defaultsfile);
+//file is open, read data
+field = strtok(in_data, ",");
+strcpy( prefix,field);
+Proc_err(INFO_OPT,"prefix is %s",prefix);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &diskunit);
+	Proc_err(INFO_OPT,"diskunit is %s",diskunit);
+field = strtok(NULL, ",");
+sscanf(field,"%s", &suser);
+	Proc_err(INFO_OPT,"suser is %s",suser);
+field = strtok(NULL,",");
+sscanf(field,"%s",&tunefile);
+	Proc_err(INFO_OPT,"tunefile is %s", tunefile);
+field = strtok(NULL,",");
+sscanf(field,"%s",&shimset);
+	Proc_err(INFO_OPT,"shimset is %s", shimset);
+field = strtok(NULL,",");
+sscanf(field,"%s",&archpath);
+	Proc_err(INFO_OPT,"archpath is %s", archpath);
+field = strtok(NULL,",");
+sscanf(field,"%s",&archive);
+	Proc_err(INFO_OPT,"archive is %s", archive);
+field = strtok(NULL,",");
+sscanf(field,"%s",&gradshim);
+	Proc_err(INFO_OPT,"gradshim is %s", gradshim);
+Proc_err(INFO_OPT,"parsed file");
+
+
+Proc_err ( INFO_OPT, "finished reading defaults");
+
+/*--- Assign filenames for signalling etc.----------------------*/
+/*set to be the diskunit, then a folder in that called the user usually chemist*/
+/*sprintf(batfile, "%s%s\\janus-bat.bat", diskunit,suser);
+sprintf(batcmd, "%s%s\\janus-bat.bat", diskunit,suser);
+sprintf(prodfile, "%s%s\\prod.txt",diskunit,suser);
+sprintf(prodfiletxt, "%s%s\\prod.txt",diskunit,suser);	
+sprintf(errorfile, "%s%s\\error.txt",diskunit,suser);
+sprintf(warnfile, "%s%s\\warn.txt",diskunit,suser);
+sprintf(waitfile, "%s%s\\wait.txt",diskunit,suser);
+sprintf(protfile, "%s%s\\prot.txt",diskunit,suser);
+sprintf(logfile, "%s%s\\jchlog.txt",diskunit,suser);
+*/
+// for windows above
+
+sprintf(batfile, "%s%s/janus-bat.bat", diskunit,suser);
+sprintf(batcmd, "%s%s/janus-bat.bat", diskunit,suser);
+sprintf(prodfile, "%s%s/prod.txt",diskunit,suser);
+sprintf(prodfiletxt, "%s%s/prod.txt",diskunit,suser);	
+sprintf(errorfile, "%s%s/error.txt",diskunit,suser);
+sprintf(warnfile, "%s%s/warn.txt",diskunit,suser);
+sprintf(waitfile, "%s%s/wait.txt",diskunit,suser);
+sprintf(protfile, "%s%s/prot.txt",diskunit,suser);
+sprintf(logfile, "%s%s/jchlog.txt",diskunit,suser);
+
+Proc_err ( INFO_OPT,"%s",batfile);
+Proc_err ( INFO_OPT,"%s",batcmd);
+Proc_err ( INFO_OPT,"%s",prodfile);
+Proc_err ( INFO_OPT,"%s",prodfiletxt);
+
+
+
+
+
+
+/*the below becomes the place the data is stored. Done in the old skool path format for compatibility*/
+// the first line is for windows, second line for testing on my mac.
+//sprintf(diskunit,"%sdata\\%s\\nmr\\",diskunit,suser);
+//sprintf(diskunit,"%sdata/%s/nmr/",diskunit,suser);
+
+
+/*--------------------------------------------------------------*/
+
+Proc_err ( INFO_OPT, "At end of default file parsing");
+
+QUIT
+
+

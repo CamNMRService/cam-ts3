@@ -1,0 +1,137 @@
+/*exports to Jcamp format*/
+/*puts the jcamp file in a folder called jcamp above the working data directory*/
+/*this jcamp directory must exist before the program is called*/
+/*djh35@cam.ac.uk June 2016*/
+/*extensive mods thorugh to july 2018*/
+/*options for what type of jcamp, and to copy to the dataset or not.*/
+
+#include <stdio.h>
+#include <string.h>
+#include <inc/sysutil>
+#include <stdlib.h>
+
+char data_path[PATH_MAX], exp_path[PATH_MAX], fid_path[PATH_MAX], ser_path[PATH_MAX];
+char exp_name[PATH_MAX], jdx_name[PATH_MAX], jdx_path[PATH_MAX];
+char nuc1[20], nuc2[20],au_p[128],cmd_str[256];
+signed int jdx_data=4;
+signed int jdx_type=2;
+signed int copy_flag=0;
+
+GETCURDATA;
+
+if (i_argc == 2)
+{  
+   Proc_err (DEF_ERR_OPT, "Usage. Enter the values in the following dialogues. Or you can use the command line options :- \n"
+            "service_to_jcamp X Y Z\n"
+            "Where X,Y & Z are values you would otherwise enter in the dialogues.\n"
+            "Or :\n service_to_jcamp default \n"
+            "Which runs it with the default values of 4, 2 and 1.\n");        
+   for (;;)
+   {
+	   (void)sprintf(text,"What data would you like to convert to JCamp format? Type -1 (thats minus one) for help.\n", jdx_data);
+    	GETINT(text, jdx_data);
+           if (jdx_data < 0 || jdx_data > 6)
+           {
+            	Proc_err( DEF_ERR_OPT, "For the included data types, you have the following choices:- \n"
+              "0 = FID raw data \n"
+              "1 = RSPEC, real processed data\n "
+              "2 = RSPEC+ISPEC, real and imaginary processed data\n "
+              "3 = PARAMS, parameter files\n "
+              "4 = FID+RSPEC+ISPEC, raw data + real and imaginary processed data\n "
+              "5 = FID+ALL_PROCNOS, Raw data + real and imaginary processed data of all PROCNOs under the current EXPNO\n "
+              "6 = ALL_EXPNOS_DIM_1_2, Raw data + real and imaginary processed data of all EXPNOs under the current NAME\n " 
+              "The most useful are going to be probably 0 or 4. You probably need the FID raw data, and the formats "
+              "that have multiple directories may be less readable by JCamp readers. Consider the JCamp format as a backup;"
+              "as with all backups, check you can read it again!\n");
+           }
+	         if ( jdx_data >= 0 && jdx_data <= 6 )
+	         {
+	         break;
+	         }
+   } /*end of for loop*/
+
+   for (;;)
+   {
+	   (void)sprintf(text, "What type of JCamp archive would you like? Type -1 (thats minus one) for help.\n", jdx_type);
+	   GETINT(text, jdx_type);
+	       if (jdx_type < 0 || jdx_type > 2)
+	       { 
+	     	    Proc_err (DEF_ERR_OPT, "0 = FIX. This is simple X,Y data, imports into excel easily. Largest size of file.\n"
+	     	    "1 = PACKED. No spaces between intensity values.\n"
+	     	    "2 = SQUEEZED. The sign of the intensity values is encoded in the first digit.\n"
+	     	    "3 = DIFF/DUP. The difference between sucessive values is stored.\n"
+	     	    "SQUEEZED and DIFF/DUP are about the same size.");
+	       }
+	       if ( jdx_type >= 0 && jdx_type <= 2 )
+	       {
+	        	break;
+	     	    /*out of for loop*/
+	       }
+   }/*end of for loop)*/
+  for (;;)
+   {
+   	   (void) sprintf(text, "Copy to dataset? 1 for yes, 0 for no\n",copy_flag);
+   	   GETINT(text, copy_flag);
+   	   if (copy_flag !=0 || copy_flag !=1)
+   	   {
+   	   	   break;
+   	   	   /*out of for loop*/
+   	   }
+   } /*end of for loop)*/
+ 
+}/*end of if i_argv == 2*/
+
+if (i_argc == 3) {
+	 /*we'll assume the one argument it was called with was 'default' :) */
+	 jdx_data = 4;
+	 jdx_type = 2;
+	 copy_flag = 1;
+}
+
+if (i_argc == 4) {
+	 jdx_data = strtol(i_argv[2], NULL , 10);
+	 jdx_type = strtol(i_argv[3], NULL, 10);
+	 if (jdx_data < 0 || jdx_data > 6){
+	 	 Proc_err(DEF_ERR_OPT,"Unknown value of jdx_data entered on commandline");
+	 	 exit(1);
+	 }
+	 if (jdx_type < 0 || jdx_type > 2){
+	 	 Proc_err(DEF_ERR_OPT,"Unknown value of jdx_type entered on commandline");
+	 	 exit(1);
+	 }
+}
+if (i_argc == 5) {
+	 jdx_data = strtol(i_argv[2], NULL , 10);
+	 jdx_type = strtol(i_argv[3], NULL, 10);
+	 copy_flag = strtol(i_argv[4], NULL, 10);
+	 if (jdx_data < 0 || jdx_data > 6){
+	 	 Proc_err(DEF_ERR_OPT,"Unknown value of jdx_data (=%i)entered on commandline",jdx_data);
+	 	 exit(1);
+	 }
+	 if (jdx_type < 0 || jdx_type > 2){
+	 	 Proc_err(DEF_ERR_OPT,"Unknown value of jdx_type (=%i) entered on commandline",jdx_type);
+	 	 exit(1);
+	 }
+	  if (copy_flag < 0 || copy_flag > 1){
+	 	 Proc_err(DEF_ERR_OPT,"Unknown value of copy_flag (=%i) entered on commandline",copy_flag);
+	 	 exit(1);
+	 }
+}
+if (i_argc > 5)
+{
+	Proc_err(DEF_ERR_OPT,"Unknown arguments used. Aborting...");
+  exit(1);	
+}
+
+sprintf( jdx_name, "%s-jcamp-%i-%i.dx",name,jdx_data,jdx_type);
+sprintf( jdx_path, "%s/../jcamp/%s", disk,jdx_name);
+Proc_err(DEF_ERR_OPT, "disk=%s,expname=%s,jdx_name=%s,jdx_path=%s",disk,name,jdx_name,jdx_path);
+TOJDX(jdx_path,jdx_data,jdx_type,"*","*","*");
+if ( (copy_flag==1) || (i_argc == 5) )
+{
+	sprintf( jdx_path,"%s/../%s",ACQUPATH(0),jdx_name);
+	TOJDX(jdx_path,jdx_data,jdx_type,"*","*","*");
+}	
+
+QUIT
+

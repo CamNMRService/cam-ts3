@@ -1,0 +1,35 @@
+
+
+  char*   ep;
+  /* Parameters of measurement and referenc dataset */
+  char    PROBHDSet[128] = "";
+
+
+
+
+ GETCURDATA
+ FETCHPARS("PROBHD",PROBHDSet);
+
+  ep = PROBHDSet + strlen(PROBHDSet);
+
+  while (ep > PROBHDSet  &&  isspace((int)*--ep))
+    *ep = 0;		/* remove trailing spaces */
+
+   Proc_err(DEF_ERR_OPT, "ep - %s PROBHDSet %s", ep , PROBHDSet);
+  
+  QUIT
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,100 @@
+/*** ^^A -*-C++-*- **********************************************/
+/*	calcphhomo		04.02.2005			*/
+/****************************************************************/
+/*	Short Description :					*/
+/*	AU program to calculate the phase correction for the	*/
+/*	F2 dimension of homonuclear 2D experiments.             */
+/****************************************************************/
+/*	Keywords :						*/
+/*	phase values homonuclear COSY MLEV NOESY ROESY		*/
+/****************************************************************/
+/*	Description/Usage :					*/
+/*	AU program to calculate the phase correction for the	*/
+/*	F2 dimension of homonuclear 2D experiments. The         */
+/*	following 2D standard parameter sets currently call	*/
+/*	this AU program from the AU program proc_2dhom.		*/
+/*								*/
+/*	Avance			                                */
+/*	--------------                 				*/
+/*	COSYDQFPHSW		                                */
+/*	COSYGPDFPHSW						*/
+/*	H20SUPCOSY		                                */
+/*	H2OSUPMLEV		                                */
+/*	H2OSUPNOESY		                                */
+/*	H2OSUPROESY		                                */
+/*	MLEVGPPH19SW						*/
+/*	MLEVPHSW		                                */
+/*	NOESYGPPH19SW						*/
+/*	NOESYPHSW		                                */
+/*	ROESYPHSW                                               */
+/*								*/
+/*	The phase correction in F2 depends on the experiment :	*/
+/*	For NOESY type experiments, the first incr. is phased	*/
+/*	For COSY type experiments, the middle fid is phased	*/
+/*	For all others experiments, the second fid is phased.	*/
+/****************************************************************/
+/*	Author(s) :						*/
+/*	Name		: Rainer Kerssebaum, Ruediger Weisemann,*/
+/*			  Mike Engelhardt 			*/
+/*	Organisation	: Bruker BioSpin GmbH			*/
+/*	Email		: michael.engelhardt@bruker.de		*/
+/****************************************************************/
+/*	Name		Date	Modification:			*/
+/*	rke, rwe, eng	000503	created				*/
+/****************************************************************/
+/*
+$Id: calcphhomo,v 1.8 2007/11/09 13:56:59 wem Exp $
+*/
+
+char path[PATH_MAX];
+float ph00, ph11;
+int  tmp_procno, cur_procno;
+int  parmode = 0;
+
+FETCHPARS("PARMODE", &parmode)
+
+if (parmode == 0)
+  STOPMSG("Program not suitable for 1D raw data");
+
+cur_procno = procno;
+do
+    procno++;
+while (access(PROCPATH(0), F_OK) == 0);
+
+tmp_procno = procno;
+procno = cur_procno;
+
+FETCHPAR("PULPROG", path)
+if (strncmp(path, "noes", 4) == 0)
+  i1 = 1; 
+else if (strncmp(path, "dipsi2gpphzs", 12) == 0)
+  i1 = 1; 
+else if (strncmp(path, "roesyadjs", 9) == 0)
+  i1 = 1;
+else if (strncmp(path, "cosy", 4) == 0)
+{
+  int td1 = 0; 
+  FETCHPAR1S("TD", &td1)
+  i1 = td1/2;
+}
+else
+  i1 = 2;
+
+sprintf(path, "qsin %d %d n", i1, tmp_procno);
+XCMD(path)
+ERRORABORT
+DATASET(name,expno,tmp_procno,disk,user)
+FT
+ERRORABORT
+APK0
+ERRORABORT
+FETCHPAR("PHC0",&ph00)
+FETCHPAR("PHC1",&ph11)
+
+DATASET(name,expno,cur_procno,disk,user)
+//DELETEPROCNO(name,expno,tmp_procno,disk,user)
+STOREPAR("PHC0",ph00)
+STOREPAR("PHC1",ph11)
+STOREPAR("PH_mod",1)
+
+QUIT

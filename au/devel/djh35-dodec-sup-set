@@ -1,0 +1,49 @@
+char paramset[PATH_MAX] = "dodec-suppress";
+char peak_list[PATH_MAX] = "dodecane.xml";
+char paramfilePathname[PATH_MAX];
+char peaklistPathname[PATH_MAX];
+char PL_list[PATH_MAX];
+char PL_dest[PATH_MAX];
+int orig_ns=32;
+float orig_cnst6=10;
+float orig_cnst7=10;
+float orig_rg=8;
+float orig_d1=4;
+
+GETCURDATA
+FETCHPAR("NS", &orig_ns)
+FETCHPAR("CNST 6", &orig_cnst6)
+FETCHPAR("CNST 7", &orig_cnst7)
+FETCHPAR("RG", &orig_rg)
+FETCHPAR("D 1", &orig_d1)
+
+//Proc_err(DEF_ERR_OPT,"NS= %i, cnst6 = %f, cnst7 = %f", orig_ns, orig_cnst6, orig_cnst7);
+
+if (getParfileDirForRead(paramset, PAR_DIRS, paramfilePathname)< 0)
+{
+Proc_err(DEF_ERR_OPT, "Parameter set - %s - %s\nAborting - Check README", paramset, paramfilePathname);
+ABORT
+}
+
+if (getParfileDirForRead(peak_list, PEAKLIST_DIRS, peaklistPathname)< 0)
+{
+Proc_err(DEF_ERR_OPT, "Peak list file name  - %s - in - %s Not there... \nAborting - Check README", peak_list, peaklistPathname);
+ABORT
+}
+SETCURDATA
+//sprintf(PL_list,"%s%s",peaklistPathname,peak_list);
+//Proc_err(DEF_ERR_OPT, "full-path = %s",PL_list);
+
+
+
+RPAR(paramset,"all");
+STOREPAR("NS", orig_ns)
+STOREPAR("CNST 6", orig_cnst6)
+STOREPAR("CNST 7", orig_cnst7)
+STOREPAR("RG", orig_rg)
+STOREPAR("D 1", orig_d1)
+dircp (peaklistPathname,ACQUPATH("PL.xml") );
+XCMD("sendgui wvm -a") //should allow for error checking here. Manual says accessible via XCMD
+ZG
+
+QUIT

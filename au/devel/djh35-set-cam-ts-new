@@ -1,0 +1,64 @@
+/****************************************/
+/*Ok - an attempt to setup topspin to use the cam-ts repository*/
+
+/*djh35 - september 2021*/
+
+#include <stdio.h>
+#include <inc/sysutil>
+
+
+
+/*the directory to output pdfs to.*/
+char parfile_dirs_file[127]="parfile-dirs.prop",parfile_dirs_file_cam_ts[127]="serv_parfile-dirs.prop";
+char parfile_cam_ts_windows_path[255], parfile_cam_ts_linux_path[255];
+
+char layout_search_file[127]="layoutsearchpath", layout_search_file_cam_ts[127]="serv_layoutsearchpath";
+char layout_search_windows_path[255], layout_search_linux_path[255];
+
+char windows_copy_cmd[1024], linux_copy_cmd[1024];
+
+int i;
+
+
+
+
+
+
+
+
+/*Copy origial files*/
+
+#ifdef HAS_WINDOWS_FEATURES
+
+	sprintf (layout_search_windows_path,"%s/global",PathXWinNMRConf() );
+	Proc_err(INFO_OPT,"layout_search_windows_path - %s", layout_search_windows_path);
+/*  	for(i = 0; i <= strlen(pdfname); i++)
+  	{
+  		if(pdfname[i] == '/')  
+		  {
+  			pdfname[i] = '\\';
+ 		  }
+  	}
+    sprintf (cmd_str, "del %s", pdfname);
+    Proc_err(INFO_OPT,"%s",cmd_str);
+
+    //write a dos batch file with the cmd_str and run it
+    fbat = fopen(batfile, "w");
+    fputs( cmd_str, fbat);
+    fclose( fbat);
+   //Show_status(cmd_str);
+   system(batcmd); 
+*/
+
+
+		  
+#else
+
+	sprintf (layout_search_linux_path,"%s/global",PathXWinNMRConf() );
+	Proc_err(INFO_OPT,"layout_search_linux_path - %s", layout_search_linux_path);
+	
+#endif
+
+
+
+QUIT

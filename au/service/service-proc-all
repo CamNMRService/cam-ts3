@@ -1,0 +1,160 @@
+/*djh35@cam.ac.uk June 2016*/
+/*start from a data set, and it will process all files in the directory */
+/*that dataset is in*/
+/*must set diskunit and suser variables below*/
+/*the reason these are not calculated from the data set you're in is because*/
+/*its possible to wipe out stuff you've worked on...*/
+
+
+char homepul[128], pul[128], data_path[PATH_MAX], exp_path[PATH_MAX];
+char exp_name[PATH_MAX], pp_path[PATH_MAX], fid_path[PATH_MAX],  ser_path[PATH_MAX];
+char nuc1[20], nuc2[20],au_p[128],cmd_str[256];
+char diskunit[PATH_MAX]="/media/sf_nmr-in";
+char suser[PATH_MAX]="reproc";
+
+char **listfile;
+
+int mode, dexpno, i_expno, i_limit, Hexpno, Cexpno, no_hours=1, loop_break=0, i_lowest=1;
+float Hsr, Csr;
+
+Hexpno=0;
+Cexpno=0;
+i_expno=1;
+Hsr=0.0;
+Csr=0.0;
+XCMD("setdef ackn no");
+XCMD("setdef stdout no");
+XCMD("setdef stderr no");
+
+DATASET ( "junk", 10, 1, diskunit, suser)
+GETCURDATA
+VIEWDATA_SAMEWIN
+//GETINT("Enter the number of hours to get and process. This will reprocess all the data in the current directory. Enter zero if you don't want to get data, only process this.",no_hours);
+GETINT("Enter zero if you want to process all the data. THIS WILL ERASE ALL YOUR PROCESSED data here.",no_hours);
+GETINT("ARE YOU SURE YOU WANT TO DO THIS???\n Enter zero if you want to process all the data.",no_hours);
+if (no_hours!=0)
+{
+exit(1);
+}
+GETCURDATA
+dexpno = expno;
+
+FETCHPAR("PULPROG", &homepul)
+
+(void) sprintf(data_path, "%s%s", disk, user);
+i1 = getdir (data_path,&listfile,NULL);
+
+//Ok, the below is what we need to loop over
+//need to set the below to be the entry in the listfile
+(void) sprintf(exp_path, "%s%s/%s", disk, user, name);
+
+//but for now; lets just print the list
+TIMES(i1)
+  //get the filename to work on from listfile
+  sprintf(exp_name, "%s", listfile[loopcount1]);
+  sprintf(exp_path, "%s%s/%s", disk, user, exp_name);
+  i_limit = gethighest(exp_path);
+  i_limit = i_limit-1;
+  if( i_limit > 999 ) i_limit = 999;
+  //Now find first expno with data in.
+  i_expno = 0;
+  loop_break = 0;
+  while ( (i_expno <= i_limit)&&(loop_break==0) )
+  {
+  	i_expno++;
+  	sprintf( pp_path, "%s%s/%s/%d/pulseprogram", disk, user, name, i_expno );
+  //	Proc_err(INFO_OPT, "%s", pp_path);
+		sprintf( fid_path, "%s%s/%s/%d/fid", disk, user, name, i_expno );
+		sprintf( ser_path, "%s%s/%s/%d/ser", disk, user, name, i_expno );
+  	
+  	if( (access( pp_path, R_OK ) == 0) && ((access(fid_path, R_OK ) == 0) || (access( ser_path, R_OK) == 0) ) )
+  		{
+  			loop_break=1;
+  			i_lowest=i_expno;
+  		}	
+  }
+  i_expno = i_lowest;
+ Proc_err(INFO_OPT, "Dataset name-%s,lowest-%i,highest-%i", exp_name,i_lowest,i_limit);
+ DATASET(exp_name, i_lowest, 1, disk, user)
+ VIEWDATA_SAMEWIN
+ GETCURDATA
+
+//Proc_err(INFO_OPT,"%s,%i",exp_path,i_limit);
+//i_limit = gethighest(exp_path);
+
+if( i_limit > 999 ) i_limit = 999;
+
+while (i_expno <= i_limit)
+{
+//	Proc_err(INFO_OPT,"ixpno=%i,ilimit=%i"	, i_expno, i_limit);
+	sprintf( pp_path, "%s%s/%s/%d/pulseprogram", disk, user, name, i_expno );
+	sprintf( fid_path, "%s%s/%s/%d/fid", disk, user, name, i_expno );
+	sprintf( ser_path, "%s%s/%s/%d/ser", disk, user, name, i_expno );
+	if( (access( pp_path, R_OK ) == 0) && ((access(fid_path, R_OK ) == 0) || (access( ser_path, R_OK) == 0) ) )
+	 {
+	 	 DATASET(name, i_expno, procno, disk, user)
+	 	 VIEWDATA_SAMEWIN
+	 	 SETCURDATA
+	 	 FETCHPAR("PULPROG", &pul)
+	 	 FETCHPAR("NUC1",nuc1)
+	 	 FETCHPAR("NUC2",nuc2)
+	 	 if  (((strstr(pul, "zg30" ) || (strstr(pul, "noesypr1d")) || (strstr(pul, "zgpr"))) || (strstr(pul, "zggpw5")) ) && (!strcmp(nuc1,"1H")))
+	 	 {
+	 	 	  sprintf(au_p,"service-1h-proc");
+	 	 	  STOREPAR("AUNMP", au_p)
+	 	 	  XAU("service-1h-proc",cmd);
+	 	 	  XAU("service-pdfit-pp",cmd);
+	 	 	  goto next;
+	 	 }
+		 if ((strstr(pul, "zgpg30") || (strstr(pul, "zgdc30"))) && (!strcmp(nuc1,"13C")))
+		 {
+			 sprintf(au_p,"service-13c-proc");
+			 STOREPAR("AUNMP", au_p)
+			 XAU("service-13c-proc",cmd);
+			 XAU("service-pdfit-pp",cmd);
+		 }
+		 if ((strstr(pul, "dept")) || (strstr(pul, "apt")) || (strstr(pul, "jmod")))
+		 {
+			 sprintf(au_p,"service-dept-proc");
+			 STOREPAR("AUNMP", au_p)
+			 XAU("service-dept-proc",cmd);
+			 XAU("service-pdfit-pp",cmd);
+		 }
+		 if ((strstr(pul, "cosy")) )
+		 {
+			 sprintf(au_p,"service-cosy-proc");
+			 STOREPAR("AUNMP", au_p);
+			 XAU("service-cosy-proc",cmd);
+			 XAU("service-pdfit-pp",cmd);
+		 }
+		 if ((strstr(pul, "hsqc")) || (strstr (pul, "hmqc")))
+		 {
+			 sprintf(au_p,"service-hsqc-ed-proc");
+			 STOREPAR("AUNMP", au_p);
+			 XAU("service-hsqc-ed-proc",cmd)
+			 XAU("service-pdfit-pp",cmd);
+		 }
+		 if ((strstr(pul, "hmbc")) || (strstr (pul, "impact")))
+		 {
+			 sprintf(au_p,"service-hmbc-proc");
+			 STOREPAR("AUNMP", au_p)
+			 XAU("service-hmbc-proc",cmd)
+			 XAU("service-pdfit-pp",cmd);
+		 }
+		 if ((strstr(pul, "roesy")) || (strstr(pul, "noesy")) || (strstr(pul, "mlevph")))
+		 {
+			 sprintf(au_p,"service-noesy-proc");
+			 STOREPAR("AUNMP", au_p)
+			 XAU("service-noesy-proc",cmd)
+			 XAU("service-pdfit-pp",cmd);
+		 }
+	 }
+ 	next:
+ 	i_expno++;
+}
+END
+
+QUIT
+
+#include <stdio.h>
+#include <inc/sysutil>

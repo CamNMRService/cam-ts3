@@ -5,34 +5,35 @@
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/ 
 /**!!!!!!!!Change to test on djh mac!!!!!!!!!*/
 
+//This compiles at least - working on parsing prod.txt file to check it matches curdata - done 
+//Nest write to log file
+
 //char def_file[255]="e:/chemist/defaults-csv.txt"; //janus software defaults
-char def_file[255]="/Users/duncanhowe/janus-test/defaults-csv.txt"; //janus software defaults
+//char def_file[255]="/Users/duncanhowe/janus-test/defaults-csv.txt"; //janus software defaults
+char def_file[255]="D:/chemist/defaults-csv.txt";
 /**!!!!!!!!Change to test on djh mac!!!!!!!!!*/ 
 
 float   delaytime=10.0;
-int     expt=1, curloop=1, cpos, specno, jexpt, jsolv,i=1, finish=0;
+int     error=0; //if not 0 an error has occured.
+int     curloop=1, cpos, specno, jexpt, jsolv,i=1, finish=0;
 
 int     prod_access=0; //0 if we can't access the prod file
 
 char    oi[20], juser[50], suser[40], in_data[1024], tmp_fname[1024];
 char    shimfile[80], acqufile[80];
 char     tunefile[40];
-char    tmp_str[1024], titlefile[80], titletext[80];
-char    exptfile[80], diskunit[40], archive[40], gradshim[40];
-char    archpath[PATH_MAX], prefix[40], shimset[40], defaultsfile[PATH_MAX]; 
-char    command[1024], snostr[1024], tmpcmd[256];
+char    cmd_str[1024];
+char    expt_time[PATH_MAX];
+char    exptfile[80], diskunit[40], archive[40], gradshim[40], solvent[40], protocol[40];
+char    comments[PATH_MAX],filename[PATH_MAX], archpath[PATH_MAX],prefix[40], shimset[40], defaultsfile[PATH_MAX]; 
+char 		error_msg[1024];
 
-char    exset_filename[PATH_MAX];
+char  *file_data, *field;
+FILE   *fprod = NULL;
+FILE   *fdef = NULL;
+FILE	 *flog = NULL;
 
 
-char   *env_name, *file_data, *field, *ed;
-FILE   *fprod = NULL, *facqu = NULL, *ferror = NULL, *fwarn = NULL;
-FILE   *fshim = NULL, *fwait = NULL, *ftitle = NULL, *fsx = NULL;
-FILE   *fexpt = NULL, *fprot = NULL, *flog = NULL, *fdef = NULL;
-FILE   *fjup = NULL, *fexpts = NULL, *pidfile = NULL, *fawm = NULL;
-FILE  *sname = NULL;
-FILE 	*fbat=NULL;
-FILE  *f_extset=NULL;
 
 char  samplename[80], snamefile[255];
 
@@ -52,15 +53,15 @@ char extset_filename[PATH_MAX];
 char email[80]="camnmrservice@gmail.com";
 
 
-time_t lt;
-
 
 Proc_err ( INFO_OPT, "Starting program");
-sleep(delaytime);
+//sleep(delaytime);
 //XCMD("setdef ackn no");
 //XCMD("setdef stdout no");
 //XCMD("setdef stderr no");
-
+//This is designed to be run from the current dataset running under iconNMR
+GETCURDATA
+VIEWDATA_SAMEWIN
 /*--------------------------------------------------------------*/
 /*--- Get defaults from the defaults file ----------------------*/
 strcpy( defaultsfile, def_file );
@@ -106,7 +107,7 @@ Proc_err ( INFO_OPT, "finished reading defaults");
 
 /*--- Assign filenames for signalling etc.----------------------*/
 /*set to be the diskunit, then a folder in that called the user usually chemist*/
-/*sprintf(batfile, "%s%s\\janus-bat.bat", diskunit,suser);
+sprintf(batfile, "%s%s\\janus-bat.bat", diskunit,suser);
 sprintf(batcmd, "%s%s\\janus-bat.bat", diskunit,suser);
 sprintf(prodfile, "%s%s\\prod.txt",diskunit,suser);
 sprintf(prodfiletxt, "%s%s\\prod.txt",diskunit,suser);	
@@ -115,23 +116,114 @@ sprintf(warnfile, "%s%s\\warn.txt",diskunit,suser);
 sprintf(waitfile, "%s%s\\wait.txt",diskunit,suser);
 sprintf(protfile, "%s%s\\prot.txt",diskunit,suser);
 sprintf(logfile, "%s%s\\jchlog.txt",diskunit,suser);
-*/
+
 // for windows above
 
-sprintf(batfile, "%s%s/janus-bat.bat", diskunit,suser);
-sprintf(batcmd, "%s%s/janus-bat.bat", diskunit,suser);
-sprintf(prodfile, "%s%s/prod.txt",diskunit,suser);
-sprintf(prodfiletxt, "%s%s/prod.txt",diskunit,suser);	
-sprintf(errorfile, "%s%s/error.txt",diskunit,suser);
-sprintf(warnfile, "%s%s/warn.txt",diskunit,suser);
-sprintf(waitfile, "%s%s/wait.txt",diskunit,suser);
-sprintf(protfile, "%s%s/prot.txt",diskunit,suser);
-sprintf(logfile, "%s%s/jchlog.txt",diskunit,suser);
+//sprintf(batfile, "%s%s/janus-bat.bat", diskunit,suser);
+//sprintf(batcmd, "%s%s/janus-bat.bat", diskunit,suser);
+//sprintf(prodfile, "%s%s/prod.txt",diskunit,suser);
+//sprintf(prodfiletxt, "%s%s/prod.txt",diskunit,suser);	
+//sprintf(errorfile, "%s%s/error.txt",diskunit,suser);
+//sprintf(warnfile, "%s%s/warn.txt",diskunit,suser);
+//sprintf(waitfile, "%s%s/wait.txt",diskunit,suser);
+//sprintf(protfile, "%s%s/prot.txt",diskunit,suser);
+//sprintf(logfile, "%s%s/jchlog.txt",diskunit,suser);
 
 Proc_err ( INFO_OPT,"%s",batfile);
 Proc_err ( INFO_OPT,"%s",batcmd);
 Proc_err ( INFO_OPT,"%s",prodfile);
 Proc_err ( INFO_OPT,"%s",prodfiletxt);
+
+Proc_err ( INFO_OPT, "At end of default file parsing");
+
+#ifdef HAS_WINDOWS_FEATURES
+   sprintf(cmd_str,"del %s",prodfile);
+#else
+ 		sprintf(cmd_str, "rm %s",prodfile);
+#endif
+
+//get the time
+time_t lt;
+lt=time(NULL);
+sprintf(expt_time, ctime(&lt));
+expt_time[strlen(expt_time)-1]=NULL; //strip training newline from time
+
+	
+if( access( prodfile, F_OK ) == 0 ) {
+    // prodfile exists
+    Proc_err ( INFO_OPT, "cmd_str is - %s", cmd_str);
+    Proc_err( INFO_OPT, "About to read data from prod file - %s", prodfile);
+	  fprod=fopen(prodfile,"r");
+	  file_data = fgets(in_data, 1024, fprod);
+	  Proc_err ( INFO_OPT, "prod file %s  contains :- %s",prodfile,in_data);
+	  field = strtok( in_data, "," );
+	  sscanf( field, "%d", &cpos );
+	
+	  field = strtok(NULL, "," );
+	  strcpy( tmp_fname, field );	
+
+	  field = strtok(NULL, "," );
+	  strcpy( oi, field );	
+
+	  field = strtok( NULL, "," );
+	  strcpy( juser, field );
+
+	  field = strtok( NULL, "," );
+	  strcpy( solvent, field );
+
+	  field = strtok( NULL, "," );
+	  strcpy( protocol, field );
+
+	  field = strtok( NULL, ",");
+	  strcpy( comments, field);
+	  
+	  
+/*Now a mod by DJH to make a filename containing the sample name, without any 'rogue' characters', and poke that into USERP2. Set USERP1 to be the comments, if an email*/
+
+		sprintf( samplename, "%s", oi );
+		fclose(fprod);
+		for( i = 0; i < strlen(samplename); i++ )
+   	{
+    				if( samplename[i] == '\\' || samplename[i] == '/' || samplename[i] == ':' || samplename[i] == '*' ||
+          				samplename[i] == '?' || samplename[i] == '\"' || samplename[i] == '<' || samplename[i] == '>' ||
+           				samplename[i]== '#' || samplename[i]=='$' || samplename[i]=='%' || samplename[i]=='^' || samplename[i]=='&' ||
+				samplename[i]=='=' || samplename[i]=='+' || samplename[i]==' ' ||
+          				samplename[i]=='(' || samplename[i]==')' || samplename[i]=='{' || samplename[i]=='}' || samplename[i]=='[' ||
+          				samplename[i]==']' || samplename[i]==';' || samplename[i]=='@' || samplename[i]=='~' || samplename[i]=='!' || samplename[i]=='`')
+     		 			{
+        					samplename[i] = '_';
+     		 			}
+   	}
+	  
+	 sprintf( filename, "%s-%s", tmp_fname,samplename);
+	 
+	 if (strcmp(filename, name) !=0 )
+	 {
+	 	   sprintf( error_msg, "%s - PROD HAS DIFFERENT SAMPLE NAME TO CURRENT DATASET! WHOOP! WHOOP! Filename from prod is - %s Current dataset name is  %s\n", expt_time,filename, name);
+	     Proc_err (INFO_OPT, "%s", error_msg);
+	 } else
+	   {
+	   	sprintf( error_msg, "%s - Prod has same Filename - %s as current dataset name - %s. Deleting prodfile.\n With command - %s", expt_time,filename, name, cmd_str);
+	   	Proc_err (INFO_OPT, "%s", error_msg);
+	    system(cmd_str);
+	   }
+//write error to lofgile    
+    flog = fopen(logfile,"a+");
+	  fputs( error_msg, flog);
+	  fclose( flog );
+	/*------------------------------------------------*/
+} else {
+    // fprodfile doesn't exist
+    sprintf( error_msg, "%s - Couldn't find/access prodfile. %s\n", expt_time,prodfile);
+    Proc_err ( INFO_OPT, "%s", error_msg);
+//write error to logfile
+    flog = fopen(logfile,"a+");
+	  fputs( error_msg, flog);
+	  fclose( flog );
+
+    
+}
+
 
 
 
@@ -146,7 +238,7 @@ Proc_err ( INFO_OPT,"%s",prodfiletxt);
 
 /*--------------------------------------------------------------*/
 
-Proc_err ( INFO_OPT, "At end of default file parsing");
+
 
 QUIT
 

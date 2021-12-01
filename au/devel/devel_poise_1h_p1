@@ -173,6 +173,7 @@ STOREPAR("PULPROG", "zg")
 STOREPAR("NS", 1)
 STOREPAR("DS", 0)
 STOREPAR("D 1", d1_float)
+STOREPAR("RG", rg_float)
 STOREPAR("SW", sw_double)
 //STOREPAR("RG", rg_float) // This just does not work on my reproc mac... not sure about a spect.
 STOREPAR("F1P", f1p_double)

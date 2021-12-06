@@ -205,7 +205,9 @@ if( access( prodfile, F_OK ) == 0 ) {
 	   {
 	   	sprintf( error_msg, "%s - Prod has same Filename - %s as current dataset name - %s. Deleting prodfile.\n With command - %s", expt_time,filename, name, cmd_str);
 	   	Proc_err (INFO_OPT, "%s", error_msg);
+	   	/********************This is where the the magic happens**************************/
 	    system(cmd_str);
+	    XAU("service-email",cmd);
 	   }
 //write error to lofgile    
     flog = fopen(logfile,"a+");

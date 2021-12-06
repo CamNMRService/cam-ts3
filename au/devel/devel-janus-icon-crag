@@ -376,13 +376,7 @@ END
              }
        }
 
-
-		//	CPR_exec("ro off",WAIT_TERM);			sprintf(expttime, ctime(&lt));
 			expttime[strlen(expttime)-1]=NULL;
-//removed stuff about logging to archive dir.
-			//sprintf(janusup, "c:/chemist/jup.txt");
-			//for windows
-			//sprintf(janusup, "%s%s\\jup.txt",diskunit,suser); 
       sprintf(janusup, "%s%s\\jup.txt",diskunit,suser);
 			Show_status( "opening local janusup to append");
 			sleep(delaytime);
@@ -403,10 +397,12 @@ END
 /*ok, now at end of this samples experiments; remove prod fie and tidy up*/
 
 		fclose(fprod);
-	
-//CPR_exec("janus-email",WAIT_TERM);
 
+	/*Cant email here, as we dont know which dataset we might be in - IconNMR is taking care of that now. 
+	It will run delprod on the last experiment of a	sample position - so better run it from there.
+XAU("service-email",cmd);
 
+*/
 	
 
 		flog = fopen(logfile,"a+");

@@ -31,6 +31,7 @@ char zip_name[PATH_MAX]="unset";
 char status_string[127]="working";
 char temp_str[PATH_MAX]="temp string";
 char data_File[PATH_MAX];
+char instrum_name[PATH_MAX];
 int finish=0;
 int suffix=1;
 int ch;
@@ -70,7 +71,7 @@ if (i_argc == 3 ) {
 
 
 GETCURDATA
-
+FETCHPARS("INSTRUM", instrum_name)
 
 
 //get the time
@@ -79,7 +80,7 @@ lt=time(NULL);
 sprintf(expt_time, ctime(&lt));
 expt_time[strlen(expt_time)-1]=NULL; //strip training newline from time
 
-sprintf (body, "%s - %s", expt_time,error_message);
+sprintf (body, "%s - Instrument - %s - %s", expt_time,instrum_name,error_message);
 sprintf (email_cmd_str, "sendemail -f %s -t %s -u %s -m %s -s smtp.gmail.com:587 -o tls=yes -xu %s -xp %s", user_id, email,name, body, user_id, password);
 
 /*write a dos batch file with the cmd_str and run it*/
@@ -89,7 +90,9 @@ fclose( fbat);
 Show_status(email_cmd_str);
 */
 /*send the email*/
-system(batfile);
+
+//remove comment to actually run
+//system(batfile);
 
 //if verbose, display info on what happened
 if (verbose==1){	

@@ -199,12 +199,16 @@ if( access( prodfile, F_OK ) == 0 ) {
 	 
 	 if (strcmp(filename, name) !=0 )
 	 {
-	 	   sprintf( error_msg, "%s - PROD HAS DIFFERENT SAMPLE NAME TO CURRENT DATASET! WHOOP! WHOOP! Filename from prod is - %s Current dataset name is  %s\n", expt_time,filename, name);
+	 	   sprintf( error_msg, "%s PROD HAS DIFFERENT SAMPLE NAME TO CURRENT DATASET! WHOOP! WHOOP! Filename from prod is %s Current dataset name is  %s\n", expt_time,filename, name);
+	     STOREPAR("TI", error_msg)
+	     XAU("devel-janus-icon-whoopwhoop",cmd);
 	     Proc_err (INFO_OPT, "%s", error_msg);
 	 } else
 	   {
-	   	sprintf( error_msg, "%s - Prod has same Filename - %s as current dataset name - %s. Deleting prodfile.\n With command - %s", expt_time,filename, name, cmd_str);
+	   	sprintf( error_msg, "%s Prod has same Filename %s as current dataset name %s. Deleting prodfile.\n With command  %s", expt_time,filename, name, cmd_str);
 	   	Proc_err (INFO_OPT, "%s", error_msg);
+	    STOREPAR("TI", error_msg)
+	    XAU("devel-janus-icon-whoopwhoop",cmd);
 	   	/********************This is where the the magic happens**************************/
 	    system(cmd_str);
 	    XAU("service-email",cmd);

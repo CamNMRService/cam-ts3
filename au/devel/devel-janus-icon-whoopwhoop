@@ -20,7 +20,7 @@ char log_dir[255];
 char zip_dir[PATH_MAX];
 char *file_data,*field;
 char orig_au[255],proc_au[255];
-char email[255];
+char email[255]="nmr@ch.cam.ac.uk";
 char status1[127]="emailing";
 char zip_cmd_str[2048]="\n";
 char email_cmd_str[2048]="\n";
@@ -36,7 +36,7 @@ int finish=0;
 int suffix=1;
 int ch;
 int cmdstatus,orig_expno,i_limit=999,i_exp=1,pdfthere=0,i;
-int verbose=0;
+int verbose=1;
 int error_message_present=0;
 
 FILE *plist = NULL;
@@ -60,19 +60,20 @@ sscanf(field,"%s", &log_dir);
 field = strtok(NULL, ",");
 sscanf(field,"%s", &zip_dir);
 
+
 /*what command line options do we have...*/
 /*i_argv[2] should be the option passed to the au program*/
-
+/*
 if (i_argc == 3 ) {
 	strcpy(error_message,i_argv[2]); //lets just assume first argument is a password.
 }else {
 	sprintf(error_message, "No argument passed to au program to send as error message");
 }
-
+*/
 
 GETCURDATA
 FETCHPARS("INSTRUM", instrum_name)
-
+FETCHPAR("TI", error_message)
 
 //get the time
 time_t lt;
@@ -80,8 +81,8 @@ lt=time(NULL);
 sprintf(expt_time, ctime(&lt));
 expt_time[strlen(expt_time)-1]=NULL; //strip training newline from time
 
-sprintf (body, "%s - Instrument - %s - %s", expt_time,instrum_name,error_message);
-sprintf (email_cmd_str, "sendemail -f %s -t %s -u %s -m %s -s smtp.gmail.com:587 -o tls=yes -xu %s -xp %s", user_id, email,name, body, user_id, password);
+sprintf (body, "%s Instrument %s %s", expt_time,instrum_name,error_message);
+sprintf (email_cmd_str, "sendemail -f %s -t %s -u Janus-Icon-delprod error -m %s -s smtp.gmail.com:587 -o tls=yes -xu %s -xp %s", user_id, email, body, user_id, password);
 
 /*write a dos batch file with the cmd_str and run it*/
 /*fbat = fopen(batfile, "w");
@@ -92,7 +93,7 @@ Show_status(email_cmd_str);
 /*send the email*/
 
 //remove comment to actually run
-//system(batfile);
+system(email_cmd_str);
 
 //if verbose, display info on what happened
 if (verbose==1){	

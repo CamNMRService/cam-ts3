@@ -22,7 +22,7 @@ int     error=0; //if not 0 an error has occured.
 int     curloop=1, cpos, specno, jexpt, jsolv,i=1, finish=0;
 
 int     prod_access=0; //0 if we can't access the prod file
-
+int     lock_access=0;
 char    oi[20], juser[50], suser[40], in_data[1024], tmp_fname[1024];
 char    shimfile[80], acqufile[80];
 char     tunefile[40];
@@ -36,7 +36,7 @@ char  *file_data, *field;
 FILE   *fprod = NULL;
 FILE   *fdef = NULL;
 FILE	 *flog = NULL;
-
+FILE    *f_lock = NULL;
 
 
 char  samplename[80], snamefile[255];
@@ -114,6 +114,7 @@ Proc_err ( INFO_OPT, "finished reading defaults");
 sprintf(batfile, "%s%s\\janus-bat.bat", diskunit,suser);
 sprintf(batcmd, "%s%s\\janus-bat.bat", diskunit,suser);
 sprintf(prodfile, "%s%s\\prod.txt",diskunit,suser);
+sprintf(lockfile, "%s%s\\lock.txt",diskunit,suser);
 sprintf(prodfiletxt, "%s%s\\prod.txt",diskunit,suser);	
 sprintf(errorfile, "%s%s\\error.txt",diskunit,suser);
 sprintf(warnfile, "%s%s\\warn.txt",diskunit,suser);

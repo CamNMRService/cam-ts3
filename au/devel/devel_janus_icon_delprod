@@ -45,7 +45,8 @@ char  samplename[80], snamefile[255];
 /*--- Assign filenames for signalling etc.----------------------*/
 
 char batfile[127],batcmd[127];
-char prodfile[255];
+char prodfile[PATH_MAX];
+char lockfile[PATH_MAX];
 char prodfiletxt[255];
 char errorfile[255];
 char warnfile[255];
@@ -137,14 +138,15 @@ sprintf(logfile, "%s%s\\jchlog.txt",diskunit,suser);
 Proc_err ( INFO_OPT,"%s",batfile);
 Proc_err ( INFO_OPT,"%s",batcmd);
 Proc_err ( INFO_OPT,"%s",prodfile);
+Proc_err ( INFO_OPT,"%s",lockfile);
 Proc_err ( INFO_OPT,"%s",prodfiletxt);
 
 Proc_err ( INFO_OPT, "At end of default file parsing");
 
 #ifdef HAS_WINDOWS_FEATURES
-   sprintf(cmd_str,"del %s",prodfile);
+   sprintf(cmd_str,"del %s %s",prodfile, lockfile);
 #else
- 		sprintf(cmd_str, "rm %s",prodfile);
+ 		sprintf(cmd_str, "rm %s %s",prodfile, lockfile);
 #endif
 
 //get the time
@@ -154,7 +156,7 @@ sprintf(expt_time, ctime(&lt));
 expt_time[strlen(expt_time)-1]=NULL; //strip training newline from time
 
 	
-if( access( prodfile, F_OK ) == 0 ) {
+if( (access( prodfile, F_OK ) == 0) &&  (access( lockfile, F_OK ) == 0) ) {
     // prodfile exists
     Proc_err ( INFO_OPT, "cmd_str is - %s", cmd_str);
     Proc_err( INFO_OPT, "About to read data from prod file - %s", prodfile);
@@ -211,7 +213,7 @@ if( access( prodfile, F_OK ) == 0 ) {
 	 } else
 	   {
 	   	//sprintf( error_msg, "Deleting prod %s", expt_time, cmd_str);
-	   	sprintf( error_msg, "Deleting prod %s", cmd_str);
+	   	sprintf( error_msg, "Deleting prod and lockfile %s", cmd_str);
 	   	Proc_err (INFO_OPT, "%s", error_msg);
 	    STOREPAR("TI", error_msg)
 	    // XAU("devel-janus-icon-whoopwhoop",cmd);

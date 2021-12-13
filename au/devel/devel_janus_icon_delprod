@@ -115,7 +115,7 @@ Proc_err ( INFO_OPT, "finished reading defaults");
 sprintf(batfile, "%s%s\\janus-bat.bat", diskunit,suser);
 sprintf(batcmd, "%s%s\\janus-bat.bat", diskunit,suser);
 sprintf(prodfile, "%s%s\\prod.txt",diskunit,suser);
-sprintf(lockfile, "%s%s\\lock.txt",diskunit,suser);
+sprintf(lockfile, "%s%s\\janus_lock.txt",diskunit,suser);
 sprintf(prodfiletxt, "%s%s\\prod.txt",diskunit,suser);	
 sprintf(errorfile, "%s%s\\error.txt",diskunit,suser);
 sprintf(warnfile, "%s%s\\warn.txt",diskunit,suser);
@@ -155,9 +155,9 @@ lt=time(NULL);
 sprintf(expt_time, ctime(&lt));
 expt_time[strlen(expt_time)-1]=NULL; //strip training newline from time
 
-	
 if( (access( prodfile, F_OK ) == 0) &&  (access( lockfile, F_OK ) == 0) ) {
-    // prodfile exists
+
+    // lockfile exists
     Proc_err ( INFO_OPT, "cmd_str is - %s", cmd_str);
     Proc_err( INFO_OPT, "About to read data from prod file - %s", prodfile);
 	  fprod=fopen(prodfile,"r");

@@ -160,7 +160,7 @@ sprintf(logfile, "%s%s\\jchlog.txt",diskunit,suser);
 sprintf(batfile, "%s%s\\janus-bat.bat", diskunit,suser);
 sprintf(batcmd, "%s%s\\janus-bat.bat", diskunit,suser);
 sprintf(prodfile, "%s%s\\prod.txt",diskunit,suser);
-sprintf(lockfile, "%s%s\\lock.txt",diskunit,suser);
+sprintf(lockfile, "%s%s\\janus_lock.txt",diskunit,suser);
 sprintf(prodfiletxt, "%s%s\\prod.txt",diskunit,suser);	
 sprintf(errorfile, "%s%s\\error.txt",diskunit,suser);
 sprintf(warnfile, "%s%s\\warn.txt",diskunit,suser);
@@ -195,13 +195,14 @@ proderrcount=0;
 while ( finish != 1 ) //THE MAIN LOOP
 { 
 	//now check if prod file is actually there
+	prod_access=0;
 	while (prod_access !=1)
 	{/*--- Let everyone know that the loop is running -*/
       	if(access(prodfile, F_OK)!=0) 
 				{
 					  sprintf( status_str, "In loop waiting for prod file. Waiting %f secs before trying to read %s again ",delaytime, prodfile);
 					  Show_status( status_str );
-            //Proc_err ( INFO_OPT, "In loop waiting for prod file. Waiting %f secs before trying to read %s again ",delaytime, prodfile); 
+            Proc_err ( INFO_OPT, "In loop waiting for prod file. Waiting %f secs before trying to read %s again ",delaytime, prodfile); 
 	          sleep(delaytime);
 				} else
 				{ prod_access=1;
@@ -368,8 +369,8 @@ END
  	
  	f_lock = fopen(lockfile,"a+");
  	sprintf(tmp_str,"NAME %s-%s\n",tmp_fname,samplename);
-      	  fputs(tmp_str,f_lock);
-   fclose(f_lock);   	  
+     fputs(tmp_str,f_lock);
+  fclose(f_lock);   	  
          
      }
       lock_access = 1;

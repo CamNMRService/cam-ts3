@@ -10,6 +10,10 @@
 
 //char def_file[255]="e:/chemist/defaults-csv.txt"; //janus software defaults
 //char def_file[255]="/Users/duncanhowe/janus-test/defaults-csv.txt"; //janus software defaults
+/* This has a bug/feature it all craps out if there's a space in the paths created. Ensure IconNMR doesn't creat spaces in the path*/
+/*work around - make IconNMR ignore "data", "nmr" and "user" in global options, dataset management*/
+/*then define exact path in  usermanager data directories*/
+
 char def_file[255]="D:/chemist/defaults-csv.txt";
 /**!!!!!!!!Change to test on djh mac!!!!!!!!!*/ 
 
@@ -205,13 +209,26 @@ if( access( prodfile, F_OK ) == 0 ) {
 	     Proc_err (INFO_OPT, "%s", error_msg);
 	 } else
 	   {
-	   	sprintf( error_msg, "%s Prod has same Filename %s as current dataset name %s. Deleting prodfile.\n With command  %s", expt_time,filename, name, cmd_str);
+	   	//sprintf( error_msg, "Deleting prod %s", expt_time, cmd_str);
+	   	sprintf( error_msg, "Deleting prod %s", cmd_str);
 	   	Proc_err (INFO_OPT, "%s", error_msg);
 	    STOREPAR("TI", error_msg)
-	    XAU("devel-janus-icon-whoopwhoop",cmd);
+	    // XAU("devel-janus-icon-whoopwhoop",cmd);
 	   	/********************This is where the the magic happens**************************/
 	    system(cmd_str);
-	    XAU("service-email",cmd);
+	    
+	 
+/* remove check for deletion of prod file as this could end up deleting the new prod file 	    	
+	    	   	   if( access( prodfile, F_OK ) == 0 ) {
+    // prodfile exists
+         Proc_err (INFO_OPT, "%s appears to have failed, prod file still exists, trying again");
+         fprod=fopen(prodfile,"r");
+         fclose(fprod);
+         sleep(2);
+         system(cmd_str);
+	    }
+ */        
+	    XAU("service-email","");
 	   }
 //write error to lofgile    
     flog = fopen(logfile,"a+");

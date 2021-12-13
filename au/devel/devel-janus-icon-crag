@@ -39,6 +39,7 @@ int     expt=1, curloop=1, cpos, specno, jexpt, jsolv,i=1, finish=0;
 int     LastSample,  nexpt, parmo, proderrcount, sthou;
 int     skipsample, pid, x, proc_or_not=0;
 int     prod_access=0; //0 if we can't access the prod file
+int 		lock_access=0;
 
 char    oi[20], juser[50], suser[40], in_data[1024], tmp_fname[1024];
 char    shimfile[80], acqufile[80];
@@ -61,7 +62,7 @@ FILE   *fjup = NULL, *fexpts = NULL, *pidfile = NULL, *fawm = NULL;
 FILE  *sname = NULL;
 FILE 	*fbat=NULL;
 FILE  *f_extset=NULL;
-
+FILE  *f_lock=NULL;
 char  samplename[80], snamefile[255];
 
 
@@ -69,6 +70,7 @@ char  samplename[80], snamefile[255];
 
 char batfile[127],batcmd[127];
 char prodfile[255];
+char lockfile[255];
 char prodfiletxt[255];
 char errorfile[255];
 char warnfile[255];
@@ -158,6 +160,7 @@ sprintf(logfile, "%s%s\\jchlog.txt",diskunit,suser);
 sprintf(batfile, "%s%s\\janus-bat.bat", diskunit,suser);
 sprintf(batcmd, "%s%s\\janus-bat.bat", diskunit,suser);
 sprintf(prodfile, "%s%s\\prod.txt",diskunit,suser);
+sprintf(lockfile, "%s%s\\lock.txt",diskunit,suser);
 sprintf(prodfiletxt, "%s%s\\prod.txt",diskunit,suser);	
 sprintf(errorfile, "%s%s\\error.txt",diskunit,suser);
 sprintf(warnfile, "%s%s\\warn.txt",diskunit,suser);
@@ -204,6 +207,11 @@ while ( finish != 1 ) //THE MAIN LOOP
 				{ prod_access=1;
 				}
 	} 
+	
+
+	
+
+	
 	/*------------------------------------------------*/
 
 	skipsample=0;
@@ -319,7 +327,7 @@ while ( finish != 1 ) //THE MAIN LOOP
       Proc_err(INFO_OPT, "extset_filename is - %s", extset_filename);
       if( (f_extset != NULL) )
       {
-      	  sprintf(tmp_str,"USER %s\n",juser);
+      	  sprintf(tmp_str,"USER %s\n",suser);
       	  fputs(tmp_str,f_extset);
       	  sprintf(tmp_str,"HOLDER %i\nDELETE\n",cpos);
       	  fputs(tmp_str,f_extset);
@@ -354,25 +362,34 @@ END
 
 */
          fclose(f_extset);
+ 
+ 	//create lock file to prevent moving on to next Janus sample until this one is actually done
+ 	// put sample name in for debugging purposes
+ 	
+ 	f_lock = fopen(lockfile,"a+");
+ 	sprintf(tmp_str,"NAME %s-%s\n",tmp_fname,samplename);
+      	  fputs(tmp_str,f_lock);
+   fclose(f_lock);   	  
+         
      }
-      prod_access = 1;
-//Spin the wheels, checking if prod file is still here, if it is, loop. If its not, go on as iconnmr has removed it. 
+      lock_access = 1;
+//Spin the wheels, checking if lock file is still here, if it is, loop. If its not, go on as iconnmr has removed it. 
 
-      while (prod_access != 0)
+      while (lock_access != 0)
       {
-          if(access(prodfile, F_OK)==0)
+          if(access(lockfile, F_OK)==0)
           //  if( (fprod = fopen(prodfile,"r")) != NULL)
             { 
-                prod_access=1;	
-                sprintf(status_str,"Waiting for IconNMR to delete %s - Sleeping for %f seconds",prodfile,delaytime);
+                lock_access=1;	
+                sprintf(status_str,"Waiting for IconNMR to delete %s - Sleeping for %f seconds",lockfile,delaytime);
                 Show_status( status_str );
              //  Proc_err(INFO_OPT, "Waitng for iconnmr to delete %s - Sleeping %f seconds",prodfile, delaytime );
                 sleep(delaytime);
 		            //Show_status(statusstr );
              }else 
              {
-              prod_access=0;
-              Proc_err( INFO_OPT, "Don't appear to be able to open prod file - %s, iconnmr must have deleted it, going on...",prodfile);
+              lock_access=0;
+              Proc_err( INFO_OPT, "Don't appear to be able to open lock file - %s, iconnmr must have deleted it, going on...",lockfile);
              }
        }
 
@@ -411,7 +428,7 @@ XAU("service-email",cmd);
 	}
 	
 
-	Proc_err ( INFO_OPT, "At the end.");
+	Proc_err ( INFO_OPT, "At the end of a sample.");
 }/*End while*/
 Show_status( "Program aborted!" );
 QUIT

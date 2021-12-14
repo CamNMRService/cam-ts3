@@ -202,7 +202,7 @@ while ( finish != 1 ) //THE MAIN LOOP
 				{
 					  sprintf( status_str, "In loop waiting for prod file. Waiting %f secs before trying to read %s again ",delaytime, prodfile);
 					  Show_status( status_str );
-            Proc_err ( INFO_OPT, "In loop waiting for prod file. Waiting %f secs before trying to read %s again ",delaytime, prodfile); 
+         //   Proc_err ( INFO_OPT, "In loop waiting for prod file. Waiting %f secs before trying to read %s again ",delaytime, prodfile); 
 	          sleep(delaytime);
 				} else
 				{ prod_access=1;

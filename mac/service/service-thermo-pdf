@@ -1,0 +1,9 @@
+CY 19
+MI 0.2
+PC 0.3
+PPS
+LAYOUT +/service-carbon.xwp
+service-pdfit
+LAYOUT +/service-carbon-int.xwp
+service-pdfit
+service-plotx-ppm-pdfit 20 A3

@@ -1,0 +1,10 @@
+/*service-porc-and-email*/
+/*Program to do service default processing to current data and email the result*/
+/*Relies on cam-nmrservice au program suite*/
+
+GETCURDATA
+
+XAU("service-def-proc","")
+XAU("service-email","")
+
+QUIT

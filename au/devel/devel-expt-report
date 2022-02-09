@@ -4,8 +4,7 @@
 #include <inc/exptUtil>
 
 /*DEFINITION - NEEDS TO BE SET*/
-//char report_filename[PATH_MAX]="/Users/duncanhowe/nmr-in/expt-report.csv";
-char report_filename[PATH_MAX]="D:\\disk2\\data\\expt-report.csv";
+char report_filename[PATH_MAX]="/Users/duncanhowe/nmr-in/expt-report.csv";
 /*****************************/
 FILE *report_file_pointer = NULL;
 FILE *fp;

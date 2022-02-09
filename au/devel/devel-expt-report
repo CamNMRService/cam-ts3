@@ -2,6 +2,9 @@
 /* output/append experimental details to a csv report*/
 
 #include <inc/exptUtil>
+#include <stdio.h>
+#include <string.h>
+
 
 /*DEFINITION - NEEDS TO BE SET*/
 char report_filename[PATH_MAX]="/Users/duncanhowe/nmr-in/expt-report.csv";

@@ -4,7 +4,8 @@
 #include <inc/exptUtil>
 
 /*DEFINITION - NEEDS TO BE SET*/
-char report_filename[PATH_MAX]="/Users/duncanhowe/nmr-in/expt-report.csv";
+//char report_filename[PATH_MAX]="/Users/duncanhowe/nmr-in/expt-report.csv";
+char report_filename[PATH_MAX]="D:\\disk2\\data\\expt-report.csv";
 /*****************************/
 FILE *report_file_pointer = NULL;
 int verbose = 0; //set to one for verbose output

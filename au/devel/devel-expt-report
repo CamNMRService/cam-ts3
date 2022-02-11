@@ -1,10 +1,13 @@
 /* devel-expt-report*/ 
 /* output/append experimental details to a csv report*/
-
+//#include <time.h>
 #include <inc/exptUtil>
+#include <time.h>
 
 /*DEFINITION - NEEDS TO BE SET*/
-char report_filename[PATH_MAX]="/Users/duncanhowe/nmr-in/expt-report.csv";
+//char report_filename[PATH_MAX]="/Users/duncanhowe/nmr-in/expt-report.csv";
+char report_filename[PATH_MAX]="";
+sprintf( report_filename, "%s/logfiles/expt-report.csv", PathXWinNMRProg() );
 /*****************************/
 FILE *report_file_pointer = NULL;
 FILE *fp;
@@ -15,6 +18,7 @@ int line_len = 0;
 int date_unix;
 char instrum_name[40]="";
 char data_path[PATH_MAX]="";
+char experiment[80]="";
 char nucleus[6]="";
 char pulse_prog[80]="";
 char date_str[50]="";
@@ -28,12 +32,13 @@ struct tm *now;     /* structure with year, month etc. */
 GETCURDATA
 SETCURDATA
 FETCHPARS("INSTRUM", instrum_name)
+FETCHPARS("EXP",experiment)
 FETCHPARS("DATE", &date_unix)
 FETCHPARS("DATE", &dtime_s)
 strcpy(data_path,ACQUPATH("acqus") );
 FETCHPARS("NS",&num_scans)
-FETCHPAR("NUC1",&nucleus);
-FETCHPAR("PULPROG", pulse_prog);
+FETCHPAR("NUC1",&nucleus)
+FETCHPAR("PULPROG", pulse_prog)
 exp_time = CalcExpTime();
  
 // get spectrum acquisition time
@@ -43,6 +48,7 @@ sprintf(date_str, "%04i/%02i/%02i %02i:%02i:%02i", now->tm_year+1900, 1+now->tm_
 if(verbose == 1){
 	 Proc_err(DEF_ERR_OPT,"Instrument name defined as :- %s", instrum_name); 
    Proc_err(DEF_ERR_OPT,"Dataset name is :-  %s", name);
+   Proc_err(DEF_ERR_OPT,"Experiment performed is :- %s", experiment);
    Proc_err(DEF_ERR_OPT,"Dataset unix date is :- %i", date_unix);
    Proc_err(DEF_ERR_OPT,"Dataset date (converted) is :- %s", date_str);
 	 Proc_err(DEF_ERR_OPT,"Disk defined as :- %s", disk);
@@ -64,7 +70,7 @@ if (report_file_pointer == NULL)
 }
 else
 {
-  fprintf(report_file_pointer,"%s,%s,%i,%s,%s,%s,%s,%s,%i,%i\n", instrum_name, name, date_unix, date_str, disk, data_path, nucleus, pulse_prog, num_scans, exp_time);
+  fprintf(report_file_pointer,"%s,%s,%s,%i,%s,%s,%s,%s,%s,%i,%i\n", instrum_name, name, experiment, date_unix, date_str, disk, data_path, nucleus, pulse_prog, num_scans, exp_time);
 	fclose(report_file_pointer);
 }
 QUIT 

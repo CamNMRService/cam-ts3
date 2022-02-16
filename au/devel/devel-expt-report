@@ -11,7 +11,7 @@ sprintf( report_filename, "%s/logfiles/expt-report.csv", PathXWinNMRProg() );
 /*****************************/
 FILE *report_file_pointer = NULL;
 FILE *fp;
-int verbose = 1; //set to one for verbose output
+int verbose = 0; //set to one for verbose output
 int exp_time = 0;
 int num_scans = 0;
 int line_len = 0;

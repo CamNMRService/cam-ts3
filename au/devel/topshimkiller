@@ -1,17 +1,17 @@
 // started by topshim_watchdog
 // waits eg 5 mins then issues topshim stop command.
-
+// modified to use sendgui topshim stop as xcmd("topshim stop") doesn't seem to work.
 
 char lockpath[PATH_MAX];
 FILE *lockfile;
 
-sprintf(lockpath, "%s/topshim_lockfile", PathXWinNMRCurDir());
+sprintf(lockpath, "%s/%s/topshim_lockfile",PathXWinNMRProg(), PathXWinNMRCurDir());
 
 sleep(300); //e.g. 5 minutes limit
 
-if ( access(lockfile,F_OK) == 0) // file found, stop topshim
+if ( lockfile = access(lockpath,F_OK) == 0) // file found, stop topshim
 	{
-		Proc_err ( INFO_OPT, "topshim took too long, killing");
-		XCMD("topshim stop")
+		Proc_err (INFO_OPT, "topshim took too long, killing");
+		XCMD("sendgui topshim stop")
 	}
 QUIT

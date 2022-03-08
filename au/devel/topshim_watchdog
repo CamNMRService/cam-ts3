@@ -4,6 +4,8 @@
 //to a folder with the name of the current experiment
 //So that you can look at the data and see what might have gone wrong
 
+//ptg 2022/03/08 correct path to curdir for lock file, and properly get it to delete file - argument is file path not FILE pointer
+
 #include <time.h>
 time_t now_s, dtime_s;		  	/* seconds since 1970 */
 struct tm *now;	  		/* structure with year, month etc. */
@@ -26,7 +28,7 @@ now = localtime(&now_s);
 sprintf(datestamp, "%d_%d_%d_%d_%d_%d", now->tm_year+1900, 1+now->tm_mon, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
 
 // write lock file
-sprintf(lockpath, "%s/topshim_lockfile", PathXWinNMRCurDir());
+sprintf(lockpath, "%s/%s/topshim_lockfile", PathXWinNMRProg(),PathXWinNMRCurDir());
 lockfile = fopen(lockpath, "wt");
 fclose(lockfile);
 
@@ -41,13 +43,14 @@ XCMD(tscommand);
 
 // delete the lockfile
 
-remove(lockfile);  // get rid of the kil file!
+remove(lockpath);  // get rid of the kil file!
 // check for failed execution
 if(AUERR)
 {
 	
 	sleep(5);
-  XCMD(tscommand)
+ // don't repeat topshim!!
+ // XCMD(tscommand)
   #ifdef	HAS_WINDOWS_FEATURES
   sprintf(command,"ren C:\\Bruker\\TopSpin3.6.4\\data\\topshimData topshimData_%s", datestamp);  
 //  Proc_err(DEF_ERR_OPT,command);

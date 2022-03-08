@@ -7,7 +7,7 @@ FILE *lockfile;
 
 sprintf(lockpath, "%s/topshim_lockfile", PathXWinNMRCurDir());
 
-sleep(300); e.g. 5 minutes limit
+sleep(300); //e.g. 5 minutes limit
 
 if ( access(lockfile,F_OK) == 0) // file found, stop topshim
 	{

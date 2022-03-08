@@ -1,0 +1,17 @@
+// started by topshim_watchdog
+// waits eg 5 mins then issues topshim stop command.
+
+
+char lockpath[PATH_MAX];
+FILE *lockfile;
+
+sprintf(lockpath, "%s/topshim_lockfile", PathXWinNMRCurDir());
+
+sleep(300); e.g. 5 minutes limit
+
+if ( access(lockfile,F_OK) == 0) // file found, stop topshim
+	{
+		Proc_err ( INFO_OPT, "topshim took too long, killing");
+		XCMD("topshim stop")
+	}
+QUIT

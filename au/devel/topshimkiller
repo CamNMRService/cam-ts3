@@ -12,6 +12,6 @@ sleep(300); //e.g. 5 minutes limit
 if ( lockfile = access(lockpath,F_OK) == 0) // file found, stop topshim
 	{
 		Proc_err (INFO_OPT, "topshim took too long, killing");
-		XCMD("sendgui topshim stop")
+		XCMD("sendgui noqu topshim stop")
 	}
 QUIT

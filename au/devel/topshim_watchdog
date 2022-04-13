@@ -17,6 +17,9 @@ char reportdest[PATH_MAX];
 char reportsource[PATH_MAX]; 
 char  datestamp[256];
 char lockpath[PATH_MAX];
+char pidpath[PATH_MAX];
+ int pid;
+FILE *pidfile;
 FILE *lockfile;
 GETCURDATA 
 
@@ -36,14 +39,34 @@ fclose(lockfile);
 
 CPR_exec("xau topshimkiller", WAIT_START); 
 
+
+
 // execute topshim as desired
 sprintf(tscommand,"topshim plotall convcomp %s", cmd);
 XCMD(tscommand);
 
 
-// delete the lockfile
+// delete the lockfile  *and kill the killer program!!!!!* if topshim completes OK
 
 remove(lockpath);  // get rid of the kil file!
+
+sprintf(pidpath, "%s/%s/topshim_pidfile", PathXWinNMRProg(),PathXWinNMRCurDir());
+
+/* try and open the file */
+if (pidfile = fopen(pidpath, "rt")) 
+{
+
+	/* read the PID number */
+	fscanf(pidfile, "%d", &pid);
+	fclose(pidfile);
+
+	/* kill the process! */
+	Proc_err(INFO_OPT, "killing PID = %d !", pid);
+	sprintf(command, "kill %d", pid);
+	CPR_exec(command, CONT_EX);
+
+}
+
 // check for failed execution
 if(AUERR)
 {

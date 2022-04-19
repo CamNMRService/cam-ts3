@@ -7,16 +7,41 @@
 #include <stdio.h>
 #include <time.h>
 
-/*VARIABLES THAT NEED TO BE SET!*/
+//Set some variables for below
+char defaults_file_name[PATH_MAX];
+int ts_major = GetTsVersionMajor();
+Proc_err(INFO_OPT,"ts_major is %i",ts_major);
+
+/*!!!!VARIABLES THAT NEED TO BE SET!!!!*/
 /********************************/
 
-char method_name[40]="poise_auto_p1_19f"; //poise method name to create for 1h p1 calib. Also used for results filename.
-char default_au[40]="service_zg_efp";
-//Handlly print out what its doing as it goes along. Can chage to output diff levels of verbosity.
-int verbose = 1; 
+char method_name[40]="poise_auto_p1_19f"; //poise method name to create for calibration. Also used for results filename.
+char default_au[40]="service_zg_efp"; //au program to aquire and process results. Set to default for default method within poise.
+//This acts as an overide for poise, for it to use default method, default need to be saved in the service_poise_19f_p1_defaults.txt AND in this variable
+char param_set_name[40]="F19";
+char param[40] = "p1";
+
+#ifdef HAS_WINDOWS_FEATURES
+   sprintf(defaults_file_name,"C:\\Bruker\\cam-ts%i\\poise\\service_poise_19f_p1_defaults.txt",ts_major);
+#else
+ 		sprintf(defaults_file_name,"/opt/cam-ts%i/poise/service_poise_19f_p1_defaults.txt",ts_major);
+#endif
+
+//Handlly print out what its doing as it goes along. Can change to output diff levels of verbosity.
+//verbose == 0 is no output
+int verbose = 1;
 //set aqtest = 0 to issue aquisition commands to the spectrometer
 int aqtest = 0; // !=0 == test mode ==0 for aquire mode
 /********************************/
+
+
+// Also need a place for the results to go. I'm thinking same place as the helium log will suit us. Maybe duplicate to where the probe files are. Would be nice
+//if nmr_save backed it up too.
+// The method name is fixed and nor read from the defaults as don't want too much cluttering up the place.
+
+//Get topspin major version for defaults file location - set for us to be part of the git version control. Changes to method easily pushed to all spects.
+/*Local lab defaults*/
+
 
 int i; //loop counter
 FILE *results_file = NULL;
@@ -24,7 +49,7 @@ FILE *defaults_file = NULL;
 FILE *title_file = NULL;
 
 char results_file_name[PATH_MAX];
-char defaults_file_name[PATH_MAX];
+
 char title_path_name[PATH_MAX];
 
 char defaults_content[1024]="";
@@ -34,27 +59,15 @@ char instrum_name[40]="";
 char probe_name[PATH_MAX];
 char probe_name_trunc[PATH_MAX];
 
-// Also need a place for the results to go. I'm thinking same place as the helium log will suit us. Maybe duplicate to where the probe files are. Would be nice 
-//if nmr_save backed it up too.
-// The method name is fixed and nor read from the defaults as don't want too much cluttering up the place.
 
-//Get topspin major version for defaults file location - set for us to be part of the git version control. Changes to method easily pushed to all spects.
-/*Local lab defaults*/
-int ts_major = GetTsVersionMajor(); 
-Proc_err(INFO_OPT,"ts_major is %i",ts_major); 
 
-#ifdef HAS_WINDOWS_FEATURES
-   sprintf(defaults_file_name,"C:\\Bruker\\cam-ts%i\\poise\\service_poise_19f_p1_defaults.txt",ts_major);
-#else
- 		sprintf(defaults_file_name,"/opt/cam-ts%i/poise/service_poise_19f_p1_defaults.txt",ts_major);
-#endif
 
 
 /*End of Local lab defaults*/
 
 //Now more variable definitions
 
-char *field; 
+char *field;
 char *defaults_content_ptr;
 char *end_ptr;
 
@@ -73,7 +86,6 @@ char tol[40];
 char cost_function[40];
 char poise_cmd[PATH_MAX];
 char poise_au[PATH_MAX];
-char param[40] = "p1";
 char poise_status[40];
 
 
@@ -83,7 +95,7 @@ double o1_hz_double;
 double sfo1;
 double f1p_double;
 double f2p_double;
-float rg_float=1.1; 
+float rg_float=1.1;
 float d1_float;
 float tol_float;
 float p1_init;
@@ -95,7 +107,7 @@ int pc_hb_int;
 
 
 
-//Get the defaults content 
+//Get the defaults content
 defaults_file = fopen (defaults_file_name,"r");
 if (defaults_file == NULL)
 {
@@ -106,7 +118,7 @@ else
 {
 	rewind(defaults_file);
 //	defaults_content_ptr = fgets(defaults_content, 1024, defaults_file); // don't think I need this.
-  fgets(defaults_content, 1024, defaults_file); 
+  fgets(defaults_content, 1024, defaults_file);
 	if (verbose == 1) {
 	    Proc_err(DEF_ERR_OPT,"defaults file name = %s", defaults_file_name);
       Proc_err(DEF_ERR_OPT,"defaults content is  = %s", defaults_content);
@@ -136,7 +148,7 @@ sscanf(field, "%s", &pc_hb);
 field = strtok(NULL, ",");
 sscanf(field, "%s", &tol);
 field = strtok(NULL, ",");
-sscanf(field, "%s", &cost_function); 
+sscanf(field, "%s", &cost_function);
 field = strtok(NULL, ",");
 sscanf(field, "%s", &poise_au);
 
@@ -151,7 +163,7 @@ if (verbose == 1) {
 //Ok, now have to convert those strings to float/doubles
 sw_double = strtod(sw, &end_ptr);
 o1_ppm_double = strtod(o1p, &end_ptr);
-f1p_double = strtod(f1p, &end_ptr); 
+f1p_double = strtod(f1p, &end_ptr);
 f2p_double = strtod(f2p, &end_ptr);
 rg_float = strtof(rg, &end_ptr);
 d1_float = strtof(d1s, &end_ptr);
@@ -162,12 +174,12 @@ pc_hb_int = atoi(pc_hb);
 if (verbose == 1) {
 //show text to number conversion values
     Proc_err(DEF_ERR_OPT, "sw ppm - %f \n o1p ppm %f \n f1p ppm %f \n f2p ppm %f \n rg is %f \n d1 is %f\n tol is %f\n", sw_double, o1_ppm_double, f1p_double, f2p_double, rg_float, d1_float, tol_float);
-    Proc_err(DEF_ERR_OPT, "percentage lower and higher than nominal 360 pulse to check - %i and %i", pc_lb_int, pc_hb_int);  
+    Proc_err(DEF_ERR_OPT, "percentage lower and higher than nominal 360 pulse to check - %i and %i", pc_lb_int, pc_hb_int);
 } else {}
 
 //Ok, now setup poise default 19F calib experiment
 
-RPAR("F19", "all")
+RPAR(param_set_name, "all")
 GETPROSOL
 STOREPAR("PULPROG", "zg")
 STOREPAR("NS", 1)
@@ -185,18 +197,18 @@ FETCHPARS("PROBHD", probe_name)
 
 //get p1, then set the minimum and maximum p1. Note P1 is got from the prosol table.
 
-FETCHPAR("P 1", &p1_init) 
+FETCHPAR("P 1", &p1_init)
 p1_init = p1_init*4; //this is a 360 pulse we are doing.
 p1_min = p1_init - (p1_init * ((float)pc_lb_int/100) );
 p1_max = p1_init + (p1_init * ((float)pc_hb_int/100) );
 
 //create the method - check if we need to use a different au program for aqcqu and processing
-if( strcmp(poise_au,"default") == 0) 
+if( strcmp(poise_au,"default") == 0)
 {
 //	sprintf(poise_cmd,"xpy poise --create NAME PARAM MIN MAX INIT TOL CF");
     sprintf(poise_cmd,"sendgui xpy poise --create %s %s %.2f %.2f %.2f %.2f %s %s",method_name, param, p1_min, p1_max, p1_init, tol_float, cost_function, default_au );
-//deidnt work running only 7 arguments... needs 8... maybe if =default =zg    
-} 
+//deidnt work running only 7 arguments... needs 8... maybe if =default =zg
+}
 else {
     sprintf(poise_cmd,"sendgui xpy poise --create %s %s %.2f %.2f %.2f %.2f %s %s",method_name, param, p1_min, p1_max, p1_init, tol_float, cost_function, poise_au );
 }
@@ -218,9 +230,9 @@ if (verbose == 1) {
 STOREPAR("TI", "poise")  //poise puts the optimised value in TI if it completes
 
 //Only do aquisition if not in test mode.
-if (aqtest == 0) 
+if (aqtest == 0)
 {
-    //ATMA exact	
+    //ATMA exact
     //lets make some nicely phased peaks
     XCMD("sendgui AQ 10s");
     ZG
@@ -235,14 +247,14 @@ FETCHPAR("TI", poise_status)
 
 if (aqtest == 0)//so we are in aquire mode, test if poise has run
 {
-    if ( strcmp ( poise_status, "poise") == 0 ) 
+    if ( strcmp ( poise_status, "poise") == 0 )
     {
     	  Proc_err(DEF_ERR_OPT, "Poise optimisation failed because value of TI is still %s", poise_status );
 	      exit(1);
     }
 } else {} //carry on, as we must be in test mode and dont care p1 hasn't been found)
-   
-    
+
+
 //Now deal with result
 FETCHPAR("P 1", &p1_opt)
 p1_opt = p1_opt/4;
@@ -265,7 +277,7 @@ if (( title_file = fopen( title_path_name, "w")) == 0)
 {
 		Proc_err(DEF_ERR_OPT, "Cannot open title file for writing:\n%s", title_path_name);
 		exit(1);
-} else 
+} else
 {
    fputs( title_text, title_file);
    fclose(title_file);
@@ -287,7 +299,7 @@ if (verbose ==1) {
 
 sprintf( results_file_name, "%s/logfiles/%s-%s-%s", PathXWinNMRProg(), instrum_name,probe_name_trunc,method_name );
 //what the time mr wolf?
-time_t rawtime;   
+time_t rawtime;
 
 struct tm *info;
 char time_buffer[80];

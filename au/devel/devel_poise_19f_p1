@@ -26,6 +26,7 @@ char param[40] = "p1";
 #else
  		sprintf(defaults_file_name,"/opt/cam-ts%i/poise/service_poise_19f_p1_defaults.txt",ts_major);
 #endif
+float max_deviation = 10.0;
 
 //Handlly print out what its doing as it goes along. Can change to output diff levels of verbosity.
 //verbose == 0 is no output
@@ -95,6 +96,8 @@ double o1_hz_double;
 double sfo1;
 double f1p_double;
 double f2p_double;
+double deviation;
+
 float rg_float=1.1;
 float d1_float;
 float tol_float;
@@ -323,9 +326,16 @@ if ((results_file = fopen(results_file_name, "a+")) == 0)
      fclose(results_file);
 }
 
+
 //Check how much p1_opt has changed from p1_init - report if too different
-if (fabs((p1_opt/p1_init)/100)) >= max_deviation{
-  //do something
+deviation=((fabs(p1_opt/(p1_init/4)/p1_opt))*100)-100;
+if (verbose == 1) {
+	   Proc_err(DEF_ERR_OPT, " P1 has deviated by %f percent. \n P1_init=%f \n p1_opt=%f", deviation,p1_init/4,p1_opt);
 }
+
+if (deviation >= max_deviation) {
+  //do something 
+}
+
 
 QUIT

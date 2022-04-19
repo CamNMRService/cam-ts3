@@ -263,6 +263,7 @@ if (verbose == 1) {
     Proc_err(DEF_ERR_OPT, "Automated poise optimised value of p1: %.2f", p1_opt);
 } else {}
 
+
 //next, write the result to a file. Maybe to title also.
 //Then compare p1_opt to p1_init (should be unchanged from prosol. Report if too different.
 
@@ -320,6 +321,11 @@ if ((results_file = fopen(results_file_name, "a+")) == 0)
 } else {
      fputs(results_content, results_file);
      fclose(results_file);
+}
+
+//Check how much p1_opt has changed from p1_init - report if too different
+if (fabs((p1_opt/p1_init)/100)) >= max_deviation{
+  //do something
 }
 
 QUIT

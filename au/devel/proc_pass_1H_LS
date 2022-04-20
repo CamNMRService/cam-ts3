@@ -1,0 +1,87 @@
+/* proc_pass - pass fail for signal to noise test */
+/* selects different layouts for output */
+
+//#define EXPECTSINO 350.0
+//#define PASSLOW 0.8
+//#define PASSHIGH 1.1
+
+#define WIDTHLOW 0.7
+
+//float sino, sinolow, sinohigh; 
+
+float width, widthlow;
+int sinopass, widthpass;
+FILE *output, *input;
+char outputpath[PATH_MAX];
+char inputpath[PATH_MAX];
+
+GETCURDATA
+
+STOREPAR("LAYOUT", "+/pass.xwp")
+//STOREPAR("NOISF1", 5.0)
+//STOREPAR("NOISF2", 4.5)
+//STOREPAR("SIGF1", 3.0)
+//STOREPAR("SIGF2", 2.0)
+
+//SINO
+
+//FETCHPARS("SINO", &sino)
+
+//sinolow = EXPECTSINO * PASSLOW;
+//sinohigh = EXPECTSINO * PASSHIGH;
+
+//if (sino > sinolow && sino < sinohigh) sinopass = 1;
+//else	sinopass = 0;
+
+
+
+
+STOREPAR("F1P", 8.0)
+STOREPAR("F2P", 4.0)
+FP
+APKF
+XAU("hwcal", "")
+
+ 
+strcpy(inputpath, PROCPATH("hwcal.out"));
+if ( ( input = fopen (inputpath, "r") ) == NULL)
+{
+	Proc_err(INFO_OPT, "could not open file %s", inputpath);
+	ABORT
+}
+
+fscanf(input, "%f", &width);
+fclose(input);
+
+if (width > WIDTHLOW) widthpass = 0; 
+else widthpass = 1;
+
+if (!sinopass || !widthpass) 	STOREPAR("LAYOUT", "+/fail.xwp")
+
+strcpy(outputpath, PROCPATH("passfail.txt"));
+
+if ( ( output = fopen (outputpath, "w") ) == NULL)
+{
+	Proc_err(INFO_OPT, "could not open file %s", outputpath);
+	ABORT
+}
+//fprintf(output, "Signal-to-noise test\n\n");
+//if (sinopass) 
+//{
+	//fprintf(output, "s/n = %.1f : 1    PASS\n(%.1f min < %.1f observed < %.1f max)", sino, sinolow, sino, sinohigh);
+//}
+//else
+//{
+	//if (sino < sinolow)
+	//{
+		//	fprintf(output, "s/n = %.1f : 1    FAIL\n(less than %.1f)", sino, sinolow);
+	//}
+	//else fprintf(output, "s/n = %.1f : 1    FAIL\n(greater than %.1f, too high?)", sino, sinohigh);	
+//}
+
+fprintf(output, "\n\n\nLinewidth test\n\n");
+if (widthpass) fprintf(output, "%.1f Hz < %.1f Hz   PASS", width, WIDTHLOW);
+else fprintf(output, "%.1f Hz > %.1f Hz   FAIL", width, WIDTHLOW);
+fclose(output);
+AUTOPLOT
+QUIT

@@ -1,0 +1,122 @@
+/* proc_pass - pass fail for signal to noise test */
+/* selects different layouts for output */
+
+int ret, headid;
+char headstring[PATH_MAX];
+float expectsino;
+
+// Check probe and set values accordingly:
+
+ret = getProbeheadInfo(&headid,headstring);
+Proc_err(DEF_ERR_OPT,"probeid=%d", headid);
+  if(ret < 0)
+  {
+    Proc_err(DEF_ERR_OPT,"failed to determine installed probe!"); 
+   ABORT
+  }
+  else if (headid == 1) //SmartProbe s/n 45
+  { 
+   expectsino=480;
+  }
+
+  else if (headid == 3) //Prodigy
+  { 
+   expectsino=1100;
+  }
+  
+	
+	
+   else if (headid == 4) //DumbProbe s/n 762
+  { 
+  	
+   expectsino=300;
+  }
+ else 
+  {
+    Proc_err(DEF_ERR_OPT,"No specifications for probe!"); 
+   ABORT
+  }
+
+#define PASSLOW 0.9
+#define PASSHIGH 1.2
+
+#define WIDTHLOW 1.1
+
+float sino, sinolow, sinohigh; 
+
+float width, widthlow;
+int sinopass, widthpass;
+FILE *output, *input;
+char outputpath[PATH_MAX];
+char inputpath[PATH_MAX];
+
+GETCURDATA
+
+STOREPAR("LAYOUT", "+/pass.xwp")
+//STOREPAR("NOISF1", 5.4)
+//STOREPAR("NOISF2", 5.0)
+STOREPAR("SIGF1", 3.0)
+STOREPAR("SIGF2", 2.0)
+XCMD("sendgui sinocal 3.0 2.0 7.0 3.0 0.5")
+SINO
+
+FETCHPARS("SINO", &sino)
+
+sinolow = expectsino * PASSLOW;
+sinohigh = expectsino * PASSHIGH;
+
+if (sino > sinolow && sino < sinohigh) sinopass = 1;
+else	sinopass = 0;
+
+
+
+
+//STOREPAR("F1P", -1.0)
+//STOREPAR("F2P", -3.0)
+//FP
+//APKF
+//XAU("hwcal", "")
+
+ 
+//sprintf(inputpath, "%s/data/%s/nmr/%s/%d/pdata/%d/hwcal.out", disk, user, name, expno, procno); 
+//if ( ( input = fopen (inputpath, "r") ) == NULL)
+//{
+//	Proc_err(INFO_OPT, "could not open file %s", inputpath);
+//ABORT
+//}
+
+//fscanf(input, "%f", &width);
+//fclose(input);
+
+//if (width > WIDTHLOW) widthpass = 0; 
+//else widthpass = 1;
+
+if (!sinopass) 	STOREPAR("LAYOUT", "+/fail.xwp")
+
+strcpy(outputpath, PROCPATH("passfail.txt"));
+
+if ( ( output = fopen (outputpath, "w") ) == NULL)
+{
+	Proc_err(INFO_OPT, "could not open file %s", outputpath);
+	ABORT
+}
+fprintf(output, "Signal-to-noise test\n\n");
+if (sinopass) 
+{
+	fprintf(output, "s/n = %.1f : 1    PASS\n(%.1f min < %.1f observed < %.1f max)", sino, sinolow, sino, sinohigh);
+}
+else
+{
+	if (sino < sinolow)
+	{
+			fprintf(output, "s/n = %.1f : 1    FAIL\n(less than %.1f)", sino, sinolow);
+	}
+	else fprintf(output, "s/n = %.1f : 1    FAIL\n(greater than %.1f, too high?)", sino, sinohigh);	
+}
+
+//fprintf(output, "\n\n\nLinewidth test\n\n");
+//if (widthpass) fprintf(output, "%.1f Hz < %.1f Hz   PASS", width, WIDTHLOW);
+//else fprintf(output, "%.1f Hz > %.1f Hz   FAIL", width, WIDTHLOW);
+fclose(output);
+//AUTOPLOT
+QUIT

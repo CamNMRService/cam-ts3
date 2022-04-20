@@ -10,7 +10,7 @@
 /*VARIABLES THAT NEED TO BE SET!*/
 /********************************/
 
-char method_name[40]="poise_auto_p1_13c"; //poise method name to create for 1h p1 calib. Also used for results filename.
+char method_name[40]="poise_auto_p1_1h"; //poise method name to create for 1h p1 calib. Also used for results filename.
 char default_au[40]="service_zg_efp";
 //Handlly print out what its doing as it goes along. Can chage to output diff levels of verbosity.
 int verbose = 1; 
@@ -44,9 +44,9 @@ int ts_major = GetTsVersionMajor();
 Proc_err(INFO_OPT,"ts_major is %i",ts_major); 
 
 #ifdef HAS_WINDOWS_FEATURES
-   sprintf(defaults_file_name,"C:\\Bruker\\cam-ts%i\\poise\\service_poise_13c_p1_defaults.txt",ts_major);
+   sprintf(defaults_file_name,"C:\\Bruker\\cam-ts%i\\poise\\service_poise_1h_p1_defaults.txt",ts_major);
 #else
- 		sprintf(defaults_file_name,"/opt/cam-ts%i/poise/service_poise_13c_p1_defaults.txt",ts_major);
+ 		sprintf(defaults_file_name,"/opt/cam-ts%i/poise/service_poise_1h_p1_defaults.txt",ts_major);
 #endif
 
 
@@ -165,14 +165,15 @@ if (verbose == 1) {
     Proc_err(DEF_ERR_OPT, "percentage lower and higher than nominal 360 pulse to check - %i and %i", pc_lb_int, pc_hb_int);  
 } else {}
 
-//Ok, now setup poise default 13C calib experiment
+//Ok, now setup poise default 1H calib experiment
 
-RPAR("C13IG", "all")
+RPAR("PROTON", "all")
 GETPROSOL
-STOREPAR("PULPROG", "zgig")
+STOREPAR("PULPROG", "zg")
 STOREPAR("NS", 1)
 STOREPAR("DS", 0)
 STOREPAR("D 1", d1_float)
+STOREPAR("RG", rg_float)
 STOREPAR("SW", sw_double)
 //STOREPAR("RG", rg_float) // This just does not work on my reproc mac... not sure about a spect.
 STOREPAR("F1P", f1p_double)

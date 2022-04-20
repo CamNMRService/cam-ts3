@@ -197,7 +197,7 @@ STOREPARS("F2P", f2p_double)
 STOREPAR("O1P", o1_ppm_double)
 FETCHPARS("INSTRUM", instrum_name)
 FETCHPARS("PROBHD", probe_name)
-
+STOREPAR("RG", rg_float)
 //get p1, then set the minimum and maximum p1. Note P1 is got from the prosol table.
 
 FETCHPAR("P 1", &p1_init)

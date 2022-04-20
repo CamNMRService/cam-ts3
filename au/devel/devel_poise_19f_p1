@@ -20,6 +20,7 @@ char default_au[40]="service_zg_efp"; //au program to aquire and process results
 //This acts as an overide for poise, for it to use default method, default need to be saved in the service_poise_19f_p1_defaults.txt AND in this variable
 char param_set_name[40]="F19";
 char param[40] = "p1";
+char p_program[40] = "zg";
 
 #ifdef HAS_WINDOWS_FEATURES
    sprintf(defaults_file_name,"C:\\Bruker\\cam-ts%i\\poise\\service_poise_19f_p1_defaults.txt",ts_major);
@@ -183,8 +184,8 @@ if (verbose == 1) {
 //Ok, now setup poise default 19F calib experiment
 
 RPAR(param_set_name, "all")
+STOREPAR("PULPROG", p_program)
 GETPROSOL
-STOREPAR("PULPROG", "zg")
 STOREPAR("NS", 1)
 STOREPAR("DS", 0)
 STOREPAR("D 1", d1_float)
@@ -334,7 +335,7 @@ if (verbose == 1) {
 }
 
 if (deviation >= max_deviation) {
-  //do something 
+  //do something
 }
 
 

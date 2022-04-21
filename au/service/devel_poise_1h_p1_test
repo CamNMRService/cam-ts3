@@ -12,12 +12,12 @@ char defaults_file_name[PATH_MAX];
 int ts_major = GetTsVersionMajor();
 int ts_minor = GetTsVersionMinor();
 int ts_patch = GetTsVersionPl();
-
-Proc_err(INFO_OPT,"ts_major is %i",ts_major);
+char results_path[PATH_MAX];
+Proc_err(INFO_OPT,"ts_major is %i \n minor %i \n patch %i",ts_major, ts_minor, ts_patch);
 
 /*!!!!VARIABLES THAT NEED TO BE SET!!!!*/
 /********************************/
-//Handlly print out what its doing as it goes along. Can change to output diff levels of verbosity.
+//Handlly print out what its doing as it goes along. Can change to output diff levels of verbosity. (in future)
 //verbose == 0 is no output
 int verbose = 1;
 //set aqtest = 0 to issue aquisition commands to the spectrometer
@@ -31,8 +31,21 @@ char p_program[40] = "zg";
 
 #ifdef HAS_WINDOWS_FEATURES
    sprintf(defaults_file_name,"C:\\Bruker\\cam-ts%i\\poise\\service_poise_1h_p1_defaults.txt",ts_major);
-#else
+   // Also need a place for the results to go. I'm thinking same place as the helium log will suit us. 
+   if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
+    	sprintf(results_path,"C:\\Bruker\\diskless\\prog\\logfiles\\");
+   } 
+   else{
+      sprintf( results_path, "%s\\logfiles\\", PathXWinNMRProg() );
+   }
+#else //Not actually checked this on linux... We have no linux xpectrometers
  		sprintf(defaults_file_name,"/opt/cam-ts%i/poise/service_poise_1h_p1_defaults.txt",ts_major);
+ 		if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
+    	sprintf(results_path,"/opt/diskless/prog/logfiles/");
+   } 
+   else{
+      sprintf( results_path, "%s/logfiles/", PathXWinNMRProg() );
+   }
 #endif
 float max_deviation = 10.0;
 
@@ -43,7 +56,7 @@ FILE *defaults_file = NULL;
 FILE *title_file = NULL;
 
 char results_file_name[PATH_MAX];
-char results_path[PATH_MAX];
+
 char title_path_name[PATH_MAX];
 char defaults_content[1024]="";
 char title_text[1024]="";
@@ -84,13 +97,7 @@ float p1_opt;
 int pc_lb_int;
 int pc_hb_int;
 
-// Also need a place for the results to go. I'm thinking same place as the helium log will suit us. Maybe duplicate to where the probe files are. Would be nice
-//if nmr_save backed it up too.
-if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
-	sprintf(results_path,"C:\\Bruker\\diskless\\prog\\logfiles\\");
-} else {
-  sprintf( results_path, "%s\\logfiles\\", PathXWinNMRProg() );
-}
+
 
 //Get the defaults content
 defaults_file = fopen (defaults_file_name,"r");

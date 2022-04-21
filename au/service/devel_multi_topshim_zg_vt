@@ -1,0 +1,162 @@
+/*** ^^A -*-C++-*- **********************************************/
+/*	multi_zgvt 		18.05.2000			*/
+/****************************************************************/
+/*	Short Description :					*/
+/*	Performs multiple acquisitions on increasing expnos	*/
+/*	with temperatures that are read from a vtlist file.	*/
+/****************************************************************/
+/*	Keywords :						*/
+/*	serial acquisitions, variable temperature, VT		*/
+/****************************************************************/
+/*	Description/Usage :					*/
+/*	This AU program performs multiple acquisitions on	*/
+/*	increasing expnos in much the same way as multizg. If	*/
+/*	datasets do not yet exist, the current dataset and its	*/
+/*	parameters are copied. If the data sets already exist,	*/
+/*	then the experiments are executed as they are.		*/
+/*	But in addition to multizg, this AU program asks for a	*/
+/*	variable temperature list and sets the temperature for	*/
+/*	each experiment according to the list entry from the	*/
+/*	VTLIST file.						*/
+/*	The number of experiments is calculated from the number	*/
+/*	of temperature values in the VTLIST. The user can ask	*/
+/*	for a reduced number of experiments, though.		*/
+/*	A security check is implemented that asks for a		*/
+/*	confirmation of the highest and lowest temperature of	*/
+/*	the variable temperature list.				*/
+/*	Temperatures are in Kelvin K !				*/
+/*	You will be asked for the temperature equilibration	*/
+/*	time. The AU program will wait at as long as defined	*/
+/*	by this time for the temperature to settle.		*/
+/*	The total experiment time is estimated and printed out.	*/
+/****************************************************************/
+/*	Author(s) :						*/
+/*	Name		: Rainer Kerssebaum, Mike Engelhardt	*/
+/*	Organisation	: Bruker BioSpin GmbH			*/
+/*	Email		: rainer.kerssebaum@bruker.de		*/
+/*			: michael.engelhardt@bruker.de		*/
+/****************************************************************/
+/*	Name		Date	Modification:			*/
+/*	rke, eng	990711	created				*/
+/*	eng		000327  switch ZGSAFETY off if on	*/
+/*	eng		000518	bug 2388 corrected		*/
+/*	eng		000518	PathSystemTemp instead of /tmp	*/
+/*	wem		080905	ZG_OVERWRITE			*/
+/****************************************************************/
+/*
+$Id: multi_zgvt,v 1.13 2008/09/05 07:52:41 wem Exp $
+*/
+
+AUERR = multi_zgvt(curdat);
+QUITMSG("--- multi_zgvt finished ---")
+
+#include <inc/exptUtil>
+
+int multi_zgvt(const char* curdat)
+{
+  char vtlistname[PATH_MAX], vtlistpath[PATH_MAX], line[PATH_MAX];
+  float acttemp[512], hightemp, lowtemp;
+  int startExpno, numtemp, waittime;
+  int ret, i1, expTime;
+  FILE* fptr1;
+
+  startExpno = expno;
+  (void) strcpy (vtlistname,"vtlist1");
+  GETSTRING("Enter name of vtlist :",vtlistname)
+  if (getParfileDirForRead(vtlistname, VT_DIRS, vtlistpath) < 0)
+  {
+    Proc_err(DEF_ERR_OPT, "VT list file %s: %s\n"
+			  "Please use 'edlist vt' to check for valid files.",
+			  vtlistname, vtlistpath);
+    ABORT
+  }
+
+  if ( (fptr1 = fopen (vtlistpath,"r")) == NULL )
+  {
+    Proc_err(DEF_ERR_OPT, "Could not open VT list file\n%s\n"
+			  "Please use 'edlist vt' to check for valid files.",
+			  vtlistpath);
+    ABORT
+  }
+
+  /* Read first temperature value, scan for highest and lowest */
+  /* temperature and the total number of temperature values.   */
+
+  if ( fgets (line,sizeof(line),fptr1) == NULL )
+  {
+    Proc_err(DEF_ERR_OPT, "No VT list entry found.\n"
+			  "Please check the VT list file\n%s\n"
+			  "with 'edlist vt %s'.", vtlistpath, vtlistname);
+    (void) fclose (fptr1);
+    ABORT
+  }
+
+  if ( (ret = sscanf (line,"%f",&acttemp[0])) != 1 )
+  {
+    Proc_err(DEF_ERR_OPT, "--- temperature list has no valid entries ---");
+    (void) fclose (fptr1);
+    ABORT
+  }
+
+  hightemp = lowtemp = acttemp[0];
+  numtemp = 1;
+
+  /* Check for more temperature values */
+
+  while ( fgets (line,sizeof(line),fptr1) != NULL )
+  {
+    if ( (ret = sscanf (line,"%f",&acttemp[numtemp])) != 1 )
+      break;
+
+    if ( acttemp[numtemp] > hightemp )
+      hightemp = acttemp[numtemp];
+
+    if ( acttemp[numtemp] < lowtemp )
+      lowtemp = acttemp[numtemp];
+
+    numtemp++;
+  }
+
+  (void) fclose (fptr1);
+
+  if ( Proc_err(QUESTION_OPT,"Highest temperature : %f OK?",hightemp) != ERR_OK )
+    STOPMSG ("--- highest temperature not OK ---")
+  if ( Proc_err(QUESTION_OPT,"Lowest temperature : %f OK?",lowtemp) != ERR_OK )
+    STOPMSG ("--- lowest temperature not OK ---")
+
+  do
+  {
+    i1 = numtemp;
+    GETINT("Enter number of experiments :",i1)
+  }
+   while ( (i1 > numtemp) || (i1 == 0) );
+
+  waittime = 60;
+  GETINT("Enter temperature equilibration period (secs) :",waittime)
+
+  expTime = 0;
+  TIMES(i1)
+    SETCURDATA
+    STOREPAR("TE",acttemp[loopcount1]);
+    expTime += CalcExpTime() + 4 + waittime;
+    IEXPNO
+  END
+  DEXPNO
+  PrintExpTime(expTime, i1);
+
+  expno = startExpno;
+  SETCURDATA
+  TIMES(i1)
+    (void)sprintf(line, "running experiment # %d (TE = %f)",
+			loopcount1+1, acttemp[loopcount1]);
+    Show_status(line);
+    sleep(4);
+    TESET
+    TEREADY(waittime,0.1)
+    XCMD("sendgui topshim convcomp")
+    ZG_OVERWRITE
+    IEXPNO
+  END
+
+  return 0;
+}

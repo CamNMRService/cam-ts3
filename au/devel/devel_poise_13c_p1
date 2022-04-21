@@ -10,41 +10,46 @@
 //Set some variables for below
 char defaults_file_name[PATH_MAX];
 int ts_major = GetTsVersionMajor();
-Proc_err(INFO_OPT,"ts_major is %i",ts_major);
+int ts_minor = GetTsVersionMinor();
+int ts_patch = GetTsVersionPl();
+char results_path[PATH_MAX];
+Proc_err(INFO_OPT,"ts_major is %i \n minor %i \n patch %i",ts_major, ts_minor, ts_patch);
 
 /*!!!!VARIABLES THAT NEED TO BE SET!!!!*/
 /********************************/
-
+//Handlly print out what its doing as it goes along. Can change to output diff levels of verbosity. (in future)
+//verbose == 0 is no output
+int verbose = 1;
+//set aqtest = 0 to issue aquisition commands to the spectrometer
+int aqtest = 0; // !=0 == test mode ==0 for aquire mode
 char method_name[40]="poise_auto_p1_13c"; //poise method name to create for calibration. Also used for results filename.
 char default_au[40]="service_zg_efp"; //au program to aquire and process results. Set to default for default method within poise.
 //This acts as an overide for poise, for it to use default method, default need to be saved in the service_poise_19f_p1_defaults.txt AND in this variable
 char param_set_name[40]="C13IG";
 char param[40] = "p1";
-char p_program[40] = "zgpg";
+char p_program[40] = "zgig";
 
 #ifdef HAS_WINDOWS_FEATURES
    sprintf(defaults_file_name,"C:\\Bruker\\cam-ts%i\\poise\\service_poise_13c_p1_defaults.txt",ts_major);
-#else
+   // Also need a place for the results to go. I'm thinking same place as the helium log will suit us. 
+   if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
+    	sprintf(results_path,"C:\\Bruker\\diskless\\prog\\logfiles\\");
+   } 
+   else{
+      sprintf( results_path, "%s\\logfiles\\", PathXWinNMRProg() );
+   }
+#else //Not actually checked this on linux... We have no linux xpectrometers
  		sprintf(defaults_file_name,"/opt/cam-ts%i/poise/service_poise_13c_p1_defaults.txt",ts_major);
+ 		if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
+    	sprintf(results_path,"/opt/diskless/prog/logfiles/");
+   } 
+   else{
+      sprintf( results_path, "%s/logfiles/", PathXWinNMRProg() );
+   }
 #endif
 float max_deviation = 10.0;
 
-//Handlly print out what its doing as it goes along. Can change to output diff levels of verbosity.
-//verbose == 0 is no output
-int verbose = 1;
-//set aqtest = 0 to issue aquisition commands to the spectrometer
-int aqtest = 0; // !=0 == test mode ==0 for aquire mode
-/********************************/
-
-
-// Also need a place for the results to go. I'm thinking same place as the helium log will suit us. Maybe duplicate to where the probe files are. Would be nice
-//if nmr_save backed it up too.
-// The method name is fixed and nor read from the defaults as don't want too much cluttering up the place.
-
-//Get topspin major version for defaults file location - set for us to be part of the git version control. Changes to method easily pushed to all spects.
-/*Local lab defaults*/
-
-
+//Variable definitions
 int i; //loop counter
 FILE *results_file = NULL;
 FILE *defaults_file = NULL;
@@ -53,29 +58,15 @@ FILE *title_file = NULL;
 char results_file_name[PATH_MAX];
 
 char title_path_name[PATH_MAX];
-
 char defaults_content[1024]="";
 char title_text[1024]="";
 char results_content[1024]="";
 char instrum_name[40]="";
 char probe_name[PATH_MAX];
 char probe_name_trunc[PATH_MAX];
-
-
-
-
-
-/*End of Local lab defaults*/
-
-//Now more variable definitions
-
 char *field;
 char *defaults_content_ptr;
 char *end_ptr;
-
-
-
-
 char sw[40];
 char o1p[40];
 char f1p[40];
@@ -89,8 +80,6 @@ char cost_function[40];
 char poise_cmd[PATH_MAX];
 char poise_au[PATH_MAX];
 char poise_status[40];
-
-
 double sw_double;
 double o1_ppm_double;
 double o1_hz_double;
@@ -98,7 +87,6 @@ double sfo1;
 double f1p_double;
 double f2p_double;
 double deviation;
-
 float rg_float=1.1;
 float d1_float;
 float tol_float;
@@ -302,7 +290,8 @@ if (verbose ==1) {
 }
 //now print to results file
 
-sprintf( results_file_name, "%s/logfiles/%s-%s-%s", PathXWinNMRProg(), instrum_name,probe_name_trunc,method_name );
+//sprintf( results_file_name, "%s/logfiles/%s-%s-%s", PathXWinNMRProg(), instrum_name,probe_name_trunc,method_name );
+sprintf( results_file_name, "%s%s-%s-%s", results_path, instrum_name,probe_name_trunc,method_name );
 //what the time mr wolf?
 time_t rawtime;
 

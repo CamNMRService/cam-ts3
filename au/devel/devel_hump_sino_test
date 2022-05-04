@@ -34,7 +34,7 @@ char param[40] = "p1";
 char p_program[40] = "zg";
 
 #ifdef HAS_WINDOWS_FEATURES
-  // sprintf(defaults_file_name,"C:\\Bruker\\cam-ts%i\\poise\\service_hump_sino_1h_defaults",ts_major);
+   sprintf(defaults_file_name,"C:\\Bruker\\cam-ts%i\\poise\\service_hump_sino_1h_defaults",ts_major);
    // Also need a place for the results to go. I'm thinking same place as the helium log will suit us.
    if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
     	sprintf(results_path,"C:\\Bruker\\diskless\\prog\\logfiles\\");
@@ -43,7 +43,7 @@ char p_program[40] = "zg";
       sprintf( results_path, "%s\\logfiles\\", PathXWinNMRProg() );
    }
 #else //Not actually checked this on linux... We have no linux xpectrometers
- 	//	sprintf(defaults_file_name,"/opt/cam-ts%i/poise/service_hump_sino_1h_defaults",ts_major);
+ 		sprintf(defaults_file_name,"/opt/cam-ts%i/poise/service_hump_sino_1h_defaults",ts_major);
  		if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
     	sprintf(results_path,"/opt/diskless/prog/logfiles/");
    }

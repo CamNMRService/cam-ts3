@@ -9,11 +9,12 @@
 #include <time.h>
 
 //Set some variables for below
-char defaults_file_name[PATH_MAX];
+char defaults_file_name[1024];
 int ts_major = GetTsVersionMajor();
 int ts_minor = GetTsVersionMinor();
 int ts_patch = GetTsVersionPl();
 char results_path[PATH_MAX];
+
 Proc_err(INFO_OPT,"ts_major is %i \n minor %i \n patch %i",ts_major, ts_minor, ts_patch);
 
 /*!!!!VARIABLES THAT NEED TO BE SET!!!!*/
@@ -84,6 +85,9 @@ char cost_function[40];
 char gui_cmd[PATH_MAX];
 char poise_au[PATH_MAX];
 char poise_status[40];
+char* str_probe;
+char probe_id[40];
+char probe_nickname[40];
 double sw_double;
 double o1_ppm_double;
 double o1_hz_double;
@@ -112,13 +116,11 @@ SETCURDATA
 FETCHPARS("INSTRUM", instrum_name)
 FETCHPARS("PROBHD", probe_name)
 
-//Now to get parse probe_name to read into probe_name_trunc until space is found, we don't need all the guff
-i=0;
-while (i < strlen(probe_name) && probe_name[i] != ' ')
-{
-	  probe_name_trunc[i]=probe_name[i];
-	  i++;
-}
+CALL_PROBESERVER("probe_client getParams getInstalledProbe", str_probe);
+//str_probe will be a big long string, separated by commas - we only need the first csv entry 
+//some magic from au_sst1ir
+(void) sscanf(str_probe, "%[^,]%*c%*[^,]%*c%*[^,]%*c%*[^,]%*c%[^,]%*s", probe_id, probe_nickname);
+sprintf(probe_name_trunc,"%s",probe_id);
 
 if (verbose ==1) {
     Proc_err(DEF_ERR_OPT,"instrum_name is - %s \n probe_name - %s \n probe_name_trunc - %s", instrum_name,probe_name,probe_name_trunc);
@@ -130,7 +132,7 @@ defaults_file = fopen (defaults_file_name,"r");
 if (defaults_file == NULL)
 {
 	Proc_err(DEF_ERR_OPT,"can't open file - %s", defaults_file_name);
-  err = Proc_err(QUESTION_OPT,"The file might not exist, would you like to try and create a default one?");
+  err = Proc_err(QUESTION_OPT,"The file %s might not exist, would you like to try and create a default one?", defaults_file_name);
   if (err == 0) {
     XAU("devel_create_hump_sino_file","")
   }

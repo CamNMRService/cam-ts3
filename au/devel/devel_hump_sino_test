@@ -13,6 +13,9 @@ char defaults_file_name[1024];
 int ts_major = GetTsVersionMajor();
 int ts_minor = GetTsVersionMinor();
 int ts_patch = GetTsVersionPl();
+char* str_probe;
+char probe_id[40];
+char probe_nickname[40];
 char results_path[PATH_MAX];
 
 Proc_err(INFO_OPT,"ts_major is %i \n minor %i \n patch %i",ts_major, ts_minor, ts_patch);
@@ -31,7 +34,7 @@ char param[40] = "p1";
 char p_program[40] = "zg";
 
 #ifdef HAS_WINDOWS_FEATURES
-   sprintf(defaults_file_name,"C:\\Bruker\\cam-ts%i\\poise\\service_hump_sino_1h_defaults",ts_major);
+  // sprintf(defaults_file_name,"C:\\Bruker\\cam-ts%i\\poise\\service_hump_sino_1h_defaults",ts_major);
    // Also need a place for the results to go. I'm thinking same place as the helium log will suit us.
    if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
     	sprintf(results_path,"C:\\Bruker\\diskless\\prog\\logfiles\\");
@@ -40,7 +43,7 @@ char p_program[40] = "zg";
       sprintf( results_path, "%s\\logfiles\\", PathXWinNMRProg() );
    }
 #else //Not actually checked this on linux... We have no linux xpectrometers
- 		sprintf(defaults_file_name,"/opt/cam-ts%i/poise/service_hump_sino_1h_defaults",ts_major);
+ 	//	sprintf(defaults_file_name,"/opt/cam-ts%i/poise/service_hump_sino_1h_defaults",ts_major);
  		if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
     	sprintf(results_path,"/opt/diskless/prog/logfiles/");
    }
@@ -76,8 +79,8 @@ char f1p[40];
 char f2p[40];
 char rg[40];
 char d1s[40];
-char hs_l[40]; 
-char hs_h[40]; 
+char hs_l[40];
+char hs_h[40];
 char pc_lb[40];
 char pc_hb[40];
 char tol[40];
@@ -85,9 +88,7 @@ char cost_function[40];
 char gui_cmd[PATH_MAX];
 char poise_au[PATH_MAX];
 char poise_status[40];
-char* str_probe;
-char probe_id[40];
-char probe_nickname[40];
+
 double sw_double;
 double o1_ppm_double;
 double o1_hz_double;
@@ -117,7 +118,7 @@ FETCHPARS("INSTRUM", instrum_name)
 FETCHPARS("PROBHD", probe_name)
 
 CALL_PROBESERVER("probe_client getParams getInstalledProbe", str_probe);
-//str_probe will be a big long string, separated by commas - we only need the first csv entry 
+//str_probe will be a big long string, separated by commas - we only need the first csv entry
 //some magic from au_sst1ir
 (void) sscanf(str_probe, "%[^,]%*c%*[^,]%*c%*[^,]%*c%*[^,]%*c%[^,]%*s", probe_id, probe_nickname);
 sprintf(probe_name_trunc,"%s",probe_id);
@@ -135,6 +136,7 @@ if (defaults_file == NULL)
   err = Proc_err(QUESTION_OPT,"The file %s might not exist, would you like to try and create a default one?", defaults_file_name);
   if (err == 0) {
     XAU("devel_create_hump_sino_file","")
+    exit(1);
   }
   else {
 	  exit(1);
@@ -175,13 +177,6 @@ sscanf(field, "%s", &hs_h);
 
 
 
-
-if (verbose == 1) {
-//show text read in from file
-    Proc_err(DEF_ERR_OPT, "sw is - %s \n o1p is - %s \n f1p - %s \n f2p - %s \n rg - %s\n d1 - %s \n pc_lb - %s \n pc_hb - %s \n tol - %s", sw,o1p,f1p,f2p,rg, d1s, pc_lb, pc_hb, tol);
-    Proc_err(DEF_ERR_OPT, "cost function - %s \n Au program to run and process - %s ", cost_function, poise_au);
-} else {}
-
 //Ok, now have to convert those strings to float/doubles
 sw_double = strtod(sw, &end_ptr);
 o1_ppm_double = strtod(o1p, &end_ptr);
@@ -194,16 +189,12 @@ hs_l_double = strtod(hs_l, &end_ptr);
 hs_h_double = strtod(hs_h, &end_ptr);
 
 
-if (verbose == 1) {
-//show text to number conversion values
-    Proc_err(DEF_ERR_OPT, "sw ppm - %f \n o1p ppm %f \n f1p ppm %f \n f2p ppm %f \n rg is %f \n d1 is %f\n tol is %f\n", sw_double, o1_ppm_double, f1p_double, f2p_double, rg_float, d1_float, tol_float);
-    Proc_err(DEF_ERR_OPT, "percentage lower and higher than nominal 360 pulse to check - %i and %i", pc_lb_int, pc_hb_int);
-} else {}
-
-//Ok, now setup poise default 19F calib experiment
-
 f1p_double = o1_ppm_double+(sw_double/2);
 f2p_double = o1_ppm_double-(sw_double/2);
+if (verbose == 1) {
+//show text to number conversion values
+    Proc_err(DEF_ERR_OPT, "sw ppm - %f \n o1p ppm %f \n f1p ppm %f \n f2p ppm %f \n rg is %f \n d1 is %f\n aq is %f\n", sw_double, o1_ppm_double, f1p_double, f2p_double, rg_float, d1_float, aq_double);
+} else {}
 
 RPAR(param_set_name, "all")
 STOREPAR("PULPROG", p_program)
@@ -215,7 +206,7 @@ STOREPAR("SW", sw_double)
 STOREPAR("F1P", f1p_double )
 STOREPAR("F2P", f2p_double )
 STOREPARS("F1P", f1p_double )
-STOREPARS("F2P", f2p_double ) 
+STOREPARS("F2P", f2p_double )
 STOREPAR("O1P", o1_ppm_double)
 //STOREPAR("RG", rg_float) // This just does not work on my reproc mac... not sure about a spect - seems ok.
 STOREPAR("RG", rg_float)
@@ -228,14 +219,14 @@ if (aqtest == 0)
     //ATMA exact
     //lets make some nicely phased peaks
     sprintf(gui_cmd,"sendgui AQ %is",ns_int);
-    XCMD("sendgui AQ 10s");
+    XCMD(gui_cmd);
     ZG
-    if ( (ts_major==3) && (ts_minor>5) && (ts_patch>5) ) {
-      APBK}
+    if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
+      APBK }
       else{
         EFP
         APK
-        ABS}
+        ABS }
 
 }
 

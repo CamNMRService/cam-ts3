@@ -3,6 +3,7 @@
 /* djh35, May 2022*/
 /*based on poise work - stripping out and adapting code - WIP*/
 /*should be as far as running a zg - if it ompiles...*/
+/*compiles - now to bug hunt and fix my undoubedely spurious logic...*/
 
 #include <stdio.h>
 #include <time.h>
@@ -68,10 +69,14 @@ char *defaults_content_ptr;
 char *end_ptr;
 char sw[40];
 char o1p[40];
+char aq[40];
+char ns[40];
 char f1p[40];
 char f2p[40];
 char rg[40];
 char d1s[40];
+char hs_l[40]; 
+char hs_h[40]; 
 char pc_lb[40];
 char pc_hb[40];
 char tol[40];
@@ -89,10 +94,9 @@ double hs_h_double;
 double f1p_double;
 double f2p_double;
 double deviation;
+
 float rg_float=1.1;
 float d1_float;
-float hs_l=15.0; //10% hump spec
-float hs_h=8.0; //50% hump spec
 float tol_float;
 float sino_result=1.0;
 int pc_lb_int;
@@ -126,9 +130,9 @@ defaults_file = fopen (defaults_file_name,"r");
 if (defaults_file == NULL)
 {
 	Proc_err(DEF_ERR_OPT,"can't open file - %s", defaults_file_name);
-  err = Proc_err(QUESTION_OPT,"The file might not exist, would you like to try and create a default one?")
+  err = Proc_err(QUESTION_OPT,"The file might not exist, would you like to try and create a default one?");
   if (err == 0) {
-    XAU(devel_create_hump_sino_file,"")
+    XAU("devel_create_hump_sino_file","")
   }
   else {
 	  exit(1);
@@ -196,6 +200,9 @@ if (verbose == 1) {
 
 //Ok, now setup poise default 19F calib experiment
 
+f1p_double = o1_ppm_double+(sw_double/2);
+f2p_double = o1_ppm_double-(sw_double/2);
+
 RPAR(param_set_name, "all")
 STOREPAR("PULPROG", p_program)
 GETPROSOL
@@ -203,10 +210,10 @@ STOREPAR("NS", ns_int)
 STOREPAR("DS", 0)
 STOREPAR("D 1", d1_float)
 STOREPAR("SW", sw_double)
-STOREPAR("F1P", ( o1_ppm_double+(sw_double/2) )
-STOREPAR("F2P", ( o1_ppm_double-(sw_double/2) )
-STOREPARS("F1P", ( o1_ppm_double+(sw_double/2) )
-STOREPARS("F2P", ( o1_ppm_double-(sw_double/2) )
+STOREPAR("F1P", f1p_double )
+STOREPAR("F2P", f2p_double )
+STOREPARS("F1P", f1p_double )
+STOREPARS("F2P", f2p_double ) 
 STOREPAR("O1P", o1_ppm_double)
 //STOREPAR("RG", rg_float) // This just does not work on my reproc mac... not sure about a spect - seems ok.
 STOREPAR("RG", rg_float)
@@ -218,7 +225,7 @@ if (aqtest == 0)
 {
     //ATMA exact
     //lets make some nicely phased peaks
-    sprntf(gui_cmd,"sendgui AQ %is",ns_int)
+    sprintf(gui_cmd,"sendgui AQ %is",ns_int);
     XCMD("sendgui AQ 10s");
     ZG
     if ( (ts_major==3) && (ts_minor>5) && (ts_patch>5) ) {
@@ -237,7 +244,7 @@ if (aqtest == 0)
 //Then compare p1_opt to p1_init (should be unchanged from prosol. Report if too different.
 
 sprintf( title_path_name, "%s/title", PROCPATH(0) );
-sprintf( title_text, " hump 10% = %.2f \n hump 50% = %.2f \n sino result = %.2f", hump_l, hump_h, sino_result );
+sprintf( title_text, " hump 10% = %.2f \n hump 50% = %.2f \n sino result = %.2f", hs_l, hs_h, sino_result );
 if (verbose == 1) {
 	   Proc_err(DEF_ERR_OPT, "Writing %s into file %s", title_text, title_path_name);
 }
@@ -258,7 +265,7 @@ if (( title_file = fopen( title_path_name, "w")) == 0)
 //now print to results file
 
 //sprintf( results_file_name, "%s/logfiles/%s-%s-%s", PathXWinNMRProg(), instrum_name,probe_name_trunc,method_name );
-sprintf( results_file_name, "%s%s-%s-%s", results_path, instrum_name,probe_name_trunc,method_name );
+sprintf( results_file_name, "%s%s-%s-hump-sino", results_path, instrum_name,probe_name_trunc );
 //what the time mr wolf?
 time_t rawtime;
 
@@ -269,7 +276,7 @@ time(&rawtime);
 info = localtime( &rawtime);
 strftime(time_buffer , 80, "%x,%X", info);
 
-sprintf( results_content, "%s,%.2f,%2f,%2f,%s\n",time_buffer,hump_l,hump_h,sino_result,name);
+sprintf( results_content, "%s,%.2f,%2f,%2f,%s\n",time_buffer,hs_l,hs_h,sino_result,name);
 if (verbose == 1) {
 	   Proc_err(DEF_ERR_OPT, "Writing %s into file %s", results_content, results_file_name);
 }

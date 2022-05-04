@@ -80,6 +80,9 @@ char cost_function[40];
 char poise_cmd[PATH_MAX];
 char poise_au[PATH_MAX];
 char poise_status[40];
+char* str_probe;
+char probe_id[40];
+char probe_nickname[40];
 double sw_double;
 double o1_ppm_double;
 double o1_hz_double;
@@ -224,7 +227,7 @@ STOREPAR("TI", "poise")  //poise puts the optimised value in TI if it completes
 //Only do aquisition if not in test mode.
 if (aqtest == 0)
 {
-    //ATMA exact
+    ATMA
     //lets make some nicely phased peaks
     XCMD("sendgui AQ 10s");
     ZG
@@ -277,13 +280,13 @@ if (( title_file = fopen( title_path_name, "w")) == 0)
 }
 
 
-//Now to get parse probe_name to read into probe_name_trunc until space is found, we don't need all the guff
-i=0;
-while (i < strlen(probe_name) && probe_name[i] != ' ')
-{
-	  probe_name_trunc[i]=probe_name[i];
-	  i++;
-}
+//now to get the probe name
+CALL_PROBESERVER("probe_client getParams getInstalledProbe", str_probe);
+//str_probe will be a big long string, separated by commas - we only need the first csv entry 
+//some magic from au_sst1ir
+(void) sscanf(str_probe, "%[^,]%*c%*[^,]%*c%*[^,]%*c%*[^,]%*c%[^,]%*s", probe_id, probe_nickname);
+sprintf(probe_name_trunc,"%s",probe_id);
+
 
 if (verbose ==1) {
     Proc_err(DEF_ERR_OPT,"instrum_name is - %s \n probe_name - %s \n probe_name_trunc - %s", instrum_name,probe_name,probe_name_trunc);
@@ -326,6 +329,9 @@ if (verbose == 1) {
 if (deviation >= max_deviation) {
   //do something 
 }
+
+//now lets run a 1D with new P1 value
+XAU( default_au,"")
 
 
 QUIT

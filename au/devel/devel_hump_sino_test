@@ -97,6 +97,8 @@ float tol_float;
 float sino_result=1.0;
 int pc_lb_int;
 int pc_hb_int;
+int ns_int;
+int err = -1;
 
 RPAR(param_set_name, "all")
 STOREPAR("PULPROG", p_program)
@@ -124,6 +126,7 @@ defaults_file = fopen (defaults_file_name,"r");
 if (defaults_file == NULL)
 {
 	Proc_err(DEF_ERR_OPT,"can't open file - %s", defaults_file_name);
+  err = Proc_err(QUESTION_OPT,"The file might not exist, would you like to try and create a default one?")
 	exit(1);
 }
 else

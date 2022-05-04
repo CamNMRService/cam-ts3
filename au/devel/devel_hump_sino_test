@@ -1,0 +1,281 @@
+/* This Au program is designed to perform a humpcal on a defined peak, then a sino on this peak*/
+/*devel_hump_sino_test*/
+/* djh35, May 2022*/
+/*based on poise work - stripping out and adapting code - WIP*/
+/*should be as far as running a zg - if it ompiles...*/
+
+#include <stdio.h>
+#include <time.h>
+
+//Set some variables for below
+char defaults_file_name[PATH_MAX];
+int ts_major = GetTsVersionMajor();
+int ts_minor = GetTsVersionMinor();
+int ts_patch = GetTsVersionPl();
+char results_path[PATH_MAX];
+Proc_err(INFO_OPT,"ts_major is %i \n minor %i \n patch %i",ts_major, ts_minor, ts_patch);
+
+/*!!!!VARIABLES THAT NEED TO BE SET!!!!*/
+/********************************/
+//Handlly print out what its doing as it goes along. Can change to output diff levels of verbosity. (in future)
+//verbose == 0 is no output
+int verbose = 1;
+//set aqtest = 0 to issue aquisition commands to the spectrometer
+int aqtest = 0; // !=0 == test mode ==0 for aquire mode
+char default_au[40]="service_zg_efp"; //au program to aquire and process results. Set to default for default method within poise.
+//This acts as an overide for poise, for it to use default method, default need to be saved in the service_poise_19f_p1_defaults.txt AND in this variable
+char param_set_name[40]="PROTON";
+char param[40] = "p1";
+char p_program[40] = "zg";
+
+#ifdef HAS_WINDOWS_FEATURES
+   sprintf(defaults_file_name,"C:\\Bruker\\cam-ts%i\\poise\\service_hump_sino_1h_defaults",ts_major);
+   // Also need a place for the results to go. I'm thinking same place as the helium log will suit us.
+   if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
+    	sprintf(results_path,"C:\\Bruker\\diskless\\prog\\logfiles\\");
+   }
+   else{
+      sprintf( results_path, "%s\\logfiles\\", PathXWinNMRProg() );
+   }
+#else //Not actually checked this on linux... We have no linux xpectrometers
+ 		sprintf(defaults_file_name,"/opt/cam-ts%i/poise/service_hump_sino_1h_defaults",ts_major);
+ 		if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
+    	sprintf(results_path,"/opt/diskless/prog/logfiles/");
+   }
+   else{
+      sprintf( results_path, "%s/logfiles/", PathXWinNMRProg() );
+   }
+#endif
+float max_deviation = 10.0;
+
+//Variable definitions
+int i; //loop counter
+FILE *results_file = NULL;
+FILE *defaults_file = NULL;
+FILE *title_file = NULL;
+
+char results_file_name[PATH_MAX];
+
+char title_path_name[PATH_MAX];
+char defaults_content[1024]="";
+char title_text[1024]="";
+char results_content[1024]="";
+char instrum_name[40]="";
+char probe_name[PATH_MAX];
+char probe_name_trunc[PATH_MAX];
+char *field;
+char *defaults_content_ptr;
+char *end_ptr;
+char sw[40];
+char o1p[40];
+char f1p[40];
+char f2p[40];
+char rg[40];
+char d1s[40];
+char pc_lb[40];
+char pc_hb[40];
+char tol[40];
+char cost_function[40];
+char gui_cmd[PATH_MAX];
+char poise_au[PATH_MAX];
+char poise_status[40];
+double sw_double;
+double o1_ppm_double;
+double o1_hz_double;
+double sfo1;
+double aq_double=1.0;
+double hs_l_double;
+double hs_h_double;
+double f1p_double;
+double f2p_double;
+double deviation;
+float rg_float=1.1;
+float d1_float;
+float hs_l=15.0; //10% hump spec
+float hs_h=8.0; //50% hump spec
+float tol_float;
+float sino_result=1.0;
+int pc_lb_int;
+int pc_hb_int;
+
+RPAR(param_set_name, "all")
+STOREPAR("PULPROG", p_program)
+GETPROSOL
+GETCURDATA
+SETCURDATA
+FETCHPARS("INSTRUM", instrum_name)
+FETCHPARS("PROBHD", probe_name)
+
+//Now to get parse probe_name to read into probe_name_trunc until space is found, we don't need all the guff
+i=0;
+while (i < strlen(probe_name) && probe_name[i] != ' ')
+{
+	  probe_name_trunc[i]=probe_name[i];
+	  i++;
+}
+
+if (verbose ==1) {
+    Proc_err(DEF_ERR_OPT,"instrum_name is - %s \n probe_name - %s \n probe_name_trunc - %s", instrum_name,probe_name,probe_name_trunc);
+}
+
+sprintf( defaults_file_name,"%s-%s-%s.txt",defaults_file_name,instrum_name,probe_name_trunc);
+//Get the defaults content
+defaults_file = fopen (defaults_file_name,"r");
+if (defaults_file == NULL)
+{
+	Proc_err(DEF_ERR_OPT,"can't open file - %s", defaults_file_name);
+	exit(1);
+}
+else
+{
+	rewind(defaults_file);
+//	defaults_content_ptr = fgets(defaults_content, 1024, defaults_file); // don't think I need this.
+  fgets(defaults_content, 1024, defaults_file);
+	if (verbose == 1) {
+	    Proc_err(DEF_ERR_OPT,"defaults file name = %s", defaults_file_name);
+      Proc_err(DEF_ERR_OPT,"defaults content is  = %s", defaults_content);
+  } else {}
+	fclose(defaults_file);
+}
+//OK, we have the defaults file content, now to parse it.
+//The format should be  :-
+//swp, o1p, aq in s,rg,  d1,  ns, 10% hump spec, 50% hump spec,
+//4.0, 5.3, 16,     32.0,1.0, 4,  15,            8,
+//Below taen from the janus_sx au program. The first line at least is always slightly magic to me.
+field = strtok(defaults_content, ",");
+strcpy (sw,field);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &o1p);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &aq);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &rg);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &d1s);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &ns);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &hs_l);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &hs_h);
+
+
+
+
+if (verbose == 1) {
+//show text read in from file
+    Proc_err(DEF_ERR_OPT, "sw is - %s \n o1p is - %s \n f1p - %s \n f2p - %s \n rg - %s\n d1 - %s \n pc_lb - %s \n pc_hb - %s \n tol - %s", sw,o1p,f1p,f2p,rg, d1s, pc_lb, pc_hb, tol);
+    Proc_err(DEF_ERR_OPT, "cost function - %s \n Au program to run and process - %s ", cost_function, poise_au);
+} else {}
+
+//Ok, now have to convert those strings to float/doubles
+sw_double = strtod(sw, &end_ptr);
+o1_ppm_double = strtod(o1p, &end_ptr);
+aq_double = strtod(aq, &end_ptr);
+f2p_double = strtod(f2p, &end_ptr);
+rg_float = strtof(rg, &end_ptr);
+d1_float = strtof(d1s, &end_ptr);
+ns_int = atoi(ns);
+hs_l_double = strtod(hs_l, &end_ptr);
+hs_h_double = strtod(hs_h, &end_ptr);
+
+
+if (verbose == 1) {
+//show text to number conversion values
+    Proc_err(DEF_ERR_OPT, "sw ppm - %f \n o1p ppm %f \n f1p ppm %f \n f2p ppm %f \n rg is %f \n d1 is %f\n tol is %f\n", sw_double, o1_ppm_double, f1p_double, f2p_double, rg_float, d1_float, tol_float);
+    Proc_err(DEF_ERR_OPT, "percentage lower and higher than nominal 360 pulse to check - %i and %i", pc_lb_int, pc_hb_int);
+} else {}
+
+//Ok, now setup poise default 19F calib experiment
+
+RPAR(param_set_name, "all")
+STOREPAR("PULPROG", p_program)
+GETPROSOL
+STOREPAR("NS", ns_int)
+STOREPAR("DS", 0)
+STOREPAR("D 1", d1_float)
+STOREPAR("SW", sw_double)
+STOREPAR("F1P", ( o1_ppm_double+(sw_double/2) )
+STOREPAR("F2P", ( o1_ppm_double-(sw_double/2) )
+STOREPARS("F1P", ( o1_ppm_double+(sw_double/2) )
+STOREPARS("F2P", ( o1_ppm_double-(sw_double/2) )
+STOREPAR("O1P", o1_ppm_double)
+//STOREPAR("RG", rg_float) // This just does not work on my reproc mac... not sure about a spect - seems ok.
+STOREPAR("RG", rg_float)
+
+
+
+//Only do aquisition if not in test mode.
+if (aqtest == 0)
+{
+    //ATMA exact
+    //lets make some nicely phased peaks
+    sprntf(gui_cmd,"sendgui AQ %is",ns_int)
+    XCMD("sendgui AQ 10s");
+    ZG
+    if ( (ts_major==3) && (ts_minor>5) && (ts_patch>5) ) {
+      APBK}
+      else{
+        EFP
+        APK
+        ABS}
+
+}
+
+
+
+
+//next, write the result to a file. Maybe to title also.
+//Then compare p1_opt to p1_init (should be unchanged from prosol. Report if too different.
+
+sprintf( title_path_name, "%s/title", PROCPATH(0) );
+sprintf( title_text, " hump 10% = %.2f \n hump 50% = %.2f \n sino result = %.2f", hump_l, hump_h, sino_result );
+if (verbose == 1) {
+	   Proc_err(DEF_ERR_OPT, "Writing %s into file %s", title_text, title_path_name);
+}
+
+
+if (( title_file = fopen( title_path_name, "w")) == 0)
+{
+		Proc_err(DEF_ERR_OPT, "Cannot open title file for writing:\n%s", title_path_name);
+		exit(1);
+} else
+{
+   fputs( title_text, title_file);
+   fclose(title_file);
+}
+
+
+
+//now print to results file
+
+//sprintf( results_file_name, "%s/logfiles/%s-%s-%s", PathXWinNMRProg(), instrum_name,probe_name_trunc,method_name );
+sprintf( results_file_name, "%s%s-%s-%s", results_path, instrum_name,probe_name_trunc,method_name );
+//what the time mr wolf?
+time_t rawtime;
+
+struct tm *info;
+char time_buffer[80];
+time(&rawtime);
+
+info = localtime( &rawtime);
+strftime(time_buffer , 80, "%x,%X", info);
+
+sprintf( results_content, "%s,%.2f,%2f,%2f,%s\n",time_buffer,hump_l,hump_h,sino_result,name);
+if (verbose == 1) {
+	   Proc_err(DEF_ERR_OPT, "Writing %s into file %s", results_content, results_file_name);
+}
+//now write to results file in append mode.
+if ((results_file = fopen(results_file_name, "a+")) == 0)
+{
+			Proc_err(DEF_ERR_OPT, "Cannot open file for writing:\n%s", results_file_name);
+		  exit(1);
+} else {
+     fputs(results_content, results_file);
+     fclose(results_file);
+}
+
+
+
+
+QUIT

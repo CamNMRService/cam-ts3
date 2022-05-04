@@ -218,7 +218,7 @@ if (aqtest == 0)
 {
     //ATMA exact
     //lets make some nicely phased peaks
-    sprintf(gui_cmd,"sendgui AQ %is",ns_int);
+    sprintf(gui_cmd,"sendgui AQ %f",aq_double);
     XCMD(gui_cmd);
     ZG
     if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {

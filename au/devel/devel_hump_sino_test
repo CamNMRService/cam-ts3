@@ -240,7 +240,7 @@ if (aqtest == 0)
         }
 }
 
-//XAUA("djh-humpcal","")
+XAU("djh-humpcal","")
 
 //Get the humpcal results
 strcpy(hump_file_path, PROCPATH("humpcal.txt"));

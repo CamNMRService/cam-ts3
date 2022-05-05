@@ -58,10 +58,11 @@ int i; //loop counter
 FILE *results_file = NULL;
 FILE *defaults_file = NULL;
 FILE *title_file = NULL;
+FILE *hump_file = NULL;
 
 char results_file_name[PATH_MAX];
-
 char title_path_name[PATH_MAX];
+char hump_file_path[PATH_MAX];
 char defaults_content[1024]="";
 char title_text[1024]="";
 char results_content[1024]="";
@@ -79,8 +80,12 @@ char f1p[40];
 char f2p[40];
 char rg[40];
 char d1s[40];
-char hs_l[40];
-char hs_h[40];
+char hs_l[40]; // hump 0.11% spec read from defaults_file
+char hs_h[40]; // hump 0.55% spec read from defaults_file
+char hs_w[40]="1.0"; // hump 50% width spec
+char hs_l_obs[40];
+char hs_h_obs[40];
+char hs_w_obs[40];
 char pc_lb[40];
 char pc_hb[40];
 char tol[40];
@@ -96,6 +101,10 @@ double sfo1;
 double aq_double=1.0;
 double hs_l_double;
 double hs_h_double;
+double hs_w_double;
+double hs_l_obs_double;
+double hs_h_obs_double;
+double hs_w_obs_double;
 double f1p_double;
 double f2p_double;
 double deviation;
@@ -187,10 +196,10 @@ d1_float = strtof(d1s, &end_ptr);
 ns_int = atoi(ns);
 hs_l_double = strtod(hs_l, &end_ptr);
 hs_h_double = strtod(hs_h, &end_ptr);
-
-
+hs_w_double = strtod(hs_w, &end_ptr);
 f1p_double = o1_ppm_double+(sw_double/2);
 f2p_double = o1_ppm_double-(sw_double/2);
+
 if (verbose == 1) {
 //show text to number conversion values
     Proc_err(DEF_ERR_OPT, "sw ppm - %f \n o1p ppm %f \n f1p ppm %f \n f2p ppm %f \n rg is %f \n d1 is %f\n aq is %f\n", sw_double, o1_ppm_double, f1p_double, f2p_double, rg_float, d1_float, aq_double);
@@ -228,19 +237,32 @@ if (aqtest == 0)
      else{
         FP
         APK
-        ABS 
+        ABS
         }
 
 }
 
+XAUA("djh-humpcal","")
 
+//Get the humpcal results
+strcpy(hump_file_path, PROCPATH("humpcal.txt"));
+if ( ( hump_file = fopen (hump_file_path, "r") ) == NULL)
+{
+	Proc_err(INFO_OPT, "could not open file %s", hump_file_path);
+	ABORT
+}
+
+fscanf(hump_file "%f", &hs_l_obs_double);
+fscanf(hump_file, "%f", &hs_h_obs_double);
+fscanf(hump_file, "%f", &hs_w_obs_double);
+fclose(hump_file);
 
 
 //next, write the result to a file. Maybe to title also.
 //Then compare p1_opt to p1_init (should be unchanged from prosol. Report if too different.
 
 sprintf( title_path_name, "%s/title", PROCPATH(0) );
-sprintf( title_text, " hump 0.11 = %.2f \n hump 0.55 = %.2f \n sino result = %.2f", hs_l, hs_h, sino_result );
+sprintf( title_text, " hump 0.11 = %.2f \n hump 0.55 = %.2f \n hump 50pc = %.2f", hs_l_obs_double, hs_h_obs_double, hs_w_obs_double );
 if (verbose == 1) {
 	   Proc_err(DEF_ERR_OPT, "Writing %s into file %s", title_text, title_path_name);
 }

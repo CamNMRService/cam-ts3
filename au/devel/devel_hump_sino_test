@@ -222,10 +222,11 @@ if (aqtest == 0)
     XCMD(gui_cmd);
     ZG
     if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
-     EFP
-     APBK }
+     FP
+     XCMD("sendgui apbk -apk0" }
+     XCMD("sendgui apbk -bo" }
      else{
-        EFP
+        FP
         APK
         ABS 
         }
@@ -239,7 +240,7 @@ if (aqtest == 0)
 //Then compare p1_opt to p1_init (should be unchanged from prosol. Report if too different.
 
 sprintf( title_path_name, "%s/title", PROCPATH(0) );
-sprintf( title_text, " hump 10% = %.2f \n hump 50% = %.2f \n sino result = %.2f", hs_l, hs_h, sino_result );
+sprintf( title_text, " hump 0.11 = %.2f \n hump 0.55 = %.2f \n sino result = %.2f", hs_l, hs_h, sino_result );
 if (verbose == 1) {
 	   Proc_err(DEF_ERR_OPT, "Writing %s into file %s", title_text, title_path_name);
 }

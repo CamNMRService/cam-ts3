@@ -230,7 +230,7 @@ if (aqtest == 0)
     ZG
     if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
     EFP
-    XCMD("sendgui apbk -apk0") 
+    XCMD("sendgui apbk -apk0")
     XCMD("sendgui apbk -bo" )
     }
      else{
@@ -254,6 +254,7 @@ fscanf(hump_file, "%f", &hs_h_obs_float);
 fscanf(hump_file, "%f", &hs_l_obs_float);
 fscanf(hump_file, "%f", &hs_w_obs_float);
 fclose(hump_file);
+
 
 
 //next, write the result to a file. Maybe to title also.

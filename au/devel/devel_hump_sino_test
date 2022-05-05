@@ -222,11 +222,13 @@ if (aqtest == 0)
     XCMD(gui_cmd);
     ZG
     if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
-      APBK }
-      else{
+     EFP
+     APBK }
+     else{
         EFP
         APK
-        ABS }
+        ABS 
+        }
 
 }
 
@@ -269,7 +271,7 @@ time(&rawtime);
 info = localtime( &rawtime);
 strftime(time_buffer , 80, "%x,%X", info);
 
-sprintf( results_content, "%s,%.2f,%2f,%2f,%s\n",time_buffer,hs_l,hs_h,sino_result,name);
+sprintf( results_content, "%s,%.2f,%2f,%2f,%s\n",time_buffer,hs_l_double,hs_h_double,sino_result,name);
 if (verbose == 1) {
 	   Proc_err(DEF_ERR_OPT, "Writing %s into file %s", results_content, results_file_name);
 }

@@ -4,6 +4,7 @@
 /*based on poise work - stripping out and adapting code - WIP*/
 /*should be as far as running a zg - if it ompiles...*/
 /*compiles - now to bug hunt and fix my undoubedely spurious logic...*/
+/*Hump runs, now to do the sino*/
 
 #include <stdio.h>
 #include <time.h>
@@ -93,7 +94,13 @@ char cost_function[40];
 char gui_cmd[PATH_MAX];
 char poise_au[PATH_MAX];
 char poise_status[40];
+char sino_pul[40]; //pulse program for sino
 
+char sig_f1[40];
+char sig_f2[40];
+char noise_f1[40];
+char noise_f2[40];
+char noise_width[40];
 double sw_double;
 double o1_ppm_double;
 double o1_hz_double;
@@ -108,10 +115,14 @@ float hs_w_obs_float=1.0;
 double f1p_double;
 double f2p_double;
 double deviation;
+double sig_f1_double;
+double sig_f2_double;
+double noise_f1_double;
+double noise_f2_double;
+double noise_width_double;
 
 float rg_float=1.1;
 float d1_float;
-float tol_float;
 float sino_result=1.0;
 int pc_lb_int;
 int pc_hb_int;
@@ -123,6 +134,7 @@ STOREPAR("PULPROG", p_program)
 GETPROSOL
 GETCURDATA
 SETCURDATA
+//The instrum and probhd doesn't seem to be filled in until some aquisiation has been done...
 FETCHPARS("INSTRUM", instrum_name)
 FETCHPARS("PROBHD", probe_name)
 
@@ -164,8 +176,8 @@ else
 }
 //OK, we have the defaults file content, now to parse it.
 //The format should be  :-
-//swp, o1p, aq in s,rg,  d1,  ns, 10% hump spec, 50% hump spec,
-//4.0, 5.3, 16,     32.0,1.0, 4,  15,            8,
+//swp, o1p, aq in s,rg,  d1,  ns, 10% hump spec, 50% hump spec,sig_f1, sig_f2, noise_f1, noise_f2, noise_width
+//4.0, 5.3, 16,     32.0,1.0, 4,  15,            8,           ,5.6,    5.4,    10.0,     8.0,     0.2
 //Below taen from the janus_sx au program. The first line at least is always slightly magic to me.
 field = strtok(defaults_content, ",");
 strcpy (sw,field);
@@ -256,6 +268,7 @@ fscanf(hump_file, "%f", &hs_w_obs_float);
 fclose(hump_file);
 
 
+//Now lets gets the sino... We'll need a bit of a different sweep width
 
 //next, write the result to a file. Maybe to title also.
 //Then compare p1_opt to p1_init (should be unchanged from prosol. Report if too different.

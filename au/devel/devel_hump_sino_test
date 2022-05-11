@@ -134,7 +134,10 @@ STOREPAR("PULPROG", p_program)
 GETPROSOL
 GETCURDATA
 SETCURDATA
-//The instrum and probhd doesn't seem to be filled in until some aquisiation has been done...
+STOREPAR("NS", 1)
+STOREPAR("DS", 0)
+ZG
+//The instrum and probhd doesn't seem to be filled in until some aquisition has been done... at least on laphroiag
 FETCHPARS("INSTRUM", instrum_name)
 FETCHPARS("PROBHD", probe_name)
 

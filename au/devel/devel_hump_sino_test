@@ -94,7 +94,7 @@ char cost_function[40];
 char gui_cmd[PATH_MAX];
 char poise_au[PATH_MAX];
 char poise_status[40];
-char sino_pul[40]; //pulse program for sino
+char sino_pp[40]; //pulse program for sino
 
 char sig_f1[40];
 char sig_f2[40];
@@ -179,8 +179,8 @@ else
 }
 //OK, we have the defaults file content, now to parse it.
 //The format should be  :-
-//swp, o1p, aq in s,rg,  d1,  ns, 10% hump spec, 50% hump spec,sig_f1, sig_f2, noise_f1, noise_f2, noise_width
-//4.0, 5.3, 16,     32.0,1.0, 4,  15,            8,           ,5.6,    5.4,    10.0,     8.0,     0.2
+//sw, o1p, aq      ,rg,  d1s,  ns, hs_l 10% hump spec, hs_h 50% hump spec,sig_f1, sig_f2, noise_f1, noise_f2, noise_width, sino_pp
+//4.0, 5.3, 16,     32.0,1.0, 4,  15,                  8,                ,5.6,    5.4,    10.0,     8.0,      0.2,        ,zg30
 //Below taen from the janus_sx au program. The first line at least is always slightly magic to me.
 field = strtok(defaults_content, ",");
 strcpy (sw,field);
@@ -198,6 +198,19 @@ field = strtok(NULL, ",");
 sscanf(field, "%s", &hs_l);
 field = strtok(NULL, ",");
 sscanf(field, "%s", &hs_h);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &sig_f1);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &sig_f2);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &noise_f1);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &noise_f2);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &noise_width);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &sino_pp);
+
 
 
 
@@ -217,7 +230,8 @@ f2p_double = o1_ppm_double-(sw_double/2);
 
 if (verbose == 1) {
 //show text to number conversion values
-    Proc_err(DEF_ERR_OPT, "sw ppm - %f \n o1p ppm %f \n f1p ppm %f \n f2p ppm %f \n rg is %f \n d1 is %f\n aq is %f\n", sw_double, o1_ppm_double, f1p_double, f2p_double, rg_float, d1_float, aq_double);
+    Proc_err(DEF_ERR_OPT, "Poise pulse cal :- \n sw ppm %f \n o1p ppm %f \n f1p ppm %f \n f2p ppm %f \n rg is %f \n d1 is %f\n aq is %f\n", sw_double, o1_ppm_double, f1p_double, f2p_double, rg_float, d1_float, aq_double);
+    Proc_err(DEF_ERR_OPT, "Sino parameters :- \n signal f1 %.2f \n signal f2 \n noise f1 \n noise f2 \n noise_width \n sino pp",sig_f1_double,sig_f2_double,noise_f1_double,noise_f2_double,noise_width_double,sino_pp)
 } else {}
 
 RPAR(param_set_name, "all")
@@ -261,7 +275,7 @@ XAU("djh-humpcal","")
 strcpy(hump_file_path, PROCPATH("humpcal.txt"));
 if ( ( hump_file = fopen (hump_file_path, "r") ) == NULL)
 {
-	Proc_err(INFO_OPT, "could not open file %s", hump_file_path);
+	Proc_err(INFO_OPT, "Could not open file %s Maybe Humpcal failed?", hump_file_path);
 	ABORT
 }
 

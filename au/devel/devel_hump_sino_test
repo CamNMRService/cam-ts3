@@ -299,6 +299,7 @@ if (verbose == 1) {
 //Now lets gets the sino... We'll need a bit of a different sweep width
 IEXPNO
 SETCURDATA
+VIEWDATA_SAMEWIN
 RPAR(param_set_name, "all")
 STOREPAR("PULPROG", sino_pp)
 GETPROSOL

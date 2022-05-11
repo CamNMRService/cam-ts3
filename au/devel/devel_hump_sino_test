@@ -292,9 +292,18 @@ fclose(hump_file);
 
 
 //Now lets gets the sino... We'll need a bit of a different sweep width
-
+IEXPNO
+SETCURDATA
+RPAR(param_set_name, "all")
+STOREPAR("PULPROG", p_program)
+GETPROSOL
+STOREPAR("NS", 1)
+STOREPAR("DS", 0)
+//STOREPAR("RG", rg_float) // This just does not work on my reproc mac... not sure about a spect - seems ok.
+STOREPAR("RG", rg_float)
 //next, write the result to a file. Maybe to title also.
 //Then compare p1_opt to p1_init (should be unchanged from prosol. Report if too different.
+ZG
 
 sprintf( title_path_name, "%s/title", PROCPATH(0) );
 sprintf( title_text, " hump 0.11 = %.2f \n hump 0.55 = %.2f \n hump 50pc = %.2f", hs_l_obs_float, hs_h_obs_float, hs_w_obs_float );

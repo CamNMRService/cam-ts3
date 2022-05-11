@@ -295,7 +295,7 @@ fclose(hump_file);
 IEXPNO
 SETCURDATA
 RPAR(param_set_name, "all")
-STOREPAR("PULPROG", p_program)
+STOREPAR("PULPROG", sino_pp)
 GETPROSOL
 STOREPAR("NS", 1)
 STOREPAR("DS", 0)

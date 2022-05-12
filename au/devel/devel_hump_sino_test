@@ -297,6 +297,16 @@ if (verbose == 1) {
 	   Proc_err(DEF_ERR_OPT, "Writing %s into file %s", title_text, title_path_name);
 }
 
+if (( title_file = fopen( title_path_name, "w")) == 0)
+{
+		Proc_err(DEF_ERR_OPT, "Cannot open title file for writing:\n%s", title_path_name);
+		exit(1);
+} else
+{
+   fputs( title_text, title_file);
+   fclose(title_file);
+}
+
 //Now lets gets the sino... We'll need a bit of a different sweep width
 IEXPNO
 SETCURDATA
@@ -329,7 +339,7 @@ SINO
 
 FETCHPARS("SINO", &sino_result)
 sprintf( title_path_name, "%s/title", PROCPATH(0) );
-sprintf( title_text, "sino is - ", sino_result );
+sprintf( title_text, "sino is - %.2f ", sino_result );
 if (verbose == 1) {
 	   Proc_err(DEF_ERR_OPT, "Writing %s into file %s", title_text, title_path_name);
 }

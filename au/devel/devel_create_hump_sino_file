@@ -1,0 +1,23 @@
+
+
+
+char filename[PATH_MAX];
+char param_set_name[PATH_MAX]="PROTON";
+
+GETCURDATA
+
+if (i_argc == 3 ) {
+	strcpy(filename[2]); //lets just assume first argument is a password.
+} else
+  {
+		//Ask if want to determine what it should be - can't do that unless run an expt.
+
+		RPAR(param_set_name, "all")
+		GETPROSOL
+		GETCURDATA
+		SETCURDATA
+		STOREPAR("NS", 1)
+		STOREPAR("DS", 0)
+		ZG
+	}
+QUIT

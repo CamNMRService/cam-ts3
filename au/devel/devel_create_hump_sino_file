@@ -1,11 +1,30 @@
 
-
-
 char defaults_file_name[PATH_MAX];
 char param_set_name[PATH_MAX]="PROTON";
 char junk_name[PATH_MAX]="junk";
-
-
+char file_text[1024]="";
+char instrum_name[40];
+char probe_name[PATH_MAX];
+char probe_name_trunc[PATH_MAX];
+char probe_id[40];
+char probe_nickname[40];
+char* str_probe;
+FILE *defaults_file = NULL;
+double sw_double = 3.0;
+double o1_ppm_double = 5.45;
+double aq_double=16.0;
+float rg_float=128.0;
+float d1_float=1.0;
+int ns_int=4;
+double hs_l_double=15.0;
+double hs_h_double=8.0;
+double sig_f1_double=5.6;
+double sig_f2_double=5.4;
+double noise_f1_double=10.0;
+double noise_f2_double=8.0;
+double noise_width_double=0.2;
+char sino_pp[40]="zg30";
+sprintf(file_text,"%.2f,%.2f,%.2f,%.2f,%.2f,%i,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%s", sw_double,o1_ppm_double,aq_double,rg_float,d1_float,ns_int,hs_l_double,hs_h_double,sig_f1_double,sig_f2_double,noise_f1_double,noise_f2_double,noise_width_double,sino_pp);
 int ts_major = GetTsVersionMajor();
 int ts_minor = GetTsVersionMinor();
 int ts_patch = GetTsVersionPl();
@@ -29,8 +48,33 @@ if (i_argc == 3 ) {
 		GETPROSOL
 		GETCURDATA
 		SETCURDATA
+    VIEWDATA_SAMEWIN
 		STOREPAR("NS", 1)
 		STOREPAR("DS", 0)
 		ZG
-	}
+		FETCHPARS("INSTRUM", instrum_name)
+    FETCHPARS("PROBHD", probe_name)
+
+    CALL_PROBESERVER("probe_client getParams getInstalledProbe", str_probe);
+
+    //some magic from au_sst1ir
+    (void) sscanf(str_probe, "%[^,]%*c%*[^,]%*c%*[^,]%*c%*[^,]%*c%[^,]%*s", probe_id, probe_nickname);
+    sprintf(probe_name_trunc,"%s",probe_id);
+    sprintf( defaults_file_name,"%s-%s-%s.txt",defaults_file_name,instrum_name,probe_name_trunc);
+  
+  }
+  //maybe make it ask for values here
+sprintf(file_text,"%.2f,%.2f,%.2f,%.2f,%.2f,%i,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%s", sw_double,o1_ppm_double,aq_double,rg_float,d1_float,ns_int,hs_l_double,hs_h_double,sig_f1_double,sig_f2_double,noise_f1_double,noise_f2_double,noise_width_double,sino_pp);
+Proc_err(DEF_ERR_OPT,"defaults filename - %s",defaults_file_name);
+Proc_err(DEF_ERR_OPT,"defaults content - %s",file_text);
+defaults_file = fopen (defaults_file_name,"w");
+if (defaults_file == NULL) {
+     Proc_err(DEF_ERR_OPT,"can't open file - %s", defaults_file_name);
+     exit(1);
+}
+else {
+     fputs(file_text,defaults_file);
+     fclose(defaults_file);
+}
+	
 QUIT

@@ -1,17 +1,30 @@
 
 
 
-char filename[PATH_MAX];
+char defaults_file_name[PATH_MAX];
 char param_set_name[PATH_MAX]="PROTON";
+char junk_name[PATH_MAX]="junk";
+
+
+int ts_major = GetTsVersionMajor();
+int ts_minor = GetTsVersionMinor();
+int ts_patch = GetTsVersionPl();
 
 GETCURDATA
 
+#ifdef HAS_WINDOWS_FEATURES
+   sprintf(defaults_file_name,"C:\\Bruker\\cam-ts%i\\poise\\service_hump_sino_1h_defaults",ts_major);
+#else //Not actually checked this on linux... We have no linux xpectrometers
+ 		sprintf(defaults_file_name,"/opt/cam-ts%i/poise/service_hump_sino_1h_defaults",ts_major);
+#endif
+
 if (i_argc == 3 ) {
-	strcpy(filename[2]); //lets just assume first argument is a password.
+	sprintf(defaults_file_name,"%s",filename[2]); //lets just assume first argument is a filename
 } else
   {
 		//Ask if want to determine what it should be - can't do that unless run an expt.
-
+    DATASET(junk_name,1 ,procno, disk, user)
+		GETCUDATA
 		RPAR(param_set_name, "all")
 		GETPROSOL
 		GETCURDATA

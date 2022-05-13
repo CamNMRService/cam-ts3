@@ -111,7 +111,7 @@ SETCURDATA
 STOREPAR("P 1", 1.0)
 STOREPAR("NS", 1)
 STOREPAR("DS", 0)
-ZG
+ZG_OVERWRITE
 //The instrum and probhd doesn't seem to be filled in until some aquisition has been done... at least on laphroiag
 FETCHPARS("INSTRUM", instrum_name)
 FETCHPARS("PROBHD", probe_name)
@@ -297,7 +297,7 @@ if (aqtest == 0)
     STOREPAR("D 1", &t1_float);
     STOREPAR("NS",1);
     STOREPAR("DS",0);
-    ZG
+    ZG_OVERWRITE
     
     if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
     EFP	
@@ -373,7 +373,7 @@ if (( title_file = fopen( title_path_name, "w")) == 0)
     STOREPAR("D 1", &t1_float);
     STOREPAR("NS",1);
     STOREPAR("DS",0);
-    ZG
+    ZG_OVERWRITE
     
     if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
     EFP	

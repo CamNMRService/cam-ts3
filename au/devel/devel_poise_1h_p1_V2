@@ -16,6 +16,76 @@ int ts_major = GetTsVersionMajor();
 int ts_minor = GetTsVersionMinor();
 int ts_patch = GetTsVersionPl();
 char results_path[PATH_MAX];
+char instrum_name[40]="";
+
+//Variable definitions
+int i; //loop counter
+FILE *results_file = NULL;
+FILE *defaults_file = NULL;
+FILE *title_file = NULL;
+
+char results_file_name[PATH_MAX];
+
+char title_path_name[PATH_MAX];
+char defaults_content[1024]="";
+char title_text[1024]="";
+char results_content[1024]="";
+
+char probe_name[PATH_MAX];
+char probe_name_trunc[PATH_MAX];
+char *field;
+char *defaults_content_ptr;
+char *end_ptr;
+char sw[40];
+char o1p[40];
+char f1p[40];
+char f2p[40];
+char rg[40];
+char d1s[40];
+char pc_lb[40];
+char pc_hb[40];
+char tol[40];
+char cost_function[40];
+char poise_cmd[PATH_MAX];
+char poise_au[PATH_MAX];
+char poise_status[40];
+char* str_probe;
+char probe_id[40];
+char probe_nickname[40];
+char t1;
+char noise_f1;
+char noise_f2;
+char noise_width;
+char sino_pp[40]="zg30";
+char gui_cmd[128];
+double sw_double;
+double o1_ppm_double;
+double o1_hz_double;
+double sfo1;
+double f1p_double;
+double f2p_double;
+double deviation;
+double noise_f1_double=10.0;
+double noise_f2_double=8.0;
+double noise_width_double=0.2;
+float rg_float=1.1;
+float d1_float;
+float t1_float;
+float tol_float;
+float p1_init;
+float p1_min;
+float p1_max;
+float p1_opt;
+float max_deviation = 10.0;
+float initial_sino_result = 1.234;
+float final_sino_result = 4.321;
+int pc_lb_int;
+int pc_hb_int;
+int err= -1;
+
+
+
+
 Proc_err(INFO_OPT,"ts_major is %i \n minor %i \n patch %i",ts_major, ts_minor, ts_patch);
 
 /*!!!!VARIABLES THAT NEED TO BE SET!!!!*/
@@ -38,6 +108,7 @@ STOREPAR("PULPROG", p_program)
 GETPROSOL
 GETCURDATA
 SETCURDATA
+STOREPAR("P 1", 1.0)
 STOREPAR("NS", 1)
 STOREPAR("DS", 0)
 ZG
@@ -56,7 +127,7 @@ if (verbose ==1) {
 }
 
 #ifdef HAS_WINDOWS_FEATURES
-   sprintf(defaults_file_name,"C:\\Bruker\\cam-ts%i\\poise\\service_poise_1h_p1_defaults-%s-%s",ts_major,instrum_name,probe_name_trunc);
+   sprintf(defaults_file_name,"C:\\Bruker\\cam-ts%i\\poise\\service_poise_1h_p1_defaults-%s-%s.txt",ts_major,instrum_name,probe_name_trunc);
    // Also need a place for the results to go. I'm thinking same place as the helium log will suit us.
    if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
     	sprintf(results_path,"C:\\Bruker\\diskless\\prog\\logfiles\\");
@@ -65,7 +136,7 @@ if (verbose ==1) {
       sprintf( results_path, "%s\\logfiles\\", PathXWinNMRProg() );
    }
 #else //Not actually checked this on linux... We have no linux xpectrometers
- 		sprintf(defaults_file_name,"/opt/cam-ts%i/poise/service_poise_1h_p1_defaults-%s-%s",ts_major,instrum_name,probe_name_trunc);
+ 		sprintf(defaults_file_name,"/opt/cam-ts%i/poise/service_poise_1h_p1_defaults-%s-%s.txt",ts_major,instrum_name,probe_name_trunc);
  		if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
     	sprintf(results_path,"/opt/diskless/prog/logfiles/");
    }
@@ -73,59 +144,6 @@ if (verbose ==1) {
       sprintf( results_path, "%s/logfiles/", PathXWinNMRProg() );
    }
 #endif
-float max_deviation = 10.0;
-
-//Variable definitions
-int i; //loop counter
-FILE *results_file = NULL;
-FILE *defaults_file = NULL;
-FILE *title_file = NULL;
-
-char results_file_name[PATH_MAX];
-
-char title_path_name[PATH_MAX];
-char defaults_content[1024]="";
-char title_text[1024]="";
-char results_content[1024]="";
-char instrum_name[40]="";
-char probe_name[PATH_MAX];
-char probe_name_trunc[PATH_MAX];
-char *field;
-char *defaults_content_ptr;
-char *end_ptr;
-char sw[40];
-char o1p[40];
-char f1p[40];
-char f2p[40];
-char rg[40];
-char d1s[40];
-char pc_lb[40];
-char pc_hb[40];
-char tol[40];
-char cost_function[40];
-char poise_cmd[PATH_MAX];
-char poise_au[PATH_MAX];
-char poise_status[40];
-char* str_probe;
-char probe_id[40];
-char probe_nickname[40];
-double sw_double;
-double o1_ppm_double;
-double o1_hz_double;
-double sfo1;
-double f1p_double;
-double f2p_double;
-double deviation;
-float rg_float=1.1;
-float d1_float;
-float tol_float;
-float p1_init;
-float p1_min;
-float p1_max;
-float p1_opt;
-int pc_lb_int;
-int pc_hb_int;
-
 
 
 //Get the defaults content
@@ -142,7 +160,7 @@ if (defaults_file == NULL)
     exit(1);
   }
 }
-else
+else //we can open the file
 {
 	rewind(defaults_file);
 //	defaults_content_ptr = fgets(defaults_content, 1024, defaults_file); // don't think I need this.
@@ -179,6 +197,16 @@ field = strtok(NULL, ",");
 sscanf(field, "%s", &cost_function);
 field = strtok(NULL, ",");
 sscanf(field, "%s", &poise_au);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &t1);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &noise_f1);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &noise_f2);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &noise_width);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &sino_pp);
 
 
 
@@ -262,11 +290,32 @@ if (aqtest == 0)
 {
     //ATMA exact
     //lets make some nicely phased peaks
-    XCMD("sendgui AQ 10s");
+    //add use this for sino calc before we calculate P1
+    STOREPAR("pulprog", sino_pp);
+    GETPROSOL //make sure we do have the pulses
+    XCMD("sendgui AQ 10s"); //lets make sure its sharpish
+    STOREPAR("D 1", &t1_float);
+    STOREPAR("NS",1);
+    STOREPAR("DS",0);
     ZG
-    EFP
-    APK
-    //now run optimiseation
+    
+    if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
+    EFP	
+    XCMD("sendgui apbk")
+    XCMD("sendgui apbk -bo" )
+    }
+     else{
+     	  EFP
+        APK
+        ABS
+    }
+    sprintf(gui_cmd, "sendgui sinocal %.2f %.2f %.2f %.2f %.2f", f1p_double,f2p_double,noise_f1_double,noise_f2_double,noise_width_double);
+    XCMD(gui_cmd)
+    SINO
+    STOREPAR("PULPROG",p_program)
+    FETCHPARS("SINO", &initial_sino_result)
+    //now run optimisation - set pulprog back to what it should be!p1
+    STOREPAR("PULPROG",p_program)
     XCMD(poise_cmd)
 }
 
@@ -312,17 +361,34 @@ if (( title_file = fopen( title_path_name, "w")) == 0)
    fclose(title_file);
 }
 
-//now to get the probe name
-CALL_PROBESERVER("probe_client getParams getInstalledProbe", str_probe);
-//str_probe will be a big long string, separated by commas - we only need the first csv entry
-//some magic from au_sst1ir
-(void) sscanf(str_probe, "%[^,]%*c%*[^,]%*c%*[^,]%*c%*[^,]%*c%[^,]%*s", probe_id, probe_nickname);
-sprintf(probe_name_trunc,"%s",probe_id);
 
 
-if (verbose ==1) {
-    Proc_err(DEF_ERR_OPT,"instrum_name is - %s \n probe_name - %s \n probe_name_trunc - %s \n str_probe - %s", instrum_name,probe_name,probe_name_trunc,str_probe);
-}
+
+
+
+//now lets run a 1D with new P1 value and take its sino
+    STOREPAR("pulprog", sino_pp);
+   //NOPE! GETPROSOL //make sure we do have the pulses
+    XCMD("sendgui AQ 10s"); //lets make sure its sharpish
+    STOREPAR("D 1", &t1_float);
+    STOREPAR("NS",1);
+    STOREPAR("DS",0);
+    ZG
+    
+    if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
+    EFP	
+    XCMD("sendgui apbk")
+    XCMD("sendgui apbk -bo" )
+    }
+     else{
+     	  EFP
+        APK
+        ABS
+    }
+    sprintf(gui_cmd, "sendgui sinocal %.2f %.2f %.2f %.2f %.2f", f1p_double,f2p_double,noise_f1_double,noise_f2_double,noise_width_double);
+    XCMD(gui_cmd)
+    SINO
+    FETCHPARS("SINO", &final_sino_result)
 //now print to results file
 
 //sprintf( results_file_name, "%s/logfiles/%s-%s-%s", PathXWinNMRProg(), instrum_name,probe_name_trunc,method_name );
@@ -337,7 +403,7 @@ time(&rawtime);
 info = localtime( &rawtime);
 strftime(time_buffer , 80, "%x,%X", info);
 
-sprintf( results_content, "%s,%.2f,%2f,%s\n",time_buffer,p1_opt,p1_init/4,name);
+sprintf( results_content, "%s,%.2f,%.2f,,%.2f,%2.f,%s,%i\n",time_buffer,p1_opt,p1_init/4,initial_sino_result,final_sino_result,name,expno);
 if (verbose == 1) {
 	   Proc_err(DEF_ERR_OPT, "Writing %s into file %s", results_content, results_file_name);
 }
@@ -361,8 +427,5 @@ if (verbose == 1) {
 if (deviation >= max_deviation) {
   //do something
 }
-
-//now lets run a 1D with new P1 value
-XAU( default_au,"")
 
 QUIT

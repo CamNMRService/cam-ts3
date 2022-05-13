@@ -34,7 +34,7 @@ double noise_f2_double=8.0;
 double noise_width_double=0.2;
 char sino_pp[40]="zg30";
 //to do
-sprintf(file_text,"%.2f,%.2f,%.2f,%.2f,%.2f,%i,%i,%i,%.2f,%s,%s,%.2f,%.2f,%2.f,%s", sw_double,o1_ppm_double,f1p_double,f2p_double,rg_float,d1_float,pc_lb_int,pc_hb_int,tol_float,cost_function,poise_au,noise_f1_double,noise_f2_double,noise_width_double,sino_pp);
+sprintf(file_text,"%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%i,%i,%.2f,%s,%s,%.2f,%.2f,%.2f,%s", sw_double,o1_ppm_double,f1p_double,f2p_double,rg_float,d1_float,pc_lb_int,pc_hb_int,tol_float,cost_function,poise_au,noise_f1_double,noise_f2_double,noise_width_double,sino_pp);
 int ts_major = GetTsVersionMajor();
 int ts_minor = GetTsVersionMinor();
 int ts_patch = GetTsVersionPl();
@@ -77,8 +77,8 @@ if (i_argc == 3 ) {
 
 //  For V2 :-
  // swp,o1p,f1p,f2p,rg,d1,lower bound percent (int), higher bound percent (int), tolerance , cost function, poise au to run and process,T1, noise_f1, noise_f2,noise_width, Sino pp
-//10.0,5.0,8.1,1.1,0.25,2.0,20,20,0.2,minabsint,default,10.0,8.0,0.2,zg30
-sprintf(file_text,"%.2f,%.2f,%.2f,%.2f,%.2f,%i,%i,%i,%.2f,%s,%s,%.2f,%.2f,%2.f,%s", sw_double,o1_ppm_double,f1p_double,f2p_double,rg_float,d1_float,pc_lb_int,pc_hb_int,tol_float,cost_function,poise_au,noise_f1_double,noise_f2_double,noise_width_double,sino_pp);
+//10.0,5.0,8.1,1.1,0.25,2.0,20,20,0.2,minabsint,default,10.0,8.0,0.2,zg30sprintf(file_text,"%.2f,%.2f,%.2f,%.2f,%.2f,%i,%i,%i,%.2f,%s,%s,%.2f,%.2f,%2.f,%s", sw_double,o1_ppm_double,f1p_double,f2p_double,rg_float,d1_float,pc_lb_int,pc_hb_int,tol_float,cost_function,poise_au,noise_f1_double,noise_f2_double,noise_width_double,sino_pp);sprintf(file_text,"%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%i,%i,%.2f,%s,%s,%.2f,%.2f,%.2f,%2.f,%s", sw_double,o1_ppm_double,f1p_double,f2p_double,rg_float,d1_float,pc_lb_int,pc_hb_int,tol_float,cost_function,poise_au,noise_f1_double,noise_f2_double,noise_width_double,sino_pp);
+sprintf(file_text,"%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%i,%i,%.2f,%s,%s,%.2f,%.2f,%.2f,%s", sw_double,o1_ppm_double,f1p_double,f2p_double,rg_float,d1_float,pc_lb_int,pc_hb_int,tol_float,cost_function,poise_au,noise_f1_double,noise_f2_double,noise_width_double,sino_pp);
 
 Proc_err(DEF_ERR_OPT,"defaults filename - %s",defaults_file_name);
 Proc_err(DEF_ERR_OPT,"defaults content - %s",file_text);

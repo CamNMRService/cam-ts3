@@ -34,7 +34,7 @@ double noise_f2_double=8.0;
 double noise_width_double=0.2;
 char sino_pp[40]="zg30";
 //to do
-sprintf(file_text,"%.2f,%.2f,%.2f,%.2f,%.2f,%i,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%s", sw_double,o1_ppm_double,aq_double,rg_float,d1_float,ns_int,hs_l_double,hs_h_double,sig_f1_double,sig_f2_double,noise_f1_double,noise_f2_double,noise_width_double,sino_pp);
+sprintf(file_text,"%.2f,%.2f,%.2f,%.2f,%.2f,%i,%i,%i,%.2f,%s,%s,%.2f,%.2f,%2.f,%s", sw_double,o1_ppm_double,f1p_double,f2p_double,rg_float,d1_float,pc_lb_int,pc_hb_int,tol_float,cost_function,poise_au,noise_f1_double,noise_f2_double,noise_width_double,sino_pp);
 int ts_major = GetTsVersionMajor();
 int ts_minor = GetTsVersionMinor();
 int ts_patch = GetTsVersionPl();

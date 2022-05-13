@@ -1,7 +1,9 @@
 /*Used to create a default file*/
-/*devel_create_hump_sino_file*/
+/*devel_create_poise_1h_file*/
 
-
+//  For V2 :-
+ // swp,o1p,f1p,f2p,rg,d1,lower bound percent (int), higher bound percent (int), tolerance , cost function, poise au to run and process,T1, noise_f1, noise_f2,noise_width, Sino pp
+//12.0,5.4,6.0,5.0,32,2.0,50,60,0.2,minabsint,default,10.0,8.0,0.2,zg30
 char defaults_file_name[PATH_MAX];
 char param_set_name[PATH_MAX]="PROTON";
 char junk_name[PATH_MAX]="junk";
@@ -13,20 +15,25 @@ char probe_id[40];
 char probe_nickname[40];
 char* str_probe;
 FILE *defaults_file = NULL;
-double sw_double = 3.0;
-double o1_ppm_double = 5.45;
-double aq_double=16.0;
-float rg_float=128.0;
-float d1_float=1.0;
-int ns_int=4;
-double hs_l_double=15.0;
-double hs_h_double=8.0;
-double sig_f1_double=5.6;
-double sig_f2_double=5.4;
+
+double sw_double = 12.0;
+double o1_ppm_double = 5.4;
+double f1p_double = 6.0;
+double f2p_double = 5.0;
+float rg_float = 32.0;
+
+float d1_float = 8.0;
+int pc_lb_int = 50;
+int pc_hb_int = 60;
+float tol_float = 0.2;
+char cost_function[40]="minabsint";
+
+char poise_au[40]="default";
 double noise_f1_double=10.0;
 double noise_f2_double=8.0;
 double noise_width_double=0.2;
 char sino_pp[40]="zg30";
+//to do
 sprintf(file_text,"%.2f,%.2f,%.2f,%.2f,%.2f,%i,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%s", sw_double,o1_ppm_double,aq_double,rg_float,d1_float,ns_int,hs_l_double,hs_h_double,sig_f1_double,sig_f2_double,noise_f1_double,noise_f2_double,noise_width_double,sino_pp);
 int ts_major = GetTsVersionMajor();
 int ts_minor = GetTsVersionMinor();
@@ -35,9 +42,9 @@ int ts_patch = GetTsVersionPl();
 GETCURDATA
 
 #ifdef HAS_WINDOWS_FEATURES
-   sprintf(defaults_file_name,"C:\\Bruker\\cam-ts%i\\poise\\service_hump_sino_1h_defaults",ts_major);
+   sprintf(defaults_file_name,"C:\\Bruker\\cam-ts%i\\poise\\service_poise_1h_p1_defaults",ts_major);
 #else //Not actually checked this on linux... We have no linux xpectrometers
- 		sprintf(defaults_file_name,"/opt/cam-ts%i/poise/service_hump_sino_1h_defaults",ts_major);
+ 		sprintf(defaults_file_name,"/opt/cam-ts%i/poise/service_poise_1h_p1_defaults",ts_major);
 #endif
 
 if (i_argc == 3 ) {
@@ -67,6 +74,10 @@ if (i_argc == 3 ) {
 
   }
   //maybe make it ask for values here
+
+//  For V2 :-
+ // swp,o1p,f1p,f2p,rg,d1,lower bound percent (int), higher bound percent (int), tolerance , cost function, poise au to run and process,T1, noise_f1, noise_f2,noise_width, Sino pp
+//10.0,5.0,8.1,1.1,0.25,2.0,20,20,0.2,minabsint,default,10.0,8.0,0.2,zg30
 sprintf(file_text,"%.2f,%.2f,%.2f,%.2f,%.2f,%i,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%s", sw_double,o1_ppm_double,aq_double,rg_float,d1_float,ns_int,hs_l_double,hs_h_double,sig_f1_double,sig_f2_double,noise_f1_double,noise_f2_double,noise_width_double,sino_pp);
 Proc_err(DEF_ERR_OPT,"defaults filename - %s",defaults_file_name);
 Proc_err(DEF_ERR_OPT,"defaults content - %s",file_text);

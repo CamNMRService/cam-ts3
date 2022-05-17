@@ -77,7 +77,7 @@ if (defaults_file == NULL) {
 }
 else {
      fputs(file_text,defaults_file);
-     fclose(defaults_file);
+     fclose(defaults_file_name);
 }
 
 QUIT

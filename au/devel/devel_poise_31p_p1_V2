@@ -1,4 +1,4 @@
-/* This Au program is designed to perform a 360 13C length calibration using the "poise" method */
+/* This Au program is designed to perform a 360 31P length calibration using the "poise" method */
 /* It will read in a defaults file to define the parameters used for the poise optimisation */
 /*It will define the poise method, run it and check the result isn't too far from the prosol value*/
 /*It will write the output to a logfile*/
@@ -6,7 +6,7 @@
 /*djh35 May 2022 refactor to also do sino before and after*/
 /* And use per instrument/probe defaults_file*/
 
-//devel_poise_13c_p1
+//devel_poise_31p_p1
 #include <stdio.h>
 #include <time.h>
 
@@ -96,10 +96,10 @@ Proc_err(INFO_OPT,"ts_major is %i \n minor %i \n patch %i",ts_major, ts_minor, t
 int verbose = 1;
 //set aqtest = 0 to issue aquisition commands to the spectrometer
 int aqtest = 0; // !=0 == test mode ==0 for aquire mode
-char method_name[40]="poise_auto_p1_13c"; //poise method name to create for calibration. Also used for results filename.
+char method_name[40]="poise_auto_p1_31p"; //poise method name to create for calibration. Also used for results filename.
 char default_au[40]="service_zg_efp"; //au program to aquire and process results. Set to default for default method within poise.
 //This acts as an overide for poise, for it to use default method, default need to be saved in the service_poise_19f_p1_defaults.txt AND in this variable
-char param_set_name[40]="C13IG";
+char param_set_name[40]="P31CPD";
 char param[40] = "p1";
 char p_program[40] = "zgig"; //for poise
 char sino_pp[40]="zgig30";
@@ -130,7 +130,7 @@ if (verbose ==1) {
 }
 
 #ifdef HAS_WINDOWS_FEATURES
-   sprintf(defaults_file_name,"C:\\Bruker\\cam-ts%i\\poise\\service_poise_13c_p1_defaults-%s-%s.txt",ts_major,instrum_name,probe_name_trunc);
+   sprintf(defaults_file_name,"C:\\Bruker\\cam-ts%i\\poise\\service_poise_31p_p1_defaults-%s-%s.txt",ts_major,instrum_name,probe_name_trunc);
    // Also need a place for the results to go. I'm thinking same place as the helium log will suit us.
    if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
     	sprintf(results_path,"C:\\Bruker\\diskless\\prog\\logfiles\\");
@@ -139,7 +139,7 @@ if (verbose ==1) {
       sprintf( results_path, "%s\\logfiles\\", PathXWinNMRProg() );
    }
 #else //Not actually checked this on linux... We have no linux xpectrometers
- 		sprintf(defaults_file_name,"/opt/cam-ts%i/poise/service_poise_13c_p1_defaults-%s-%s.txt",ts_major,instrum_name,probe_name_trunc);
+ 		sprintf(defaults_file_name,"/opt/cam-ts%i/poise/service_poise_31p_p1_defaults-%s-%s.txt",ts_major,instrum_name,probe_name_trunc);
  		if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
     	sprintf(results_path,"/opt/diskless/prog/logfiles/");
    }
@@ -156,7 +156,7 @@ if (defaults_file == NULL)
   Proc_err(DEF_ERR_OPT,"can't open file - %s", defaults_file_name);
   err = Proc_err(QUESTION_OPT,"The file %s might not exist, would you like to try and create a default one?", defaults_file_name);
   if (err == 0) {
-    XAU("devel_create_poise_13c_file","")
+    XAU("devel_create_poise_31p_file","")
     exit(1);
   }
   else {
@@ -240,7 +240,7 @@ noise_width_double = strtod(noise_width,&end_ptr);
 
 if (verbose == 1) {
 //show text to number conversion values
-    Proc_err(DEF_ERR_OPT, "sw ppm - %f \n o1p ppm %f \n f1p ppm %f \n f2p ppm %f \n rg is %f \n d1 is %f\n tol is %f\n", sw_double, o1_ppm_double, f1p_double, f2p_double, rg_float, d1_float, tol_float);
+    Proc_err(DEF_ERR_OPT, "sw ppm = %.2f \n o1p ppm = %.2f \n f1p ppm = %.2f \n f2p ppm = %.2f \n rg is %.2f \n d1 is %.2f\n tol is %.2f\n", sw_double, o1_ppm_double, f1p_double, f2p_double, rg_float, d1_float, tol_float);
     Proc_err(DEF_ERR_OPT, "noise_f1_double = %.2f \n noise_f2_double = %.2f \n noise_width_double = %.2f", noise_f1_double, noise_f2_double, noise_width_double);
     Proc_err(DEF_ERR_OPT, "percentage lower and higher than nominal 360 pulse to check - %i and %i", pc_lb_int, pc_hb_int);
 } else {}
@@ -289,6 +289,7 @@ if (verbose == 1) {
  XCMD(poise_cmd)
 
 //next use this created method to do the optimisation!
+STOREPAR("D 1", d1_float)
 sprintf(poise_cmd, "sendgui xpy poise %s -q", method_name);
 if (verbose == 1) {
     Proc_err(DEF_ERR_OPT, "poise command to run method - \n %s", poise_cmd);

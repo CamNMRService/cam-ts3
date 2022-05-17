@@ -1,11 +1,11 @@
 /*Used to create a default file*/
-/*devel_create_poise_13c_file*/
+/*devel_create_poise_31p_file*/
 
 //  For V2 :-
  // swp,o1p,f1p,f2p,rg,d1,lower bound percent (int), higher bound percent (int), tolerance , cost function, poise au to run and process,T1, noise_f1, noise_f2,noise_width, Sino pp
 //12.0,5.4,6.0,5.0,32,2.0,50,60,0.2,minabsint,default,10.0,8.0,0.2,zg30
 char defaults_file_name[PATH_MAX];
-char param_set_name[PATH_MAX]="C13IG";
+char param_set_name[PATH_MAX]="P31CPD";
 char junk_name[PATH_MAX]="junk";
 char file_text[1024]="";
 char instrum_name[40];
@@ -16,13 +16,13 @@ char probe_nickname[40];
 char* str_probe;
 FILE *defaults_file = NULL;
 
-double sw_double = 250.0;
-double o1_ppm_double = 49;
-double f1p_double = 52.0;
-double f2p_double = 46.0;
-float rg_float = 4096.0;
+double sw_double = 30;
+double o1_ppm_double = -17.0;
+double f1p_double = -16.0;
+double f2p_double = -18.0;
+float rg_float = 2048.0;
 
-float d1_float = 10.0;
+float d1_float = 2.0;
 int pc_lb_int = 50;
 int pc_hb_int = 60;
 float tol_float = 0.2;
@@ -30,8 +30,8 @@ char cost_function[40]="minabsint";
 char poise_au[40]="default";
 
 float t1_float=10.0;
-double noise_f1_double = -20;
-double noise_f2_double = -50;
+double noise_f1_double = -5.0;
+double noise_f2_double = -12.0;
 double noise_width_double=1.0;
 char sino_pp[40]="zgig30";
 //to do
@@ -43,9 +43,9 @@ int ts_patch = GetTsVersionPl();
 GETCURDATA
 
 #ifdef HAS_WINDOWS_FEATURES
-   sprintf(defaults_file_name,"C:\\Bruker\\cam-ts%i\\poise\\service_poise_13c_p1_defaults",ts_major);
+   sprintf(defaults_file_name,"C:\\Bruker\\cam-ts%i\\poise\\service_poise_31p_p1_defaults",ts_major);
 #else //Not actually checked this on linux... We have no linux xpectrometers
- 		sprintf(defaults_file_name,"/opt/cam-ts%i/poise/service_poise_13c_p1_defaults",ts_major);
+ 		sprintf(defaults_file_name,"/opt/cam-ts%i/poise/service_poise_31p_p1_defaults",ts_major);
 #endif
 
 if (i_argc == 3 ) {
@@ -80,7 +80,7 @@ if (i_argc == 3 ) {
 //  For V2 :-
  // swp,o1p,f1p,f2p,rg,d1,lower bound percent (int), higher bound percent (int), tolerance , cost function, poise au to run and process,T1, noise_f1, noise_f2,noise_width, Sino pp
 //10.0,5.0,8.1,1.1,0.25,2.0,20,20,0.2,minabsint,default,10.0,8.0,0.2,zg30sprintf(file_text,"%.2f,%.2f,%.2f,%.2f,%.2f,%i,%i,%i,%.2f,%s,%s,%.2f,%.2f,%2.f,%s", sw_double,o1_ppm_double,f1p_double,f2p_double,rg_float,d1_float,pc_lb_int,pc_hb_int,tol_float,cost_function,poise_au,noise_f1_double,noise_f2_double,noise_width_double,sino_pp);sprintf(file_text,"%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%i,%i,%.2f,%s,%s,%.2f,%.2f,%.2f,%2.f,%s", sw_double,o1_ppm_double,f1p_double,f2p_double,rg_float,d1_float,pc_lb_int,pc_hb_int,tol_float,cost_function,poise_au,noise_f1_double,noise_f2_double,noise_width_double,sino_pp);
-sprintf(file_text,"%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%i,%i,%.2f,%s,%s,%.2f,%.2f,%.2f,%.2f,%s", sw_double,o1_ppm_double,f1p_double,f2p_double,rg_float,d1_float,pc_lb_int,pc_hb_int,tol_float,cost_function,poise_au,t1_float,noise_f1_double,noise_f2_double,noise_width_double,sino_pp);
+sprintf(file_text,"%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%i,%i,%.2f,%s,%s,%.2f,%.2f,%.2f,%.2f,%s\n", sw_double,o1_ppm_double,f1p_double,f2p_double,rg_float,d1_float,pc_lb_int,pc_hb_int,tol_float,cost_function,poise_au,t1_float,noise_f1_double,noise_f2_double,noise_width_double,sino_pp);
 
 Proc_err(DEF_ERR_OPT,"defaults filename - %s",defaults_file_name);
 Proc_err(DEF_ERR_OPT,"defaults content - %s",file_text);
@@ -91,7 +91,7 @@ if (defaults_file == NULL) {
 }
 else {
      fputs(file_text,defaults_file);
-     fclose(defaults_file_name);
+     fclose(defaults_file);
 }
 
 QUIT

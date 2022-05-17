@@ -63,7 +63,7 @@ if (i_argc == 3 ) {
 		STOREPAR("NS", 1)
 		STOREPAR("DS", 0)
 		STOREPAR("P 1", 1.0)
-		ZG
+		ZG_OVERWRITE
 		FETCHPARS("INSTRUM", instrum_name)
     FETCHPARS("PROBHD", probe_name)
 

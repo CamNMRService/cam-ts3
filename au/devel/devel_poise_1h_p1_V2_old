@@ -52,11 +52,11 @@ char poise_status[40];
 char* str_probe;
 char probe_id[40];
 char probe_nickname[40];
-char t1[40];
-char noise_f1[40];
-char noise_f2[40];
-char noise_width[40];
-
+char t1;
+char noise_f1;
+char noise_f2;
+char noise_width;
+char sino_pp[40]="zg30";
 char gui_cmd[128];
 double sw_double;
 double o1_ppm_double;
@@ -65,7 +65,6 @@ double sfo1;
 double f1p_double;
 double f2p_double;
 double deviation;
-double t1_double=1.0;
 double noise_f1_double=10.0;
 double noise_f2_double=8.0;
 double noise_width_double=0.2;
@@ -101,9 +100,7 @@ char default_au[40]="service_zg_efp"; //au program to aquire and process results
 //This acts as an overide for poise, for it to use default method, default need to be saved in the service_poise_19f_p1_defaults.txt AND in this variable
 char param_set_name[40]="PROTON";
 char param[40] = "p1";
-char p_program[40] = "zg"; //for poise
-char sino_pp[40]="zg30";
-
+char p_program[40] = "zg";
 
 //Data doesn't have instr or probehd set until an aquisition has been done.
 RPAR(param_set_name, "all")
@@ -174,7 +171,6 @@ else //we can open the file
   } else {}
 	fclose(defaults_file);
 }
-
 //OK, we have the defaults file content, now to parse it.
 //The format should be  swp,o1p,f1p,f2p,rg,d1, lower bound percent (int), higher bound percent (int), tolerance , cost function, poise au to run and process
 //10.0,5.0,8.1,1.1,32.0,2.0,20,20,0.2, minabsint, default
@@ -216,9 +212,7 @@ sscanf(field, "%s", &sino_pp);
 
 if (verbose == 1) {
 //show text read in from file
-    Proc_err(DEF_ERR_OPT, "sw is - %s \n o1p is - %s \n f1p - %s \n f2p - %s \n rg - %s\n", sw,o1p,f1p,f2p,rg);
-    Proc_err(DEF_ERR_OPT, "d1 - %s \n pc_lb - %s \n pc_hb - %s \n tol - %s \n", d1s, pc_lb, pc_hb, tol);
-    Proc_err(DEF_ERR_OPT, "noise_f1 = %s \n noise_f2 = %s \n noise_width = %s", noise_f1,noise_f2,noise_width);
+    Proc_err(DEF_ERR_OPT, "sw is - %s \n o1p is - %s \n f1p - %s \n f2p - %s \n rg - %s\n d1 - %s \n pc_lb - %s \n pc_hb - %s \n tol - %s", sw,o1p,f1p,f2p,rg, d1s, pc_lb, pc_hb, tol);
     Proc_err(DEF_ERR_OPT, "cost function - %s \n Au program to run and process - %s ", cost_function, poise_au);
 } else {}
 
@@ -232,16 +226,10 @@ d1_float = strtof(d1s, &end_ptr);
 tol_float = strtof(tol, &end_ptr);
 pc_lb_int = atoi(pc_lb);
 pc_hb_int = atoi(pc_hb);
-t1_double = strtod(t1,&end_ptr);
-noise_f1_double = strtod(noise_f1,&end_ptr);
-noise_f2_double = strtod(noise_f2,&end_ptr);
-noise_width_double = strtod(noise_width,&end_ptr);
-
 
 if (verbose == 1) {
 //show text to number conversion values
-    Proc_err(DEF_ERR_OPT, "sw ppm = %.2f \n o1p ppm = %.2f \n f1p ppm = %.2f \n f2p ppm = %.2f \n rg is %.2f \n d1 is %.2f\n tol is %.2f\n", sw_double, o1_ppm_double, f1p_double, f2p_double, rg_float, d1_float, tol_float);
-    Proc_err(DEF_ERR_OPT, "noise_f1_double = %.2f \n noise_f2_double = %.2f \n noise_width_double = %.2f", noise_f1_double, noise_f2_double, noise_width_double);
+    Proc_err(DEF_ERR_OPT, "sw ppm - %f \n o1p ppm %f \n f1p ppm %f \n f2p ppm %f \n rg is %f \n d1 is %f\n tol is %f\n", sw_double, o1_ppm_double, f1p_double, f2p_double, rg_float, d1_float, tol_float);
     Proc_err(DEF_ERR_OPT, "percentage lower and higher than nominal 360 pulse to check - %i and %i", pc_lb_int, pc_hb_int);
 } else {}
 
@@ -289,7 +277,6 @@ if (verbose == 1) {
  XCMD(poise_cmd)
 
 //next use this created method to do the optimisation!
-STOREPAR("D 1", d1_float)
 sprintf(poise_cmd, "sendgui xpy poise %s -q", method_name);
 if (verbose == 1) {
     Proc_err(DEF_ERR_OPT, "poise command to run method - \n %s", poise_cmd);
@@ -307,7 +294,7 @@ if (aqtest == 0)
     STOREPAR("pulprog", sino_pp);
     GETPROSOL //make sure we do have the pulses
     XCMD("sendgui AQ 10s"); //lets make sure its sharpish
-    STOREPAR("D 1", t1_float*2);
+    STOREPAR("D 1", &t1_float);
     STOREPAR("NS",1);
     STOREPAR("DS",0);
     ZG_OVERWRITE
@@ -329,7 +316,6 @@ if (aqtest == 0)
     FETCHPARS("SINO", &initial_sino_result)
     //now run optimisation - set pulprog back to what it should be!p1
     STOREPAR("PULPROG",p_program)
-    STOREPAR("D 1", d1_float)
     XCMD(poise_cmd)
 }
 
@@ -354,36 +340,12 @@ if (verbose == 1) {
     Proc_err(DEF_ERR_OPT, "Automated poise optimised value of p1: %.2f", p1_opt);
 } else {}
 
-//now lets run a 1D with new P1 value and take its sino
-    STOREPAR("pulprog", sino_pp);
-   //NOPE! GETPROSOL //make sure we do have the pulses
-    XCMD("sendgui AQ 10s"); //lets make sure its sharpish
-    STOREPAR("D 1", t1_float*2);
-    STOREPAR("NS",1);
-    STOREPAR("DS",0);
-    ZG_OVERWRITE
-
-    if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
-    EFP
-    XCMD("sendgui apbk")
-    XCMD("sendgui apbk -bo" )
-    }
-     else{
-     	  EFP
-        APK
-        ABS
-    }
-    sprintf(gui_cmd, "sendgui sinocal %.2f %.2f %.2f %.2f %.2f", f1p_double,f2p_double,noise_f1_double,noise_f2_double,noise_width_double);
-    XCMD(gui_cmd)
-    SINO
-    FETCHPARS("SINO", &final_sino_result)
-
 
 //next, write the result to a file. Maybe to title also.
 //Then compare p1_opt to p1_init (should be unchanged from prosol. Report if too different.
 
 sprintf( title_path_name, "%s/title", PROCPATH(0) );
-sprintf( title_text, " Original P1 = %.2f \n Poise calibrated P1 = %.2f \n Original Sino = %.2f \n Final Sino = %.2f", p1_init/4, p1_opt, initial_sino_result, final_sino_result );
+sprintf( title_text, " Original P1 = %.2f \n Poise calibrated P1 = %.2f", p1_init/4, p1_opt );
 if (verbose == 1) {
 	   Proc_err(DEF_ERR_OPT, "Writing %s into file %s", title_text, title_path_name);
 }
@@ -404,7 +366,29 @@ if (( title_file = fopen( title_path_name, "w")) == 0)
 
 
 
+//now lets run a 1D with new P1 value and take its sino
+    STOREPAR("pulprog", sino_pp);
+   //NOPE! GETPROSOL //make sure we do have the pulses
+    XCMD("sendgui AQ 10s"); //lets make sure its sharpish
+    STOREPAR("D 1", &t1_float);
+    STOREPAR("NS",1);
+    STOREPAR("DS",0);
+    ZG_OVERWRITE
 
+    if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
+    EFP
+    XCMD("sendgui apbk")
+    XCMD("sendgui apbk -bo" )
+    }
+     else{
+     	  EFP
+        APK
+        ABS
+    }
+    sprintf(gui_cmd, "sendgui sinocal %.2f %.2f %.2f %.2f %.2f", f1p_double,f2p_double,noise_f1_double,noise_f2_double,noise_width_double);
+    XCMD(gui_cmd)
+    SINO
+    FETCHPARS("SINO", &final_sino_result)
 //now print to results file
 
 //sprintf( results_file_name, "%s/logfiles/%s-%s-%s", PathXWinNMRProg(), instrum_name,probe_name_trunc,method_name );

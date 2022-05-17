@@ -307,7 +307,7 @@ if (aqtest == 0)
     STOREPAR("pulprog", sino_pp);
     GETPROSOL //make sure we do have the pulses
     XCMD("sendgui AQ 10s"); //lets make sure its sharpish
-    STOREPAR("D 1", &t1_float*2);
+    STOREPAR("D 1", t1_float*2);
     STOREPAR("NS",1);
     STOREPAR("DS",0);
     ZG_OVERWRITE
@@ -329,6 +329,7 @@ if (aqtest == 0)
     FETCHPARS("SINO", &initial_sino_result)
     //now run optimisation - set pulprog back to what it should be!p1
     STOREPAR("PULPROG",p_program)
+    STOREPAR("D 1", d1_float)
     XCMD(poise_cmd)
 }
 
@@ -357,7 +358,7 @@ if (verbose == 1) {
     STOREPAR("pulprog", sino_pp);
    //NOPE! GETPROSOL //make sure we do have the pulses
     XCMD("sendgui AQ 10s"); //lets make sure its sharpish
-    STOREPAR("D 1", &t1_float);
+    STOREPAR("D 1", t1_float*2);
     STOREPAR("NS",1);
     STOREPAR("DS",0);
     ZG_OVERWRITE

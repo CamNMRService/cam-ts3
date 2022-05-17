@@ -307,13 +307,13 @@ if (aqtest == 0)
     STOREPAR("pulprog", sino_pp);
     GETPROSOL //make sure we do have the pulses
     XCMD("sendgui AQ 10s"); //lets make sure its sharpish
-    STOREPAR("D 1", &t1_float);
+    STOREPAR("D 1", &t1_float*2);
     STOREPAR("NS",1);
     STOREPAR("DS",0);
     ZG_OVERWRITE
-    
+
     if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
-    EFP	
+    EFP
     XCMD("sendgui apbk")
     XCMD("sendgui apbk -bo" )
     }
@@ -361,9 +361,9 @@ if (verbose == 1) {
     STOREPAR("NS",1);
     STOREPAR("DS",0);
     ZG_OVERWRITE
-    
+
     if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
-    EFP	
+    EFP
     XCMD("sendgui apbk")
     XCMD("sendgui apbk -bo" )
     }
@@ -376,8 +376,8 @@ if (verbose == 1) {
     XCMD(gui_cmd)
     SINO
     FETCHPARS("SINO", &final_sino_result)
-    
-    
+
+
 //next, write the result to a file. Maybe to title also.
 //Then compare p1_opt to p1_init (should be unchanged from prosol. Report if too different.
 

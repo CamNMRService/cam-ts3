@@ -65,13 +65,13 @@ double sfo1;
 double f1p_double;
 double f2p_double;
 double deviation;
-double t1_double=1.0;
+
 double noise_f1_double=10.0;
 double noise_f2_double=8.0;
 double noise_width_double=0.2;
 float rg_float=1.1;
 float d1_float;
-float t1_float;
+float t1_float=1.0;
 float tol_float;
 float p1_init;
 float p1_min;
@@ -232,7 +232,7 @@ d1_float = strtof(d1s, &end_ptr);
 tol_float = strtof(tol, &end_ptr);
 pc_lb_int = atoi(pc_lb);
 pc_hb_int = atoi(pc_hb);
-t1_double = strtod(t1,&end_ptr);
+t1_float = strtof(t1,&end_ptr);
 noise_f1_double = strtod(noise_f1,&end_ptr);
 noise_f2_double = strtod(noise_f2,&end_ptr);
 noise_width_double = strtod(noise_width,&end_ptr);
@@ -241,7 +241,7 @@ noise_width_double = strtod(noise_width,&end_ptr);
 if (verbose == 1) {
 //show text to number conversion values
     Proc_err(DEF_ERR_OPT, "sw ppm = %.2f \n o1p ppm = %.2f \n f1p ppm = %.2f \n f2p ppm = %.2f \n rg is %.2f \n d1 is %.2f\n tol is %.2f\n", sw_double, o1_ppm_double, f1p_double, f2p_double, rg_float, d1_float, tol_float);
-    Proc_err(DEF_ERR_OPT, "noise_f1_double = %.2f \n noise_f2_double = %.2f \n noise_width_double = %.2f", noise_f1_double, noise_f2_double, noise_width_double);
+    Proc_err(DEF_ERR_OPT, "t1_float = %.2f \n noise_f1_double = %.2f \n noise_f2_double = %.2f \n noise_width_double = %.2f", t1_float, noise_f1_double, noise_f2_double, noise_width_double);
     Proc_err(DEF_ERR_OPT, "percentage lower and higher than nominal 360 pulse to check - %i and %i", pc_lb_int, pc_hb_int);
 } else {}
 

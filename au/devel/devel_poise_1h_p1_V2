@@ -71,7 +71,7 @@ double noise_f2_double=8.0;
 double noise_width_double=0.2;
 float rg_float=1.1;
 float d1_float;
-float t1_float=1.0;
+float t1_float=1.234;
 float tol_float;
 float p1_init;
 float p1_min;

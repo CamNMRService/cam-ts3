@@ -4,19 +4,14 @@
 #include <inc/exptUtil>
 #include <time.h>
 
-int ts_major = GetTsVersionMajor();
-int ts_minor = GetTsVersionMinor();
-int ts_patch = GetTsVersionPl();
-
-
-int verbose=0; //set to 1 to be verbose
-
+/*DEFINITION - NEEDS TO BE SET*/
+//char report_filename[PATH_MAX]="/Users/duncanhowe/nmr-in/expt-report.csv";
 char report_filename[PATH_MAX]="";
 sprintf( report_filename, "%s/logfiles/expt-report.csv", PathXWinNMRProg() );
 /*****************************/
 FILE *report_file_pointer = NULL;
 FILE *fp;
-
+int verbose = 1; //set to one for verbose output
 int exp_time = 0;
 int num_scans = 0;
 int line_len = 0;
@@ -31,29 +26,8 @@ char date_str[50]="";
 time_t now_s, dtime_s, cdtime_s;     /* seconds since 1970 */
 struct tm *now;     /* structure with year, month etc. */
 
-if (verbose ==1) {
-   Proc_err(INFO_OPT,"ts_major is %i \n minor %i \n patch %i",ts_major, ts_minor, ts_patch);
-}
 
-#ifdef HAS_WINDOWS_FEATURES
-   if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
-    	sprintf(report_filename,"C:\\Bruker\\diskless\\prog\\logfiles\\expt-report.csv");
-   }
-   else{
-      sprintf( report_filename, "%s\\logfiles\\expt-report.csv", PathXWinNMRProg() );
-   }
-#else //Not actually checked this on linux... We have no linux xpectrometers
- 		if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
-    	sprintf(report_filename,"/opt/diskless/prog/logfiles/expt-report.csv");
-   }
-   else{
-      sprintf( report_filename, "%s/logfiles/expt-report.csv", PathXWinNMRProg() );
-   }
-#endif
 
-if (verbose ==1) {
-   Proc_err(INFO_OPT,"expt-report file location - %s",report_filename);
-}
 
 GETCURDATA
 SETCURDATA

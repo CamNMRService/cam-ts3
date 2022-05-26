@@ -21,7 +21,6 @@ int exp_time = 0;
 int num_scans = 0;
 int line_len = 0;
 int date_unix;
-int verbose=0;
 char instrum_name[40]="";
 char data_path[PATH_MAX]="";
 char experiment[80]="";

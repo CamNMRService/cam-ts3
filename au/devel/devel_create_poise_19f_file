@@ -1,0 +1,98 @@
+/*Used to create a default file*/
+/*devel_create_poise_19f_file*/
+
+//  For V2 :-
+ // swp,o1p,f1p,f2p,rg,d1,lower bound percent (int), higher bound percent (int), tolerance , cost function, poise au to run and process,T1, noise_f1, noise_f2,noise_width, Sino pp
+//12.0,5.4,6.0,5.0,32,2.0,50,60,0.2,minabsint,default,10.0,8.0,0.2,zg30
+//20,-109,-107,-109,2048,10.0,50,50,0.2,minabsint,default,10,-100.0,-104.00,0.2,zg30
+char defaults_file_name[PATH_MAX];
+char param_set_name[PATH_MAX]="F19";
+char junk_name[PATH_MAX]="junk";
+char file_text[1024]="";
+char instrum_name[40];
+char probe_name[PATH_MAX];
+char probe_name_trunc[PATH_MAX];
+char probe_id[40];
+char probe_nickname[40];
+char* str_probe;
+FILE *defaults_file = NULL;
+
+double sw_double = 20;
+double o1_ppm_double = -108.0;
+double f1p_double = -107.0;
+double f2p_double = -109.0;
+float rg_float = 32.0;
+
+float d1_float = 2.0;
+int pc_lb_int = 50;
+int pc_hb_int = 60;
+float tol_float = 0.2;
+char cost_function[40]="minabsint";
+char poise_au[40]="default";
+
+float t1_float=10.0;
+double noise_f1_double = -100.0;
+double noise_f2_double = -104.0
+double noise_width_double=0.2;
+char sino_pp[40]="zg30";
+//to do
+sprintf(file_text,"%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%i,%i,%.2f,%s,%s,%.2f,%.2f,%.2f,%.2f,%s", sw_double,o1_ppm_double,f1p_double,f2p_double,rg_float,d1_float,pc_lb_int,pc_hb_int,tol_float,cost_function,poise_au,t1_float,noise_f1_double,noise_f2_double,noise_width_double,sino_pp);
+int ts_major = GetTsVersionMajor();
+int ts_minor = GetTsVersionMinor();
+int ts_patch = GetTsVersionPl();
+
+GETCURDATA
+
+#ifdef HAS_WINDOWS_FEATURES
+   sprintf(defaults_file_name,"C:\\Bruker\\cam-ts%i\\poise\\service_poise_19f_p1_defaults",ts_major);
+#else //Not actually checked this on linux... We have no linux xpectrometers
+ 		sprintf(defaults_file_name,"/opt/cam-ts%i/poise/service_poise_19f_p1_defaults",ts_major);
+#endif
+
+if (i_argc == 3 ) {
+	sprintf(defaults_file_name,"%s",i_argv[2]); //lets just assume first argument is a filename
+} else
+  {
+		//Ask if want to determine what it should be - can't do that unless run an expt.
+    DATASET(junk_name,1 ,procno, disk, user)
+		GETCURDATA
+		RPAR(param_set_name, "all")
+		GETPROSOL
+		GETCURDATA
+		SETCURDATA
+    VIEWDATA_SAMEWIN
+		STOREPAR("NS", 1)
+		STOREPAR("DS", 0)
+		STOREPAR("P 1", 1.0)
+		ZG_OVERWRITE
+		FETCHPARS("INSTRUM", instrum_name)
+    FETCHPARS("PROBHD", probe_name)
+
+    CALL_PROBESERVER("probe_client getParams getInstalledProbe", str_probe);
+
+    //some magic from au_sst1ir
+    (void) sscanf(str_probe, "%[^,]%*c%*[^,]%*c%*[^,]%*c%*[^,]%*c%[^,]%*s", probe_id, probe_nickname);
+    sprintf(probe_name_trunc,"%s",probe_id);
+    sprintf( defaults_file_name,"%s-%s-%s.txt",defaults_file_name,instrum_name,probe_name_trunc);
+
+  }
+  //maybe make it ask for values here
+
+//  For V2 :-
+ // swp,o1p,f1p,f2p,rg,d1,lower bound percent (int), higher bound percent (int), tolerance , cost function, poise au to run and process,T1, noise_f1, noise_f2,noise_width, Sino pp
+//10.0,5.0,8.1,1.1,0.25,2.0,20,20,0.2,minabsint,default,10.0,8.0,0.2,zg30sprintf(file_text,"%.2f,%.2f,%.2f,%.2f,%.2f,%i,%i,%i,%.2f,%s,%s,%.2f,%.2f,%2.f,%s", sw_double,o1_ppm_double,f1p_double,f2p_double,rg_float,d1_float,pc_lb_int,pc_hb_int,tol_float,cost_function,poise_au,noise_f1_double,noise_f2_double,noise_width_double,sino_pp);sprintf(file_text,"%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%i,%i,%.2f,%s,%s,%.2f,%.2f,%.2f,%2.f,%s", sw_double,o1_ppm_double,f1p_double,f2p_double,rg_float,d1_float,pc_lb_int,pc_hb_int,tol_float,cost_function,poise_au,noise_f1_double,noise_f2_double,noise_width_double,sino_pp);
+sprintf(file_text,"%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%i,%i,%.2f,%s,%s,%.2f,%.2f,%.2f,%.2f,%s\n", sw_double,o1_ppm_double,f1p_double,f2p_double,rg_float,d1_float,pc_lb_int,pc_hb_int,tol_float,cost_function,poise_au,t1_float,noise_f1_double,noise_f2_double,noise_width_double,sino_pp);
+
+Proc_err(DEF_ERR_OPT,"defaults filename - %s",defaults_file_name);
+Proc_err(DEF_ERR_OPT,"defaults content - %s",file_text);
+defaults_file = fopen (defaults_file_name,"w");
+if (defaults_file == NULL) {
+     Proc_err(DEF_ERR_OPT,"can't open file - %s", defaults_file_name);
+     exit(1);
+}
+else {
+     fputs(file_text,defaults_file);
+     fclose(defaults_file);
+}
+
+QUIT

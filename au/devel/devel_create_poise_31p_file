@@ -29,7 +29,7 @@ float tol_float = 0.2;
 char cost_function[40]="minabsint";
 char poise_au[40]="default";
 
-float t1_float=10.0;
+float t1_float=20.0;
 double noise_f1_double = -5.0;
 double noise_f2_double = -12.0;
 double noise_width_double=1.0;

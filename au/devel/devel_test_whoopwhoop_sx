@@ -15,6 +15,7 @@ FILE  *sname = NULL;
 
 sprintf(body,"THIS IS A TEST CALL OF - WHOOP WHOOP!!! Samplechanger failure, position %s", cmd);
 sprintf (cmd_str, "sendemail -f %s -t %s -u %s -m %s -s smtp.gmail.com:587 -o tls=yes -xu %s -xp %s", email_from,  email_to, title, body, email_from, password);
+Proc_err(INFO_OPT,"calling sendemail with %s",cmd_str);
 fbat = fopen(batfile, "w");
 fputs( cmd_str, fbat);
 fclose( fbat);

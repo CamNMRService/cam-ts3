@@ -2,7 +2,7 @@
 
 char snamepath[255];
 char password[255]="esbnrinuhltzukoi";
-char email_to[255]="nmr@ch.cam.ac.uk";
+char email_to[255]="djh35@cam.ac.uk";
 char title[255]="GLENFAIRN SAMPLECHANGER ERROR";
 char body[1023];
 char email_from[255]="camnmrservice@gmail.com";
@@ -13,7 +13,7 @@ char cmd_str[1024];
 
 FILE  *sname = NULL;
 
-sprintf(body,"WHOOP WHOOP!!! Samplechanger failure, position %s", cmd);
+sprintf(body,"THIS IS A TEST CALL OF - WHOOP WHOOP!!! Samplechanger failure, position %s", cmd);
 sprintf (cmd_str, "sendemail -f %s -t %s -u %s -m %s -s smtp.gmail.com:587 -o tls=yes -xu %s -xp %s", email_from,  email_to, title, body, email_from, password);
 fbat = fopen(batfile, "w");
 fputs( cmd_str, fbat);

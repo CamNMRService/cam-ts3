@@ -1,0 +1,9 @@
+/*test calling whoopwhoop_sx*/
+
+char tmp_str[40];
+int cpos=888;
+
+sprintf(tmp_str, "%i", cpos);
+XAU("devel_whoopwhoop_sx",tmp_str);
+
+QUIT

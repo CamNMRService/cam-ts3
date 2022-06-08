@@ -2,7 +2,7 @@
 
 char snamepath[255];
 char password[255]="esbnrinuhltzukoi";
-char email_to[255]="djh35@cam.ac.uk";
+char email_to[255]="nmr@ch.cam.ac.uk";
 char title[255]="GLENFAIRN SAMPLECHANGER ERROR";
 char body[1023];
 char email_from[255]="camnmrservice@gmail.com";

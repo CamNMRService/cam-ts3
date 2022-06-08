@@ -114,6 +114,7 @@ SETCURDATA
 STOREPAR("P 1", 1.0)
 STOREPAR("NS", 1)
 STOREPAR("DS", 0)
+ATMA
 ZG_OVERWRITE
 //The instrum and probhd doesn't seem to be filled in until some aquisition has been done... at least on laphroiag
 FETCHPARS("INSTRUM", instrum_name)

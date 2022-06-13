@@ -20,7 +20,7 @@ double sw_double = 30;
 double o1_ppm_double = -17.0;
 double f1p_double = -16.0;
 double f2p_double = -18.0;
-float rg_float = 2048.0;
+float rg_float = 64.0;
 
 float d1_float = 10.0;
 int pc_lb_int = 50;

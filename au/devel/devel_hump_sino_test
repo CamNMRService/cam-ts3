@@ -371,7 +371,7 @@ time(&rawtime);
 info = localtime( &rawtime);
 strftime(time_buffer , 80, "%x,%X", info);
 
-sprintf( results_content, "%s,%.2f,%.2f,%.2f,%.2f,%i,%s\n",time_buffer,hs_h_obs_float,hs_l_obs_float,hs_w_obs_float,sino_result,ro_int, name);
+sprintf( results_content, "%s,%.2f,%.2f,%.2f,%.2f,%.2f,%i,%s\n",time_buffer,hs_h_obs_float,hs_l_obs_float,hs_w_obs_float,sino_result,rg_float,ro_int, name);
 if (verbose == 1) {
 	   Proc_err(DEF_ERR_OPT, "Writing %s into file %s", results_content, results_file_name);
 }

@@ -385,6 +385,7 @@ if (verbose == 1) {
 
 sprintf( title_path_name, "%s/title", PROCPATH(0) );
 sprintf( title_text, " Original P1 = %.2f \n Poise calibrated P1 = %.2f \n Original Sino = %.2f \n Final Sino = %.2f", p1_init/4, p1_opt, initial_sino_result, final_sino_result );
+
 if (verbose == 1) {
 	   Proc_err(DEF_ERR_OPT, "Writing %s into file %s", title_text, title_path_name);
 }
@@ -420,7 +421,7 @@ time(&rawtime);
 info = localtime( &rawtime);
 strftime(time_buffer , 80, "%x,%X", info);
 
-sprintf( results_content, "%s,%.2f,%.2f,%.2f,%.2f,%s,%i\n",time_buffer,p1_opt,p1_init/4,initial_sino_result,final_sino_result,name,expno);
+sprintf( results_content, "%s,%.2f,%.2f,%.2f,%.2f,%.2f,%s,%i\n",time_buffer,p1_init/4,p1_opt,initial_sino_result,final_sino_result,rg_float,name,expno);
 if (verbose == 1) {
 	   Proc_err(DEF_ERR_OPT, "Writing %s into file %s", results_content, results_file_name);
 }

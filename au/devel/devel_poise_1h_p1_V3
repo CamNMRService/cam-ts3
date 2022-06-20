@@ -81,7 +81,7 @@ float max_deviation = 10.0;
 float initial_sino_result = 1.234;
 float final_sino_result = 4.321;
 
-float sino_lb;
+float sino_lb_float;
 int pc_lb_int;
 int pc_hb_int;
 int err= -1;

@@ -153,6 +153,7 @@ if (verbose ==1) {
 
 sprintf( defaults_file_name,"%s-%s-%s.txt",defaults_file_name,instrum_name,probe_name_trunc);
 //Get the defaults content
+Proc_err(DEF_ERR_OPT,"Got to 156");
 defaults_file = fopen (defaults_file_name,"r");
 if (defaults_file == NULL)
 {

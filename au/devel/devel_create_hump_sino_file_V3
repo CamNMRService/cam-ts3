@@ -86,7 +86,7 @@ else {
      fputs(file_text,defaults_file);
      sprintf(file_text, "%i,%.2f,%.2f,%.2f,%.2f," ,ns_int,hs_l_double,hs_h_double,sig_f1_double,sig_f2_double);
      fputs(file_text,defaults_file);
-     sprintf(file_text, "%.2f,%.2f,%.2f,%s,%.2f,%s" ,noise_f1_double,noise_f2_double,noise_width_double,sino_aq,sino_lb,sino_pp);
+     sprintf(file_text, "%.2f,%.2f,%.2f,%.2f,%s" ,noise_f1_double,noise_f2_double,noise_width_double,sino_lb,sino_pp);
      fputs(file_text,defaults_file);
      fclose(defaults_file_name);
 }

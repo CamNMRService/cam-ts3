@@ -434,8 +434,7 @@ time(&rawtime);
 info = localtime( &rawtime);
 strftime(time_buffer , 80, "%x,%X", info);
 
-sprintf( results_content, "%s,%.2f,%.2f,%.2f,",time_buffer,p1_init/4,p1_opt,initial_sino_result,final_sino_result);
-sprintf( results_content, "%.2f,%2.f,%.2f,%s,%i\n",rg_float,sino_lb_float,name,expno);
+
 if (verbose == 1) {
 	   Proc_err(DEF_ERR_OPT, "Writing %s into file %s", results_content, results_file_name);
 }
@@ -445,6 +444,9 @@ if ((results_file = fopen(results_file_name, "a+")) == 0)
 			Proc_err(DEF_ERR_OPT, "Cannot open file for writing:\n%s", results_file_name);
 		  exit(1);
 } else {
+     sprintf( results_content, "%s,%.2f,%.2f,%.2f,%.2f,",time_buffer,p1_init/4,p1_opt,initial_sino_result,final_sino_result);
+     fputs(results_content, results_file);
+     sprintf( results_content, "%%2.f,%.2f,%s,%i\n",rg_float,sino_lb_float,name,expno);
      fputs(results_content, results_file);
      fclose(results_file);
 }

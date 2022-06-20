@@ -27,10 +27,10 @@ double sig_f2_double=5.4;
 double noise_f1_double=10.0;
 double noise_f2_double=8.0;
 double noise_width_double=0.2;
-char sino_aq[8]="10s"
+char sino_aq[8]="10s";
 char sino_pp[40]="zg30";
 
-char repo_name[40]="cam-ts" \\Set this to be the name of your repository
+char repo_name[40]="cam-ts"; //Set this to be the name of your repository
 
 int ts_major = GetTsVersionMajor();
 int ts_minor = GetTsVersionMinor();

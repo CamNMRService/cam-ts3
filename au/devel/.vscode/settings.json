@@ -8,6 +8,7 @@
         "devel_create_poise_31p_file_v3": "c",
         "devel_poise_1h_p1_v3": "c",
         "devel_create_hump_sino_file": "c",
-        "devel_create_poise_19f_file_v3": "c"
+        "devel_create_poise_19f_file_v3": "c",
+        "devel_create_hump_sino_file_v3": "c"
     }
 }

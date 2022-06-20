@@ -56,7 +56,7 @@ char t1[40];
 char noise_f1[40];
 char noise_f2[40];
 char noise_width[40];
-
+char sino_aq[8];
 char gui_cmd[128];
 double sw_double;
 double o1_ppm_double;
@@ -80,6 +80,8 @@ float p1_opt;
 float max_deviation = 10.0;
 float initial_sino_result = 1.234;
 float final_sino_result = 4.321;
+float sino_lb;
+
 int pc_lb_int;
 int pc_hb_int;
 int err= -1;
@@ -157,7 +159,7 @@ if (defaults_file == NULL)
   Proc_err(DEF_ERR_OPT,"can't open file - %s", defaults_file_name);
   err = Proc_err(QUESTION_OPT,"The file %s might not exist, would you like to try and create a default one?", defaults_file_name);
   if (err == 0) {
-    XAU("devel_create_poise_13c_file",defaults_file_name)
+    XAU("devel_create_poise_13c_file_V3",defaults_file_name)
     exit(1);
   }
   else {
@@ -211,6 +213,8 @@ sscanf(field, "%s", &noise_f2);
 field = strtok(NULL, ",");
 sscanf(field, "%s", &noise_width);
 field = strtok(NULL, ",");
+sscanf(field, "%f", &sino_aq);
+field = strtok(NULL, ",");
 sscanf(field, "%s", &sino_lb);
 field = strtok(NULL, ",");
 sscanf(field, "%s", &sino_pp);
@@ -241,12 +245,12 @@ noise_f2_double = strtod(noise_f2,&end_ptr);
 noise_width_double = strtod(noise_width,&end_ptr);
 sino_lb_float = strof(sino_lb,&end_ptr);
 
-
 if (verbose == 1) {
-//show text to number conversion values
-    Proc_err(DEF_ERR_OPT, "sw ppm = %.2f \n o1p ppm = %.2f \n f1p ppm = %.2f \n f2p ppm = %.2f \n rg is %.2f \n d1 is %.2f\n tol is %.2f\n", sw_double, o1_ppm_double, f1p_double, f2p_double, rg_float, d1_float, tol_float);
-    Proc_err(DEF_ERR_OPT, "t1_float = %.2f \n noise_f1_double = %.2f \n noise_f2_double = %.2f \n noise_width_double = %.2f,sino_lb_float = %.2f", t1_float, noise_f1_double, noise_f2_double, noise_width_double, sino_lb_float);
-    Proc_err(DEF_ERR_OPT, "percentage lower and higher than nominal 360 pulse to check - %i and %i", pc_lb_int, pc_hb_int);
+//show text read in from file
+    Proc_err(DEF_ERR_OPT, "sw is - %s \n o1p is - %s \n f1p - %s \n f2p - %s \n rg - %s\n", sw,o1p,f1p,f2p,rg);
+    Proc_err(DEF_ERR_OPT, "d1 - %s \n pc_lb - %s \n pc_hb - %s \n tol - %s \n", d1s, pc_lb, pc_hb, tol);
+    Proc_err(DEF_ERR_OPT, "t1 = %s \n noise_f1 = %s \n noise_f2 = %s \n noise_width = %s \n sino_aq = %s \n sino_lb = %s \n sino_pp = %s", t1, noise_f1,noise_f2,noise_width,sino_aq,sino_lb, sino_pp);
+    Proc_err(DEF_ERR_OPT, "cost function - %s \n Au program to run and process - %s ", cost_function, poise_au);
 } else {}
 
 //Ok, now setup poise default 19F calib experiment
@@ -305,12 +309,16 @@ STOREPAR("TI", "poise")  //poise puts the optimised value in TI if it completes
 //Only do aquisition if not in test mode.
 if (aqtest == 0)
 {
+    //We've done ATMA above, do we need this?
     //ATMA exact
+    
     //lets make some nicely phased peaks
     //add use this for sino calc before we calculate P1
     STOREPAR("pulprog", sino_pp);
     GETPROSOL //make sure we do have the pulses
-    XCMD("sendgui AQ 10s"); //lets make sure its sharpish
+    sprintf(gui_cmd, "sendgui AQ %s",sino_aq);
+    XCMD(gui_cmd)
+    //XCMD("sendgui AQ 10s"); //lets make sure its sharpish
     STOREPAR("D 1", t1_float*2);
     STOREPAR("NS",1);
     STOREPAR("DS",0);
@@ -332,7 +340,8 @@ if (aqtest == 0)
     SINO
     STOREPAR("PULPROG",p_program)
     FETCHPARS("SINO", &initial_sino_result)
-    //now run optimisation - set pulprog back to what it should be!p1
+    //now run optimisation - set pulprog back to what it should be!
+    //At this point we could set LB and AQ back to param defaults, but it doesnt seem necessary
     STOREPAR("PULPROG",p_program)
     STOREPAR("D 1", d1_float)
     XCMD(poise_cmd)
@@ -426,7 +435,9 @@ time(&rawtime);
 info = localtime( &rawtime);
 strftime(time_buffer , 80, "%x,%X", info);
 
-sprintf( results_content, "%s,%.2f,%.2f,%.2f,%.2f,%.2f,%s,%i\n",time_buffer,p1_init/4,p1_opt,initial_sino_result,final_sino_result,rg_float,name,expno);
+sprintf( results_content, "%s,%.2f,%.2f,%.2f,",time_buffer,p1_init/4,p1_opt,initial_sino_result,final_sino_result);
+sprintf( results_content, "%.2f,%2.f,%.2f,%s,%i\n",rg_float,lb_float,name,expno);
+
 if (verbose == 1) {
 	   Proc_err(DEF_ERR_OPT, "Writing %s into file %s", results_content, results_file_name);
 }

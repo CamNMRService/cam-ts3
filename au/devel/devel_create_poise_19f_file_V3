@@ -33,14 +33,11 @@ float t1_float=10.0;
 double noise_f1_double = -100.0;
 double noise_f2_double = -104.0;
 double noise_width_double=0.2;
-float sino_aq=10.0;
+char sino_aq="10s";
 double sino_lb=1.0;
-char sino_pp[40]="zg30";
 
-sprintf(file_text,"%.2f,%.2f,%.2f,%.2f,%.2f," ,sw_double,o1_ppm_double,f1p_double,f2p_double,rg_float)
-sprintf(file_text,"%.2f,%i,%i,%.2f,%s,",d1_float,pc_lb_int,pc_hb_int,tol_float,cost_function)
-sprintf(file_text,"%s,%.2f,%.2f,%.2f,%.2f,",poise_au,t1_float,noise_f1_double,noise_f2_double,noise_width_double);
-sprintf(file_text,"%.2f,%.2f,%s", sino_aq,sino_lb,sino_pp);
+char sino_pp[40]="zg30";
+char repo_name[40]="cam-ts" //set to name of your repository
 
 int ts_major = GetTsVersionMajor();
 int ts_minor = GetTsVersionMinor();
@@ -49,9 +46,9 @@ int ts_patch = GetTsVersionPl();
 GETCURDATA
 
 #ifdef HAS_WINDOWS_FEATURES
-   sprintf(defaults_file_name,"C:\\Bruker\\cam-ts%i\\poise\\service_poise_19f_p1_defaults",ts_major);
-#else //Not actually checked this on linux... We have no linux xpectrometers
- 		sprintf(defaults_file_name,"/opt/cam-ts%i/poise/service_poise_19f_p1_defaults",ts_major);
+   sprintf(defaults_file_name,"C:\\Bruker\\%s%i\\poise\\service_poise_1h_p1_defaults",repo_name,ts_major);
+#else //Not actually checked this on linux... We have no linux solution-state spectrometers
+ 		sprintf(defaults_file_name,"/opt/%s%i/poise/service_poise_1h_p1_defaults",repo_name,ts_major);
 #endif
 
 if (i_argc == 3 ) {
@@ -83,19 +80,22 @@ if (i_argc == 3 ) {
   }
   //maybe make it ask for values here
 
-//  For V2 :-
- // swp,o1p,f1p,f2p,rg,d1,lower bound percent (int), higher bound percent (int), tolerance , cost function, poise au to run and process,T1, noise_f1, noise_f2,noise_width, Sino pp
-//10.0,5.0,8.1,1.1,0.25,2.0,20,20,0.2,minabsint,default,10.0,8.0,0.2,zg30sprintf(file_text,"%.2f,%.2f,%.2f,%.2f,%.2f,%i,%i,%i,%.2f,%s,%s,%.2f,%.2f,%2.f,%s", sw_double,o1_ppm_double,f1p_double,f2p_double,rg_float,d1_float,pc_lb_int,pc_hb_int,tol_float,cost_function,poise_au,noise_f1_double,noise_f2_double,noise_width_double,sino_pp);sprintf(file_text,"%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%i,%i,%.2f,%s,%s,%.2f,%.2f,%.2f,%2.f,%s", sw_double,o1_ppm_double,f1p_double,f2p_double,rg_float,d1_float,pc_lb_int,pc_hb_int,tol_float,cost_function,poise_au,noise_f1_double,noise_f2_double,noise_width_double,sino_pp);
-sprintf(file_text,"%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%i,%i,%.2f,%s,%s,%.2f,%.2f,%.2f,%.2f,%s\n", sw_double,o1_ppm_double,f1p_double,f2p_double,rg_float,d1_float,pc_lb_int,pc_hb_int,tol_float,cost_function,poise_au,t1_float,noise_f1_double,noise_f2_double,noise_width_double,sino_pp);
+//write out above defined values to defaults file
+sprintf(file_text,"%.2f,%.2f,%.2f,%.2f,%.2f," ,sw_double,o1_ppm_double,f1p_double,f2p_double,rg_float)
+sprintf(file_text,"%.2f,%i,%i,%.2f,%s,",d1_float,pc_lb_int,pc_hb_int,tol_float,cost_function)
+sprintf(file_text,"%s,%.2f,%.2f,%.2f,%.2f,",poise_au,t1_float,noise_f1_double,noise_f2_double,noise_width_double);
+sprintf(file_text,"%s,%.2f,%s", sino_aq,sino_lb,sino_pp);
 
 Proc_err(DEF_ERR_OPT,"defaults filename - %s",defaults_file_name);
 Proc_err(DEF_ERR_OPT,"defaults content - %s",file_text);
 defaults_file = fopen (defaults_file_name,"w");
-if (defaults_file == NULL) {
+if (defaults_file == NULL) 
+{
      Proc_err(DEF_ERR_OPT,"can't open file - %s", defaults_file_name);
      exit(1);
 }
-else {
+else 
+{
      fputs(file_text,defaults_file);
      fclose(defaults_file);
 }

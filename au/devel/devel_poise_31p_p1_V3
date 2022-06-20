@@ -213,7 +213,7 @@ sscanf(field, "%s", &noise_f2);
 field = strtok(NULL, ",");
 sscanf(field, "%s", &noise_width);
 field = strtok(NULL, ",");
-sscanf(field, "%f", &sino_aq);
+sscanf(field, "%s", &sino_aq);
 field = strtok(NULL, ",");
 sscanf(field, "%s", &sino_lb);
 field = strtok(NULL, ",");

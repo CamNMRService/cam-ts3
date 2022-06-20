@@ -91,7 +91,7 @@ char cost_function[40];
 char gui_cmd[PATH_MAX];
 char poise_au[PATH_MAX];
 char poise_status[40];
-char sino_aq[8];
+char sino_lb[40];
 char sino_pp[40]; //pulse program for sino
 
 char sig_f1[40];

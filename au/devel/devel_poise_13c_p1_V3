@@ -57,7 +57,9 @@ char noise_f1[40];
 char noise_f2[40];
 char noise_width[40];
 char sino_aq[8];
+char sino_lb[40];
 char gui_cmd[128];
+
 double sw_double;
 double o1_ppm_double;
 double o1_hz_double;
@@ -65,10 +67,10 @@ double sfo1;
 double f1p_double;
 double f2p_double;
 double deviation;
-
 double noise_f1_double=10.0;
 double noise_f2_double=8.0;
 double noise_width_double=0.2;
+
 float rg_float=1.1;
 float d1_float;
 float t1_float=1.0;

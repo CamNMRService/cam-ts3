@@ -58,6 +58,7 @@ char noise_f2[40];
 char noise_width[40];
 char sino_aq[8];
 char gui_cmd[128];
+char sino_lb[40];
 double sw_double;
 double o1_ppm_double;
 double o1_hz_double;

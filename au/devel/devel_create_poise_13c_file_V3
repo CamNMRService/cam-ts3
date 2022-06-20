@@ -39,7 +39,7 @@ char sino_pp[40]="zgig30";
 
 sprintf(file_text,"%.2f,%.2f,%.2f,%.2f,%.2f," ,sw_double,o1_ppm_double,f1p_double,f2p_double,rg_float)
 sprintf(file_text,"%.2f,%i,%i,%.2f,%s,",d1_float,pc_lb_int,pc_hb_int,tol_float,cost_function)
-sprintf(file_text,"%s,%.2f,%.2f,%.2f,%.2f,%.2f,%s",poise_au,t1_float,noise_f1_double,noise_f2_double,noise_width_double,sino_pp);
+sprintf(file_text,"%s,%.2f,%.2f,%.2f,%.2f,%.2f,%s",poise_au,t1_float,noise_f1_double,noise_f2_double,noise_width_double, sino_lb,sino_pp);
 
 int ts_major = GetTsVersionMajor();
 int ts_minor = GetTsVersionMinor();

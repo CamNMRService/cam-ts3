@@ -85,11 +85,13 @@ sprintf(file_text,"%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%i,%i,%.2f,%s,%s,%.2f,%.2f,%.2f
 Proc_err(DEF_ERR_OPT,"defaults filename - %s",defaults_file_name);
 Proc_err(DEF_ERR_OPT,"defaults content - %s",file_text);
 defaults_file = fopen (defaults_file_name,"w");
-if (defaults_file == NULL) {
+if (defaults_file == NULL) 
+{
      Proc_err(DEF_ERR_OPT,"can't open file - %s", defaults_file_name);
      exit(1);
 }
-else {
+else 
+{
      fputs(file_text,defaults_file);
      fclose(defaults_file);
 }

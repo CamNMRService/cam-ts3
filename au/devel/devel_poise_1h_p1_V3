@@ -244,7 +244,7 @@ t1_float = strtof(t1,&end_ptr);
 noise_f1_double = strtod(noise_f1,&end_ptr);
 noise_f2_double = strtod(noise_f2,&end_ptr);
 noise_width_double = strtod(noise_width,&end_ptr);
-sino_lb_float = strof(sino_lb,&end_ptr);
+sino_lb_float = strtof(sino_lb,&end_ptr);
 
 if (verbose == 1) {
 //show text to number conversion values

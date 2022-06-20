@@ -446,7 +446,7 @@ if ((results_file = fopen(results_file_name, "a+")) == 0)
 } else {
      sprintf( results_content, "%s,%.2f,%.2f,%.2f,%.2f,",time_buffer,p1_init/4,p1_opt,initial_sino_result,final_sino_result);
      fputs(results_content, results_file);
-     sprintf( results_content, "%%2.f,%.2f,%s,%i\n",rg_float,sino_lb_float,name,expno);
+     sprintf( results_content, "%2.f,%.2f,%s,%i\n",rg_float,sino_lb_float,name,expno);
      fputs(results_content, results_file);
      fclose(results_file);
 }

@@ -33,8 +33,8 @@ float t1_float=10.0;
 double noise_f1_double = -100.0;
 double noise_f2_double = -104.0;
 double noise_width_double=0.2;
-char sino_aq="10s";
-double sino_lb=1.0;
+char sino_aq[8]="10s";
+double sino_lb_float=1.0;
 
 char sino_pp[40]="zg30";
 char repo_name[40]="cam-ts"; //set to name of your repository
@@ -81,10 +81,7 @@ if (i_argc == 3 ) {
   //maybe make it ask for values here
 
 //write out above defined values to defaults file
-sprintf(file_text,"%.2f,%.2f,%.2f,%.2f,%.2f," ,sw_double,o1_ppm_double,f1p_double,f2p_double,rg_float);
-sprintf(file_text,"%.2f,%i,%i,%.2f,%s,",d1_float,pc_lb_int,pc_hb_int,tol_float,cost_function);
-sprintf(file_text,"%s,%.2f,%.2f,%.2f,%.2f,",poise_au,t1_float,noise_f1_double,noise_f2_double,noise_width_double);
-sprintf(file_text,"%s,%.2f,%s", sino_aq,sino_lb,sino_pp);
+
 
 Proc_err(DEF_ERR_OPT,"defaults filename - %s",defaults_file_name);
 Proc_err(DEF_ERR_OPT,"defaults content - %s",file_text);
@@ -96,6 +93,13 @@ if (defaults_file == NULL)
 }
 else 
 {
+     sprintf(file_text,"%.2f,%.2f,%.2f,%.2f,%.2f," ,sw_double,o1_ppm_double,f1p_double,f2p_double,rg_float);
+     fputs(file_text,defaults_file);
+     sprintf(file_text,"%.2f,%i,%i,%.2f,%s,",d1_float,pc_lb_int,pc_hb_int,tol_float,cost_function);
+     fputs(file_text,defaults_file);
+     sprintf(file_text,"%s,%.2f,%.2f,%.2f,%.2f,",poise_au,t1_float,noise_f1_double,noise_f2_double,noise_width_double);
+     fputs(file_text,defaults_file);
+     sprintf(file_text,"%s,%.2f,%s", sino_aq,sino_lb_float,sino_pp);
      fputs(file_text,defaults_file);
      fclose(defaults_file);
 }

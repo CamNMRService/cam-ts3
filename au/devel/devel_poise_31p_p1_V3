@@ -118,7 +118,7 @@ SETCURDATA
 STOREPAR("P 1", 1.0)
 STOREPAR("NS", 1)
 STOREPAR("DS", 0)
-//ATMA
+ATMA
 ZG_OVERWRITE
 //The instrum and probhd doesn't seem to be filled in until some aquisition has been done... at least on laphroiag
 FETCHPARS("INSTRUM", instrum_name)
@@ -254,7 +254,7 @@ if (verbose == 1) {
     Proc_err(DEF_ERR_OPT, "percentage lower and higher than nominal 360 pulse to check - %i and %i", pc_lb_int, pc_hb_int);
 } else {}
 
-//Ok, now setup poise default 19F calib experiment
+//Ok, now setup poise default calib experiment
 
 RPAR(param_set_name, "all")
 STOREPAR("PULPROG", p_program)

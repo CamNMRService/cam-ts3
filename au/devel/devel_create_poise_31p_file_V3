@@ -103,7 +103,7 @@ else
      sprintf(file_text,"%s,%.2f,%.2f,%.2f,%.2f,",poise_au,t1_float,noise_f1_double,noise_f2_double,noise_width_double);
       Proc_err(DEF_ERR_OPT,"got to 104");  
      fputs(file_text,defaults_file);
-     sprintf(file_text,"%s,%.2f,%s", sino_aq,sino_lb,sino_pp);
+     sprintf(file_text,"%s,%.2f,%s", sino_aq,sino_lb_float,sino_pp);
      fputs(file_text,defaults_file);
      Proc_err(DEF_ERR_OPT,"got to 108"); 
      fclose(defaults_file);

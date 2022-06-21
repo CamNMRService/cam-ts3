@@ -33,7 +33,7 @@ float t1_float=20.0;
 double noise_f1_double = -5.0;
 double noise_f2_double = -12.0;
 double noise_width_double=0.4;
-char sino_aq="10s";
+char sino_aq[8]="10s";
 float sino_lb_float=3.0;
 
 char sino_pp[40]="zgig30";
@@ -100,10 +100,8 @@ else
      fputs(file_text,defaults_file);
      sprintf(file_text,"%s,%.2f,%.2f,%.2f,%.2f,",poise_au,t1_float,noise_f1_double,noise_f2_double,noise_width_double);
      fputs(file_text,defaults_file);
-     //sprintf(file_text,"%s,%.2f,%s", sino_aq,sino_lb_float,sino_pp);
-     sprintf(file_text,"%.2f,%s", sino_lb_float,sino_pp);
-    
-     //fputs(file_text,defaults_file);
+     sprintf(file_text,"%s,%.2f,%s", sino_aq,sino_lb_float,sino_pp);
+     fputs(file_text,defaults_file);
      fclose(defaults_file);
 }
 

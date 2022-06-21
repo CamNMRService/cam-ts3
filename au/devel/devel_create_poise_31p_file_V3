@@ -93,12 +93,15 @@ if (defaults_file == NULL)
 }
 else 
 {
-     
+   Proc_err(DEF_ERR_OPT,"got to 96");  
      sprintf(file_text,"%.2f,%.2f,%.2f,%.2f,%.2f," ,sw_double,o1_ppm_double,f1p_double,f2p_double,rg_float);
      fputs(file_text,defaults_file);
+      Proc_err(DEF_ERR_OPT,"got to 99");  
      sprintf(file_text,"%.2f,%i,%i,%.2f,%s,",d1_float,pc_lb_int,pc_hb_int,tol_float,cost_function);
      fputs(file_text,defaults_file);
+      Proc_err(DEF_ERR_OPT,"got to 102");  
      sprintf(file_text,"%s,%.2f,%.2f,%.2f,%.2f,",poise_au,t1_float,noise_f1_double,noise_f2_double,noise_width_double);
+      Proc_err(DEF_ERR_OPT,"got to 104");  
      fputs(file_text,defaults_file);
      sprintf(file_text,"%s,%.2f,%s", sino_aq,sino_lb,sino_pp);
      fputs(file_text,defaults_file);

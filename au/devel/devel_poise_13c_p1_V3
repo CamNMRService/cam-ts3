@@ -227,7 +227,7 @@ if (verbose == 1) {
 //show text read in from file
     Proc_err(DEF_ERR_OPT, "sw is - %s \n o1p is - %s \n f1p - %s \n f2p - %s \n rg - %s\n", sw,o1p,f1p,f2p,rg);
     Proc_err(DEF_ERR_OPT, "d1 - %s \n pc_lb - %s \n pc_hb - %s \n tol - %s \n", d1s, pc_lb, pc_hb, tol);
-    Proc_err(DEF_ERR_OPT, "t1 = %s \n noise_f1 = %s \n noise_f2 = %s \n noise_width = %s \n sino_lb = %s,sino_pp = %s", t1, noise_f1,noise_f2,noise_width,sino_lb, sino_pp);
+    Proc_err(DEF_ERR_OPT, "t1 = %s \n noise_f1 = %s \n noise_f2 = %s \n noise_width = %s \n sino_aq = %s \n sino_lb = %s \n sino_pp = %s", t1, noise_f1,noise_f2,noise_width,sino_aq,sino_lb, sino_pp);
     Proc_err(DEF_ERR_OPT, "cost function - %s \n Au program to run and process - %s ", cost_function, poise_au);
 } else {}
 

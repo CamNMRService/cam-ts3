@@ -85,7 +85,7 @@ if (i_argc == 3 ) {
 
 
 Proc_err(DEF_ERR_OPT,"defaults filename - %s",defaults_file_name);
-Proc_err(DEF_ERR_OPT,"defaults content - %s",file_text);
+//Proc_err(DEF_ERR_OPT,"defaults content - %s",file_text);
 defaults_file = fopen (defaults_file_name,"w");
 if (defaults_file == NULL)
 {

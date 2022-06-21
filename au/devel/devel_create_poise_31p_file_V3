@@ -95,7 +95,6 @@ else
 {
      
      sprintf(file_text,"%.2f,%.2f,%.2f,%.2f,%.2f," ,sw_double,o1_ppm_double,f1p_double,f2p_double,rg_float);
-     //Proc_err(DEF_ERR_OPT,"defaults content - %s",file_text);
      fputs(file_text,defaults_file);
      sprintf(file_text,"%.2f,%i,%i,%.2f,%s,",d1_float,pc_lb_int,pc_hb_int,tol_float,cost_function);
      fputs(file_text,defaults_file);

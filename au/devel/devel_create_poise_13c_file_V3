@@ -47,9 +47,9 @@ int ts_patch = GetTsVersionPl();
 GETCURDATA
 
 #ifdef HAS_WINDOWS_FEATURES
-   sprintf(defaults_file_name,"C:\\Bruker\\%s%i\\poise\\service_poise_1h_p1_defaults",repo_name,ts_major);
+   sprintf(defaults_file_name,"C:\\Bruker\\%s%i\\poise\\service_poise_13c_p1_defaults",repo_name,ts_major);
 #else //Not actually checked this on linux... We have no linux solution-state spectrometers
- 		sprintf(defaults_file_name,"/opt/%s%i/poise/service_poise_1h_p1_defaults",repo_name,ts_major);
+ 		sprintf(defaults_file_name,"/opt/%s%i/poise/service_poise_13c_p1_defaults",repo_name,ts_major);
 #endif
 
 if (i_argc == 3 ) {

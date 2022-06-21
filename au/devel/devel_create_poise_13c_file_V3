@@ -35,7 +35,7 @@ double noise_f1_double = -20;
 double noise_f2_double = -50;
 double noise_width_double=1.0;
 
-float sino_lb=3.0;
+float sino_lb_float=3.0;
 
 char sino_pp[40]="zgig30";
 char repo_name[40]="cam-ts"; //set to name of your repository
@@ -100,7 +100,7 @@ else
      fputs(file_text,defaults_file);
      sprintf(file_text,"%s,%.2f,%.2f,%.2f,%.2f,",poise_au,t1_float,noise_f1_double,noise_f2_double,noise_width_double);
      fputs(file_text,defaults_file);
-     sprintf(file_text,"%s,%.2f,%s", sino_aq,sino_lb,sino_pp);
+     sprintf(file_text,"%s,%.2f,%s", sino_aq,sino_lb_float,sino_pp);
      fputs(file_text,defaults_file);
      fclose(defaults_file_name);
 }

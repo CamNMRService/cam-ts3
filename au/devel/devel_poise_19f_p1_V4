@@ -89,15 +89,14 @@ int pc_hb_int;
 int err= -1;
 
 
-
-
 Proc_err(INFO_OPT,"ts_major is %i \n minor %i \n patch %i",ts_major, ts_minor, ts_patch);
 
 /*!!!!VARIABLES THAT NEED TO BE SET!!!!*/
 /********************************/
 //Handlly print out what its doing as it goes along. Can change to output diff levels of verbosity. (in future)
-//verbose == 0 is no output
+//verbose == 0 disclaimer == 0 is no output
 int verbose = 1;
+int disclaimer = 1;
 //set aqtest = 0 to issue aquisition commands to the spectrometer
 int aqtest = 0; // !=0 == test mode ==0 for aquire mode
 char method_name[40]="poise_auto_p1_19f"; //poise method name to create for calibration. Also used for results filename.
@@ -106,7 +105,29 @@ char default_au[40]="service_zg_efp"; //au program to aquire and process results
 char param_set_name[40]="F19";
 char param[40] = "p1";
 
+if(disclaimer == 1){
+i1 = Proc_err(QUESTION_OPT,"THIS PROGRAM IS DISTRIBUTED IN THE HOPE THAT IT WILL BE USEFUL, \
+WITHOUT ANY WARRANTY.\n IT IS PROVIDED 'AS IS' WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED,\n \
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTY OF FITNESS FOR A PARTICULAR PURPOSE.\n \
+THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU.\n \
+SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING,\n \
+REPAIR OR CORRECTION.\n\n \
+IN NO EVENT WILL THE AUTHOR BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL,\n \
+SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY\n \
+TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING RENDERED\n \
+INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM\n \
+TO OPERATE WITH ANY OTHER PROGRAMS), EVEN IF THE AUTHOR HAS BEEN ADVISED OF THE \n \
+POSSIBILITY OF SUCH DAMAGES.\n\n \
+Click OK to agree and continue. \nClick cancel to disagree.\n\n \
+Remove this warning by setting disclaimer to 0 in the AU program.");
 
+   if ( i1 == ERR_CANCEL )
+  {
+      ABORT
+   }
+  else {
+  }
+} //end of disclaimer
 
 //Data doesn't have instr or probehd set until an aquisition has been done.
 RPAR(param_set_name, "all")

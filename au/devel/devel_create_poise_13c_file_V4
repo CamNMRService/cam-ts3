@@ -1,14 +1,14 @@
 /*Used to create a default file*/
-/*devel_create_poise_1h_file*/
+/*devel_create_poise_13c_file*/
 
 //  For V3 :-
-//For 1H as an example, the files should contain the numbers (see create_poise_NUC):-
+//For CH2Cl2 as an example, the files should contain the numbers (see create_poise_NUC):-
 // 12,5.4,6,5,8,8,50,60,0.2,minabsint,default,8,10,8,0.2,10s,1,zg30//
 //which are :-
 //SW,O1P,P1 peak ppm UB,P1 peak ppm  HB,RG,T1,Poise P1 % LB,Poise P1 % UB,Poise Tolerance,Poise calc method,poise aquisistion/processing program,Sino T!,Sino noise  F1,Sino Noise F2,Sino noise width,Sino AQ time,Sino LB,Sino PP
 
 char defaults_file_name[PATH_MAX];
-char param_set_name[PATH_MAX]="PROTON";
+char param_set_name[PATH_MAX]="C13IG";
 char junk_name[PATH_MAX]="junk";
 char file_text[1024]="";
 char instrum_name[40];
@@ -19,13 +19,13 @@ char probe_nickname[40];
 char* str_probe;
 FILE *defaults_file = NULL;
 
-double sw_double = 12.0;
-double o1_ppm_double = 5.4;
-double f1p_double = 6.0;
-double f2p_double = 5.0;
-float rg_float = 8.0;
+double sw_double = 250.0;
+double o1_ppm_double = 49;
+double f1p_double = 52.0;
+double f2p_double = 46.0;
+float rg_float = 64.0;
 
-float d1_float = 8.0;
+float d1_float = 10.0;
 int pc_lb_int = 50;
 int pc_hb_int = 60;
 float tol_float = 0.2;
@@ -33,13 +33,14 @@ char cost_function[40]="minabsint";
 char poise_au[40]="default";
 char sino_aq[8]="10s";
 
-float t1_float=8.0;
-double noise_f1_double=10.0;
-double noise_f2_double=8.0;
-double noise_width_double=0.2;
-float sino_lb_float=1.0;
+float t1_float=30.0;
+double noise_f1_double = -20;
+double noise_f2_double = -50;
+double noise_width_double=1.0;
 
-char sino_pp[40]="zg30";
+float sino_lb_float=3.0;
+
+char sino_pp[40]="zgig30";
 char repo_name[40]="cam-ts"; //set to name of your repository
 
 int ts_major = GetTsVersionMajor();
@@ -49,9 +50,9 @@ int ts_patch = GetTsVersionPl();
 GETCURDATA
 
 #ifdef HAS_WINDOWS_FEATURES
-   sprintf(defaults_file_name,"C:\\Bruker\\%s%i\\poise\\service_poise_1h_p1_defaults",repo_name,ts_major);
+   sprintf(defaults_file_name,"C:\\Bruker\\%s%i\\poise\\service_poise_13c_p1_defaults",repo_name,ts_major);
 #else //Not actually checked this on linux... We have no linux solution-state spectrometers
- 		sprintf(defaults_file_name,"/opt/%s%i/poise/service_poise_1h_p1_defaults",repo_name,ts_major);
+ 		sprintf(defaults_file_name,"/opt/%s%i/poise/service_poise_13c_p1_defaults",repo_name,ts_major);
 #endif
 
 if (i_argc == 3 ) {
@@ -89,7 +90,7 @@ if (i_argc == 3 ) {
 Proc_err(DEF_ERR_OPT,"defaults filename - %s",defaults_file_name);
 //Proc_err(DEF_ERR_OPT,"defaults content - %s",file_text);
 defaults_file = fopen (defaults_file_name,"w");
-if (defaults_file == NULL) 
+if (defaults_file == NULL)
 {
      Proc_err(DEF_ERR_OPT,"can't open file - %s", defaults_file_name);
      exit(1);
@@ -104,7 +105,7 @@ else
      fputs(file_text,defaults_file);
      sprintf(file_text,"%s,%.2f,%s", sino_aq,sino_lb_float,sino_pp);
      fputs(file_text,defaults_file);
-     fclose(defaults_file);
+     fclose(defaults_file_name);
 }
 
 QUIT

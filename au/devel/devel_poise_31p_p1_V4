@@ -105,8 +105,7 @@ char default_au[40]="service_zg_efp"; //au program to aquire and process results
 //This acts as an overide for poise, for it to use default method, default need to be saved in the service_poise_19f_p1_defaults.txt AND in this variable
 char param_set_name[40]="P31CPD";
 char param[40] = "p1";
-char p_program[40] = "zgig"; //for poise
-char sino_pp[40]="zgig30";
+
 
 
 //Data doesn't have instr or probehd set until an aquisition has been done.
@@ -181,9 +180,11 @@ else //we can open the file
 }
 
 //OK, we have the defaults file content, now to parse it.
-//The format should be  swp,o1p,f1p,f2p,rg,d1, lower bound percent (int), higher bound percent (int), tolerance , cost function, poise au to run and process
-//10.0,5.0,8.1,1.1,32.0,2.0,20,20,0.2, minabsint, default
-//Below taen from the janus_sx au program. The first line at least is always slightly magic to me.
+//For 1H as an example, the files should contain the numbers (see create_poise_NUC):-
+// 12,5.4,6,5,8,8,50,60,0.2,minabsint,default,8,10,8,0.2,10s,1,zg30//
+//which are :-
+//SW,O1P,P1 peak ppm UB,P1 peak ppm  HB,RG,T1,Poise P1 % LB,Poise P1 % UB,Poise Tolerance,Poise calc method,poise aquisistion/processing program,Sino T!,Sino noise  F1,Sino Noise F2,Sino noise width,Sino AQ time,Sino LB,Sino PP
+
 field = strtok(defaults_content, ",");
 strcpy (sw,field);
 field = strtok(NULL, ",");
@@ -270,7 +271,6 @@ STOREPARS("F2P", f2p_double)
 STOREPAR("O1P", o1_ppm_double)
 FETCHPARS("INSTRUM", instrum_name)
 FETCHPARS("PROBHD", probe_name)
-//STOREPAR("RG", rg_float) // This just does not work on my reproc mac... not sure about a spect - seems ok.
 STOREPAR("RG", rg_float)
 //get p1, then set the minimum and maximum p1. Note P1 is got from the prosol table.
 
@@ -282,9 +282,7 @@ p1_max = p1_init + (p1_init * ((float)pc_hb_int/100) );
 //create the method - check if we need to use a different au program for aqcqu and processing
 if( strcmp(poise_au,"default") == 0)
 {
-//	sprintf(poise_cmd,"xpy poise --create NAME PARAM MIN MAX INIT TOL CF");
     sprintf(poise_cmd,"sendgui xpy poise --create %s %s %.2f %.2f %.2f %.2f %s %s",method_name, param, p1_min, p1_max, p1_init, tol_float, cost_function, default_au );
-//deidnt work running only 7 arguments... needs 8... maybe if =default =zg
 }
 else {
     sprintf(poise_cmd,"sendgui xpy poise --create %s %s %.2f %.2f %.2f %.2f %s %s",method_name, param, p1_min, p1_max, p1_init, tol_float, cost_function, poise_au );

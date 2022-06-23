@@ -1,4 +1,4 @@
-/* This Au program is designed to perform a 360 19f length calibration using the "poise" method */
+/* This Au program is designed to perform a 360 1H length calibration using the "poise" method */
 /* It will read in a defaults file to define the parameters used for the poise optimisation */
 /*It will define the poise method, run it and check the result isn't too far from the prosol value*/
 /*It will write the output to a logfile*/
@@ -6,7 +6,7 @@
 /*djh35 May 2022 refactor to also do sino before and after*/
 /* And use per instrument/probe defaults_file*/
 
-//devel_poise_19f_p1
+//devel_poise_1h_p1
 #include <stdio.h>
 #include <time.h>
 
@@ -57,9 +57,8 @@ char noise_f1[40];
 char noise_f2[40];
 char noise_width[40];
 char sino_aq[8];
-char sino_lb[40];
 char gui_cmd[128];
-
+char sino_lb[40];
 double sw_double;
 double o1_ppm_double;
 double o1_hz_double;
@@ -73,7 +72,7 @@ double noise_f2_double=8.0;
 double noise_width_double=0.2;
 float rg_float=1.1;
 float d1_float;
-float t1_float=1.0;
+float t1_float=1.234;
 float tol_float;
 float p1_init;
 float p1_min;
@@ -82,8 +81,8 @@ float p1_opt;
 float max_deviation = 10.0;
 float initial_sino_result = 1.234;
 float final_sino_result = 4.321;
-float sino_lb_float;
 
+float sino_lb_float;
 int pc_lb_int;
 int pc_hb_int;
 int err= -1;
@@ -100,10 +99,10 @@ Proc_err(INFO_OPT,"ts_major is %i \n minor %i \n patch %i",ts_major, ts_minor, t
 int verbose = 1;
 //set aqtest = 0 to issue aquisition commands to the spectrometer
 int aqtest = 0; // !=0 == test mode ==0 for aquire mode
-char method_name[40]="poise_auto_p1_19f"; //poise method name to create for calibration. Also used for results filename.
+char method_name[40]="poise_auto_p1_1h"; //poise method name to create for calibration. Also used for results filename.
 char default_au[40]="service_zg_efp"; //au program to aquire and process results. Set to default for default method within poise.
 //This acts as an overide for poise, for it to use default method, default need to be saved in the service_poise_19f_p1_defaults.txt AND in this variable
-char param_set_name[40]="F19";
+char param_set_name[40]="PROTON";
 char param[40] = "p1";
 char p_program[40] = "zg"; //for poise
 char sino_pp[40]="zg30";
@@ -135,7 +134,7 @@ if (verbose ==1) {
 }
 
 #ifdef HAS_WINDOWS_FEATURES
-   sprintf(defaults_file_name,"C:\\Bruker\\cam-ts%i\\poise\\service_poise_19f_p1_defaults-%s-%s.txt",ts_major,instrum_name,probe_name_trunc);
+   sprintf(defaults_file_name,"C:\\Bruker\\cam-ts%i\\poise\\service_poise_1h_p1_defaults-%s-%s.txt",ts_major,instrum_name,probe_name_trunc);
    // Also need a place for the results to go. I'm thinking same place as the helium log will suit us.
    if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
     	sprintf(results_path,"C:\\Bruker\\diskless\\prog\\logfiles\\");
@@ -144,7 +143,7 @@ if (verbose ==1) {
       sprintf( results_path, "%s\\logfiles\\", PathXWinNMRProg() );
    }
 #else //Not actually checked this on linux... We have no linux xpectrometers
- 		sprintf(defaults_file_name,"/opt/cam-ts%i/poise/service_poise_19f_p1_defaults-%s-%s.txt",ts_major,instrum_name,probe_name_trunc);
+ 		sprintf(defaults_file_name,"/opt/cam-ts%i/poise/service_poise_1h_p1_defaults-%s-%s.txt",ts_major,instrum_name,probe_name_trunc);
  		if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
     	sprintf(results_path,"/opt/diskless/prog/logfiles/");
    }
@@ -161,7 +160,7 @@ if (defaults_file == NULL)
   Proc_err(DEF_ERR_OPT,"can't open file - %s", defaults_file_name);
   err = Proc_err(QUESTION_OPT,"The file %s might not exist, would you like to try and create a default one?", defaults_file_name);
   if (err == 0) {
-    XAU("devel_create_poise_19f_file_V3",defaults_file_name)
+    XAU("devel_create_poise_1h_file_V3",defaults_file_name)
     exit(1);
   }
   else {
@@ -312,7 +311,7 @@ if (aqtest == 0)
 {
     //We've done ATMA above, do we need this?
     //ATMA exact
-
+    
     //lets make some nicely phased peaks
     //add use this for sino calc before we calculate P1
     STOREPAR("pulprog", sino_pp);
@@ -332,7 +331,7 @@ if (aqtest == 0)
     XCMD("sendgui apbk -bo" )
     }
      else{
-     	  EFP
+        EFP
         APK
         ABS
     }
@@ -378,7 +377,7 @@ if (verbose == 1) {
     STOREPAR("DS",0);
     STOREPAR("LB",sino_lb_float);
     ZG_OVERWRITE
-    
+
     if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
     EFP
     XCMD("sendgui apbk")

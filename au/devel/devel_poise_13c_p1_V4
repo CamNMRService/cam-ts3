@@ -1,0 +1,465 @@
+/* This Au program is designed to perform a 360 13C length calibration using the "poise" method */
+/* It will read in a defaults file to define the parameters used for the poise optimisation */
+/*It will define the poise method, run it and check the result isn't too far from the prosol value*/
+/*It will write the output to a logfile*/
+/*djh35@cam.ac.uk October 2021 */
+/*djh35 May 2022 refactor to also do sino before and after*/
+/* And use per instrument/probe defaults_file*/
+
+//devel_poise_13c_p1
+#include <stdio.h>
+#include <time.h>
+
+//Set some variables for below
+char defaults_file_name[PATH_MAX];
+int ts_major = GetTsVersionMajor();
+int ts_minor = GetTsVersionMinor();
+int ts_patch = GetTsVersionPl();
+char results_path[PATH_MAX];
+char instrum_name[40]="";
+
+//Variable definitions
+int i; //loop counter
+FILE *results_file = NULL;
+FILE *defaults_file = NULL;
+FILE *title_file = NULL;
+
+char results_file_name[PATH_MAX];
+
+char title_path_name[PATH_MAX];
+char defaults_content[1024]="";
+char title_text[1024]="";
+char results_content[1024]="";
+
+char probe_name[PATH_MAX];
+char probe_name_trunc[PATH_MAX];
+char *field;
+char *defaults_content_ptr;
+char *end_ptr;
+char sw[40];
+char o1p[40];
+char f1p[40];
+char f2p[40];
+char rg[40];
+char d1s[40];
+char pc_lb[40];
+char pc_hb[40];
+char tol[40];
+char cost_function[40];
+char poise_cmd[PATH_MAX];
+char poise_au[PATH_MAX];
+char poise_status[40];
+char* str_probe;
+char probe_id[40];
+char probe_nickname[40];
+char t1[40];
+char noise_f1[40];
+char noise_f2[40];
+char noise_width[40];
+char sino_aq[8];
+char sino_lb[40];
+char gui_cmd[128];
+
+double sw_double;
+double o1_ppm_double;
+double o1_hz_double;
+double sfo1;
+double f1p_double;
+double f2p_double;
+double deviation;
+double noise_f1_double=10.0;
+double noise_f2_double=8.0;
+double noise_width_double=0.2;
+
+float rg_float=1.1;
+float d1_float;
+float t1_float=1.0;
+float tol_float;
+float p1_init;
+float p1_min;
+float p1_max;
+float p1_opt;
+float max_deviation = 10.0;
+float initial_sino_result = 1.234;
+float final_sino_result = 4.321;
+float sino_lb_float;
+
+int pc_lb_int;
+int pc_hb_int;
+int err= -1;
+
+
+
+
+Proc_err(INFO_OPT,"ts_major is %i \n minor %i \n patch %i",ts_major, ts_minor, ts_patch);
+
+/*!!!!VARIABLES THAT NEED TO BE SET!!!!*/
+/********************************/
+//Handlly print out what its doing as it goes along. Can change to output diff levels of verbosity. (in future)
+//verbose == 0 is no output
+int verbose = 1;
+//set aqtest = 0 to issue aquisition commands to the spectrometer
+int aqtest = 0; // !=0 == test mode ==0 for aquire mode
+char method_name[40]="poise_auto_p1_13c"; //poise method name to create for calibration. Also used for results filename.
+char default_au[40]="service_zg_efp"; //au program to aquire and process results. Set to default for default method within poise.
+//This acts as an overide for poise, for it to use default method, default need to be saved in the service_poise_19f_p1_defaults.txt AND in this variable
+char param_set_name[40]="C13IG";
+char param[40] = "p1";
+
+
+
+//Data doesn't have instr or probehd set until an aquisition has been done.
+RPAR(param_set_name, "all")
+STOREPAR("PULPROG", p_program)
+GETPROSOL
+GETCURDATA
+SETCURDATA
+STOREPAR("P 1", 1.0)
+STOREPAR("NS", 1)
+STOREPAR("DS", 0)
+ATMA
+ZG_OVERWRITE
+//The instrum and probhd doesn't seem to be filled in until some aquisition has been done... at least on laphroiag
+FETCHPARS("INSTRUM", instrum_name)
+FETCHPARS("PROBHD", probe_name)
+
+CALL_PROBESERVER("probe_client getParams getInstalledProbe", str_probe);
+//str_probe will be a big long string, separated by commas - we only need the first csv entry
+//some magic from au_sst1ir
+(void) sscanf(str_probe, "%[^,]%*c%*[^,]%*c%*[^,]%*c%*[^,]%*c%[^,]%*s", probe_id, probe_nickname);
+sprintf(probe_name_trunc,"%s",probe_id);
+
+if (verbose ==1) {
+    Proc_err(DEF_ERR_OPT,"instrum_name is - %s \n probe_name - %s \n probe_name_trunc - %s", instrum_name,probe_name,probe_name_trunc);
+}
+
+#ifdef HAS_WINDOWS_FEATURES
+   sprintf(defaults_file_name,"C:\\Bruker\\cam-ts%i\\poise\\service_poise_13c_p1_defaults-%s-%s.txt",ts_major,instrum_name,probe_name_trunc);
+   // Also need a place for the results to go. I'm thinking same place as the helium log will suit us.
+   if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
+    	sprintf(results_path,"C:\\Bruker\\diskless\\prog\\logfiles\\");
+   }
+   else{
+      sprintf( results_path, "%s\\logfiles\\", PathXWinNMRProg() );
+   }
+#else //Not actually checked this on linux... We have no linux xpectrometers
+ 		sprintf(defaults_file_name,"/opt/cam-ts%i/poise/service_poise_13c_p1_defaults-%s-%s.txt",ts_major,instrum_name,probe_name_trunc);
+ 		if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
+    	sprintf(results_path,"/opt/diskless/prog/logfiles/");
+   }
+   else{
+      sprintf( results_path, "%s/logfiles/", PathXWinNMRProg() );
+   }
+#endif
+
+
+//Get the defaults content
+defaults_file = fopen (defaults_file_name,"r");
+if (defaults_file == NULL)
+{
+  Proc_err(DEF_ERR_OPT,"can't open file - %s", defaults_file_name);
+  err = Proc_err(QUESTION_OPT,"The file %s might not exist, would you like to try and create a default one?", defaults_file_name);
+  if (err == 0) {
+    XAU("devel_create_poise_13c_file_V3",defaults_file_name)
+    exit(1);
+  }
+  else {
+    exit(1);
+  }
+}
+else //we can open the file
+{
+	rewind(defaults_file);
+//	defaults_content_ptr = fgets(defaults_content, 1024, defaults_file); // don't think I need this.
+  fgets(defaults_content, 1024, defaults_file);
+	if (verbose == 1) {
+	    Proc_err(DEF_ERR_OPT,"defaults file name = %s", defaults_file_name);
+      Proc_err(DEF_ERR_OPT,"defaults content is  = %s", defaults_content);
+  } else {}
+	fclose(defaults_file);
+}
+
+//OK, we have the defaults file content, now to parse it.
+//For 1H as an example, the files should contain the numbers (see create_poise_NUC):-
+// 12,5.4,6,5,8,8,50,60,0.2,minabsint,default,8,10,8,0.2,10s,1,zg30//
+//which are :-
+//SW,O1P,P1 peak ppm UB,P1 peak ppm  HB,RG,T1,Poise P1 % LB,Poise P1 % UB,Poise Tolerance,Poise calc method,poise aquisistion/processing program,Sino T!,Sino noise  F1,Sino Noise F2,Sino noise width,Sino AQ time,Sino LB,Sino PP
+
+field = strtok(defaults_content, ",");
+strcpy (sw,field);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &o1p);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &f1p);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &f2p);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &rg);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &d1s);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &pc_lb);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &pc_hb);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &tol);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &cost_function);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &poise_au);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &t1);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &noise_f1);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &noise_f2);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &noise_width);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &sino_aq);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &sino_lb);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &sino_pp);
+
+
+
+if (verbose == 1) {
+//show text read in from file
+    Proc_err(DEF_ERR_OPT, "sw is - %s \n o1p is - %s \n f1p - %s \n f2p - %s \n rg - %s\n", sw,o1p,f1p,f2p,rg);
+    Proc_err(DEF_ERR_OPT, "d1 - %s \n pc_lb - %s \n pc_hb - %s \n tol - %s \n", d1s, pc_lb, pc_hb, tol);
+    Proc_err(DEF_ERR_OPT, "t1 = %s \n noise_f1 = %s \n noise_f2 = %s \n noise_width = %s \n sino_aq = %s \n sino_lb = %s \n sino_pp = %s", t1, noise_f1,noise_f2,noise_width,sino_aq,sino_lb, sino_pp);
+    Proc_err(DEF_ERR_OPT, "cost function - %s \n Au program to run and process - %s ", cost_function, poise_au);
+} else {}
+
+//Ok, now have to convert those strings to float/doubles
+sw_double = strtod(sw, &end_ptr);
+o1_ppm_double = strtod(o1p, &end_ptr);
+f1p_double = strtod(f1p, &end_ptr);
+f2p_double = strtod(f2p, &end_ptr);
+rg_float = strtof(rg, &end_ptr);
+d1_float = strtof(d1s, &end_ptr);
+tol_float = strtof(tol, &end_ptr);
+pc_lb_int = atoi(pc_lb);
+pc_hb_int = atoi(pc_hb);
+t1_float = strtof(t1,&end_ptr);
+noise_f1_double = strtod(noise_f1,&end_ptr);
+noise_f2_double = strtod(noise_f2,&end_ptr);
+noise_width_double = strtod(noise_width,&end_ptr);
+sino_lb_float = strtof(sino_lb,&end_ptr);
+
+if (verbose == 1) {
+//show text to number conversion values
+    Proc_err(DEF_ERR_OPT, "sw ppm = %.2f \n o1p ppm = %.2f \n f1p ppm = %.2f \n f2p ppm = %.2f \n rg is %.2f \n d1 is %.2f\n tol is %.2f\n", sw_double, o1_ppm_double, f1p_double, f2p_double, rg_float, d1_float, tol_float);
+    Proc_err(DEF_ERR_OPT, "t1_float = %.2f \n noise_f1_double = %.2f \n noise_f2_double = %.2f \n noise_width_double = %.2f\n  sino_lb_float = %.2f", t1_float, noise_f1_double, noise_f2_double, noise_width_double, sino_lb_float);
+    Proc_err(DEF_ERR_OPT, "percentage lower and higher than nominal 360 pulse to check - %i and %i", pc_lb_int, pc_hb_int);
+} else {}
+
+//Ok, now setup poise default calib experiment
+
+RPAR(param_set_name, "all")
+STOREPAR("PULPROG", p_program)
+GETPROSOL
+STOREPAR("NS", 1)
+STOREPAR("DS", 0)
+STOREPAR("D 1", d1_float)
+STOREPAR("SW", sw_double)
+STOREPAR("F1P", f1p_double)
+STOREPAR("F2P", f2p_double)
+STOREPARS("F1P", f1p_double)
+STOREPARS("F2P", f2p_double)
+STOREPAR("O1P", o1_ppm_double)
+FETCHPARS("INSTRUM", instrum_name)
+FETCHPARS("PROBHD", probe_name)
+STOREPAR("RG", rg_float)
+//get p1, then set the minimum and maximum p1. Note P1 is got from the prosol table.
+
+FETCHPAR("P 1", &p1_init)
+p1_init = p1_init*4; //this is a 360 pulse we are doing.
+p1_min = p1_init - (p1_init * ((float)pc_lb_int/100) );
+p1_max = p1_init + (p1_init * ((float)pc_hb_int/100) );
+
+//create the method - check if we need to use a different au program for aqcqu and processing
+if( strcmp(poise_au,"default") == 0)
+{
+        sprintf(poise_cmd,"sendgui xpy poise --create %s %s %.2f %.2f %.2f %.2f %s %s",method_name, param, p1_min, p1_max, p1_init, tol_float, cost_function, default_au );
+}
+else {
+    sprintf(poise_cmd,"sendgui xpy poise --create %s %s %.2f %.2f %.2f %.2f %s %s",method_name, param, p1_min, p1_max, p1_init, tol_float, cost_function, poise_au );
+}
+
+if (verbose == 1) {
+    Proc_err(DEF_ERR_OPT, "poise command to create method - \n %s", poise_cmd);
+} else {}
+
+//issue command to make the method
+ XCMD(poise_cmd)
+
+//next use this created method to do the optimisation!
+STOREPAR("D 1", d1_float)
+sprintf(poise_cmd, "sendgui xpy poise %s -q", method_name);
+if (verbose == 1) {
+    Proc_err(DEF_ERR_OPT, "poise command to run method - \n %s", poise_cmd);
+} else {}
+
+//set up trap for error if poise goes wrong.
+STOREPAR("TI", "poise")  //poise puts the optimised value in TI if it completes
+
+//Only do aquisition if not in test mode.
+if (aqtest == 0)
+{
+    //We've done ATMA above, do we need this?
+    //ATMA exact
+    
+    //lets make some nicely phased peaks
+    //add use this for sino calc before we calculate P1
+    STOREPAR("pulprog", sino_pp);
+    GETPROSOL //make sure we do have the pulses
+    sprintf(gui_cmd, "sendgui AQ %s",sino_aq);
+    XCMD(gui_cmd)
+    //XCMD("sendgui AQ 10s"); //lets make sure its sharpish
+    STOREPAR("D 1", t1_float*2);
+    STOREPAR("NS",1);
+    STOREPAR("DS",0);
+    STOREPAR("LB",sino_lb_float);
+    ZG_OVERWRITE
+
+    if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
+    EFP
+    XCMD("sendgui apbk")
+    XCMD("sendgui apbk -bo" )
+    }
+     else{
+     	  EFP
+        APK
+        ABS
+    }
+    sprintf(gui_cmd, "sendgui sinocal %.2f %.2f %.2f %.2f %.2f", f1p_double,f2p_double,noise_f1_double,noise_f2_double,noise_width_double);
+    XCMD(gui_cmd)
+    SINO
+    STOREPAR("PULPROG",p_program)
+    FETCHPARS("SINO", &initial_sino_result)
+    //now run optimisation - set pulprog back to what it should be!
+    //At this point we could set LB and AQ back to param defaults, but it doesnt seem necessary
+    STOREPAR("PULPROG",p_program)
+    STOREPAR("D 1", d1_float)
+    XCMD(poise_cmd)
+}
+
+//did poise run?
+FETCHPAR("TI", poise_status)
+
+if (aqtest == 0)//so we are in aquire mode, test if poise has run
+{
+    if ( strcmp ( poise_status, "poise") == 0 )
+    {
+    	  Proc_err(DEF_ERR_OPT, "Poise optimisation failed because value of TI is still %s", poise_status );
+	      exit(1);
+    }
+} else {} //carry on, as we must be in test mode and dont care p1 hasn't been found)
+
+
+//Now deal with result
+FETCHPAR("P 1", &p1_opt)
+p1_opt = p1_opt/4;
+STOREPAR("P 1", p1_opt)
+if (verbose == 1) {
+    Proc_err(DEF_ERR_OPT, "Automated poise optimised value of p1: %.2f", p1_opt);
+} else {}
+
+//now lets run a 1D with new P1 value and take its sino
+    STOREPAR("pulprog", sino_pp);
+   //NOPE! GETPROSOL //make sure we do have the pulses
+    XCMD("sendgui AQ 10s"); //lets make sure its sharpish
+    STOREPAR("D 1", t1_float*2);
+    STOREPAR("NS",1);
+    STOREPAR("DS",0);
+    STOREPAR("LB",sino_lb_float);
+    ZG_OVERWRITE
+    
+    if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
+    EFP
+    XCMD("sendgui apbk")
+    XCMD("sendgui apbk -bo" )
+    }
+     else{
+     	  EFP
+        APK
+        ABS
+    }
+    sprintf(gui_cmd, "sendgui sinocal %.2f %.2f %.2f %.2f %.2f", f1p_double,f2p_double,noise_f1_double,noise_f2_double,noise_width_double);
+    XCMD(gui_cmd)
+    SINO
+    FETCHPARS("SINO", &final_sino_result)
+
+
+//next, write the result to a file. Maybe to title also.
+//Then compare p1_opt to p1_init (should be unchanged from prosol. Report if too different.
+
+sprintf( title_path_name, "%s/title", PROCPATH(0) );
+sprintf( title_text, " Original P1 = %.2f \n Poise calibrated P1 = %.2f \n Original Sino = %.2f \n Final Sino = %.2f", p1_init/4, p1_opt, initial_sino_result, final_sino_result );
+
+if (verbose == 1) {
+	   Proc_err(DEF_ERR_OPT, "Writing %s into file %s", title_text, title_path_name);
+}
+
+
+if (( title_file = fopen( title_path_name, "w")) == 0)
+{
+		Proc_err(DEF_ERR_OPT, "Cannot open title file for writing:\n%s", title_path_name);
+		exit(1);
+} else
+{
+   fputs( title_text, title_file);
+   fclose(title_file);
+}
+
+
+
+
+
+
+
+//now print to results file
+
+//sprintf( results_file_name, "%s/logfiles/%s-%s-%s", PathXWinNMRProg(), instrum_name,probe_name_trunc,method_name );
+sprintf( results_file_name, "%s%s-%s-%s", results_path, instrum_name,probe_name_trunc,method_name );
+//what the time mr wolf?
+time_t rawtime;
+
+struct tm *info;
+char time_buffer[80];
+time(&rawtime);
+
+info = localtime( &rawtime);
+strftime(time_buffer , 80, "%x,%X", info);
+
+
+if (verbose == 1) {
+	   Proc_err(DEF_ERR_OPT, "Writing %s into file %s", results_content, results_file_name);
+}
+//now write to results file in append mode.
+if ((results_file = fopen(results_file_name, "a+")) == 0)
+{
+			Proc_err(DEF_ERR_OPT, "Cannot open file for writing:\n%s", results_file_name);
+		  exit(1);
+} else {
+     sprintf( results_content, "%s,%.2f,%.2f,%.2f,%.2f,",time_buffer,p1_init/4,p1_opt,initial_sino_result,final_sino_result);
+     fputs(results_content, results_file);
+     sprintf( results_content, "%2.f,%.2f,%s,%i\n",rg_float,sino_lb_float,name,expno);
+     fputs(results_content, results_file);
+     fclose(results_file);
+}
+
+
+//Check how much p1_opt has changed from p1_init - report if too different
+deviation=((fabs(p1_opt/(p1_init/4)))*100)-100;
+if (verbose == 1) {
+	   Proc_err(DEF_ERR_OPT, " P1 has deviated by %f percent. \n P1_init=%f \n p1_opt=%f", deviation,p1_init/4,p1_opt);
+}
+
+if (deviation >= max_deviation) {
+  //do something
+}
+
+QUIT

@@ -7,13 +7,13 @@
 //#include <time.h>
 #include <inc/exptUtil>
 #include <time.h>
-
+/*
 int ts_major = GetTsVersionMajor();
 int ts_minor = GetTsVersionMinor();
 int ts_patch = GetTsVersionPl();
+*/
 
-
-int verbose=1; //set to 1 to be verbose
+int verbose=0; //set to 1 to be verbose
 
 char report_filename[PATH_MAX]="";
 sprintf( report_filename, "%s/logfiles/expt-report.csv", PathXWinNMRProg() );
@@ -43,27 +43,27 @@ time_t now_s, dtime_s, cdtime_s;     /* seconds since 1970 */
 struct tm *now;     /* structure with year, month etc. */
 
 if (verbose ==1) {
-Proc_err(INFO_OPT,"ts_major is %i \n minor %i \n patch %i",ts_major, ts_minor, ts_patch);
+//   Proc_err(INFO_OPT,"ts_major is %i \n minor %i \n patch %i",ts_major, ts_minor, ts_patch);
 }
 
 #ifdef HAS_WINDOWS_FEATURES
-if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
-  	sprintf(report_filename,"C:\\Bruker\\diskless\\prog\\logfiles\\expt-report.csv");
-   }
-  else{
+ //  if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
+   // 	sprintf(report_filename,"C:\\Bruker\\diskless\\prog\\logfiles\\expt-report.csv");
+   //}
+   //else{
       sprintf( report_filename, "%s\\logfiles\\expt-report.csv", PathXWinNMRProg() );
-   }
+   //}
 #else //Not actually checked this on linux... We have no linux xpectrometers
- 	if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
-  sprintf(report_filename,"/opt/diskless/prog/logfiles/expt-report.csv");
-  }
-   else{
+ 		//if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
+    	//sprintf(report_filename,"/opt/diskless/prog/logfiles/expt-report.csv");
+   //}
+   //else{
       sprintf( report_filename, "%s/logfiles/expt-report.csv", PathXWinNMRProg() );
-  }
+   //}
 #endif
 
 if (verbose ==1) {
-   Proc_err(INFO_OPT,"expt-report file location - %s",report_filename);
+//   Proc_err(INFO_OPT,"expt-report file location - %s",report_filename);
 }
 
 GETCURDATA
@@ -117,8 +117,6 @@ if (orig_file_pointer == NULL)
   Proc_err(DEF_ERR_OPT,"Can't open orig file - %s", orig_path);
   //  exit(1); // don't exit here, best to write something to the report probably.
   //handle/report the error though somehow
-  sprintf(group,"ORIG_FILE_ERROR"); 
-  sprintf(crsid,"ORIG_FILE_ERROR");
   sprintf(sample_name,"ORIG_FILE_ERROR");
 }
 
@@ -147,11 +145,7 @@ if (report_file_pointer == NULL)
 }
 else
 {
-  fprintf(report_file_pointer,"%s-%s-%s-%s,",group,crsid,sample_name,name);
-  fprintf(report_file_pointer,"%s,%s,%s,%s,",instrum_name, name, group, crsid);
-  fprintf(report_file_pointer,"%s,%s,%i,%s,",sample_name,experiment, date_unix, date_str);
-  fprintf(report_file_pointer,"%s,%s,%i,%s,",disk, data_path, expno, nucleus);
-  fprintf(report_file_pointer,"%s,%i,%i\n",pulse_prog, num_scans, exp_time);
+  fprintf(report_file_pointer,"%s-%s-%s,%s,%s,%s,%s,%s,%i,%s,%s,%s,%i,%s,%s,%i,%i\n", crsid,sample_name,name,instrum_name, name, group, crsid, sample_name,experiment, date_unix, date_str, disk, data_path, expno, nucleus, pulse_prog, num_scans, exp_time);
   fclose(report_file_pointer);
 }
 QUIT

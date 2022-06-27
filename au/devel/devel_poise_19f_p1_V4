@@ -58,6 +58,7 @@ char noise_f2[40];
 char noise_width[40];
 char sino_aq[8];
 char sino_lb[40];
+char sino_pp[40];
 char gui_cmd[128];
 
 double sw_double;
@@ -104,6 +105,7 @@ char default_au[40]="service_zg_efp"; //au program to aquire and process results
 //This acts as an overide for poise, for it to use default method, default need to be saved in the service_poise_19f_p1_defaults.txt AND in this variable
 char param_set_name[40]="F19";
 char param[40] = "p1";
+char p_program[40] = "zg"; //for poise
 
 if(disclaimer == 1){
 i1 = Proc_err(QUESTION_OPT,"THIS PROGRAM IS DISTRIBUTED IN THE HOPE THAT IT WILL BE USEFUL, \

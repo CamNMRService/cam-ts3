@@ -58,6 +58,7 @@ char noise_f2[40];
 char noise_width[40];
 char sino_aq[8];
 char sino_lb[40];
+char sino_pp[40];
 char gui_cmd[128];
 
 double sw_double;
@@ -104,8 +105,9 @@ char default_au[40]="service_zg_efp"; //au program to aquire and process results
 //This acts as an overide for poise, for it to use default method, default need to be saved in the service_poise_19f_p1_defaults.txt AND in this variable
 char param_set_name[40]="C13IG";
 char param[40] = "p1";
+char p_program[40] = "zgig"; //for poise
 
-if(disclaimer == 1){
+if (disclaimer == 1){
 i1 = Proc_err(QUESTION_OPT,"THIS PROGRAM IS DISTRIBUTED IN THE HOPE THAT IT WILL BE USEFUL, \
 WITHOUT ANY WARRANTY.\n IT IS PROVIDED 'AS IS' WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED,\n \
 INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTY OF FITNESS FOR A PARTICULAR PURPOSE.\n \
@@ -128,6 +130,7 @@ Remove this warning by setting disclaimer to 0 in the AU program.");
   else {
   }
 } //end of disclaimer
+
 
 //Data doesn't have instr or probehd set until an aquisition has been done.
 RPAR(param_set_name, "all")

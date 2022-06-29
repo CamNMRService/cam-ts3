@@ -1,0 +1,259 @@
+/*****************************************************************************/
+/*****************************************************************************/
+/*
+Program:  CYCalc13C
+Version:  1.0
+Author:   John Hollerton, GSK R&D
+Description:
+Calculates vertical scale setting (CY) for 1D carbon spectra 
+
+History
+
+
+V1.0 First release - 
+modified by djh35@cam.ac.uk to use PROCPATH, PATH_MAX and to try and get
+better peak picking. Not sure I've been succesful.
+Mod Jun 2022 - try and force gui CY to updade
+Lets see if we put stuff in buckets we can do better
+*/
+/*****************************************************************************/
+/*****************************************************************************/
+
+int l,i,j,isave,numpeaks,nregions,peakvalid,nmultiplets;
+float JPA[10001],JPH[10001],JPP[10001],JPI[10001],reglow[10],reghigh[10],cytmp,JY;
+float TPA[10001],TPH[10001],TPP[10001],TPI[10001];
+float AvY, sumY, peakmax, peakmin, initialcy, solvpeakmax;
+float maxcy,mincy,jmi;
+float low_bound,high_bound,test_peaki;
+float max_bucket_value=0;
+float max_bucketsum_value=0;
+float av_in_biggest_bucket=0;
+
+
+int num_of_buckets=50;
+int biggest_bucket=0;
+int num_in_buckets[10001]={0};
+float sum_in_buckets[10001]={0};
+float av_in_buckets[10001]={0}; 
+double sumHarmonic=0, harmonicMean;
+char a[PATH_MAX],del[80],*ptr, path[PATH_MAX],*fgets(),curp[20],foutname[PATH_MAX],outstr[PATH_MAX],jcmd[PATH_MAX];
+char fcsvname[PATH_MAX];
+char fbuckets_name[PATH_MAX];
+char nucleus[10],solvent[20],sreglist[60],sregpath[PATH_MAX],h1[120],h2[120],h3[120],h4[120];
+char logfile[PATH_MAX];
+char tmp_cmd[PATH_MAX];
+FILE *fptr,*fout,*flog,*fcsv,*fbuckets;//*fopen()
+
+///tmpvars
+int itmp;
+// Increase JY if you want bigger spectra (& v.v.)
+JY=19.0;
+
+// Set maximum range of CY values
+maxcy=1500.0;
+mincy=20.0;
+
+// initialcy and jmi help define what intensity of peaks are picked
+initialcy=20000.0; 
+jmi=(initialcy/1000);
+
+GETCURDATA
+
+STOREPAR("PC", 2.0)
+STOREPAR("ASSFAC", 0)
+STOREPAR("CY", initialcy)
+STOREPAR("F1P",15.0)
+STOREPAR("F2P",-0.5)
+STOREPAR("MI",jmi)
+STOREPAR("PSCAL",0)
+STOREPAR("MAXI",initialcy*4)
+
+FETCHPARS( "NUC1", nucleus )
+FETCHPARS( "SOLVENT", solvent )
+
+// Create files for filtered peaks and a log file of what went on
+//sprintf(foutname,"%s%s/%s/%d/pdata/%d/filteredpeaks.txt",disk,user,name,expno,procno);
+//sprintf(logfile,"%s/%s/%s/%d/pdata/%d/cycalc.log",disk,user,name,expno,procno)
+sprintf(foutname,PROCPATH("filteredpeaks.txt") );
+sprintf(logfile,PROCPATH("cycalc.log") );
+sprintf(fcsvname,PROCPATH("peaks.csv") );
+sprintf(fbuckets_name,PROCPATH("buckets.csv"));
+
+flog=fopen(logfile,"w");
+fout=fopen(foutname,"w");
+fprintf(flog,"JY=%f, maxcy=%f, mincy=%f, MI=%f\n",JY,maxcy,mincy,jmi);
+
+// Find and read SREG file to allow solvent regions to be ignored
+sprintf( sreglist, "%s.%s", nucleus, solvent );
+sprintf( sregpath, "%slists/scl/%s", getstan(0,0), sreglist );
+fprintf(flog,"region file = %s\n",sregpath);
+fptr=fopen(sregpath,"r");
+nregions=1;
+reglow[1]=250;
+reghigh[1]=-20;
+if (fptr!=NULL)
+{
+  fgets(a,100,fptr);
+  for(i=1;i<=10;i++)
+  {
+    if (fscanf(fptr,"%f %f",&reglow[i],&reghigh[i])<2)
+    {
+      fclose(fptr);
+      break;
+    }
+    else
+    {
+      nregions=i;
+    }
+  }
+}
+if (nregions>1) fprintf(flog,"(%d) regions read successfully\n",nregions);
+
+
+STOREPAR("PSCAL",0)
+PP;
+XCMD("sendgui convertpeaklist txt")
+// Construct path to peak pick file and open it for reading
+sprintf(path,PROCPATH("peak.txt") );
+//(void)sprintf(path,"%s%s/%s/%d/pdata/%d/peak.txt",disk,user,name,expno,procno);
+fptr=fopen(path,"r");
+if (fptr==NULL)
+  {
+  Proc_err(DEF_ERR_OPT,"peakfile not found");
+  STOREPAR("CY", 40.0)
+  fprintf(flog,"unable to open peak pick file: %s\n",path);
+  fclose(flog);
+  STOP
+  }
+//Get the peak file header information
+fgets(h1,120,fptr);
+fgets(h2,120,fptr);
+fgets(h3,120,fptr);
+fgets(h4,120,fptr);
+
+//Read the peaks from the peak pick file
+
+fcsv=fopen(fcsvname,"w");
+isave=1;
+for (i=1;i<=10000;i++)
+{
+  if(fscanf(fptr,"%*d %f %f %f %f",&JPA[isave],&JPH[isave],&JPP[isave],&JPI[isave])<3)
+     {
+     break;
+     }
+     else
+     {
+        //keep the peaks if they are not solvent peaks
+        /* lets try and keep all the peaks*/
+        /*peakvalid=0;*/
+        /*
+        for (j=1;j<=nregions;j++)
+        {
+          if ((JPP[isave]<reglow[j])&&(JPP[isave]>reghigh[j])) (peakvalid=1);
+        }
+        if (peakvalid==1) isave++;
+        */
+       fprintf(fcsv,"%i,%f,%f,%f,%f\n",isave,JPA[isave],JPH[isave],JPP[isave],JPI[isave]);
+      isave++;
+     }
+}
+//fclose(fptr);
+fclose(fcsv);
+peakmax=0.0;
+sumY=0.0;
+
+//now find the biggest peak
+for (i=1;i<=isave-1;i++)
+{
+
+  if (JPI[i]>peakmax) peakmax=JPI[i];
+}
+
+i=1;
+fcsv=fopen(fcsvname,"a");
+
+
+for (i=1;i<=(isave-1);i++)
+{
+   for (l=0;l<=(num_of_buckets-1);l++)
+   { 
+
+     low_bound=(peakmax/num_of_buckets)+((peakmax/num_of_buckets)*(l-1));
+     high_bound=(peakmax/num_of_buckets)+((peakmax/num_of_buckets)*l);
+     
+     test_peaki = JPI[i];
+     if ( (test_peaki >=  low_bound ) && (test_peaki <= high_bound ) )
+     { 
+          num_in_buckets[l]=num_in_buckets[l]+1;
+          sum_in_buckets[l]=sum_in_buckets[l]+test_peaki;
+          av_in_buckets[l]=(sum_in_buckets[l])/((float)num_in_buckets[l]);
+         //fprintf(fcsv,"%i,%i,%f,%f,%f,%i,%f\n",i,l,low_bound,high_bound,test_peaki,isave,peakmax);
+         break; 
+     }
+    //fprintf(fcsv,"%i,%i,%f,%f,%f,%i,%f\n",i,l,low_bound,high_bound,test_peaki,isave,peakmax);
+   }
+  
+}
+fclose(fcsv);
+
+//print out results
+fbuckets=fopen(fbuckets_name,"w");
+max_bucket_value=0;
+biggest_bucket=0;
+for (l=1;l<=num_of_buckets-2;l++) //ignore first and last bucket
+{
+  if( num_in_buckets[l]>=max_bucket_value){
+      max_bucket_value = num_in_buckets[l];
+      max_bucketsum_value =sum_in_buckets[l];
+      biggest_bucket = l;
+      av_in_biggest_bucket = sum_in_buckets[l]/num_in_buckets[l];
+      cytmp = initialcy/(av_in_buckets[l]/JY);
+  }
+  fprintf(fbuckets,"%i,%i,%f,%f,%f\n",l,num_in_buckets[l],sum_in_buckets[l],av_in_buckets[l],initialcy/(av_in_buckets[l]/JY));
+}
+if (max_bucket_value==0) //the peaks are so small/dynamic range so large, they must all be in the first bucket
+{
+      max_bucket_value = num_in_buckets[0];
+      max_bucketsum_value =sum_in_buckets[0];
+      biggest_bucket = 0;
+      av_in_biggest_bucket = sum_in_buckets[0]/num_in_buckets[0];
+
+}
+
+fprintf(fbuckets,"Sum of peaks in maximum bucket = %f\nValue of maximum bucket = %i\n",max_bucketsum_value,biggest_bucket);
+fprintf(fbuckets,"Average of peaks in maximum bucket = %f\n",av_in_biggest_bucket);
+
+fclose(fbuckets);
+
+if (max_bucketsum_value<1){
+   cytmp=initialcy;
+}//peaks must be *really* small
+else
+{
+   cytmp = initialcy/(av_in_biggest_bucket/JY);
+}
+// Look for peaks > 10% of average
+
+for (i=1;i<=isave;i++) {
+  // if (JPI[i]>peakmin) {
+      numpeaks++;
+      sprintf(outstr,"%6d %11.1f %12.3f %12.4f %12.2f\n",numpeaks,JPA[i],JPH[i],JPP[i],JPI[i]);
+      fputs(outstr,fout);
+   //   }
+   }
+fclose(fout);
+
+fprintf(flog,"Calculated CY value after limits applied= %f\n",cytmp);
+fclose(flog);
+sprintf(jcmd,"Calculated CY=%f",cytmp);
+Show_status(jcmd);
+STOREPAR("CY",cytmp)
+sprintf(tmp_cmd,"sendgui cy %f",cytmp);
+XCMD(tmp_cmd)
+//STOREPAR("MAXI",cytmp*4)
+STOREPAR("MI",0.5)
+sprintf(tmp_cmd,"sendgui ppf");
+XCMD(tmp_cmd)
+//STOREPAR("MAXI",cytmp*4)
+
+QUIT

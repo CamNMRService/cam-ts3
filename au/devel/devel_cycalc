@@ -28,14 +28,22 @@ float low_bound,high_bound,test_peaki;
 float max_bucket_value=0;
 float max_bucketsum_value=0;
 float av_in_biggest_bucket=0;
+float bucket_cy=0;
+float total_cy=0;
 
-
-int num_of_buckets=50;
+// initialcy and jmi help define what intensity of peaks are picked
+initialcy=20000.0; 
+jmi=(initialcy/1000);
+int num_of_buckets=10;
 int biggest_bucket=0;
+int num_peaks_all_buckets=0;
 int num_in_buckets[10001]={0};
 float sum_in_buckets[10001]={0};
 float av_in_buckets[10001]={0}; 
+float ln_prod_in_buckets[10001]={1};
+
 double sumHarmonic=0, harmonicMean;
+
 char a[PATH_MAX],del[80],*ptr, path[PATH_MAX],*fgets(),curp[20],foutname[PATH_MAX],outstr[PATH_MAX],jcmd[PATH_MAX];
 char fcsvname[PATH_MAX];
 char fbuckets_name[PATH_MAX];
@@ -53,13 +61,11 @@ JY=19.0;
 maxcy=1500.0;
 mincy=20.0;
 
-// initialcy and jmi help define what intensity of peaks are picked
-initialcy=20000.0; 
-jmi=(initialcy/1000);
+
 
 GETCURDATA
 
-STOREPAR("PC", 2.0)
+STOREPAR("PC", 4.0)
 STOREPAR("ASSFAC", 0)
 STOREPAR("CY", initialcy)
 STOREPAR("F1P",15.0)
@@ -74,10 +80,12 @@ FETCHPARS( "SOLVENT", solvent )
 // Create files for filtered peaks and a log file of what went on
 //sprintf(foutname,"%s%s/%s/%d/pdata/%d/filteredpeaks.txt",disk,user,name,expno,procno);
 //sprintf(logfile,"%s/%s/%s/%d/pdata/%d/cycalc.log",disk,user,name,expno,procno)
+sprintf(path,PROCPATH(0));
 sprintf(foutname,PROCPATH("filteredpeaks.txt") );
 sprintf(logfile,PROCPATH("cycalc.log") );
 sprintf(fcsvname,PROCPATH("peaks.csv") );
 sprintf(fbuckets_name,PROCPATH("buckets.csv"));
+sprintf(fbuckets_name,"%s/%s-buckets.csv",path,name);
 
 flog=fopen(logfile,"w");
 fout=fopen(foutname,"w");
@@ -209,8 +217,20 @@ for (l=1;l<=num_of_buckets-2;l++) //ignore first and last bucket
       av_in_biggest_bucket = sum_in_buckets[l]/num_in_buckets[l];
       cytmp = initialcy/(av_in_buckets[l]/JY);
   }
-  fprintf(fbuckets,"%i,%i,%f,%f,%f\n",l,num_in_buckets[l],sum_in_buckets[l],av_in_buckets[l],initialcy/(av_in_buckets[l]/JY));
+  if(num_in_buckets[l]>0){
+     num_peaks_all_buckets=num_peaks_all_buckets+num_in_buckets[l];
+     bucket_cy=initialcy/(av_in_buckets[l]/JY);
+     total_cy=total_cy+bucket_cy;
+     fprintf(fbuckets,"%i,%i,%f,%f,%f\n",l,num_in_buckets[l],sum_in_buckets[l],av_in_buckets[l],bucket_cy);
+  }
 }
+//now lets print first and last bucket at the end for excel completeness
+bucket_cy=initialcy/(av_in_buckets[0]/JY);
+fprintf(fbuckets,"%i,%i,%f,%f,%f\n",0,num_in_buckets[0],sum_in_buckets[0],av_in_buckets[0],bucket_cy);
+bucket_cy=initialcy/(av_in_buckets[num_of_buckets-1]/JY);
+fprintf(fbuckets,"%i,%i,%f,%f,%f\n",l,num_in_buckets[num_of_buckets-1],sum_in_buckets[num_of_buckets-1],av_in_buckets[num_of_buckets-1],bucket_cy);
+
+
 if (max_bucket_value==0) //the peaks are so small/dynamic range so large, they must all be in the first bucket
 {
       max_bucket_value = num_in_buckets[0];
@@ -230,10 +250,14 @@ if (max_bucketsum_value<1){
 }//peaks must be *really* small
 else
 {
-   cytmp = initialcy/(av_in_biggest_bucket/JY);
+   cytmp=total_cy/num_peaks_all_buckets;
+   //cytmp = initialcy/(av_in_biggest_bucket/JY);
 }
 // Look for peaks > 10% of average
+//or
 
+
+//
 for (i=1;i<=isave;i++) {
   // if (JPI[i]>peakmin) {
       numpeaks++;

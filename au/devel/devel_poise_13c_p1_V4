@@ -175,7 +175,7 @@ if (verbose ==1) {
       sprintf( results_path, "%s\\logfiles\\", PathXWinNMRProg() );
    }
 #else //Not actually checked this on linux... We have no linux xpectrometers
- 		sprintf(defaults_file_name,"/opt/cam-ts%i/poise/service_poise_13c_p1_defaults_s-%s-%s.txt",ts_major,au_version,instrum_name,probe_name_trunc);
+ 		sprintf(defaults_file_name,"/opt/cam-ts%i/poise/service_poise_13c_p1_defaults_%s-%s-%s.txt",ts_major,au_version,instrum_name,probe_name_trunc);
  		if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
     	sprintf(results_path,"/opt/diskless/prog/logfiles/");
    }
@@ -192,7 +192,8 @@ if (defaults_file == NULL)
   Proc_err(DEF_ERR_OPT,"can't open file - %s", defaults_file_name);
   err = Proc_err(QUESTION_OPT,"The file %s might not exist, would you like to try and create a default one?", defaults_file_name);
   if (err == 0) {
-    XAU("devel_create_poise_13c_file_V3",defaults_file_name)
+    sprintf(tmp_str,"devel_create_poise_13c_file_%s",au_version);
+    XAU(tmp_str,defaults_file_name)
     sprintf( tmp_str,"Defaults file created - %s \n You may need to return to original dataset out of a junk one.",defaults_file_name);
     STOPMSG(tmp_str)
     //exit(1);

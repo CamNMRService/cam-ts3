@@ -7,6 +7,11 @@
 /* And use per instrument/probe defaults_file*/
 
 //devel_poise_1h_p1
+/*V4 - use au version for defaults file name
+add disclaimer
+exit more usefully with STOPMSG
+*/
+
 #include <stdio.h>
 #include <time.h>
 
@@ -60,6 +65,8 @@ char sino_aq[8];
 char gui_cmd[128];
 char sino_lb[40];
 char sino_pp[40];
+char tmp_str[PATH_MAX];
+
 double sw_double;
 double o1_ppm_double;
 double o1_hz_double;
@@ -67,10 +74,10 @@ double sfo1;
 double f1p_double;
 double f2p_double;
 double deviation;
-
 double noise_f1_double=10.0;
 double noise_f2_double=8.0;
 double noise_width_double=0.2;
+
 float rg_float=1.1;
 float d1_float;
 float t1_float=1.234;
@@ -97,6 +104,8 @@ Proc_err(INFO_OPT,"ts_major is %i \n minor %i \n patch %i",ts_major, ts_minor, t
 //verbose == 0 disclaimer == 0 is no output
 int verbose = 1;
 int disclaimer = 1; 
+//Version - the version of this AU program, to ensure defaults files used are of the correct version
+char au_version[8] ="V4";
 //set aqtest = 0 to issue aquisition commands to the spectrometer
 int aqtest = 0; // !=0 == test mode ==0 for aquire mode
 char method_name[40]="poise_auto_p1_1h"; //poise method name to create for calibration. Also used for results filename.
@@ -105,10 +114,6 @@ char default_au[40]="service_zg_efp"; //au program to aquire and process results
 char param_set_name[40]="PROTON";
 char param[40] = "p1";
 char p_program[40] = "zg"; //for poise
-
-
-
-
 
 if(disclaimer == 1){
 i1 = Proc_err(QUESTION_OPT,"THIS PROGRAM IS DISTRIBUTED IN THE HOPE THAT IT WILL BE USEFUL, \
@@ -133,6 +138,7 @@ Remove this warning by setting disclaimer to 0 in the AU program.");
   else {
   }
 } //end of disclaimer
+
 
 //Data doesn't have instr or probehd set until an aquisition has been done.
 RPAR(param_set_name, "all")
@@ -160,7 +166,7 @@ if (verbose ==1) {
 }
 
 #ifdef HAS_WINDOWS_FEATURES
-   sprintf(defaults_file_name,"C:\\Bruker\\cam-ts%i\\poise\\service_poise_1h_p1_defaults-%s-%s.txt",ts_major,instrum_name,probe_name_trunc);
+   sprintf(defaults_file_name,"C:\\Bruker\\cam-ts%i\\poise\\service_poise_1h_p1_defaults_%s-%s-%s.txt",ts_major,au_version,instrum_name,probe_name_trunc);
    // Also need a place for the results to go. I'm thinking same place as the helium log will suit us.
    if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
     	sprintf(results_path,"C:\\Bruker\\diskless\\prog\\logfiles\\");
@@ -169,7 +175,7 @@ if (verbose ==1) {
       sprintf( results_path, "%s\\logfiles\\", PathXWinNMRProg() );
    }
 #else //Not actually checked this on linux... We have no linux xpectrometers
- 		sprintf(defaults_file_name,"/opt/cam-ts%i/poise/service_poise_1h_p1_defaults-%s-%s.txt",ts_major,instrum_name,probe_name_trunc);
+ 		sprintf(defaults_file_name,"/opt/cam-ts%i/poise/service_poise_1h_p1_defaults_%s-%s-%s.txt",ts_major,au_version,instrum_name,probe_name_trunc);
  		if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
     	sprintf(results_path,"/opt/diskless/prog/logfiles/");
    }
@@ -186,8 +192,11 @@ if (defaults_file == NULL)
   Proc_err(DEF_ERR_OPT,"can't open file - %s", defaults_file_name);
   err = Proc_err(QUESTION_OPT,"The file %s might not exist, would you like to try and create a default one?", defaults_file_name);
   if (err == 0) {
-    XAU("devel_create_poise_1h_file_V3",defaults_file_name)
-    exit(1);
+    sprintf(tmp_str,"devel_create_poise_1h_file_%s",au_version);
+    XAU(tmp_str,defaults_file_name)
+    sprintf( tmp_str,"Defaults file created - %s \n You may need to return to original dataset out of a junk one.",defaults_file_name);
+    STOPMSG(tmp_str)
+    //exit(1);
   }
   else {
     exit(1);

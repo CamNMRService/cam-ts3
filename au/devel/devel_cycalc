@@ -231,7 +231,7 @@ bucket_cy=initialcy/(av_in_buckets[num_of_buckets-1]/JY);
 fprintf(fbuckets,"%i,%i,%f,%f,%f\n",l,num_in_buckets[num_of_buckets-1],sum_in_buckets[num_of_buckets-1],av_in_buckets[num_of_buckets-1],bucket_cy);
 
 
-if (max_bucket_value==0) //the peaks are so small/dynamic range so large, they must all be in the first bucket
+if (max_bucket_value==0) //the peaks are so small/dynamic range so large, they must all be in the first bucket -from num_in_buckets[l]>=max_bucket_value
 {
       max_bucket_value = num_in_buckets[0];
       max_bucketsum_value =sum_in_buckets[0];

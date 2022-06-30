@@ -7,6 +7,11 @@
 /* And use per instrument/probe defaults_file*/
 
 //devel_poise_13c_p1
+/*V4 - use au version for defaults file name
+add disclaimer
+exit more usefully with STOPMSG
+*/
+
 #include <stdio.h>
 #include <time.h>
 
@@ -60,6 +65,7 @@ char sino_aq[8];
 char sino_lb[40];
 char sino_pp[40];
 char gui_cmd[128];
+char tmp_str[PATH_MAX];
 
 double sw_double;
 double o1_ppm_double;
@@ -187,7 +193,9 @@ if (defaults_file == NULL)
   err = Proc_err(QUESTION_OPT,"The file %s might not exist, would you like to try and create a default one?", defaults_file_name);
   if (err == 0) {
     XAU("devel_create_poise_13c_file_V3",defaults_file_name)
-    exit(1);
+    sprintf( tmp_str,"Defaults file created - %s \n You need to return to origianl dataset out of this junk one.",defaults_file_name);
+    STOPMSG(tmp_str)
+    //exit(1);
   }
   else {
     exit(1);

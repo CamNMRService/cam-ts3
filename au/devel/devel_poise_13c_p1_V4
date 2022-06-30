@@ -193,7 +193,7 @@ if (defaults_file == NULL)
   err = Proc_err(QUESTION_OPT,"The file %s might not exist, would you like to try and create a default one?", defaults_file_name);
   if (err == 0) {
     XAU("devel_create_poise_13c_file_V3",defaults_file_name)
-    sprintf( tmp_str,"Defaults file created - %s \n You need to return to origianl dataset out of this junk one.",defaults_file_name);
+    sprintf( tmp_str,"Defaults file created - %s \n You may need to return to original dataset out of a junk one.",defaults_file_name);
     STOPMSG(tmp_str)
     //exit(1);
   }

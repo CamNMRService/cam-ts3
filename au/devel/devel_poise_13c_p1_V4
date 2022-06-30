@@ -139,7 +139,6 @@ Remove this warning by setting disclaimer to 0 in the AU program.");
   }
 } //end of disclaimer
 
-
 //Data doesn't have instr or probehd set until an aquisition has been done.
 RPAR(param_set_name, "all")
 STOREPAR("PULPROG", p_program)

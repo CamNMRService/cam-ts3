@@ -1,11 +1,14 @@
 /*Used to create a default file*/
 /*devel_create_poise_31p_file*/
 
-//  For V3 :-
-//For 1H as an example, the files should contain the numbers (see create_poise_NUC):-
+/  For V3 :-
+//For CH2Cl2 as an example, the files should contain the numbers (see create_poise_NUC):-
 // 12,5.4,6,5,8,8,50,60,0.2,minabsint,default,8,10,8,0.2,10s,1,zg30//
 //which are :-
 //SW,O1P,P1 peak ppm UB,P1 peak ppm  HB,RG,T1,Poise P1 % LB,Poise P1 % UB,Poise Tolerance,Poise calc method,poise aquisistion/processing program,Sino T!,Sino noise  F1,Sino Noise F2,Sino noise width,Sino AQ time,Sino LB,Sino PP
+/*V4 - add disclaimer*/
+
+/*add version info to defaults file*/
 
 char defaults_file_name[PATH_MAX];
 char param_set_name[PATH_MAX]="P31CPD";
@@ -41,18 +44,45 @@ float sino_lb_float=3.0;
 
 char sino_pp[40]="zgig30";
 char repo_name[40]="cam-ts"; //set to name of your repository
+char au_version[8]="V4";
 
 int ts_major = GetTsVersionMajor();
 int ts_minor = GetTsVersionMinor();
 int ts_patch = GetTsVersionPl();
 
+int disclaimer = 1;
+
+if(disclaimer == 1){
+i1 = Proc_err(QUESTION_OPT,"THIS PROGRAM IS DISTRIBUTED IN THE HOPE THAT IT WILL BE USEFUL, \
+WITHOUT ANY WARRANTY.\n IT IS PROVIDED 'AS IS' WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED,\n \
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTY OF FITNESS FOR A PARTICULAR PURPOSE.\n \
+THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU.\n \
+SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING,\n \
+REPAIR OR CORRECTION.\n\n \
+IN NO EVENT WILL THE AUTHOR BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL,\n \
+SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY\n \
+TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING RENDERED\n \
+INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM\n \
+TO OPERATE WITH ANY OTHER PROGRAMS), EVEN IF THE AUTHOR HAS BEEN ADVISED OF THE \n \
+POSSIBILITY OF SUCH DAMAGES.\n\n \
+Click OK to agree and continue. \nClick cancel to disagree.\n\n \
+Remove this warning by setting disclaimer to 0 in the AU program.");
+
+   if ( i1 == ERR_CANCEL )
+  {
+      ABORT
+   }
+  else {
+  }
+} //end of disclaimer
+
 GETCURDATA
 
 
 #ifdef HAS_WINDOWS_FEATURES
-   sprintf(defaults_file_name,"C:\\Bruker\\%s%i\\poise\\service_poise_31p_p1_defaults",repo_name,ts_major);
+   sprintf(defaults_file_name,"C:\\Bruker\\%s%i\\poise\\service_poise_31p_p1_defaults_%s",repo_name,ts_major,au_version);
 #else //Not actually checked this on linux... We have no linux solution-state spectrometers
- 		sprintf(defaults_file_name,"/opt/%s%i/poise/service_poise_1h_31p_defaults",repo_name,ts_major);
+ 		sprintf(defaults_file_name,"/opt/%s%i/poise/service_poise_1h_31p_defaults_%s",repo_name,ts_major,au_version);
 #endif
 
 if (i_argc == 3 ) {

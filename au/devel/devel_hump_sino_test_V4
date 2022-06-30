@@ -3,6 +3,8 @@
 /* djh35, June 22*/
 /*now takes LB and AQ for sino*/
 /*V4 - Add disclaimer*/
+/*Use STOPMSG to exit more usefully*/
+/* add version check to reading/creating defaults file*/
 
 
 #include <stdio.h>
@@ -17,6 +19,7 @@ char* str_probe;
 char probe_id[40];
 char probe_nickname[40];
 char results_path[PATH_MAX];
+char tmp_str[PATH_MAX];
 
 Proc_err(INFO_OPT,"ts_major is %i \n minor %i \n patch %i",ts_major, ts_minor, ts_patch);
 
@@ -28,6 +31,8 @@ Proc_err(INFO_OPT,"ts_major is %i \n minor %i \n patch %i",ts_major, ts_minor, t
 
 int verbose = 1;
 int disclaimer = 1;
+//Version - the version of this AU program, to ensure defaults files used are of the correct version
+char au_version[8] ="V4";
 //set aqtest = 0 to issue aquisition commands to the spectrometer
 int aqtest = 0; // !=0 == test mode ==0 for aquire mode
 char default_au[40]="service_zg_efp"; //au program to aquire and process results. Set to default for default method within poise.
@@ -60,7 +65,7 @@ Remove this warning by setting disclaimer to 0 in the AU program.");
   }
 } //end of disclaimer
 #ifdef HAS_WINDOWS_FEATURES
-   sprintf(defaults_file_name,"C:\\Bruker\\cam-ts%i\\poise\\service_hump_sino_1h_defaults",ts_major);
+   sprintf(defaults_file_name,"C:\\Bruker\\cam-ts%i\\poise\\service_hump_sino_1h_defaults_%s",ts_major,au_version);
    // Also need a place for the results to go. I'm thinking same place as the helium log will suit us.
    if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
     	sprintf(results_path,"C:\\Bruker\\diskless\\prog\\logfiles\\");
@@ -69,7 +74,7 @@ Remove this warning by setting disclaimer to 0 in the AU program.");
       sprintf( results_path, "%s\\logfiles\\", PathXWinNMRProg() );
    }
 #else //Not actually checked this on linux... We have no linux xpectrometers
- 		sprintf(defaults_file_name,"/opt/cam-ts%i/poise/service_hump_sino_1h_defaults",ts_major);
+ 		sprintf(defaults_file_name,"/opt/cam-ts%i/poise/service_hump_sino_1h_defaults_%s",ts_major,au_version);
  		if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
     	sprintf(results_path,"/opt/diskless/prog/logfiles/");
    }
@@ -181,15 +186,17 @@ if (verbose ==1) {
 
 sprintf( defaults_file_name,"%s-%s-%s.txt",defaults_file_name,instrum_name,probe_name_trunc);
 //Get the defaults content
-Proc_err(DEF_ERR_OPT,"Got to 156");
+
 defaults_file = fopen (defaults_file_name,"r");
 if (defaults_file == NULL)
 {
 	Proc_err(DEF_ERR_OPT,"can't open file - %s", defaults_file_name);
   err = Proc_err(QUESTION_OPT,"The file %s might not exist, would you like to try and create a default one?", defaults_file_name);
   if (err == 0) {
-    XAU("devel_create_hump_sino_file_V3",defaults_file_name)
-    exit(1);
+    XAU("devel_create_hump_sino_file_V4",defaults_file_name)
+    sprintf( tmp_str,"Defaults file created - %s \n You need to return to origianl dataset out of this junk one.",defaults_file_name);
+    STOPMSG(tmp_str)
+    //exit(1);
   }
   else {
 	  exit(1);

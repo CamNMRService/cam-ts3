@@ -1,5 +1,8 @@
 /*Used to create a default file*/
 /*devel_create_hump_sino_file*/
+/*V4 - add disclaimer*/
+
+/*add version info to defaults file*/
 
 
 char defaults_file_name[PATH_MAX];
@@ -31,6 +34,7 @@ char sino_aq[8]="10s";
 char sino_pp[40]="zg30";
 
 char repo_name[40]="cam-ts"; //Set this to be the name of your repository
+char au_version[8]="V4"; //used to ensure defaults file used is correct for this version of the au program
 
 int ts_major = GetTsVersionMajor();
 int ts_minor = GetTsVersionMinor();
@@ -65,9 +69,9 @@ Remove this warning by setting disclaimer to 0 in the AU program.");
 GETCURDATA
 
 #ifdef HAS_WINDOWS_FEATURES
-   sprintf(defaults_file_name,"C:\\Bruker\\%s%i\\poise\\service_hump_sino_1h_defaults",repo_name,ts_major);
+   sprintf(defaults_file_name,"C:\\Bruker\\%s%i\\poise\\service_hump_sino_1h_defaults_%s",repo_name,ts_major,au_version);
 #else //Not actually checked this on linux... We have no linux xpectrometers
- 		sprintf(defaults_file_name,"/opt/%s%i/poise/service_hump_sino_1h_defaults",repo_name,ts_major);
+ 		sprintf(defaults_file_name,"/opt/%s%i/poise/service_hump_sino_1h_defaults_%s",repo_name,ts_major,au_version);
 #endif
 
 if (i_argc == 3 ) {

@@ -6,6 +6,9 @@
 // 12,5.4,6,5,8,8,50,60,0.2,minabsint,default,8,10,8,0.2,10s,1,zg30//
 //which are :-
 //SW,O1P,P1 peak ppm UB,P1 peak ppm  HB,RG,T1,Poise P1 % LB,Poise P1 % UB,Poise Tolerance,Poise calc method,poise aquisistion/processing program,Sino T!,Sino noise  F1,Sino Noise F2,Sino noise width,Sino AQ time,Sino LB,Sino PP
+/*V4 - add disclaimer*/
+
+/*add version info to defaults file*/
 
 char defaults_file_name[PATH_MAX];
 char param_set_name[PATH_MAX]="C13IG";
@@ -42,6 +45,7 @@ float sino_lb_float=3.0;
 
 char sino_pp[40]="zgig30";
 char repo_name[40]="cam-ts"; //set to name of your repository
+char au_version[8]="V4";
 
 int ts_major = GetTsVersionMajor();
 int ts_minor = GetTsVersionMinor();
@@ -76,9 +80,9 @@ Remove this warning by setting disclaimer to 0 in the AU program.");
 GETCURDATA
 
 #ifdef HAS_WINDOWS_FEATURES
-   sprintf(defaults_file_name,"C:\\Bruker\\%s%i\\poise\\service_poise_13c_p1_defaults",repo_name,ts_major);
+   sprintf(defaults_file_name,"C:\\Bruker\\%s%i\\poise\\service_poise_13c_p1_defaults_%s",repo_name,ts_major,au_version);
 #else //Not actually checked this on linux... We have no linux solution-state spectrometers
- 		sprintf(defaults_file_name,"/opt/%s%i/poise/service_poise_13c_p1_defaults",repo_name,ts_major);
+ 		sprintf(defaults_file_name,"/opt/%s%i/poise/service_poise_13c_p1_defaults_%s",repo_name,ts_major,au_version);
 #endif
 
 if (i_argc == 3 ) {

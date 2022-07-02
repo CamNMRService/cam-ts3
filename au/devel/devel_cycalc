@@ -231,19 +231,6 @@ bucket_cy=initialcy/(av_in_buckets[num_of_buckets-1]/JY);
 fprintf(fbuckets,"%i,%i,%f,%f,%f\n",l,num_in_buckets[num_of_buckets-1],sum_in_buckets[num_of_buckets-1],av_in_buckets[num_of_buckets-1],bucket_cy);
 
 
-if (max_bucket_value==0) //the peaks are so small/dynamic range so large, they must all be in the first bucket -from num_in_buckets[l]>=max_bucket_value
-{
-      max_bucket_value = num_in_buckets[0];
-      max_bucketsum_value =sum_in_buckets[0];
-      biggest_bucket = 0;
-      av_in_biggest_bucket = sum_in_buckets[0]/num_in_buckets[0];
-
-}
-
-fprintf(fbuckets,"Sum of peaks in maximum bucket = %f\nValue of maximum bucket = %i\n",max_bucketsum_value,biggest_bucket);
-fprintf(fbuckets,"Average of peaks in maximum bucket = %f\n",av_in_biggest_bucket);
-
-fclose(fbuckets);
 
 if (max_bucketsum_value<1){
    cytmp=initialcy;
@@ -253,9 +240,22 @@ else
    cytmp=total_cy/num_peaks_all_buckets;
    //cytmp = initialcy/(av_in_biggest_bucket/JY);
 }
-// Look for peaks > 10% of average
-//or
 
+if (biggest_bucket==0) //the peaks are so small/dynamic range so large, they must all be in the first bucket -from num_in_buckets[l]>=max_bucket_value
+{
+     max_bucket_value = num_in_buckets[0];
+     max_bucketsum_value =sum_in_buckets[0];
+     biggest_bucket = 0;
+     av_in_biggest_bucket = sum_in_buckets[0]/num_in_buckets[0];
+     //cytmp=initialcy;
+     cytmp = initialcy/(av_in_biggest_bucket/JY);
+}
+
+fprintf(fbuckets,"Sum of peaks in maximum bucket = %f\nValue of maximum bucket = %i\n",max_bucketsum_value,biggest_bucket);
+fprintf(fbuckets,"Average of peaks in maximum bucket = %f\n",av_in_biggest_bucket);
+fprintf(fbuckets,"Calculated CY = %f",cytmp)
+
+fclose(fbuckets);
 
 //
 for (i=1;i<=isave;i++) {

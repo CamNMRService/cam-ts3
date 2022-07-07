@@ -100,6 +100,7 @@ Proc_err(INFO_OPT,"ts_major is %i \n minor %i \n patch %i",ts_major, ts_minor, t
 
 /*!!!!VARIABLES THAT NEED TO BE SET!!!!*/
 /********************************/
+char repo_name[40]="cam-ts"; //Set this to be the name of your repository
 //Handlly print out what its doing as it goes along. Can change to output diff levels of verbosity. (in future)
 //verbose == 0 disclaimer == 0 is no output
 int verbose = 1;
@@ -166,7 +167,7 @@ if (verbose ==1) {
 }
 
 #ifdef HAS_WINDOWS_FEATURES
-   sprintf(defaults_file_name,"C:\\Bruker\\cam-ts%i\\poise\\service_poise_1h_p1_defaults_%s-%s-%s.txt",ts_major,au_version,instrum_name,probe_name_trunc);
+   sprintf(defaults_file_name,"C:\\Bruker\\%s%i\\poise\\service_poise_1h_p1_defaults_%s-%s-%s.txt",repo_name,ts_major,au_version,instrum_name,probe_name_trunc);
    // Also need a place for the results to go. I'm thinking same place as the helium log will suit us.
    if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
     	sprintf(results_path,"C:\\Bruker\\diskless\\prog\\logfiles\\");
@@ -175,7 +176,7 @@ if (verbose ==1) {
       sprintf( results_path, "%s\\logfiles\\", PathXWinNMRProg() );
    }
 #else //Not actually checked this on linux... We have no linux xpectrometers
- 		sprintf(defaults_file_name,"/opt/cam-ts%i/poise/service_poise_1h_p1_defaults_%s-%s-%s.txt",ts_major,au_version,instrum_name,probe_name_trunc);
+ 		sprintf(defaults_file_name,"/opt/%s%i/poise/service_poise_1h_p1_defaults_%s-%s-%s.txt",repo_name,ts_major,au_version,instrum_name,probe_name_trunc);
  		if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
     	sprintf(results_path,"/opt/diskless/prog/logfiles/");
    }

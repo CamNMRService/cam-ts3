@@ -315,8 +315,8 @@ if (aqtest == 0)
         }
 }
 
-XAU("djh-humpcal","")
-
+//XAU("djh-humpcal","") //I've found sometimes I've had to change parameters and roll my own humpcal
+XAU("humpcal","")
 //Get the humpcal results
 strcpy(hump_file_path, PROCPATH("humpcal.txt"));
 if ( ( hump_file = fopen (hump_file_path, "r") ) == NULL)

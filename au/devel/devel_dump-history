@@ -1,0 +1,59 @@
+    FILE * input_file;
+    FILE * output_file;
+    char line[1024];
+    char input_filename[PATH_MAX] = "";
+    char output_filename[PATH_MAX] = "";
+    char user_name[255] = "chemist";
+    size_t len = 0;
+    ssize_t read;
+    int line_len = 1024;
+    int num_lines = 0;
+    int total_lines = 0;
+    int saved_lines = 32;
+
+    GETCURDATA
+    sprintf( output_filename,"%s\\recent_history.txt",ACQUPATH(0) );
+    sprintf( input_filename,"%s\\curdir\\%s\\history_j.txt",PathXWinNMRProg(),user_name ); 
+    Proc_err (INFO_OPT, "input filename is %s", input_filename);
+    input_file = fopen(input_filename, "r");
+    if (input_file == NULL)
+        STOPMSG("failed to open file");
+
+    while ((read = fgets(line, line_len, input_file)) != NULL) {
+     //   printf("Retrieved line of length %zu:\n", read);
+     //Proc_err (INFO_OPT, "%s", line);
+     total_lines++;
+    }
+    Proc_err(INFO_OPT,"number of lines read from history_j = %i",total_lines);
+    fclose(input_file);
+
+    if (total_lines < saved_lines){
+       saved_lines=total_lines;
+    }
+    
+    input_file = fopen(input_filename, "r");
+    if (input_file == NULL)
+        STOPMSG("failed to open file");
+
+    num_lines = 0;
+    output_file = fopen(output_filename,"w");
+    if (output_file == NULL)
+        STOPMSG("failed to open file");
+ 
+     while ((read = fgets(line, line_len, input_file)) != NULL) {
+     //Proc_err (INFO_OPT, "%s", line);
+     if ( (num_lines >= (total_lines - saved_lines) ) )
+     {
+        fputs( line, output_file);
+     }
+      num_lines++;
+    // if (num_lines >= saved_lines){
+    // 	break;
+    // }
+    }
+    fclose(input_file);
+    fclose(output_file);
+ 
+    if (line)
+        free(line);
+   QUIT

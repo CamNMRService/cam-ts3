@@ -8,7 +8,9 @@
     char line[1024];
     char input_filename[PATH_MAX] = "";
     char output_filename[PATH_MAX] = "";
-    char user_name[255] = "duncanhowe";
+    char user_name[255] = "chemist"; // 
+    // don't know why  sprintf( input_filename,"%s\\curdir\\%s\\history_j.txt",PathXWinNMRProg(),user );
+    //inserts a blank.
     size_t len = 0;
     ssize_t read;
     int line_len = 1024;
@@ -21,6 +23,7 @@
        saved_lines = atoi(str_saved_lines);
      }
     GETCURDATA
+    VIEWDATA_SAMEWIN
     #ifdef HAS_WINDOWS_FEATURES
     sprintf( output_filename,"%s\\recent_history.txt",ACQUPATH(0) );
     sprintf( input_filename,"%s\\curdir\\%s\\history_j.txt",PathXWinNMRProg(),user_name ); 

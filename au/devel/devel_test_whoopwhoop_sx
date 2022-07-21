@@ -1,21 +1,57 @@
 /*sample submission software trying to overwrite a V/Z number*/
 
-char snamepath[255];
+char recent_hist_path[PATH_MAX];
+FILE *recent_hist_file = NULL;
+FILE *fbat = NULL;
+char instrum_name[255]="spect";
+char instrum_name_trunc[255]="spect";
 char password[255]="esbnrinuhltzukoi";
 char email_to[255]="nmr@ch.cam.ac.uk";
-char title[255]="GLENFAIRN SAMPLECHANGER ERROR";
-char body[1023];
+char title[255]="LAPHROIAG JANUS ERROR";
+char body[1023]="WHOOP WHOOP!!! janus problem";
 char email_from[255]="camnmrservice@gmail.com";
 char batfile[PATH_MAX]="c:\\windows\\top-copy.bat";
 char batcmd[PATH_MAX]="c:\\windows\\top-copy.bat";
-FILE *fbat = NULL;
+
 char cmd_str[1024];
+int i=0;
+char num_lines[7]="256"; //number of lines at end of history to dump has to be a string!	
 
-FILE  *sname = NULL;
 
-sprintf(body,"THIS IS A TEST CALL OF WHOOP WHOOP!!! Samplechanger failure, position %s", cmd);
-sprintf (cmd_str, "sendemail -f %s -t %s -u %s -m %s -s smtp.gmail.com:587 -o tls=yes -xu %s -xp %s", email_from,  email_to, title, body, email_from, password);
-Proc_err(INFO_OPT,"calling sendemail with %s",cmd_str);
+
+GETCURDATA
+FETCHPARS("INSTRUM", instrum_name)
+  Proc_err (INFO_OPT, "instrum_name - %s", instrum_name);
+i=0;
+while (i < strlen(instrum_name) )
+{
+   if ( ( instrum_name[i] >= 'A' && instrum_name[i] <= 'Z' ) || ( instrum_name[i] >= 'a' && instrum_name[i] <= 'z' ) || ( instrum_name[i] >= '0' && instrum_name[i] <= '9' ) ) 
+   {
+      instrum_name_trunc[i]=instrum_name[i];
+   } else {
+       instrum_name_trunc[i]='_';}
+   i++;
+}
+Proc_err (INFO_OPT, "instrum_name_trunc - %s", instrum_name_trunc);
+
+sprintf(body,"WHOOP WHOOP!!! Problem with Janus on instrument %s position %s", instrum_name, cmd);
+
+Proc_err (INFO_OPT, "instrum_name_trunc - %s", instrum_name_trunc);
+Proc_err (INFO_OPT, "body - %s", body);
+XAU( "test_dump-history", num_lines);
+sprintf(recent_hist_path,"%s\\recent_history.txt",ACQUPATH(0) );
+Proc_err (INFO_OPT, "recent_hist_path - %s", recent_hist_path);
+recent_hist_file = fopen(recent_hist_path, "r");
+    if (recent_hist_file == NULL)
+    {
+       sprintf (cmd_str, "sendemail -f %s -t %s -u %s -m %s -s smtp.gmail.com:587 -o tls=yes -xu %s -xp %s", email_from,  email_to, title, body, email_from, password);
+    }
+    else
+    {
+         sprintf (cmd_str, "sendemail -f %s -t %s -u %s -m %s -a %s -s smtp.gmail.com:587 -o tls=yes -xu %s -xp %s", email_from,  email_to, title, body, recent_hist_path, email_from, password); 
+    }
+fclose(recent_hist_file);
+Proc_err (INFO_OPT, "cmd_str - %s", cmd_str);
 fbat = fopen(batfile, "w");
 fputs( cmd_str, fbat);
 fclose( fbat);

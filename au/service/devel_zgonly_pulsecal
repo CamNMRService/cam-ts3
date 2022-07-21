@@ -1,0 +1,9 @@
+GETCURDATA
+
+//XAU("djh-find-o1","");
+
+XAU("pulsecal", "quiet fast");
+//RGA
+ZG
+
+QUIT

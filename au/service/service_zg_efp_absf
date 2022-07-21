@@ -1,0 +1,12 @@
+// using F1P and F2P for absf
+double f1p, f2p;
+float delay=0.1;
+ZG_OVERWRITE
+EFP
+sleep(2);
+FETCHPAR("F1P", &f1p)
+FETCHPAR("F2P", &f2p)
+STOREPAR("ABSF1", f1p)
+STOREPAR("ABSF2", f2p)
+ABSF
+QUIT

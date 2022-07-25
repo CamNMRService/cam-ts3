@@ -1,0 +1,679 @@
+/*--------------------------------------------------------------*/
+/* Title	: Program janus4_sx				*/
+/* WORK IN PROGRESS TO UPDATE TO TOPSPIN 3			*/
+/* Topspin 3 update done by djh in cambridge*/
+/*major source deviations; no longer part of janus gsk development*/
+/* Date		: 02-Aug-2001					*/
+/* Version	: 1.0 - Version for Janus4 front-end		*/
+/* Author	: John Hollerton				*/
+/* Contents	: Main program					*/
+/*--------------------------------------------------------------*/
+/* Description	:						*/
+/*		  Controls Bruker sample changer for XWin-NMR 	*/
+/*		  with JCH PC control program.			*/
+/*								*/
+/* External module : None.					*/
+/* Internal module : None.					*/
+/*								*/
+/* This revision reads the defaults from a file...		*/
+/* This version works on IRIX6.5 or later only!!!!		*/
+/* ...it also works in XWinNMR 2.5 or later only!!!!		*/
+/*--------------------------------------------------------------*/
+/*Incidentals							*/
+/*check length of char variables assignments			*/
+/*MILESTONES*/
+/*1-10-13 - Removed hardwire file references; soft wired to use defaults file*/
+/*the location of this defaults file *MUST* be set.*/
+
+/*Set up output to either :-			*/
+/*1 - Process nothing				*/
+/*2 - Print and email everything		*/
+/*3 - Email processed data			*/
+/*4 - Print and don't email			*/
+
+/* write this choice to a file to inform the processing au program */
+/*Done the write to file. Next to make janus_sx read this file to determine what to do*/
+/*write a procedure to read pornot file and return the integer value of its content*/
+
+/*if it can't be read, error and return 1				*/
+/*done the write of the procedure*/
+/*TO DO*/
+/*write processing errors to an error file*/
+
+/* at the end of each spectrum, if its not 1, process the spectrum	*/
+/* in the processing au file, read pornot and if its 2 or 4, plot the spectrum*/
+/* and the end of all the spectra in a sample, if its 2 or 3, email the data*/
+/*after that get the reprocessing queue software to take that into account*/
+/*if the processing queue software is run, the value in pornot must set to 1*/
+
+/*changed reading and format of defaults file to use csv*/
+/*current state :- compiles; appears to run ok*/
+
+/*Proc_err(INFO_OPT,"Right at the beginning!");*/
+/*sleep(delaytime);*/
+
+/*Set default file location and settings*/
+/* 220125 patch by djh to not do atma for 1h */
+
+//20220606 added getprosol
+/****************************************/
+/*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
+char def_file[255]="d:/chemist/defaults-csv.txt"; //janus software defaults
+float   delaytime=1.0;
+int     expt=1, curloop=1, cpos, specno, jexpt, jsolv, finish=FALSE,i=1;
+int     LastSample, FatalError=FALSE, nexpt, parmo, proderrcount, sthou;
+int     skipsample, pid, x, proc_or_not=0;
+
+char    oi[80], juser[50], suser[40], in_data[1024], tmp_fname[1024];
+char    shimfile[80], acqufile[80];
+char    experiment[155], solvent[40], tunefile[40], sxfile[80];
+char    tmp_str[180], titlefile[80], titletext[80];
+char    exptfile[80], diskunit[40];
+char    prefix[40], shimset[40], defaultsfile[80], hdwerr[80];
+char    archpath[80], archive[20], jcmd_str[1024], outpath[1024];
+char    janusup[80], expttime[40], exptsfile[80], protocol[80];
+char    sxcmd[80], gradshim[20], comments[1024], command[1024], snostr[1024], tmpcmd[256];
+char    statusstr[1024], awmfile[80],tmparchpath[1024],fidpath[1024],procau[1024];
+char	proclist[1024],procinstruct[1024];
+
+char   *env_name, *file_data, *field, *ed;
+FILE   *fprod = NULL, *facqu = NULL, *ferror = NULL, *fwarn = NULL;
+FILE   *fshim = NULL, *fwait = NULL, *ftitle = NULL, *fsx = NULL;
+FILE   *fexpt = NULL, *fprot = NULL, *flog = NULL, *fdef = NULL;
+FILE   *fjup = NULL, *fexpts = NULL, *pidfile = NULL, *fawm = NULL;
+FILE  *sname = NULL;
+FILE 	*fbat=NULL;
+FILE	*plist=NULL;
+FILE	*pornot=NULL;
+
+char  samplename[80], snamefile[255];
+
+
+/*--- Assign filenames for signalling etc.----------------------*/
+
+char batfile[127],batcmd[127];
+char prodfile[255];
+char prodfiletxt[255];
+char errorfile[255];
+char warnfile[255];
+char waitfile[255];
+char protfile[255];
+char pornotfile[255];
+char logfile[255];
+
+char email[80]="camnmrservice@gmail.com";
+int get_proc_or_not_val(FILE *pornot);
+
+time_t lt;
+
+GETCURDATA;
+while ((proc_or_not < 1) || (proc_or_not > 4))
+{
+	Proc_err(DEF_ERR_OPT,"Control wheter or not we print. Enter :-\n 1. for no processing at all. \n 2. For print and email everything. \n 3. For email processed data, no printing. \n 4. Print but don't email.");
+	GETINT("Enter a number from 1 to 4", proc_or_not);
+}
+
+
+
+Proc_err ( INFO_OPT, "Starting program");
+sleep(delaytime);
+XCMD("setdef ackn no");
+XCMD("setdef stdout no");
+XCMD("setdef stderr no");
+/*
+if ( (pidfile = fopen("jrlock.txt", "rt")) != NULL)
+{
+	fscanf(pidfile, "%d", &pid);
+	fclose(pidfile);
+	Proc_err(INFO_OPT, "killing PID = %d !", pid);
+	sprintf(command, "kill %d", pid);
+	CPR_exec(command, CONT_EX);
+}
+
+ CPR_exec("xau janus_reproc",CONT_EX);*/
+
+/*--------------------------------------------------------------*/
+/*--- Get defaults from the defaults file ----------------------*/
+strcpy( defaultsfile, def_file );
+fdef = fopen( defaultsfile, "r" );
+Proc_err ( INFO_OPT, "reading defaults");
+strcpy( defaultsfile, def_file );
+fdef = fopen( defaultsfile, "r" );
+Proc_err( INFO_OPT, "reading defaults");
+Proc_err(INFO_OPT,"file is not empty, so do something");
+rewind(fdef); //go to begining of file
+file_data = fgets(in_data, 1024, fdef); //read in file as a continuous string
+fclose(fdef); //close the file
+Proc_err(INFO_OPT,"parsing %s file",proclist);
+//file is open, read data
+field = strtok(in_data, ",");
+strcpy( prefix,field);
+Proc_err(INFO_OPT,"prefix is %s",prefix);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &diskunit);
+	Proc_err(INFO_OPT,"diskunit is %s",diskunit);
+field = strtok(NULL, ",");
+sscanf(field,"%s", &suser);
+	Proc_err(INFO_OPT,"suser is %s",suser);
+field = strtok(NULL,",");
+sscanf(field,"%s",&tunefile);
+	Proc_err(INFO_OPT,"tunefile is %s", tunefile);
+field = strtok(NULL,",");
+sscanf(field,"%s",&shimset);
+	Proc_err(INFO_OPT,"shimset is %s", shimset);
+field = strtok(NULL,",");
+sscanf(field,"%s",&archpath);
+	Proc_err(INFO_OPT,"archpath is %s", archpath);
+field = strtok(NULL,",");
+sscanf(field,"%s",&archive);
+	Proc_err(INFO_OPT,"archive is %s", archive);
+field = strtok(NULL,",");
+sscanf(field,"%s",&gradshim);
+	Proc_err(INFO_OPT,"gradshim is %s", gradshim);
+Proc_err(INFO_OPT,"parsed file");
+/*file should contain something like but separated with commas instead of newline:-
+Z		-prefix
+f:\	-diskunit
+chemist		-user for data
+qnpshim		-autotune algorithm
+QNP.work	-shimfile to load
+f:\zips		-archive path
+false		-wether to archive or not
+true		-wheter to gradshim/topshim or not
+*/
+
+Proc_err ( INFO_OPT, "finished reading defaults");
+
+/*--- Assign filenames for signalling etc.----------------------*/
+/*set to be the diskunit, then a folder in that called the user usually chemist*/
+sprintf(batfile, "%s%s\\janus-bat.bat", diskunit,suser);
+sprintf(batcmd, "%s%s\\janus-bat.bat", diskunit,suser);
+sprintf(prodfile, "%s%s\\prod.txt",diskunit,suser);
+sprintf(prodfiletxt, "%s%s\\prod.txt",diskunit,suser);	
+sprintf(errorfile, "%s%s\\error.txt",diskunit,suser);
+sprintf(warnfile, "%s%s\\warn.txt",diskunit,suser);
+sprintf(waitfile, "%s%s\\wait.txt",diskunit,suser);
+sprintf(protfile, "%s%s\\prot.txt",diskunit,suser);
+sprintf(logfile, "%s%s\\jchlog.txt",diskunit,suser);
+sprintf(proclist, "%s%s\\proclist.txt",diskunit,suser);
+sprintf(pornotfile, "%s%s\\proc_or_not.txt", diskunit,suser);
+
+/*now write what kind of processing we're doing*/
+pornot = fopen (pornotfile,"w");
+if (pornot == NULL)
+{
+	Proc_err(INFO_OPT, "Can't open %s set processing options. Try logging out and back in again", pornotfile);
+	fclose(pornot);
+	exit(1);
+	//maybe instead of quit here; write what we want to do to a failed processing file
+} else
+{	fprintf(pornot,"%i", proc_or_not);
+	fclose(pornot);
+}
+
+pornot = fopen (pornotfile,"r");
+proc_or_not=get_proc_or_not_val(pornot);
+Proc_err(INFO_OPT,"prornot val=%i",proc_or_not);
+Proc_err ( INFO_OPT,"%s",batfile);
+Proc_err ( INFO_OPT,"%s",batcmd);
+Proc_err ( INFO_OPT,"%s",prodfile);
+Proc_err ( INFO_OPT,"%s",prodfiletxt);
+Proc_err ( INFO_OPT,"%s",warnfile);
+Proc_err ( INFO_OPT,"%s",waitfile);
+Proc_err ( INFO_OPT,"%s",protfile);
+Proc_err ( INFO_OPT,"%s",logfile);
+
+
+Proc_err ( INFO_OPT, "Waiting for sample...");
+
+/*the below becomes the place the data is stored. Done in the old skool path format for compatibility*/
+sprintf(diskunit,"%sdata\\%s\\nmr\\",diskunit,suser);
+DATASET ( "junk", 10, 1, diskunit, suser)
+Proc_err(INFO_OPT,"diskunit=%s",diskunit);
+Proc_err(INFO_OPT,"disk=%s",disk);
+GETCURDATA
+VIEWDATA_SAMEWIN
+/*remove comment for production*/
+CPR_exec("ii", WAIT_TERM);
+//XCMD("ii")
+
+/*--------------------------------------------------------------*/
+
+
+finish = FALSE;
+proderrcount=0;
+while ( finish != TRUE ) //THE MAIN LOOP
+{
+	/*--- Let everyone know that the loop is running -*/
+/*	Proc_err ( INFO_OPT, "Waiting for sample...Loop(%d)",curloop); */
+	sleep(10);
+	/*------------------------------------------------*/
+	if ( access(prodfile,R_OK)!=0)
+	{
+		sleep( delaytime );
+		Show_status( "is running...");
+		curloop++;
+		continue;
+	}
+	/*--- Reset the loop counter ---------------------*/
+	curloop=1;
+	skipsample=0;
+	/*------------------------------------------------*/
+
+	/*---Get the sample data from the prod file-------*/
+	Show_status( "About to read data from prod file");
+	fprod=fopen(prodfile,"r");
+	sleep( delaytime ); //maybe this will clear possible bug with submission pc/spectrometer prodfile write/read contention
+	file_data = fgets(in_data, 1024, fprod);
+	Proc_err ( INFO_OPT, "prod file contains :- %s",in_data);
+	/*------------------------------------------------*/
+
+	/*------------------------------------------------*/
+
+	/*---Now extract the data from the line-----------*/
+	if ( file_data == NULL ) //what to do if no data from prod file
+	{
+		fclose( fprod );
+		proderrcount++;
+		if (proderrcount>2)
+		{
+			sprintf( tmp_str, "del %s", prodfiletxt );
+			fbat = fopen(batcmd, "w");
+			fputs( tmp_str,fbat);
+			fclose(fbat);
+			system(batcmd);
+        		//system ( tmp_str );
+        		//sprintf( tmp_str, "rm %s", prodfile );  
+			proderrcount=0;
+		}
+		Proc_err ( INFO_OPT, "***ERROR - No data on line***" );
+		sleep( delaytime );
+		ferror = fopen(errorfile,"w");
+		fputs( "Prod file format error", ferror);
+		fclose( ferror );
+		flog = fopen(logfile,"a+");
+		fputs( "PROD FILE ERROR\n", flog);
+		fclose( flog );
+		exit(1);
+	}
+	proderrcount=0;
+/*Now parse the prod file into the various variables*/
+
+	field = strtok( in_data, "," );
+	sscanf( field, "%d", &cpos );
+	
+	field = strtok(NULL, "," );
+	strcpy( tmp_fname, field );	
+
+	field = strtok(NULL, "," );
+	strcpy( oi, field );	
+
+	field = strtok( NULL, "," );
+	strcpy( juser, field );
+
+	field = strtok( NULL, "," );
+	strcpy( solvent, field );
+
+	field = strtok( NULL, "," );
+	strcpy( protocol, field );
+
+	field = strtok( NULL, ",");
+	strcpy( comments, field);
+	flog = fopen(logfile,"a+");
+	lt=time(NULL);
+	sprintf(expttime, ctime(&lt));
+	fputs( expttime, flog);
+	sprintf( tmp_str, " Specno: %s,Sample: %s, User: %s, Sol= %s, Expt= %s, Cpos= %d\n", tmp_fname, oi, juser, solvent, protocol, cpos); 
+	fputs( tmp_str, flog);
+	fclose( flog );
+	/*CHECK*/
+/* DJH MOD Heres a good place to check whether the data already exists; ie, the submission software has crashed and hasn't incremented the V/Z no.*/
+/*remove comment block for production	*/
+sprintf( fidpath, "%s%s/%s/%d/fid", disk, user, tmp_fname, expno );
+
+if( access( fidpath, R_OK ) == 0 ) // if there is a fid there 
+{
+	Proc_err ( INFO_OPT,"%s",fidpath);
+	XAU("whoopwhoop",cmd)
+	exit(1);
+}
+	/*need to remove trailing character from comments*/
+	STOREPAR("USERP5",comments);
+	Proc_err(INFO_OPT,"comments from prod is :- %s",comments);
+	comments[strlen(comments)-1]=NULL;	
+
+/*END MOD*/
+
+/*remove comment for production */
+	sprintf( sxcmd, "sx %d",cpos);
+//	sprintf( sxcmd, "sendgui sx %d",cpos);
+	AUERR=CPR_exec(sxcmd, WAIT_TERM);
+
+
+	if ( AUERR <0 )
+
+	{
+		sprintf( hdwerr, "SAMPLE CHANGER ERROR! Error: %d, trying again...\n", AUERR);
+		flog = fopen(logfile,"a+");
+		fputs( hdwerr, flog);
+		fclose( flog );
+		sleep( 60 );
+		sprintf( sxcmd, "sx %d ",cpos);
+		AUERR=CPR_exec(sxcmd, WAIT_TERM);
+//remove comment around below for production not sure if this is needed, the above line should deal with it
+		/*SX( cpos );*/
+	}
+	if ( AUERR <0 )
+	{
+	  sprintf(statusstr, "***Warning - could not find samples(%d)***",AUERR);
+  	Show_status(statusstr );
+		fwarn = fopen( warnfile,"w" );
+		sprintf( hdwerr, "Could not find sample: %d\n", AUERR);
+		fputs( hdwerr, fwarn );
+		fclose( fwarn );
+		flog = fopen(logfile,"a+");
+		fputs( hdwerr, flog);
+		fclose( flog );
+		skipsample=1;
+// email us but don't quit in case it's not a real problem and is just skipping sample!!		
+	 XAU("whoopwhoop_sx","")
+	}
+/*ok, we have put the sample in the magnet; now run through its exps*/
+	if (skipsample==0)
+	{
+		DATASET ( "junk", 10, 1, diskunit, suser)
+		GETCURDATA
+		STOREPAR( "SOLVENT", solvent)
+		sprintf(tmpcmd, "rsh %s",shimset);
+  	CPR_exec(tmpcmd,WAIT_TERM);
+		sprintf(tmpcmd, "lock %s",solvent);
+		CPR_exec(tmpcmd,WAIT_TERM );
+		ROT
+	//topshim has to be here, as we only want to do it once per sample, have to do atma each exp, or put more logic in.
+    CPR_exec("topshim z6",WAIT_TERM); 
+  //put in here for 700
+ //   ROTOFF
+ //   sprintf(tmpcmd, "tune z1z2");
+ //   CPR_exec(tmpcmd,WAIT_START);
+ //   sleep(15);
+  //end of 700 additions
+		nexpt=10;
+		while ((fgets( experiment, 155, fprod)!=NULL)&&(strlen(experiment)>2)) //this is slightly magic to me, but reads prod into experiment
+		{
+			experiment[strlen(experiment)-1]=NULL;
+			/*--Get that data acquiring!----------------------*/
+			sprintf(statusstr,"Sample: %s, Expt: %s, solvent: %s",oi,experiment,solvent);
+			Show_status(statusstr );
+			sleep(delaytime); //do we need to sleep here?
+			DATASET ( tmp_fname, nexpt, 1, diskunit, suser)
+			GETCURDATA
+			RPAR( experiment, "all" )
+			GETCURDATA
+			STOREPAR( "SOLVENT", solvent )
+			GETPROSOL //needed since paracon!
+//			if( nexpt != 10) { ROT }
+//remove comment for production
+
+	//	XCMD("sendgui atma");
+	if ( strstr ( experiment, "janus-1h") == NULL ) //strstr returns a pointer if a match
+	{
+    CPR_exec("atma",WAIT_TERM);
+	}
+		CPR_exec("xaua",WAIT_TERM);
+//		XCMD(tmpcmd);
+//		XCMD("sendgui topshim");
+//		XCMD("sendgui xaua");
+//XAUA
+			if ( AUERR <0 )
+			{
+				Show_status( "***Acquisition failed***" );
+				fwarn = fopen(warnfile,"w");
+				fputs( "Acquisition failed", fwarn);
+				fclose( fwarn );
+				flog = fopen(logfile,"a+");
+				fputs( "ACQUISITION FAILED!\n", flog);
+				fclose( flog );
+			}
+			//remove comment for production actually, rotation should be set in par set; line 386 ROT should do it
+		//	CPR_exec("ro off",WAIT_TERM);
+			lt=time(NULL);
+			sprintf(expttime, ctime(&lt));
+			expttime[strlen(expttime)-1]=NULL;
+//removed stuff about logging to archive dir.
+			//sprintf(janusup, "c:/chemist/jup.txt");
+			sprintf(janusup, "%s%s\\jup.txt",diskunit,suser);
+			Show_status( "opening local janusup to append");
+			sleep(delaytime);
+			fjup = fopen(janusup, "a+");
+			sprintf( tmp_str, "%s,%d,%s,%s,%s,%s,%d,%s,%s\n", tmp_fname, nexpt, oi, juser, solvent, experiment, cpos, expttime, protocol); 
+			fputs( tmp_str, fjup);
+			fclose( fjup );
+			/*CHECK*/
+			sprintf( titlefile, "%s%s/%s/%d/pdata/1/title", diskunit, user,tmp_fname, nexpt );
+			ftitle = fopen( titlefile, "w" );
+			sprintf( titletext, "%s\n%s\n%s\n%s\n%s\nPosition: %d\n%s", tmp_fname, oi, juser, experiment, solvent, cpos, comments );
+			fputs ( titletext, ftitle );
+			fclose ( ftitle );
+
+/*Now a mod by DJH to make a filename containing the sample name, without any 'rogue' characters', and poke that into USERP2. Set USERP1 to be the comments, if an email*/
+
+			sprintf( samplename, "%s", oi );
+			for( i = 0; i < strlen(samplename); i++ )
+   			 {
+    				if( samplename[i] == '\\' || samplename[i] == '/' || samplename[i] == ':' || samplename[i] == '*' ||
+          				samplename[i] == '?' || samplename[i] == '\"' || samplename[i] == '<' || samplename[i] == '>' ||
+           				samplename[i]== '#' || samplename[i]=='$' || samplename[i]=='%' || samplename[i]=='^' || samplename[i]=='&' ||
+				samplename[i]=='=' || samplename[i]=='+' || samplename[i]==' ' ||
+          				samplename[i]=='(' || samplename[i]==')' || samplename[i]=='{' || samplename[i]=='}' || samplename[i]=='[' ||
+          				samplename[i]==']' || samplename[i]==';' || samplename[i]=='@' || samplename[i]=='~' || samplename[i]=='!' || samplename[i]=='`')
+     		 			{
+        					samplename[i] = '_';
+     		 			}
+   			 }
+   			 /*CHECK*/
+   			sprintf(snamefile,PROCPATH("samplename"));
+   	 		sname=fopen(snamefile,"w");
+			fprintf(sname, "%s", samplename);
+			fclose(sname);
+			STOREPAR("USERP2", samplename);
+
+/*End mod*/
+/*			parmo=1;
+			FETCHPAR ("PARMODE", &parmo)
+			if (parmo==1)
+			{
+				STOREPAR ("PF2DU", diskunit)
+				STOREPAR ("PF2NAME", tmp_fname)
+				STOREPAR ("PF2EXP", 10)
+				STOREPAR ("PF2PROC", 1)
+			}
+*/
+/*slight mod to XAUP command to allow it to finish before going on...*/
+			FETCHPAR ("AUNMP",&procau)
+/*find ou what processing mode we're in*/
+/*if we're not in mode 1, the external processing software is not running and we need to process*/
+			pornot = fopen (pornotfile,"r");
+			proc_or_not=get_proc_or_not_val(pornot);
+			if ((proc_or_not!=1)||(nexpt==10))
+			{	
+			CPR_exec("xaup",WAIT_TERM);	
+			//	XCMD("xaup")
+			}
+			/*
+			else
+			//so if we have done exp 10, add it to the processing list if IN mode 1. Didn't really work, the janus_print always lost the race to process
+					{
+			
+			    if(nexpt==10)
+						{	
+						plist = fopen (proclist,"a+");
+						if (plist == NULL)
+						{
+								Proc_err(INFO_OPT, "Can't open %s to add to processing list", proclist);
+								//exit(1);
+								//maybe instead of quit here; write what we want to do to a failed processing file
+						} else
+							{
+								sprintf(procinstruct, "%s,%s,chemist,pdf\n",tmp_fname,diskunit);
+								Proc_err(INFO_OPT,"%s",procinstruct);
+								fputs(procinstruct,plist);
+								fclose(plist);
+							}
+						}
+					}
+					
+				if ( AUERR <0 )
+				{
+					Show_status( "***Processing failed***" );
+					fwarn = fopen(warnfile,"w");
+					fputs( "Processing failed", fwarn);
+					fclose( fwarn );
+					flog = fopen(logfile,"a+");
+					fputs( "PROCESSING FAILED\n", flog);
+					fclose( flog );
+				}
+						sleep(delaytime);
+						*/
+			/*if there's no email address in the comments file, set it to camnmr, useful for testing*/ 
+     /*the comments variable is read from the prod file.*/
+     /*email is a variable set at the start of this program to camnmr@gmail.com*/
+      STOREPAR("USERP5",comments);
+			if (strchr(comments,'@') == NULL)
+			{
+				sprintf(comments,"%s",email); 
+			}
+
+			if (strchr(comments,'@') != NULL)
+			{
+				STOREPAR("USERP1", comments); 
+			}
+		
+			nexpt++;
+		}
+	
+/*find out what processing mode we're in*/
+/*if we're in mode 1, add to processing list as we are at the end of the samples exps. move def to start of file*/
+pornot = fopen (pornotfile,"r");
+proc_or_not=get_proc_or_not_val(pornot);
+if (proc_or_not==1)
+{		
+	plist = fopen (proclist,"a+");
+	if (plist == NULL)
+	{
+		Proc_err(INFO_OPT, "Can't open %s to add to processing list", proclist);
+		//exit(1);
+		//maybe instead of quit here; write what we want to do to a failed processing file
+	} else
+	{
+		sprintf(procinstruct, "%s,%s,chemist,pdf\n",tmp_fname,diskunit);
+		Proc_err(INFO_OPT,"%s",procinstruct);
+		fputs(procinstruct,plist);
+		fclose(plist);
+	}
+}		
+/*ok, now at end of this samples experiments; remove prod fie and tidy up*/
+
+		fclose(fprod);
+		LastSample=FALSE;
+		if ( access(waitfile,R_OK)!=0)
+	        {
+	           /*PUT_SAMPLE_BACK*/
+	           /*remove comment on next line for production*/
+		  CPR_exec("sx ej",WAIT_TERM);
+	           LastSample=TRUE;
+		   sleep( delaytime );
+	        }
+
+CPR_exec("janus-email",WAIT_TERM);
+/*find out what processing mode we're in*/
+/*if we're not in mode 1 or 4, email the data*/
+/*pornot = fopen (pornotfile,"r");
+proc_or_not=get_proc_or_not_val(pornot);
+if ( (proc_or_not!=1) || (proc_or_not!=4) )
+{
+	CPR_exec("janus-email",WAIT_TERM);		
+	//	XCMD("janus-email")
+}
+*/
+
+
+//below is commented out; but could be very usefull if we want to abtract processing to another instrument
+//		if (strncmp(archive,"true",3)==0)
+//		{
+//			strcpy(snostr,tmp_fname);
+//			for (x=1;x<strlen(tmp_fname);x++)
+//			{
+//			  snostr[x-1]=tmp_fname[x];
+//			  snostr[x]=NULL;
+//			}
+//
+//			specno=atoi(snostr);
+//			sthou=(int)specno/1000;
+//			sprintf(outpath,"%s%s%d",archpath,prefix,sthou);
+//			sprintf(jcmd_str,"cp -r %s/data/chemist/nmr/%s %s",diskunit,tmp_fname,outpath);
+//			Show_status( jcmd_str);
+//			sleep(1);
+//			system (jcmd_str);
+//			sprintf(tmparchpath,"//stvdsntp001/dis-casschemist/nmr/dpx250/");
+//			sprintf(outpath,"%s%s%d",tmparchpath,prefix,sthou);
+//			sprintf(jcmd_str,"cp -r %s/data/chemist/nmr/%s %s",diskunit,tmp_fname,outpath);
+//			Show_status( jcmd_str);
+//			sleep(1);
+//			system (jcmd_str);
+//		}
+
+/*Now remove the prodfile */
+	
+		sprintf( tmp_str, "del %s", prodfiletxt );
+		fbat = fopen(batcmd, "w");
+		fputs( tmp_str,fbat);
+		fclose(fbat);
+		system(batcmd);
+		//sprintf( tmp_str, "del %s", prodfile );
+		//sprintf( tmp_str, "rm %s", prodfile );
+		system( tmp_str );
+		flog = fopen(logfile,"a+");
+		fputs( "Sample completed...\n", flog);
+		fclose( flog );
+	}
+	
+	if (skipsample!=0)
+	{
+		fclose( fprod );
+		Proc_err ( INFO_OPT, "trying to delete prod file.");
+		sprintf( tmp_str, "del %s", prodfiletxt );
+		fbat = fopen(batcmd, "w");
+		fputs( tmp_str,fbat);
+		fclose(fbat);
+		system(batcmd);
+		//sprintf( tmp_str, "del %s", prodfile );
+		//sprintf( tmp_str, "rm %s", prodfile );
+//why is the below here? needs tidying
+	//	system( tmp_str );
+		Proc_err ( INFO_OPT, "by running command %s", tmp_str);
+		Proc_err ( INFO_OPT, "deleted prod file?");
+		flog = fopen(logfile,"a+");
+		fputs("Sample missing and skipped...\n", flog);
+		fclose( flog );
+	}
+	Proc_err ( INFO_OPT, "Waiting for sample...");
+}/*End while*/
+Show_status( "Program aborted!" );
+QUIT
+
+int get_proc_or_not_val(FILE *pornot)
+{
+	int i;
+	if (pornot == NULL)
+	{
+		Proc_err(INFO_OPT, "Can't open the file to get the processing options, defaulting to aquisistion only mode");
+		fclose(pornot);
+		return 1;
+	} else
+	{		
+		fscanf(pornot,"%d",&i);
+		fclose(pornot);
+		return i;
+	}
+	return 1;
+}

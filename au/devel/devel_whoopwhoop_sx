@@ -21,7 +21,8 @@ char num_lines[7]="256"; //number of lines at end of history to dump has to be a
 
 GETCURDATA
 FETCHPARS("INSTRUM", instrum_name)
-  Proc_err (INFO_OPT, "instrum_name - %s", instrum_name);
+//Proc_err (INFO_OPT, "instrum_name - %s", instrum_name);
+//sanitise instrument name to just letters and numbers
 i=0;
 while (i < strlen(instrum_name) )
 {
@@ -32,15 +33,16 @@ while (i < strlen(instrum_name) )
        instrum_name_trunc[i]='_';}
    i++;
 }
-Proc_err (INFO_OPT, "instrum_name_trunc - %s", instrum_name_trunc);
+//Proc_err (INFO_OPT, "instrum_name_trunc - %s", instrum_name_trunc);
 
-sprintf(body,"%s - %s WHOOP WHOOP!!! Problem with Janus automation!", instrum_name, cmd);
+sprintf(title,"JANUS ERROR %s %s",instrum_name, cmd); //no dashes allowed
+sprintf(body,"%s %s WHOOP WHOOP!!! Problem with Janus automation!", instrum_name, cmd); //no dashes allowed
 
-Proc_err (INFO_OPT, "instrum_name_trunc - %s", instrum_name_trunc);
-Proc_err (INFO_OPT, "body - %s", body);
+//Proc_err (INFO_OPT, "instrum_name_trunc - %s", instrum_name_trunc);
+//Proc_err (INFO_OPT, "body - %s", body);
 XAU( "devel_dump-history", num_lines);
 sprintf(recent_hist_path,"%s\\recent_history.txt",ACQUPATH(0) );
-Proc_err (INFO_OPT, "recent_hist_path - %s", recent_hist_path);
+//Proc_err (INFO_OPT, "recent_hist_path - %s", recent_hist_path);
 recent_hist_file = fopen(recent_hist_path, "r");
     if (recent_hist_file == NULL)
     {

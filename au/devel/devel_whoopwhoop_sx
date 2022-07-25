@@ -34,7 +34,7 @@ while (i < strlen(instrum_name) )
 }
 Proc_err (INFO_OPT, "instrum_name_trunc - %s", instrum_name_trunc);
 
-sprintf(body,"WHOOP WHOOP!!! Problem with Janus on instrument %s position %s", instrum_name, cmd);
+sprintf(body,"%s - %s WHOOP WHOOP!!! Problem with Janus automation!", instrum_name, cmd);
 
 Proc_err (INFO_OPT, "instrum_name_trunc - %s", instrum_name_trunc);
 Proc_err (INFO_OPT, "body - %s", body);

@@ -410,11 +410,12 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 	       sprintf(tmp_str, "FAILED_TO_LOCK_%s_%s_%s",solvent, cpos, tmp_fname);
 	       XAU("devel_whoopwhoop",tmp_str)
         }
-		sprintf(tmp_cmd, "ROT");
-		AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
+	//	sprintf(tmp_cmd, "ROT");
+	//	AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
+	ROT
 		if ( AUERR <0 )
         {
-	       sprintf(tmp_str, "s%_FAILED_%s_%s_%s",tmp_cmd, cpos, tmp_fname);
+	       sprintf(tmp_str, "ROT_FAILED_%s_%s", cpos, tmp_fname);
 	       XAU("devel_whoopwhoop",tmp_str)
         }
 		ROT

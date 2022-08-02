@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------*/
-/* Title	: Program janus_sx_glenfairn				*/
+/* Title	: Program janus_sx_lagavulin				*/
 /*has specific parts for this instrument */
 /* WORK IN PROGRESS TO UPDATE TO TOPSPIN 3			*/
 /* Topspin 3 update done by djh in cambridge*/
@@ -59,7 +59,7 @@
 //20220606 added getprosol
 /****************************************/
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
-char def_file[255]="d:/chemist/defaults-csv.txt"; //janus software defaults
+char def_file[255]="f:/chemist/defaults-csv.txt"; //janus software defaults
 float   delaytime=1.0;
 int     expt=1, curloop=1, cpos, specno, jexpt, jsolv, finish=FALSE,i=1;
 int     LastSample, FatalError=FALSE, nexpt, parmo, proderrcount, sthou;
@@ -73,7 +73,7 @@ char    exptfile[80], diskunit[40];
 char    prefix[40], shimset[40], defaultsfile[80], hdwerr[80];
 char    archpath[80], archive[20], jcmd_str[1024], outpath[1024];
 char    janusup[80], expttime[40], exptsfile[80], protocol[80];
-char    sxcmd[80], gradshim[20], comments[1024], command[1024], snostr[1024], tmpcmd[256];
+char    sxcmd[255], gradshim[20], comments[1024], command[1024], snostr[1024], tmp_cmd[256];
 char    statusstr[1024], awmfile[80],tmparchpath[1024],fidpath[1024],procau[1024];
 char	  proclist[1024],procinstruct[1024];
 
@@ -234,9 +234,17 @@ Proc_err(INFO_OPT,"diskunit=%s",diskunit);
 Proc_err(INFO_OPT,"disk=%s",disk);
 GETCURDATA
 VIEWDATA_SAMEWIN
-/*remove comment for production*/
-CPR_exec("ii", WAIT_TERM);
-//XCMD("ii")
+
+sprintf(tmp_cmd, "ii");
+AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+if ( AUERR <0 )
+{
+	sprintf(tmp_str, "INITIAL_II_ERROR");
+	XAU("devel_whoopwhoop",tmp_str)
+}
+
+//CPR_exec("ii", WAIT_TERM);
+
 
 /*--------------------------------------------------------------*/
 
@@ -336,7 +344,7 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 {
 	Proc_err ( INFO_OPT,"%s",fidpath);
 	sprintf(tmp_str, "OVERWRITE_FID_ERROR_%i_%s", cpos,tmp_fname);
-	XAU("devel_whoopwhoop_sx",tmp_str)
+	XAU("devel_whoopwhoop",tmp_str)
 //	XAU("whoopwhoop",cmd)
 	exit(1);
 }
@@ -348,9 +356,9 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 /*END MOD*/
 
 /*remove comment for production */
-	sprintf( sxcmd, "sx %d",cpos);
+	sprintf( tmp_cmd, "sx %d",cpos);
 //	sprintf( sxcmd, "sendgui sx %d",cpos);
-	AUERR=CPR_exec(sxcmd, WAIT_TERM);
+	AUERR=CPR_exec(tmp_cmd, WAIT_TERM);
 
 
 	if ( AUERR <0 )
@@ -368,8 +376,8 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 	}
 	if ( AUERR <0 )
 	{
-	  sprintf(statusstr, "***Warning - could not find samples(%d)***",AUERR);
-  	Show_status(statusstr );
+	    sprintf(statusstr, "***Warning - could not find samples(%d)***",AUERR);
+  	    Show_status(statusstr );
 		fwarn = fopen( warnfile,"w" );
 		sprintf( hdwerr, "Could not find sample: %d\n", AUERR);
 		fputs( hdwerr, fwarn );
@@ -379,8 +387,8 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 		fclose( flog );
 		skipsample=1;
 // email us but don't quit in case it's not a real problem and is just skipping sample!!
-    sprintf(tmp_str, "INSERT_ERROR_%i_%s", cpos, tmp_fname);
-	  XAU("devel_whoopwhoop_sx",tmp_str)
+        sprintf(tmp_str, "INSERT_ERROR_%i_%s", cpos, tmp_fname);
+	    XAU("devel_whoopwhoop",tmp_str)
 	}
 /*ok, we have put the sample in the magnet; now run through its exps*/
 	if (skipsample==0)
@@ -388,17 +396,39 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 		DATASET ( "junk", 10, 1, diskunit, suser)
 		GETCURDATA
 		STOREPAR( "SOLVENT", solvent)
-		sprintf(tmpcmd, "rsh %s",shimset);
-  	CPR_exec(tmpcmd,WAIT_TERM);
-		sprintf(tmpcmd, "lock %s",solvent);
-		CPR_exec(tmpcmd,WAIT_TERM );
+		sprintf(tmp_cmd, "rsh %s",shimset);
+        AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+        if ( AUERR <0 )
+        {
+	       sprintf(tmp_str, "FAILED_TO_READ_SHIMS_%s_%s_%s",shimset, cpos, tmp_fname);
+	       XAU("devel_whoopwhoop",tmp_str)
+        }
+		sprintf(tmp_cmd, "lock %s",solvent);
+		AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
+		if ( AUERR <0 )
+        {
+	       sprintf(tmp_str, "FAILED_TO_LOCK_%s_%s_%s",solvent, cpos, tmp_fname);
+	       XAU("devel_whoopwhoop",tmp_str)
+        }
+		sprintf(tmp_cmd, "ROT");
+		AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
+		if ( AUERR <0 )
+        {
+	       sprintf(tmp_str, "s%_FAILED_%s_%s_%s",tmp_cmd, cpos, tmp_fname);
+	       XAU("devel_whoopwhoop",tmp_str)
+        }
 		ROT
 	//topshim has to be here, as we only want to do it once per sample, have to do atma each exp, or put more logic in.
-    CPR_exec("topshim z6",WAIT_TERM);
+     AUERR=CPR_exec("topshim z6",WAIT_TERM);
+	 if ( AUERR <0 )
+        {
+	       sprintf(tmp_str, "TOPSHIM_FAILED_%s_%s",cpos, tmp_fname);
+	       XAU("devel_whoopwhoop",tmp_str)
+        }
   //put in here for 700
  //   ROTOFF
- //   sprintf(tmpcmd, "tune z1z2");
- //   CPR_exec(tmpcmd,WAIT_START);
+ //   sprintf(tmp_cmd, "tune z1z2");
+ //   CPR_exec(tmp_cmd,WAIT_START);
  //   sleep(15);
   //end of 700 additions
 		nexpt=10;
@@ -421,23 +451,29 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 	//	XCMD("sendgui atma");
 	if ( strstr ( experiment, "janus-1h") == NULL ) //strstr returns a pointer if a match
 	{
-    CPR_exec("atma",WAIT_TERM);
+        sprintf(tmp_cmd,"atma");
+		AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+	    if ( AUERR <0 )
+		{
+		   sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
+	       XAU("devel_whoopwhoop",tmp_str)
+	      // STOPMSG(tmp_str)
+		}
 	}
-		CPR_exec("xaua",WAIT_TERM);
-//		XCMD(tmpcmd);
-//		XCMD("sendgui topshim");
-//		XCMD("sendgui xaua");
-//XAUA
-			if ( AUERR <0 )
-			{
-				Show_status( "***Acquisition failed***" );
-				fwarn = fopen(warnfile,"w");
-				fputs( "Acquisition failed", fwarn);
-				fclose( fwarn );
-				flog = fopen(logfile,"a+");
-				fputs( "ACQUISITION FAILED!\n", flog);
-				fclose( flog );
-			}
+	sprintf(tmp_cmd,"xaua");
+	AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+    if ( AUERR <0 )
+	{
+	   Show_status( "***Acquisition failed***" );
+	   fwarn = fopen(warnfile,"w");
+	   fputs( "Acquisition failed", fwarn);
+	   fclose( fwarn );
+	   flog = fopen(logfile,"a+");
+	   fputs( "ACQUISITION FAILED!\n", flog);
+	   fclose( flog );
+	   sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
+	   XAU("devel_whoopwhoop",tmp_str)
+	}
 			//remove comment for production actually, rotation should be set in par set; line 386 ROT should do it
 		//	CPR_exec("ro off",WAIT_TERM);
 			lt=time(NULL);
@@ -586,9 +622,9 @@ if (proc_or_not==1)
 		      AUERR=CPR_exec("sx ej",WAIT_TERM);
 		      if ( AUERR <0 )
 		         {
-		      	 sprintf(tmp_str, "EJECT_ERROR_%i_%s", cpos, tmp_fname);
-	           XAU("devel_whoopwhoop_sx",tmp_str)
-	           STOPMSG(tmp_str)
+		      	 sprintf(tmp_cmd, "EJECT_ERROR_%i_%s", cpos, tmp_fname);
+	           XAU("devel_whoopwhoop_sx",tmp_cmd)
+	           STOPMSG(tmp_cmd)
 		         }
 	           
 	        LastSample=TRUE;

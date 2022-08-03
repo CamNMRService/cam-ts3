@@ -14,7 +14,8 @@ char command[PATH_MAX];
 char tscommand[PATH_MAX];
 char experiment[100];
 char reportdest[PATH_MAX];
-char reportsource[PATH_MAX]; 
+char reportsource[PATH_MAX];
+char tmp_str[PATH_MAX]; 
 char  datestamp[256];
 char lockpath[PATH_MAX];
 char pidpath[PATH_MAX];
@@ -44,7 +45,12 @@ CPR_exec("xau topshimkiller", WAIT_START);
 // execute topshim as desired
 sprintf(tscommand,"topshim plotall convcomp %s", cmd);
 XCMD(tscommand);
-
+//mod djh35 to trap topshim error
+if ( AUERR <0 )
+	 {
+	       sprintf(tmp_str, "TOPSHIM_FAILED");
+	       XAU("devel_whoopwhoop",tmp_str)
+   }
 
 // delete the lockfile  *and kill the killer program!!!!!* if topshim completes OK
 

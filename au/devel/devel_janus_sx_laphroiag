@@ -400,14 +400,14 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
         AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
         if ( AUERR <0 )
         {
-	       sprintf(tmp_str, "FAILED_TO_READ_SHIMS_%s_%s_%s",shimset, cpos, tmp_fname);
+	       sprintf(tmp_str, "FAILED_TO_READ_SHIMS_%s_%i_%s",shimset, cpos, tmp_fname);
 	       XAU("devel_whoopwhoop",tmp_str)
         }
 		sprintf(tmp_cmd, "lock %s",solvent);
 		AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
 		if ( AUERR <0 )
         {
-	       sprintf(tmp_str, "FAILED_TO_LOCK_%s_%s_%s",solvent, cpos, tmp_fname);
+	       sprintf(tmp_str, "FAILED_TO_LOCK_%s_%i_%s",solvent, cpos, tmp_fname);
 	       XAU("devel_whoopwhoop",tmp_str)
         }
 	//	sprintf(tmp_cmd, "ROT");
@@ -415,7 +415,7 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 	  ROT
 		if ( AUERR <0 )
         {
-	       sprintf(tmp_str, "ROT_FAILED_%s_%s", cpos, tmp_fname);
+	       sprintf(tmp_str, "ROT_FAILED_%i_%s", cpos, tmp_fname);
 	       XAU("devel_whoopwhoop",tmp_str)
         }
     CPR_exec("topshim_watchdog",WAIT_TERM); 

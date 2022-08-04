@@ -448,37 +448,47 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 			GETCURDATA
 			STOREPAR( "SOLVENT", solvent )
 			GETPROSOL //needed since paracon!
-//			if( nexpt != 10) { ROT }
-//remove comment for production
 
-	//	XCMD("sendgui atma");
-	if ( strstr ( experiment, "janus-1h") == NULL ) //strstr returns a pointer if a match
-	{
+	/* Below mod is current on glenfairn
+	    if ( strstr ( experiment, "janus-1h") == NULL ) //strstr returns a pointer if a match
+	    {
         sprintf(tmp_cmd,"atma");
-		AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+	    	AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+	      if ( AUERR <0 )
+		    {
+		       sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
+	         XAU("devel_whoopwhoop",tmp_str)
+	         // STOPMSG(tmp_str)
+	    	}
+     	}
+     	//end glenfairn mod
+   */  	
+   
+      sprintf(tmp_cmd,"atma");
+	    AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 	    if ( AUERR <0 )
-		{
-		   sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
+		  {
+		     sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
 	       XAU("devel_whoopwhoop",tmp_str)
-	      // STOPMSG(tmp_str)
-		}
-	}
-	sprintf(tmp_cmd,"xaua");
-	AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
-    if ( AUERR <0 )
-	{
-	   Show_status( "***Acquisition failed***" );
-	   fwarn = fopen(warnfile,"w");
-	   fputs( "Acquisition failed", fwarn);
-	   fclose( fwarn );
-	   flog = fopen(logfile,"a+");
-	   fputs( "ACQUISITION FAILED!\n", flog);
-	   fclose( flog );
-	   sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
-	   XAU("devel_whoopwhoop",tmp_str)
-	}
+	         // STOPMSG(tmp_str)
+	    }
+	    
+	    sprintf(tmp_cmd,"xaua");
+    	AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+      if ( AUERR <0 )
+	    {
+	      Show_status( "***Acquisition failed***" );
+	      fwarn = fopen(warnfile,"w");
+	      fputs( "Acquisition failed", fwarn);
+	      fclose( fwarn );
+	      flog = fopen(logfile,"a+");
+	      fputs( "ACQUISITION FAILED!\n", flog);
+	      fclose( flog );
+	      sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
+	      XAU("devel_whoopwhoop",tmp_str)
+	    }
 			//remove comment for production actually, rotation should be set in par set; line 386 ROT should do it
-		//	CPR_exec("ro off",WAIT_TERM);
+		  //	CPR_exec("ro off",WAIT_TERM);
 			lt=time(NULL);
 			sprintf(expttime, ctime(&lt));
 			expttime[strlen(expttime)-1]=NULL;

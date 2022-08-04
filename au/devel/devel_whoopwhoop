@@ -1,7 +1,9 @@
 /*sample submission software trying to overwrite a V/Z number*/
 
 char recent_hist_path[PATH_MAX];
+char curinst_path[PATH_MAX];
 FILE *recent_hist_file = NULL;
+FILE *curinst_file = NULL;
 FILE *fbat = NULL;
 char instrum_name[255]="spect";
 char instrum_name_trunc[255]="spect";
@@ -13,14 +15,21 @@ char email_from[255]="camnmrservice@gmail.com";
 char batfile[PATH_MAX]="c:\\windows\\top-copy.bat";
 char batcmd[PATH_MAX]="c:\\windows\\top-copy.bat";
 
+
 char cmd_str[1024];
 int i=0;
+int line_len=255;//same as instrum_name
 char num_lines[7]="256"; //number of lines at end of history to dump has to be a string!	
 
 
+sprintf(curinst_path, "%s/instr/curinst", PathXWinNMRConf() );
+curinst_file = fopen(curinst_path, "r");
+fgets(instrum_name, line_len, curinst_file);
+fclose(curinst_file);
 
 GETCURDATA
-FETCHPARS("INSTRUM", instrum_name)
+//FETCHPARS("INSTRUM", instrum_name)
+//FETCHPARS doesnt really work if no aquisition has been done
 //Proc_err (INFO_OPT, "instrum_name - %s", instrum_name);
 //sanitise instrument name to just letters and numbers
 i=0;

@@ -45,12 +45,8 @@ CPR_exec("xau topshimkiller", WAIT_START);
 // execute topshim as desired
 sprintf(tscommand,"topshim plotall convcomp %s", cmd);
 XCMD(tscommand);
-//mod djh35 to trap topshim error
-if ( AUERR <0 )
-	 {
-	       sprintf(tmp_str, "TOPSHIM_FAILED");
-	       XAU("devel_whoopwhoop",tmp_str)
-   }
+
+
 
 // delete the lockfile  *and kill the killer program!!!!!* if topshim completes OK
 
@@ -76,7 +72,8 @@ if (pidfile = fopen(pidpath, "rt"))
 // check for failed execution
 if(AUERR)
 {
-	
+	sprintf(tmp_str, "TOPSHIM_FAILED");
+	XAU("devel_whoopwhoop",tmp_str)
 	sleep(5);
  // don't repeat topshim!!
  // XCMD(tscommand)

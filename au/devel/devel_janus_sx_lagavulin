@@ -420,12 +420,16 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
         }
 		ROT
 	//topshim has to be here, as we only want to do it once per sample, have to do atma each exp, or put more logic in.
-     AUERR=CPR_exec("topshim convcomp",WAIT_TERM);
-	 if ( AUERR <0 )
+ 
+// use topshim_watchdog to force timeout and to save topshim data in case of failure
+CPR_exec("topshim_watchdog",WAIT_TERM);
+/*	      AUERR=CPR_exec("topshim convcomp",WAIT_TERM);
+       if ( AUERR <0 )
         {
 	       sprintf(tmp_str, "TOPSHIM_FAILED_%i_%s",cpos, tmp_fname);
 	       XAU("devel_whoopwhoop",tmp_str)
         }
+  */
   //put in here for 700
  //   ROTOFF
  //   sprintf(tmp_cmd, "tune z1z2");
@@ -484,6 +488,7 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 	       fclose( flog );
 	       sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
 	       XAU("devel_whoopwhoop",tmp_str)
+	       STOPMSG("XAUA Failed. Maybe check IPSO")
     	}
 			//remove comment for production actually, rotation should be set in par set; line 386 ROT should do it
 		//	CPR_exec("ro off",WAIT_TERM);

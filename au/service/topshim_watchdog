@@ -1,0 +1,95 @@
+//topshim_watchdog
+//AU program to run topshim, and kill it after a while if not done.
+//if it fails or is killed move the topshimdata
+//to a folder with the name of the current experiment
+//So that you can look at the data and see what might have gone wrong
+
+//ptg 2022/03/08 correct path to curdir for lock file, and properly get it to delete file - argument is file path not FILE pointer
+
+#include <time.h>
+time_t now_s, dtime_s;		  	/* seconds since 1970 */
+struct tm *now;	  		/* structure with year, month etc. */
+
+char command[PATH_MAX];
+char tscommand[PATH_MAX];
+char experiment[100];
+char reportdest[PATH_MAX];
+char reportsource[PATH_MAX];
+char tmp_str[PATH_MAX]; 
+char  datestamp[256];
+char lockpath[PATH_MAX];
+char pidpath[PATH_MAX];
+ int pid;
+FILE *pidfile;
+FILE *lockfile;
+GETCURDATA 
+
+// 
+
+/* get current time for timestamping the copy - can't use experiment name here because kiosk */
+now_s=time(NULL);
+now = localtime(&now_s);
+sprintf(datestamp, "%d_%d_%d_%d_%d_%d", now->tm_year+1900, 1+now->tm_mon, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
+
+// write lock file
+sprintf(lockpath, "%s/%s/topshim_lockfile", PathXWinNMRProg(),PathXWinNMRCurDir());
+lockfile = fopen(lockpath, "wt");
+fclose(lockfile);
+
+// start the watchdog AU and then carry on
+
+CPR_exec("xau topshimkiller", WAIT_START); 
+
+
+
+// execute topshim as desired
+sprintf(tscommand,"topshim plotall convcomp %s", cmd);
+XCMD(tscommand);
+
+
+
+// delete the lockfile  *and kill the killer program!!!!!* if topshim completes OK
+
+remove(lockpath);  // get rid of the kil file!
+
+sprintf(pidpath, "%s/%s/topshim_pidfile", PathXWinNMRProg(),PathXWinNMRCurDir());
+
+/* try and open the file */
+if (pidfile = fopen(pidpath, "rt")) 
+{
+
+	/* read the PID number */
+	fscanf(pidfile, "%d", &pid);
+	fclose(pidfile);
+
+	/* kill the process! */
+	Proc_err(INFO_OPT, "killing PID = %d !", pid);
+	sprintf(command, "kill %d", pid);
+	CPR_exec(command, CONT_EX);
+
+}
+
+// check for failed execution
+if(AUERR)
+{
+	sprintf(tmp_str, "TOPSHIM_FAILED");
+	XAU("devel_whoopwhoop",tmp_str)
+	sleep(5);
+ // don't repeat topshim!!
+ // XCMD(tscommand)
+  #ifdef	HAS_WINDOWS_FEATURES
+  sprintf(command,"ren C:\\Bruker\\TopSpin3.6.4\\data\\topshimData topshimData_%s", datestamp);  
+//  Proc_err(DEF_ERR_OPT,command);
+  #else 
+  sprintf(command,"mv /opt/topspin3.6.4/data/topshimData /opt/topspin3.6.4/data/topshimData_%s", datestamp);
+  #endif
+  system(command);
+  //report copying now automatic
+//  strcpy(reportdest, ACQUPATH("topshim_report.txt"));
+//  sprintf(reportsource, "%s/%s/topshim_report.txt", PathXWinNMRProg(), PathXWinNMRCurDir());
+//  dircp(reportsource, reportdest);
+}
+
+
+
+QUIT

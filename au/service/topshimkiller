@@ -1,0 +1,43 @@
+// started by topshim_watchdog
+// waits eg 5 mins then issues topshim stop command.
+// modified to use sendgui topshim stop as xcmd("topshim stop") doesn't seem to work.
+// Write file containing PISD, so topshim_watchdog can kill this program, otherwise if a samples 
+//takes <5mins this could still be running when next sample comes and kill it after not very long...
+
+char lockpath[PATH_MAX];
+FILE *lockfile;
+char pidpath[PATH_MAX];
+ int pid;
+FILE *pidfile;
+
+sprintf(lockpath, "%s/%s/topshim_lockfile",PathXWinNMRProg(), PathXWinNMRCurDir());
+
+/* get current PID */
+pid = _getpid();
+
+/* create the file to contain current PID */
+
+sprintf(pidpath, "%s/%s/topshim_pidfile", PathXWinNMRProg(),PathXWinNMRCurDir());
+if ( (pidfile = fopen(pidpath, "wt") )== NULL)
+{
+	Proc_err(INFO_OPT, "could not open pid file %s", lockpath);
+	/* Abort */
+	ABORT
+}
+fprintf(pidfile, "%d\n", pid);
+fclose(pidfile);
+
+sleep(300); //e.g. 5 minutes limit
+
+if ( lockfile = access(lockpath,F_OK) == 0) // file found, stop topshim
+	{
+// scrub error message in case it's causing problems...
+//		Proc_err (INFO_OPT, "topshim took too long, killing");
+		XCMD("sendgui noqu topshim stop")
+	}
+
+// Remove pidfile asthis au prog will now exit itself
+
+remove(pidpath);
+
+QUIT

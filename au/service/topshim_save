@@ -1,0 +1,32 @@
+//topshim_diagnose
+//AU program to run topshim, then move the topshimdata
+//to a folder with the name of the current experiment
+//So that you can look at the data and see what might have gone wrong
+
+
+
+char command[PATH_MAX];
+char tscommand[PATH_MAX];
+char experiment[100];
+char reportdest[PATH_MAX];
+char reportsource[PATH_MAX];
+GETCURDATA
+sprintf(tscommand,"topshim plotall convcomp %s", cmd);
+XCMD(tscommand);
+#ifdef	HAS_WINDOWS_FEATURES
+sprintf(command,"ren C:\\Bruker\\TopSpin3.6.4\\data\\topshimData topshimData_%s_%d", name, expno);  
+//  Proc_err(DEF_ERR_OPT,command);
+#else 
+sprintf(command,"mv /opt/topspin3.6.4/data/topshimData /opt/topspin3.6.4/data/topshimData_%s_%d", name, expno);
+#endif
+system(command);
+
+
+
+//FETCHPAR("EXP", &experiment)
+//if (strcmp(experiment, "PROHUMP") == 0)
+//{
+//	TUNE("lineshape.non")
+//}
+
+QUIT

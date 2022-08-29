@@ -1,0 +1,129 @@
+/*Used to create a default file*/
+/*create_hump_sino_file_b1_0*/
+/*beta 1 - remove verbose and disclaimer toggle for automation use/
+
+/*add version info to defaults file*/
+
+
+char defaults_file_name[PATH_MAX];
+char param_set_name[PATH_MAX]="PROTON";
+char junk_name[PATH_MAX]="junk";
+char file_text[1024]="";
+char instrum_name[40];
+char probe_name[PATH_MAX];
+char probe_name_trunc[PATH_MAX];
+char probe_id[40];
+char probe_nickname[40];
+char* str_probe;
+FILE *defaults_file = NULL;
+double sw_double = 3.0;
+double o1_ppm_double = 5.45;
+double aq_double=16.0;
+float rg_float=8.0;
+float d1_float=1.0;
+float sino_lb=1.0;
+int ns_int=4;
+double hs_l_double=15.0;
+double hs_h_double=8.0;
+double sig_f1_double=5.6;
+double sig_f2_double=5.4;
+double noise_f1_double=10.0;
+double noise_f2_double=8.0;
+double noise_width_double=0.2;
+char sino_aq[8]="10s";
+char sino_pp[40]="zg30";
+
+char repo_name[40]="cam-ts"; //Set this to be the name of your repository
+char au_version[8]="b1_0"; //used to ensure defaults file used is correct for this version of the au program
+
+int ts_major = GetTsVersionMajor();
+int ts_minor = GetTsVersionMinor();
+int ts_patch = GetTsVersionPl();
+
+int disclaimer = 0;
+int verbose = 0;
+
+if(disclaimer == 1){
+i1 = Proc_err(QUESTION_OPT,"THIS PROGRAM IS DISTRIBUTED IN THE HOPE THAT IT WILL BE USEFUL, \
+WITHOUT ANY WARRANTY.\n IT IS PROVIDED 'AS IS' WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED,\n \
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTY OF FITNESS FOR A PARTICULAR PURPOSE.\n \
+THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU.\n \
+SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING,\n \
+REPAIR OR CORRECTION.\n\n \
+IN NO EVENT WILL THE AUTHOR BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL,\n \
+SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY\n \
+TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING RENDERED\n \
+INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM\n \
+TO OPERATE WITH ANY OTHER PROGRAMS), EVEN IF THE AUTHOR HAS BEEN ADVISED OF THE \n \
+POSSIBILITY OF SUCH DAMAGES.\n\n \
+Click OK to agree and continue. \nClick cancel to disagree.\n\n \
+Remove this warning by setting disclaimer to 0 in the AU program.");
+
+   if ( i1 == ERR_CANCEL )
+  {
+      ABORT
+   }
+  else {
+  }
+} //end of disclaimer
+
+GETCURDATA
+
+#ifdef HAS_WINDOWS_FEATURES
+   sprintf(defaults_file_name,"C:\\Bruker\\%s%i\\poise\\service_hump_sino_1h_defaults_%s",repo_name,ts_major,au_version);
+#else //Not actually checked this on linux... We have no linux xpectrometers
+ 		sprintf(defaults_file_name,"/opt/%s%i/poise/service_hump_sino_1h_defaults_%s",repo_name,ts_major,au_version);
+#endif
+
+if (i_argc == 3 ) {
+	sprintf(defaults_file_name,"%s",i_argv[2]); //lets just assume first argument is a filename
+} else
+  {
+		//Need to determine what the spectometer name  and probe is - can't do that unless we run an expt.
+    DATASET(junk_name,1 ,procno, disk, user)
+		GETCURDATA
+		RPAR(param_set_name, "all")
+		GETPROSOL
+		GETCURDATA
+		SETCURDATA
+    VIEWDATA_SAMEWIN
+		STOREPAR("NS", 1)
+		STOREPAR("DS", 0)
+		ZG
+		FETCHPARS("INSTRUM", instrum_name)
+    FETCHPARS("PROBHD", probe_name)
+
+    CALL_PROBESERVER("probe_client getParams getInstalledProbe", str_probe);
+
+    //some magic from au_sst1ir
+    (void) sscanf(str_probe, "%[^,]%*c%*[^,]%*c%*[^,]%*c%*[^,]%*c%[^,]%*s", probe_id, probe_nickname);
+    sprintf(probe_name_trunc,"%s",probe_id);
+    sprintf( defaults_file_name,"%s-%s-%s.txt",defaults_file_name,instrum_name,probe_name_trunc);
+
+  }
+ 
+//It would be possible to ask for input for the parameters here, to override the defaults defined above.
+if (verbose ==1) {
+    Proc_err(DEF_ERR_OPT,"defaults filename - %s",defaults_file_name); 
+}
+
+defaults_file = fopen (defaults_file_name,"w");
+if (defaults_file == NULL) {
+     Proc_err(DEF_ERR_OPT,"can't open file - %s", defaults_file_name);
+     exit(1);
+}
+else {
+  
+     sprintf(file_text, "%.2f,%.2f,%.2f,%.2f,%.2f," ,sw_double,o1_ppm_double,aq_double,rg_float,d1_float);
+     fputs(file_text,defaults_file);
+     sprintf(file_text, "%i,%.2f,%.2f,%.2f,%.2f," ,ns_int,hs_l_double,hs_h_double,sig_f1_double,sig_f2_double);
+     fputs(file_text,defaults_file);
+     sprintf(file_text, "%.2f,%.2f,%.2f,%.2f,%s" ,noise_f1_double,noise_f2_double,noise_width_double,sino_lb,sino_pp);
+     if (verbose ==1) {
+        Proc_err(DEF_ERR_OPT,"defaults file test - %s",file_text); 
+     }
+     fputs(file_text,defaults_file);
+     fclose(defaults_file_name);
+}
+
+QUIT

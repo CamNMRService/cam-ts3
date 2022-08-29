@@ -73,7 +73,7 @@ if (pidfile = fopen(pidpath, "rt"))
 if(AUERR)
 {
 	sprintf(tmp_str, "TOPSHIM_FAILED");
-	XAU("devel_whoopwhoop",tmp_str)
+	XAU("whoopwhoop",tmp_str)
 	sleep(5);
  // don't repeat topshim!!
  // XCMD(tscommand)

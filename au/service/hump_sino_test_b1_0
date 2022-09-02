@@ -196,7 +196,9 @@ if (defaults_file == NULL)
 	Proc_err(DEF_ERR_OPT,"can't open file - %s", defaults_file_name);
   err = Proc_err(QUESTION_OPT,"The file %s might not exist, would you like to try and create a default one?", defaults_file_name);
   if (err == 0) {
-    XAU("devel_create_hump_sino_file_V4",defaults_file_name)
+    sprintf(tmp_str,"create_hump_sino_file_%s",au_version);
+    XAU(tmp_str,defaults_file_name)
+   // XAU("create_hump_sino_file_V4",defaults_file_name)
     sprintf( tmp_str,"Defaults file created - %s \n You need to return to origianl dataset out of this junk one.",defaults_file_name);
     STOPMSG(tmp_str)
     //exit(1);

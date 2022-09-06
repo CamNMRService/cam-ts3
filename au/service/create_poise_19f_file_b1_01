@@ -11,7 +11,9 @@
 /*V4 - add disclaimer*/
 
 /*add version info to defaults file*/
-/*bug with sinocal?
+/*version b1_01 - bug with sinocal
+change sinopp to zg
+adjust sino noise for better reprodicibility
 */
 char defaults_file_name[PATH_MAX];
 char param_set_name[PATH_MAX]="F19";
@@ -39,13 +41,13 @@ char cost_function[40]="minabsint";
 char poise_au[40]="default";
 
 float t1_float=10.0;
-double noise_f1_double = -100.0;
-double noise_f2_double = -104.0;
-double noise_width_double=0.2;
+double noise_f1_double = -99.0;
+double noise_f2_double = -106.0;
+double noise_width_double=4.0;
 char sino_aq[8]="10s";
 double sino_lb_float=1.0;
 
-char sino_pp[40]="zg30";
+char sino_pp[40]="zg";
 char repo_name[40]="cam-ts"; //set to name of your repository
 char au_version[8]="b1_01";
 

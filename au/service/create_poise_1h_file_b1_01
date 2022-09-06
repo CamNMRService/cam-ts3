@@ -1,5 +1,5 @@
 /*Used to create a default file*/
-/*create_poise_19f_file_b1_0*/
+/*create_poise_1h_file_b1_0*/
 /*beta 1 - remove verbose and disclaimer toggle for automation use/
 
 /*add version info to defaults file*/
@@ -11,10 +11,12 @@
 /*V4 - add disclaimer*/
 
 /*add version info to defaults file*/
-/*bug with sinocal?
-*/
+/*b1_01 - change sinopp to zg
+bug with sinocal?*/
+
+
 char defaults_file_name[PATH_MAX];
-char param_set_name[PATH_MAX]="F19";
+char param_set_name[PATH_MAX]="PROTON";
 char junk_name[PATH_MAX]="junk";
 char file_text[1024]="";
 char instrum_name[40];
@@ -25,27 +27,27 @@ char probe_nickname[40];
 char* str_probe;
 FILE *defaults_file = NULL;
 
-double sw_double = 20;
-double o1_ppm_double = -108.0;
-double f1p_double = -107.0;
-double f2p_double = -109.0;
-float rg_float = 64.0;
+double sw_double = 12.0;
+double o1_ppm_double = 5.4;
+double f1p_double = 6.0;
+double f2p_double = 5.0;
+float rg_float = 8.0;
 
-float d1_float = 10.0;
+float d1_float = 8.0;
 int pc_lb_int = 50;
 int pc_hb_int = 60;
 float tol_float = 0.2;
 char cost_function[40]="minabsint";
 char poise_au[40]="default";
-
-float t1_float=10.0;
-double noise_f1_double = -100.0;
-double noise_f2_double = -104.0;
-double noise_width_double=0.2;
 char sino_aq[8]="10s";
-double sino_lb_float=1.0;
 
-char sino_pp[40]="zg30";
+float t1_float=8.0;
+double noise_f1_double=11.0;
+double noise_f2_double=9.0;
+double noise_width_double=1.0;
+float sino_lb_float=1.0;
+
+char sino_pp[40]="zg";
 char repo_name[40]="cam-ts"; //set to name of your repository
 char au_version[8]="b1_01";
 
@@ -83,9 +85,9 @@ Remove this warning by setting disclaimer to 0 in the AU program.");
 GETCURDATA
 
 #ifdef HAS_WINDOWS_FEATURES
-   sprintf(defaults_file_name,"C:\\Bruker\\%s%i\\poise\\service_poise_19f_p1_defaults_%s",repo_name,ts_major,au_version);
+   sprintf(defaults_file_name,"C:\\Bruker\\%s%i\\poise\\service_poise_1h_p1_defaults_%s",repo_name,ts_major,au_version);
 #else //Not actually checked this on linux... We have no linux solution-state spectrometers
- 		sprintf(defaults_file_name,"/opt/%s%i/poise/service_poise_19f_p1_defaults_%s",repo_name,ts_major,au_version);
+ 		sprintf(defaults_file_name,"/opt/%s%i/poise/service_poise_1h_p1_defaults_%s",repo_name,ts_major,au_version);
 #endif
 
 if (i_argc == 3 ) {

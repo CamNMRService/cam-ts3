@@ -14,7 +14,7 @@ removed verbose and disclaimer toggles for automation use
 b1_01 - fix bug of not calling second sino spectrum with saved AQ (s) value
 b1_01 - set poise pulprog = zgpg not zgig
 b1_01 - fix logic for apbk for topspin 4 - still to refine.
-b1_01 - add nucleus and instrument name to output
+b1_01 - add nucleus, sino_pp and instrument name to output
 */
 
 #include <stdio.h>
@@ -464,11 +464,6 @@ if (( title_file = fopen( title_path_name, "w")) == 0)
 }
 
 
-
-
-
-
-
 //now print to results file
 
 //sprintf( results_file_name, "%s/logfiles/%s-%s-%s", PathXWinNMRProg(), instrum_name,probe_name_trunc,method_name );
@@ -498,7 +493,7 @@ if ((results_file = fopen(results_file_name, "a+")) == 0)
      fputs(results_content, results_file);
      sprintf( results_content, "%2.f,%.2f,%s,%i,",rg_float,sino_lb_float,name,expno);
      fputs(results_content, results_file);
-     sprintf(results_content,"%s,%s\n",nuc,instrum_name);
+     sprintf(results_content,"%s,%s,%s\n",nuc,sino_pp,instrum_name);
      fputs(results_content, results_file);
      fclose(results_file);
 }

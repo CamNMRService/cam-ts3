@@ -8,7 +8,7 @@
 /*hump_sino_test_b1_01 - beta 1
 Verbose and disclaimer set to 0 to automation use
 b1_01 -fix apbk logic
-b1_01 - add nucleus and instrument name to output
+b1_01 - add nucleus, sino_pp and instrument name to output
 
 */
 
@@ -426,7 +426,7 @@ time(&rawtime);
 info = localtime( &rawtime);
 strftime(time_buffer , 80, "%x,%X", info);
 FETCHPAR("NUC1",&nuc);
-sprintf( results_content, "%s,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%i,%s,%s,%s\n",time_buffer,hs_h_obs_float,hs_l_obs_float,hs_w_obs_float,sino_result,sino_lb_float,rg_float,ro_int, name, nuc,instrum_name);
+sprintf( results_content, "%s,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%i,%s,%s,%s,%s\n",time_buffer,hs_h_obs_float,hs_l_obs_float,hs_w_obs_float,sino_result,sino_lb_float,rg_float,ro_int, name, nuc,sino_pp,instrum_name);
 if (verbose == 1) {
 	   Proc_err(DEF_ERR_OPT, "Writing %s into file %s", results_content, results_file_name);
 }

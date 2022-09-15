@@ -47,7 +47,7 @@
            }
            i++;
        } 
-       sprintf(read_user_name_cmd,"echo %USERNAME% > %s",user_name_filename);
+       sprintf(read_user_name_cmd,"echo %%USERNAME%% > %s",user_name_filename);
        fbat = fopen(bat_file_name,"w");
        fputs(read_user_name_cmd,fbat);
        fclose(fbat);

@@ -46,12 +46,13 @@
                user_name_filename[i]='\\';
            }
            i++;
-       }
+       } 
+       sprintf(read_user_name_cmd,"echo \%USERNAME\% > %s",user_name_filename);
        fbat = fopen(bat_file_name,"w");
        fputs(read_user_name_cmd,fbat);
        fclose(fbat);
        system(bat_file_name);
-       sprintf(read_user_name_cmd,"echo \%USERNAME\% > %s",user_name_filename);
+      
     #else //Not actually checked this on linux... We have no linux xpectrometers
        sprintf( output_filename,"%s/recent_history.txt",ACQUPATH(0) );
        sprintf( input_filename,"%s/curdir/%s/history_j.txt",PathXWinNMRProg(),user_name ); 		

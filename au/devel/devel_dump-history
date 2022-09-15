@@ -5,11 +5,14 @@
     FILE * input_file;
     FILE * output_file;
     FILE * user_name_file;
+    FILE * fbat;
+  
     char str_saved_lines[7]; //Not going to need more than a 7 digit number
     char line[1024];
     char input_filename[PATH_MAX] = "";
     char output_filename[PATH_MAX] = "";
     char user_name_filename[PATH_MAX] = "";
+    char bat_file_name[PATH_MAX] = "C:\\fbat.bat";
     char user_name[255] = "chemist"; //shouldn't actually be needed, if login is same as dataset
     // don't know why  sprintf( input_filename,"%s\\curdir\\%s\\history_j.txt",PathXWinNMRProg(),user );
     //inserts a blank.
@@ -44,6 +47,10 @@
            }
            i++;
        }
+       fbat = fopen(bat_file_name,"w");
+       fputs(read_user_name_cmd,fbat);
+       fclose(fbat);
+       system(bat_file_name);
        sprintf(read_user_name_cmd,"echo \%USERNAME\% > %s",user_name_filename);
     #else //Not actually checked this on linux... We have no linux xpectrometers
        sprintf( output_filename,"%s/recent_history.txt",ACQUPATH(0) );

@@ -37,8 +37,7 @@
     Proc_err (INFO_OPT, "username filename %s", user_name_filename);
   
     while (user_name_filename[i]!='\0')
-    {
-         Proc_err (INFO_OPT,"%i",i);    	
+    {   	
         if(user_name_filename[i]=='/')
         {
             user_name_filename[i]='\\';

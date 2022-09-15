@@ -35,7 +35,7 @@
     sprintf( input_filename,"%s\\curdir\\%s\\history_j.txt",PathXWinNMRProg(),user_name ); 
     sprintf( user_name_filename,"%s\\user_name.txt",ACQUPATH(0) );
     Proc_err (INFO_OPT, "username filename %s", user_name_filename);
-    
+    Proc_err (INFO_OPT,"i",i);
     while (user_name_filename[i]!='\0')
     {
          Proc_err (INFO_OPT,"i",i);    	

@@ -4,20 +4,26 @@
     /*djh35 JUlY 2022*/
     FILE * input_file;
     FILE * output_file;
+    FILE * user_name_file;
     char str_saved_lines[7]; //Not going to need more than a 7 digit number
     char line[1024];
     char input_filename[PATH_MAX] = "";
     char output_filename[PATH_MAX] = "";
-    char user_name[255] = "chemist"; // 
+    char user_name_filename[PATH_MAX] = "";
+    char user_name[255] = "chemist"; //shouldn't actually be needed, if login is same as dataset
     // don't know why  sprintf( input_filename,"%s\\curdir\\%s\\history_j.txt",PathXWinNMRProg(),user );
     //inserts a blank.
+    //However, lets maybe run a command line program to make a file with the username in
+    char read_user_name_cmd[1023] = "";
     size_t len = 0;
     ssize_t read;
+ 
     int line_len = 1024;
     int num_lines = 0;
     int total_lines = 0;
     int saved_lines = 32;
-
+    int i=0;
+    
     if (i_argc == 3 ) { //assume the argument is number of lines at the end of the file to read
        sprintf(str_saved_lines,"%s",i_argv[2]); //lets just assume first argument is a filename
        saved_lines = atoi(str_saved_lines);
@@ -27,12 +33,22 @@
     #ifdef HAS_WINDOWS_FEATURES
     sprintf( output_filename,"%s\\recent_history.txt",ACQUPATH(0) );
     sprintf( input_filename,"%s\\curdir\\%s\\history_j.txt",PathXWinNMRProg(),user_name ); 
-   
+    sprintf( user_name_filename,"%s\\user_name.txt",ACQUPATH(0) );
+    while (user_name_filename[i]!='\0')
+    {
+        if(user_name_filename[i]=='/')
+        {
+            user_name_filename[i]=='\';
+        }
+        i++;
+    }
+
     #else //Not actually checked this on linux... We have no linux xpectrometers
     sprintf( output_filename,"%s/recent_history.txt",ACQUPATH(0) );
     sprintf( input_filename,"%s/curdir/%s/history_j.txt",PathXWinNMRProg(),user_name ); 		
+    sprintf( user_name_filename,"%s/user_name.txt",ACQUPATH(0) );
     #endif
-    Proc_err (INFO_OPT, "input filename - %s\nOutput filename - %s", input_filename, output_filename);
+    Proc_err (INFO_OPT, "input filename - %s\nOutput filename - %s\n username filename %s", input_filename, output_filename,user_name_filename);
     input_file = fopen(input_filename, "r");
     if (input_file == NULL)
         STOPMSG("failed to open file");

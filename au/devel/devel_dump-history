@@ -38,7 +38,7 @@
     
     while (user_name_filename[i]!='\0')
     {
-        if(user_name_filename[i]=='\/')
+        if(user_name_filename[i]=='/')
         {
             user_name_filename[i]=='\\';
         }

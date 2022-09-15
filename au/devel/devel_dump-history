@@ -34,6 +34,8 @@
     sprintf( output_filename,"%s\\recent_history.txt",ACQUPATH(0) );
     sprintf( input_filename,"%s\\curdir\\%s\\history_j.txt",PathXWinNMRProg(),user_name ); 
     sprintf( user_name_filename,"%s\\user_name.txt",ACQUPATH(0) );
+    Proc_err (INFO_OPT, "username filename %s", user_name_filename);
+    
     while (user_name_filename[i]!='\0')
     {
         if(user_name_filename[i]=='/')

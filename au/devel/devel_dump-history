@@ -31,26 +31,30 @@
     GETCURDATA
     VIEWDATA_SAMEWIN
     #ifdef HAS_WINDOWS_FEATURES
-    sprintf( output_filename,"%s\\recent_history.txt",ACQUPATH(0) );
-    sprintf( input_filename,"%s\\curdir\\%s\\history_j.txt",PathXWinNMRProg(),user_name ); 
-    sprintf( user_name_filename,"%s\\user_name.txt",ACQUPATH(0) );
-    Proc_err (INFO_OPT, "username filename %s", user_name_filename);
+       sprintf( output_filename,"%s\\recent_history.txt",ACQUPATH(0) );
+       sprintf( input_filename,"%s\\curdir\\%s\\history_j.txt",PathXWinNMRProg(),user_name ); 
+       sprintf( user_name_filename,"%s\\user_name.txt",ACQUPATH(0) );
+       Proc_err (INFO_OPT, "username filename %s", user_name_filename);
   
-    while (user_name_filename[i]!='\0')
-    {   	
-        if(user_name_filename[i]=='/')
-        {
-            user_name_filename[i]='\\';
-        }
-        i++;
-    }
-
+       while (user_name_filename[i]!='\0')
+       {   	
+           if(user_name_filename[i]=='/')
+           {
+               user_name_filename[i]='\\';
+           }
+           i++;
+       }
+       sprintf(read_user_name_cmd,"echo %USERNAME% > %s",user_name_filename);
     #else //Not actually checked this on linux... We have no linux xpectrometers
-    sprintf( output_filename,"%s/recent_history.txt",ACQUPATH(0) );
-    sprintf( input_filename,"%s/curdir/%s/history_j.txt",PathXWinNMRProg(),user_name ); 		
-    sprintf( user_name_filename,"%s/user_name.txt",ACQUPATH(0) );
+       sprintf( output_filename,"%s/recent_history.txt",ACQUPATH(0) );
+       sprintf( input_filename,"%s/curdir/%s/history_j.txt",PathXWinNMRProg(),user_name ); 		
+       sprintf( user_name_filename,"%s/user_name.txt",ACQUPATH(0) );
+       sprintf(read_user_name_cmd,"whoami > %s",user_name_filename);
     #endif
-    Proc_err (INFO_OPT, "input filename - %s\nOutput filename - %s\n username filename %s", input_filename, output_filename,user_name_filename);
+     
+    system(read_user_name_cmd);
+  
+    Proc_err (INFO_OPT, "input filename - %s\nOutput filename - %s\n read_user_name_cmd - %s", input_filename, output_filename,read_user_name_cmd);
     input_file = fopen(input_filename, "r");
     if (input_file == NULL)
         STOPMSG("failed to open file");

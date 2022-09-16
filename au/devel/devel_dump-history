@@ -2,6 +2,10 @@
     /*takes number of lines as a command line input*/
     /*Have to define username - PathXwinNMRCurDir() returns curdir/username*/
     /*djh35 JUlY 2022*/
+    /*djh35 Sep 2022 - added ability to run a system command to find the 
+    login user name - where the history file is saved
+    runs under macos and windows
+    */
     FILE * input_file;
     FILE * output_file;
     FILE * user_name_file;

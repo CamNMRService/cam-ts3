@@ -17,11 +17,14 @@
     // don't know why  sprintf( input_filename,"%s\\curdir\\%s\\history_j.txt",PathXWinNMRProg(),user );
     //inserts a blank.
     //However, lets maybe run a command line program to make a file with the username in
+    //chemist is a good default - we use dump-history mostly for the janus software
     char read_user_name_cmd[1023] = "";
+    char message[1023];
     size_t len = 0;
     ssize_t read;
  
     int line_len = 1024;
+    int user_line_line = 255; //same as user_name - not sure is I could've used line_len
     int num_lines = 0;
     int total_lines = 0;
     int saved_lines = 32;
@@ -35,7 +38,6 @@
     VIEWDATA_SAMEWIN
     #ifdef HAS_WINDOWS_FEATURES
        sprintf( output_filename,"%s\\recent_history.txt",ACQUPATH(0) );
-       sprintf( input_filename,"%s\\curdir\\%s\\history_j.txt",PathXWinNMRProg(),user_name ); 
        sprintf( user_name_filename,"%s\\user_name.txt",ACQUPATH(0) );
        sprintf( bat_file_name,"%s\\get_username_bat.bat",ACQUPATH(0) );
        Proc_err (INFO_OPT, "username filename %s", user_name_filename);
@@ -53,20 +55,40 @@
        fputs(read_user_name_cmd,fbat);
        fclose(fbat);
        system(bat_file_name);
+
       
     #else //Not actually checked this on linux... We have no linux xpectrometers
        sprintf( output_filename,"%s/recent_history.txt",ACQUPATH(0) );
-       sprintf( input_filename,"%s/curdir/%s/history_j.txt",PathXWinNMRProg(),user_name ); 		
        sprintf( user_name_filename,"%s/user_name.txt",ACQUPATH(0) );
-       sprintf(read_user_name_cmd,"whoami > %s",user_name_filename);
+       sprintf( read_user_name_cmd,"whoami > %s",user_name_filename);
+       system( read_user_name_cmd); //do the system command to output username to a file
     #endif
      
-    system(read_user_name_cmd);
-  
-    Proc_err (INFO_OPT, "input filename - %s\nOutput filename - %s\n read_user_name_cmd - %s", input_filename, output_filename,read_user_name_cmd);
+    
+    user_name_file = fopen(user_name_filename, "r");
+       if (user_name_file == NULL) {
+        sprintf(message,"failed to open file - %s",user_name_filename);
+          STOPMSG(message);
+       }
+       else {
+         fgets(user_name,line_len,user_name_file);
+         fclose(user_name_file);
+         user_name[strlen(user_name)-1]=NULL; //remove trailing char read from file
+       }
+
+    #ifdef HAS_WINDOWS_FEATURES
+       sprintf( input_filename,"%s\\curdir\\%s\\history_j.txt",PathXWinNMRProg(),user_name ); 
+    #else
+        sprintf( input_filename,"%s/curdir/%s/history_j.txt",PathXWinNMRProg(),user_name ); 
+    #endif
+
+    Proc_err (INFO_OPT, "input filename - %s\nOutput filename - %s\n read_user_name_cmd - %s \n user_name - %s", input_filename, output_filename,read_user_name_cmd,user_name);
+    
     input_file = fopen(input_filename, "r");
-    if (input_file == NULL)
-        STOPMSG("failed to open file");
+    if (input_file == NULL){
+       sprintf(message,"failed to open file - %s",input_filename);
+       STOPMSG(message);
+    }
 
     while ((read = fgets(line, line_len, input_file)) != NULL) {
      //   printf("Retrieved line of length %zu:\n", read);
@@ -81,13 +103,19 @@
     }
     
     input_file = fopen(input_filename, "r");
-    if (input_file == NULL)
-        STOPMSG("failed to open file");
+    if (input_file == NULL){
+       sprintf(message,"failed to open file - %s",input_filename);
+       STOPMSG(message);
+    }
+       
 
     num_lines = 0;
     output_file = fopen(output_filename,"w");
-    if (output_file == NULL)
-        STOPMSG("failed to open file");
+    if (output_file == NULL){
+     sprintf(message,"failed to open file - %s",output_filename);
+       STOPMSG(message);
+    }
+      
  
      while ((read = fgets(line, line_len, input_file)) != NULL) {
      //Proc_err (INFO_OPT, "%s", line);

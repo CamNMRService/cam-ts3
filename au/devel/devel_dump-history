@@ -73,7 +73,12 @@
        else {
          fgets(user_name,line_len,user_name_file);
          fclose(user_name_file);
-         user_name[strlen(user_name)-1]=NULL; //remove trailing char read from file
+         #ifdef HAS_WINDOWS_FEATURES
+           user_name[strlen(user_name)-1]=NULL; //remove trailing char read from file
+           user_name[strlen(user_name)-1]=NULL; //remove trailing char read from file
+         #else
+           user_name[strlen(user_name)-1]=NULL; //remove trailing char read from file
+         #endif       
        }
 
     #ifdef HAS_WINDOWS_FEATURES

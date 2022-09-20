@@ -426,7 +426,7 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
  
 // use topshim_watchdog to force timeout and to save topshim data in case of failure
 //added command line option to topshim_watchdog for a message
-sprintf(tmp_str,"TOPSHIM_ERROR_%s_%s",tmp_fname,cpos)
+sprintf(tmp_str,"TOPSHIM_ERROR_%s_%i",tmp_fname,cpos);
 XAU("devel_topshim_watchdog",tmp_str)
 /*or :-
 sprintf(tmp_str,"devel_topshim_watchdog %s_%s",tmp_fname,cpos)

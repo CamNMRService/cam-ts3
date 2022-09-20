@@ -55,7 +55,8 @@ CPR_exec("xau topshimkiller", WAIT_START);
 
 
 // execute topshim as desired
-sprintf(tscommand,"topshim plotall convcomp %s", cmd);
+//sprintf(tscommand,"topshim plotall convcomp %s", cmd); //not sure why cmd is here...
+sprintf(tscommand,"topshim plotall convcomp");
 XCMD(tscommand);
 
 

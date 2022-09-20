@@ -5,6 +5,8 @@
 //So that you can look at the data and see what might have gone wrong
 
 //ptg 2022/03/08 correct path to curdir for lock file, and properly get it to delete file - argument is file path not FILE pointer
+//djh35 2022/09/20 Add option to send messsage according to commandline option
+//do output to correct version directory
 
 #include <time.h>
 time_t now_s, dtime_s;		  	/* seconds since 1970 */
@@ -19,9 +21,19 @@ char tmp_str[PATH_MAX];
 char  datestamp[256];
 char lockpath[PATH_MAX];
 char pidpath[PATH_MAX];
- int pid;
+char message[1023];
+int pid;
+int ts_major = GetTsVersionMajor();
+int ts_minor = GetTsVersionMinor();
+int ts_patch = GetTsVersionPl();
+
 FILE *pidfile;
 FILE *lockfile;
+
+if (i_argc == 3 ) { //assume the argument is a message to send
+       sprintf(message,"%s",i_argv[2]); 
+}
+
 GETCURDATA 
 
 // 
@@ -72,18 +84,25 @@ if (pidfile = fopen(pidpath, "rt"))
 // check for failed execution
 if(AUERR)
 {
-	sprintf(tmp_str, "TOPSHIM_FAILED");
-	XAU("devel_whoopwhoop",tmp_str)
-	sleep(5);
- // don't repeat topshim!!
- // XCMD(tscommand)
-  #ifdef	HAS_WINDOWS_FEATURES
-  sprintf(command,"ren C:\\Bruker\\TopSpin3.6.4\\data\\topshimData topshimData_%s", datestamp);  
-//  Proc_err(DEF_ERR_OPT,command);
-  #else 
-  sprintf(command,"mv /opt/topspin3.6.4/data/topshimData /opt/topspin3.6.4/data/topshimData_%s", datestamp);
-  #endif
-  system(command);
+	if (i_argc == 3 ) { //assume the argument is a message to send
+       XAU("whoopwhoop",message);
+	} else
+	   {
+	     sprintf(tmp_str, "TOPSHIM_FAILED");
+	     XAU("whoopwhoop",tmp_str)
+	   }
+
+
+   sleep(5);
+   // don't repeat topshim!!
+   // XCMD(tscommand)
+   #ifdef	HAS_WINDOWS_FEATURES
+   sprintf(command,"ren C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData topshimData_%s", ts_major,ts_minor,ts_patch,datestamp);  
+   //  Proc_err(DEF_ERR_OPT,command);
+   #else 
+   sprintf(command,"mv /opt/topspin%i.%i.%i/data/topshimData /opt/topspin%i.%i.%i/data/topshimData_%s", ts_major,ts_minor,ts_patch,datestamp,ts_major,ts_minor,ts_patch);
+   #endif
+   system(command);
   //report copying now automatic
 //  strcpy(reportdest, ACQUPATH("topshim_report.txt"));
 //  sprintf(reportsource, "%s/%s/topshim_report.txt", PathXWinNMRProg(), PathXWinNMRCurDir());

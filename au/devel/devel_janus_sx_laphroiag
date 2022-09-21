@@ -419,7 +419,7 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 	       XAU("devel_whoopwhoop",tmp_str)
         }
 
-  	sprintf(tmp_str,"%s_%s",tmp_fname,cpos);
+  	sprintf(tmp_str,"%s_%i",tmp_fname,cpos);
     XAU("devel_topshim_watchdog",tmp_str);
     //orig CPR_exec("topshim_watchdog",WAIT_TERM); 
 	//below is old

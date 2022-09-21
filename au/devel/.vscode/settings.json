@@ -13,6 +13,7 @@
         "devel_poise_13c_p1_v4": "c",
         "devel_poise_31p_p1_v4": "c",
         "devel_create_poise_31p_file_v4": "c",
-        "devel_dump-history": "c"
+        "devel_dump-history": "c",
+        "devel_topshim_watchdog": "c"
     }
 }

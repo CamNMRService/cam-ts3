@@ -418,7 +418,11 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 	       sprintf(tmp_str, "ROT_FAILED_%i_%s", cpos, tmp_fname);
 	       XAU("devel_whoopwhoop",tmp_str)
         }
-    CPR_exec("topshim_watchdog",WAIT_TERM); 
+
+	sprintf(tmp_str,"%s_%s",tmp_fname,cpos)
+    XAU("devel_topshim_watchdog",tmp_str)
+    //orig CPR_exec("topshim_watchdog",WAIT_TERM); 
+	//below is old
 	//topshim has to be here, as we only want to do it once per sample, have to do atma each exp, or put more logic in.
  //commented out below - probably won't work with topshim_watchdog au program. Best call whoopwhoop from there.
  /*    AUERR=CPR_exec("topshim z6",WAIT_TERM);

@@ -1,0 +1,254 @@
+/***********************************************-*-C++-*-********/
+/*	service_tecalib			12.01.2001			*/
+/****************************************************************/
+/*	Short Description :					*/
+/*	AU program to determine the temperature calibration	*/
+/*	curve.							*/
+/****************************************************************/
+/*	Keywords :						*/
+/*	TE EDTE MeOH Ethylene Glycol temperature calibration	*/
+/****************************************************************/
+/*	Description/Usage :					*/
+/*	The purpose is to measure temperature over a certain	*/
+/*	temperature range in order to calibrate thermocouple	*/
+/*	and different characteristics of each probe. Results	*/
+/*	of the experiments are saved in an ascii file called	*/
+/*	VT_calib.txt in the pdata/1 directory of the first of	*/
+/*	the consecutive experiments. Additional information	*/
+/*	like the correction coefficients is calculated so that	*/
+/*	you can put it into the correction table in EDTE in	*/
+/*	order to have an automatic temperature calibration.	*/
+/*	ATTENTION:						*/
+/*	If you decide to use this automatic calibration, then	*/
+/*	these values have to be changed with each change of the	*/
+/*	probe!							*/
+/*								*/
+/*	The calibration curve is only valid for the		*/
+/*	temperature range it covered.				*/
+/*								*/
+/*	In summary, the program works as follows :		*/
+/*								*/
+/*	1. If the sample is set up and parameters for the 1D	*/
+/*	   experiments are determined and a VT-list is created,	*/
+/*	   the au program can be called and will do the rest.	*/
+/*	2. It creates a number of consecutive 1D experiments	*/
+/*	   similar to the AU program multi_zgvt.		*/
+/*	3. Then each experiment is started with zg.		*/
+/*	4. After all experiments are performed the calibration	*/
+/*	   parameters are calculated with proc_tecalib.		*/
+/*								*/
+/*	The program is called by "xau tecalib". After the	*/
+/*	data have been acquired, they are processed with the	*/
+/*	AU program proc_tecalib					*/
+/*	(called with: xau proc_tecalib sample no).		*/
+/*								*/
+/*	You can use MeOH pure, MeOH in MeOh_d4, Ethylene-	*/
+/*	glycol pure, or our Ethylene-glycol in DMSO sample.	*/
+/*								*/
+/*	Currently, the program can work with up to 128		*/
+/*	different temperature values. If you need more, you	*/
+/*	have to increase the value of MAX_TEMP_VAL.		*/
+/*								*/
+/****************************************************************/
+/*	Author(s) :						*/
+/*	Name            : Jochem Struppe			*/
+/*	Organisation    : Bruker Instruments Inc.		*/
+/*	Email		: Jochem.Struppe@nmr.bruker.com		*/
+/****************************************************************/
+/*	Name		Date	Modification:			*/
+/*	jos		000601	created				*/
+/*	jos		010112	revised				*/
+
+//service_tecalib: added topshim at each temperature
+/****************************************************************/
+/*
+$Id:$
+*/
+
+AUERR = tecalib(curdat);
+QUIT
+
+#define MAX_TEMP_VAL 129
+
+#include <inc/exptUtil>
+/* utilities for printing and calculation of experiment time */
+
+#include <inc/teutil>
+/* utilities for temperature calibration and stability tests */
+
+int tecalib(const char *curdat)
+{
+/*-------------Variables --------------------------------*/
+int 	i1, te_mode;
+int 	startExpno, numtemp, waittime, expTime;
+
+float 	acttemp[MAX_TEMP_VAL], hightemp, lowtemp;
+
+char	line[256], text[PATH_MAX], vtlistname[PATH_MAX], vtlistpath[PATH_MAX];
+
+FILE *fptr1;
+
+/*-------------------------------------------------------*/
+/*----- Prepare Experiment and get the right sample -----*/
+/*-------------------------------------------------------*/
+
+startExpno = expno;
+FETCHPAR("VTLIST",vtlistname);
+if (getParfileDirForRead(vtlistname, VT_DIRS, vtlistpath) < 0)
+{
+  Proc_err(DEF_ERR_OPT, "VT list file %s: %s\n"
+			"Please use 'edlist vt'\n"
+			"to check for valid files\n"
+			"or set parameter VTLIST in eda.",
+			vtlistname, vtlistpath);
+  ABORT
+}
+
+if ( (fptr1 = fopen (vtlistpath,"r")) == NULL )
+{
+  Proc_err(DEF_ERR_OPT, "Could not open VT list file:\n%s\n"
+			"Please use 'edlist vt'\n"
+			"to check for valid files\n"
+			"or set parameter VTLIST in eda.",vtlistpath);
+  ABORT
+}
+
+/*-------------------------------------------------------*/
+/*--- Read first temperature value, scan for highest ----*/
+/*--- and lowest temperature and the total number of ----*/
+/*--- temperature values. -------------------------------*/
+/*-------------------------------------------------------*/
+
+if ( fgets (line,sizeof(line),fptr1) == NULL )
+{
+  Proc_err (DEF_ERR_OPT,"No VT list entry found.\n"
+	"Please check the VT list file\n%s\n"
+	"with 'edlist vt %s'.",vtlistpath,vtlistname);
+  (void) fclose (fptr1);
+  ABORT
+}
+sscanf (line,"%f",&acttemp[0]);
+hightemp = lowtemp = acttemp[0];
+numtemp = 1;
+
+/*-------------------------------------------------------*/
+/*------------- Check for temperature values ------------*/
+/*-------------------------------------------------------*/
+
+while ( fgets (line,sizeof(line),fptr1) != NULL )
+{
+  sscanf (line,"%f",&acttemp[numtemp]);
+  if ( acttemp[numtemp] > hightemp )
+  {
+    hightemp = acttemp[numtemp];
+  }
+  if ( acttemp[numtemp] < lowtemp )
+  {
+    lowtemp = acttemp[numtemp];
+  }
+  numtemp++; 
+}
+(void) fclose (fptr1);
+
+if ( numtemp == 1 )
+{
+  Proc_err (DEF_ERR_OPT,"Only one temperature value\n"
+	"was specified. If you intend to\n"
+	"calibrate just the offset,\n"
+	"please use AU program batman.");
+  ABORT
+}
+
+if ( numtemp > MAX_TEMP_VAL-1 )
+{
+  Proc_err (DEF_ERR_OPT,"Maximum number of temperature\n"
+	"values exceeded %d (max: %d). Please\n"
+	"reduce the number of values\n"
+	"with 'edlist vt %s'.",numtemp, MAX_TEMP_VAL,vtlistname);
+  ABORT
+}
+
+if (Proc_err(QUESTION_OPT,
+	"Highest temperature : %f OK?",hightemp) != ERR_OK)
+  STOPMSG ("--- Highest temperature not OK ---")
+if (Proc_err(QUESTION_OPT,
+	"Lowest temperature : %f OK?",lowtemp) != ERR_OK)
+  STOPMSG ("--- Lowest temperature not OK ---")
+
+/*-------------------------------------------------------*/
+/*------ Make sure the right sample is inserted ---------*/
+/*------ shimmed and the probe is matched and tuned. ----*/
+/*-------------------------------------------------------*/
+
+te_mode = SampleType(hightemp);
+
+/*-------------------------------------------------------*/
+/*--------- Get number of experiments -------------------*/
+/*-------------------------------------------------------*/
+
+do
+{
+  i1 = numtemp;
+  if (Proc_err(QUESTION_OPT,
+	"You chose to run %d experiments?",i1) != ERR_OK)
+  {
+    GETINT("Enter number of experiments : ",i1);
+  }
+} while ( (i1 > numtemp) || (i1 == 0) );
+
+numtemp = i1;
+
+/*-------------------------------------------------------*/
+/*-------------- Set experiment -------------------------*/
+/*-------------------------------------------------------*/
+
+waittime = 60;
+GETINT("Enter temperature equilibration period (secs) : ",waittime);
+
+expTime = 0;
+TIMES(numtemp)
+    SETCURDATA;
+    STOREPAR("TE",acttemp[loopcount1]);
+    expTime += CalcExpTime() + 4 + waittime;
+    IEXPNO;
+END
+DEXPNO;
+PrintExpTime(expTime, numtemp);
+
+expno = startExpno;
+SETCURDATA;
+
+/*-------------------------------------------------------*/
+/*----- Run the experiments -----------------------------*/
+/*-------------------------------------------------------*/
+
+if (Proc_err(QUESTION_OPT,
+	"Do you want to start with the experiments?\n") != ERR_OK)
+  STOPMSG ("----- Run stopped by user -----");
+
+TIMES(numtemp)
+  (void)sprintf(text,"running experiment # %d (TE = %f)",
+                          loopcount1+1,acttemp[loopcount1]);
+  Show_status(text);
+  sleep(4);
+  TESET
+  TEREADY(waittime,0.1)
+  XCMD("topshim tuneaxyz");
+  ZG;
+  IEXPNO;
+END
+
+expno = startExpno;
+SETCURDATA;
+
+/*-------------------------------------------------------*/
+/*--- Prepare new cmd string for call of proc_tecalib ---*/
+/*-------------------------------------------------------*/
+
+(void)sprintf(line,"%d no",te_mode); 
+
+XAU("proc_tecalib", line)
+
+Show_status("--- calibration measurement finished ---");
+return 0;
+}

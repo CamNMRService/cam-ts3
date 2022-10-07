@@ -41,7 +41,7 @@ if (i_argc == 4) {
 }
 
 if (i_argc > ){
-    sprintf( tmp_str,"Too many arguments passed to %s",i_argv[0]);
+    sprintf(tmp_str,"Too many arguments passed to %s",i_argv[0]);
     STOPMSG(tmp_str)
 }
 GETCURDATA 

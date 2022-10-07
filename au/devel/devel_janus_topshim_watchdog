@@ -40,7 +40,7 @@ if (i_argc == 4) {
    sprintf(topshim_option,"%s",i_argv[3]); 
 }
 
-if (i_argc > ){
+if (i_argc > 4 ){
     sprintf(tmp_str,"Too many arguments passed to %s",i_argv[0]);
     STOPMSG(tmp_str)
 }

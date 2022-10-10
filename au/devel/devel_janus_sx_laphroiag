@@ -57,6 +57,9 @@
 /* 220125 patch by djh to not do atma for 1h */
 
 //20220606 added getprosol
+/*20220920 - added option to call topshim_watchdog with a command line 
+argument for a message
+- had to mod topshim_watchdog too*/
 /****************************************/
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 char def_file[255]="f:/chemist/defaults-csv.txt"; //janus software defaults
@@ -418,9 +421,11 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 	       sprintf(tmp_str, "ROT_FAILED_%i_%s", cpos, tmp_fname);
 	       XAU("devel_whoopwhoop",tmp_str)
         }
-
-  	sprintf(tmp_str,"%s_%i",tmp_fname,cpos);
-    XAU("devel_topshim_watchdog",tmp_str);
+//topshim has to be here, as we only want to do it once per sample, have to do atma each exp, or put more logic in. 
+// use topshim_watchdog to force timeout and to save topshim data in case of failure
+//added command line option to topshim_watchdog for a message
+sprintf(tmp_str,"devel_janus_topshim_watchdog TOPSHIM_ERROR_%s_%i ordmax=8",tmp_fname,cpos); 
+XCMD(tmp_str);
     //orig CPR_exec("topshim_watchdog",WAIT_TERM); 
 	//below is old
 	//topshim has to be here, as we only want to do it once per sample, have to do atma each exp, or put more logic in.

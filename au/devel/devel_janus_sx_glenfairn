@@ -57,6 +57,9 @@
 /* 220125 patch by djh to not do atma for 1h */
 
 //20220606 added getprosol
+/*20220920 - added option to call topshim_watchdog with a command line 
+argument for a message
+- had to mod topshim_watchdog too*/
 /****************************************/
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 char def_file[255]="d:/chemist/defaults-csv.txt"; //janus software defaults
@@ -420,13 +423,25 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 	       XAU("devel_whoopwhoop",tmp_str)
         }
 	
-	//topshim has to be here, as we only want to do it once per sample, have to do atma each exp, or put more logic in.
-     AUERR=CPR_exec("topshim convcomp",WAIT_TERM);
-	 if ( AUERR <0 )
+//topshim has to be here, as we only want to do it once per sample, have to do atma each exp, or put more logic in. 
+// use topshim_watchdog to force timeout and to save topshim data in case of failure
+//added command line option to topshim_watchdog for a message
+sprintf(tmp_str,"devel_janus_topshim_watchdog TOPSHIM_ERROR_%s_%i ordmax=8",tmp_fname,cpos); 
+XCMD(tmp_str);
+//XAU("devel_topshim_watchdog",tmp_str) //failed
+/*or :-
+sprintf(tmp_str,"devel_topshim_watchdog %s_%s",tmp_fname,cpos)
+XCMD(tmp_str);
+*/
+//orig - CPR_exec("topshim_watchdog",WAIT_TERM);
+
+/*	      AUERR=CPR_exec("topshim convcomp",WAIT_TERM);
+       if ( AUERR <0 )
         {
 	       sprintf(tmp_str, "TOPSHIM_FAILED_%i_%s",cpos, tmp_fname);
 	       XAU("devel_whoopwhoop",tmp_str)
         }
+  */
   //put in here for 700
  //   ROTOFF
  //   sprintf(tmp_cmd, "tune z1z2");

@@ -421,8 +421,7 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 	       sprintf(tmp_str, "ROT_FAILED_%i_%s", cpos, tmp_fname);
 	       XAU("devel_whoopwhoop",tmp_str)
         }
-	//topshim has to be here, as we only want to do it once per sample, have to do atma each exp, or put more logic in.
- 
+//topshim has to be here, as we only want to do it once per sample, have to do atma each exp, or put more logic in. 
 // use topshim_watchdog to force timeout and to save topshim data in case of failure
 //added command line option to topshim_watchdog for a message
 sprintf(tmp_str,"devel_janus_topshim_watchdog TOPSHIM_ERROR_%s_%i ordmax=5",tmp_fname,cpos); 

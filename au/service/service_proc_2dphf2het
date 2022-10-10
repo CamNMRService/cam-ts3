@@ -1,0 +1,158 @@
+/***********************************************-*-C++-*-********/
+/*  proc_2dphf2het      11.01.2006                              */
+/****************************************************************/
+/*  Short Description :                                         */
+/*  Determines phase correction in F2 for heteronuclear spectra.*/
+/****************************************************************/
+/*  Keywords :                                                  */
+/*  2D inverse HMQC HSQC                                        */
+/****************************************************************/
+/*  Description/Usage :                                         */
+/*  Processing AU program for 2D inverse type spectra.          */
+/*  The phase in F2 is determined by 2D peak picking            */
+/*  followed by APK.                                            */
+/*  This AU program assumes that "xfb;.all;dpl" has been        */
+/*  executed prior to calling.                                  */
+/****************************************************************/
+/*  Author(s) :                                                 */
+/*  Name            : Rainer Kerssebaum, Peter Dvortsak         */
+/*  Organisation    : Bruker BioSpin GmbH                       */
+/*  Email           : nmr-software-support@bruker.de            */
+/****************************************************************/
+/*  Name        Date    Modification:                           */
+/*  rke         060111  created out of proc_2dinv               */
+/*  ge        20071212  readPeakList		                */
+/*  wem	      20150326	care of NUS data			*/
+/*  ptg 		more intelligent handling of NUS data */
+/****************************************************************/
+/*
+$Id: proc_2dphf2het,v 1.6.12.2 2015/03/27 09:22:23 wem Exp $
+*/
+
+/********************************************/
+/* Declare variables                        */
+    int     mc2, fntype, niter_orig, sif2, tdf2;
+    int     irow,s_procno,nprocno, nprocno2;
+    float   phc0,phc1;
+
+/********************************************/
+/* save current dataset info                */
+    s_procno = procno;
+    nprocno  = 9999;
+    nprocno2=10000;
+
+    FETCHPARS("FnTYPE",&fntype);
+    
+// for first transform, can reduce number of iterations for processing to speed it up
+// also make sure one round of zero filling done to avoid artefacts in  Hilbert transform 	
+	if (fntype == 2)
+    {
+    	FETCHPAR("MDD_CSNITER", &niter_orig)
+    	STOREPAR("MDD_CSNITER", 10)
+    	FETCHPAR("SI", &sif2)
+    	FETCHPAR("TD", &tdf2)
+    	if (sif2 < tdf2)
+    	{
+    		STOREPAR("SI",tdf2)
+    		FETCHPAR("SI", &sif2)
+    		if (sif2<tdf2)
+    		{
+    			STOREPAR("SI",tdf2*2)
+    		}
+    	}	
+    }
+    XFB;
+// for NUS data need todo Hilbert transform at this point
+
+    if (fntype == 2)
+    {
+    	DELETEIMAGINARYDATA(name, expno, procno, disk, user)
+    	XHT2
+    }
+    ERRORABORT;
+    WRP(nprocno2); // copy 2d dataset to dummy procno
+    DATASET(name,expno,nprocno2,disk,user);
+    XF2M;
+    RVPP(nprocno);
+    ERRORABORT;
+    
+    
+   
+   
+
+/********************************************/
+/* create the pp file on pos peaks          */
+    DATASET(name,expno,nprocno,disk,user);
+    STOREPAR("CY",100.);
+    STOREPAR("MAXI",110.);
+    STOREPAR("MI",10.);
+    STOREPAR("PSIGN",0);
+    STOREPAR("PC",2.0);
+
+    PP;
+    ERRORABORT;
+
+/********************************************/
+/* open and read the pp file                */
+    irow = readPeakList(PROCPATH(0));
+
+    if (irow < 0)
+    {
+	Proc_err(DEF_ERR_OPT, "%s, phase correction aborted", getPeakError());
+	ABORT;
+    }
+
+    if (irow == 0)
+    {
+	Proc_err(DEF_ERR_OPT,
+		 "no peak was found in the 2D file, phase correction aborted");
+	ABORT;
+    }
+
+
+/********************************************/
+/* add the selected rows in the procno 9999 */
+
+    DATASET(name,expno,s_procno,disk,user);
+    RSR(getPeakAddress(0),nprocno);
+    ERRORABORT;
+    DATASET(name,expno,nprocno,disk,user);
+    DATASET2(name,expno,nprocno - 1,disk,user);
+    DATASET3(name,expno,nprocno,disk,user);
+    STOREPAR("DATMOD",1);
+    STOREPAR("DC",1.0);
+
+    for (i1 = 1; i1 < irow; i1++)
+    {
+	DATASET(name,expno,s_procno,disk,user);
+	RSR(getPeakAddress(i1),nprocno - 1);
+	ERRORABORT;
+	DATASET(name,expno,nprocno,disk,user);
+	ADD;
+	ERRORABORT;
+    }
+
+    freePeakList();
+
+/********************************************/
+/* perform the phase correction             */
+
+    APK;
+    ERRORABORT;
+    FETCHPAR("PHC0",&phc0);
+    FETCHPAR("PHC1",&phc1);
+
+    DATASET(name,expno,s_procno,disk,user);
+    phc0 = fmod(phc0,360.);
+    STOREPAR("PHC0",phc0);
+    STOREPAR("PHC1",phc1);
+    STOREPAR("PH_mod",1);
+
+/********************************************/
+/* processing                               */
+    STOREPAR("MDD_CSNITER",niter_orig);
+    XFB
+    
+    // get rid of teh dummy procno!
+    DELETEPROCNO(name, expno, nprocno2, disk, user)
+QUIT

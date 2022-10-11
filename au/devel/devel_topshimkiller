@@ -1,14 +1,31 @@
+//topshimkiller
 // started by topshim_watchdog
 // waits eg 5 mins then issues topshim stop command.
 // modified to use sendgui topshim stop as xcmd("topshim stop") doesn't seem to work.
 // Write file containing PISD, so topshim_watchdog can kill this program, otherwise if a samples 
 //takes <5mins this could still be running when next sample comes and kill it after not very long...
+//Oct 2022 mod by djh to accept commandline argument as timeout
 
 char lockpath[PATH_MAX];
 FILE *lockfile;
 char pidpath[PATH_MAX];
- int pid;
+int timeout=1; //timeout in seconds 
+int min_timeout=300; // used as default time in seconds, if no or bogus args
+int max_timeout=600; // used as a default if bogus args
+int pid;
 FILE *pidfile;
+
+if (i_argc == 3 ) { //assume the argument is time in seconds
+   timeout = atoi(i_argv[2]);  
+} else {
+	timeout=min_timeout;
+}
+
+//now catch errors from bogus values.
+
+if (timeout<min_timeout) {timeout=min_timeout;}
+if )timeout>max_timeout) {timeout=max_timeout;}
+
 
 sprintf(lockpath, "%s/%s/topshim_lockfile",PathXWinNMRProg(), PathXWinNMRCurDir());
 
@@ -27,7 +44,7 @@ if ( (pidfile = fopen(pidpath, "wt") )== NULL)
 fprintf(pidfile, "%d\n", pid);
 fclose(pidfile);
 
-sleep(300); //e.g. 5 minutes limit
+sleep(timeout); //defined above
 
 if ( lockfile = access(lockpath,F_OK) == 0) // file found, stop topshim
 	{

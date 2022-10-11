@@ -55,7 +55,7 @@ if (i_argc > 5 ){
     STOPMSG(tmp_str)
 }
 
-sprintf(tmp_str,"topshimkiller %s",topshim_timeout);
+sprintf(tmp_str,"devel_topshimkiller %s",topshim_timeout);
 CPR_exec(tmp_str, WAIT_START); 
 
 if (i_argc == 3 ) { 

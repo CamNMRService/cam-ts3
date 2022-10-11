@@ -77,7 +77,7 @@ if (i_argc == 5) {
    sprintf(topshim_option_b,"%s",i_argv[3]); 
    sprintf(topshim_option_c,"%s",i_argv[4]); 
    // execute topshim as desired
-   sprintf(tscommand,"topshim plotall convcomp %s %s",topshim_option_a, topshim_option_b, topshim_option_c);
+   sprintf(tscommand,"topshim plotall convcomp %s %s %s",topshim_option_a, topshim_option_b, topshim_option_c);
 }
 
 // delete the lockfile  *and kill the killer program!!!!!* if topshim completes OK

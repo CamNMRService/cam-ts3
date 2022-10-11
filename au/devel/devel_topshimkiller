@@ -24,12 +24,13 @@ if (i_argc == 3 ) { //assume the argument is time in seconds
 //now catch errors from bogus values.
 
 if (timeout<min_timeout) {timeout=min_timeout;}
-if )timeout>max_timeout) {timeout=max_timeout;}
+if (timeout>max_timeout) {timeout=max_timeout;}
 
 
 sprintf(lockpath, "%s/%s/topshim_lockfile",PathXWinNMRProg(), PathXWinNMRCurDir());
 
-/* get current PID */
+/* get current PID - doesnt compile under OSX*/
+//pid = 1;
 pid = _getpid();
 
 /* create the file to contain current PID */

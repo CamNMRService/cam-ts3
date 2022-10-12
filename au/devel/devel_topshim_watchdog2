@@ -25,6 +25,7 @@ char message[1023];
 char topshim_option_a[255];
 char topshim_option_b[255];
 char topshim_option_c[255];
+char topshim_option_d[255];
 char topshim_timeout[8]="300";
 int pid;
 int ts_major = GetTsVersionMajor();

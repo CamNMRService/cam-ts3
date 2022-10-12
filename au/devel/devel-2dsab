@@ -1,0 +1,56 @@
+//devel-2dsab
+// AU program for cubic spline baseline correction of all rows of a pseudo 2D
+
+// Start by creating baslpts file in some procno, make sure NZP is set correctly
+// return to 2d procno
+// Start AU program from there
+
+int i, s_procno, refprocno, tmp_procno, td1;
+int nzp;
+int pparmod;
+char tempstr[PATH_MAX];
+
+// check we are in a 2d procno!
+
+FETCHPARS("PPARMOD", &pparmod)
+
+if (pparmod != 1)
+  STOPMSG("Program only suitable for 2D spectra")
+// set starting procno
+s_procno=procno;
+
+// ask user which procno has the baslpts file stored
+GETINT("Which procno contains baslpts file?", refprocno);
+
+// find first empty proco for use as temp one to store each row
+do
+  procno++;
+while (access(PROCPATH(0), F_OK) == 0);
+
+tmp_procno = procno;
+
+// enter refprocno and read nzp
+procno = refprocno;
+FETCHPAR("NZP", &nzp);
+
+procno=s_procno;
+// read number of rows
+FETCHPAR1S("TDEFF", &td1)
+
+
+
+//loop over all rows
+for (i = 1; i <= td1; ++i)
+{
+	DATASET(name, expno, s_procno, disk, user)  // start from 2d procno
+	RSR(i, tmp_procno)   // read row into temp procno
+	DATASET(name, expno, tmp_procno, disk, user) //open temp procno
+	sprintf(tempstr, VARPROCPATH(name, expno, refprocno, "baslpnts"));
+	dircp(tempstr, PROCPATH("baslpnts"));  //copy baslpnts file into tmp procno
+	STOREPAR("NZP", nzp)  // set nzp based on ref procno
+	SAB //apply
+  WSR(i, s_procno, expno, name, user, disk) //write out to 2D procno
+}
+
+QUIT
+	

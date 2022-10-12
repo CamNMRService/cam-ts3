@@ -70,16 +70,14 @@ if (i_argc == 3 ) {
 sprintf(tmp_str,"devel_topshimkiller %s",topshim_timeout);
 CPR_exec(tmp_str, WAIT_START);
 
-if (i_argc ==3){
-   sprintf(tscommand,"topshim plotall");
-   XCMD(tscommand);
+if (i_argc == 3){
+   sprintf(tscommand,"topshim plotall"); 
 }
 
 if (i_argc == 4 ) { 
    sprintf(topshim_option_a,"%s",i_argv[3]); 
    // execute topshim as desired
    sprintf(tscommand,"topshim plotall %s",topshim_option_a);
-   XCMD(tscommand);
 }
 
 if (i_argc == 5) {
@@ -93,7 +91,6 @@ if (i_argc == 6) {
    sprintf(topshim_option_a,"%s",i_argv[3]); 
    sprintf(topshim_option_b,"%s",i_argv[4]); 
    sprintf(topshim_option_c,"%s",i_argv[5]); 
-   // execute topshim as desired
    sprintf(tscommand,"topshim plotall %s %s %s",topshim_option_a, topshim_option_b, topshim_option_c);
 }
 
@@ -102,9 +99,11 @@ if (i_argc == 7) {
    sprintf(topshim_option_b,"%s",i_argv[4]); 
    sprintf(topshim_option_c,"%s",i_argv[5]); 
    sprintf(topshim_option_d,"%s",i_argv[6]); 
-   // execute topshim as desired
    sprintf(tscommand,"topshim plotall %s %s %s %s",topshim_option_a, topshim_option_b, topshim_option_c, topshim_option_d);
 }
+Proc_err(INFO_OPT, "topshim command = %s", tscommand);
+// execute topshim as desired
+XCMD(tscommand);
 // delete the lockfile  *and kill the killer program!!!!!* if topshim completes OK
 
 remove(lockpath);  // get rid of the kil file!

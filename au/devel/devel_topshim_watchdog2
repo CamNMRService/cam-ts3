@@ -70,6 +70,11 @@ if (i_argc == 3 ) {
 sprintf(tmp_str,"devel_topshimkiller %s",topshim_timeout);
 CPR_exec(tmp_str, WAIT_START);
 
+if (i_argc ==3){
+   sprintf(tscommand,"topshim plotall");
+   XCMD(tscommand);
+}
+
 if (i_argc == 4 ) { 
    sprintf(topshim_option_a,"%s",i_argv[3]); 
    // execute topshim as desired

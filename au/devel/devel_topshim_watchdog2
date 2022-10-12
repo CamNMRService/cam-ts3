@@ -57,13 +57,14 @@ if (i_argc > 7 ){
 }
 
 if (i_argc == 3 ) {
-	if ( (strstr(i_argv[2],"help")) || (strstr(topshim_timeout,"help")) ) //...unless its not.
+    sprintf(topshim_timeout,"%s",i_argv[2]); //first argument is timeout for topshim is secs
+	if ( (strstr(topshim_timeout,"help")) || (strstr(topshim_timeout,"?")) ) //...unless its not.
 	{
 		Proc_err(INFO_OPT, "Program takes the following arguments :- \n Topshim timeout in secs (must be first argument) \n Up to 4 arguments for topshim, separated by spaces ");
 		sprintf(tmp_str,"Help printed");
         STOPMSG(tmp_str)
 	}
-    sprintf(topshim_timeout,"%s",i_argv[2]); //first argument is timeout for topshim is secs
+    
 
 }
 

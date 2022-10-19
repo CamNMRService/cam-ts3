@@ -57,6 +57,9 @@
 /* 220125 patch by djh to not do atma for 1h */
 
 //20220606 added getprosol
+/*20220920 - added option to call topshim_watchdog with a command line 
+argument for a message
+- had to mod topshim_watchdog too*/
 /****************************************/
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 char def_file[255]="d:/chemist/defaults-csv.txt"; //janus software defaults
@@ -240,7 +243,7 @@ AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 if ( AUERR <0 )
 {
 	sprintf(tmp_str, "INITIAL_II_ERROR");
-	XAU("whoopwhoop",tmp_str)
+	XAU("devel_whoopwhoop",tmp_str)
 }
 
 //CPR_exec("ii", WAIT_TERM);
@@ -344,7 +347,7 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 {
 	Proc_err ( INFO_OPT,"%s",fidpath);
 	sprintf(tmp_str, "OVERWRITE_FID_ERROR_%i_%s", cpos,tmp_fname);
-	XAU("whoopwhoop",tmp_str)
+	XAU("devel_whoopwhoop",tmp_str)
 //	XAU("whoopwhoop",cmd)
 	exit(1);
 }
@@ -388,7 +391,7 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 		skipsample=1;
 // email us but don't quit in case it's not a real problem and is just skipping sample!!
         sprintf(tmp_str, "INSERT_ERROR_%i_%s", cpos, tmp_fname);
-	    XAU("whoopwhoop",tmp_str)
+	    XAU("devel_whoopwhoop",tmp_str)
 	}
 /*ok, we have put the sample in the magnet; now run through its exps*/
 	if (skipsample==0)
@@ -401,7 +404,7 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
     if ( AUERR <0 )
     {
 	     sprintf(tmp_str, "FAILED_TO_READ_SHIMS_%s_%i_%s",shimset, cpos, tmp_fname);
-	     XAU("whoopwhoop",tmp_str)
+	     XAU("devel_whoopwhoop",tmp_str)
     }
 		sprintf(tmp_cmd, "lock %s",solvent);
 		AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
@@ -409,7 +412,7 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
         {
 	      sprintf(tmp_str, "FAILED_TO_LOCK_%s_%i_%s",solvent, cpos, tmp_fname);
 	     
-	       XAU("whoopwhoop",tmp_str)
+	       XAU("devel_whoopwhoop",tmp_str)
         }
 	//	sprintf(tmp_cmd, "ROT");
 	//	AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
@@ -417,16 +420,28 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 		if ( AUERR <0 )
         {
 	       sprintf(tmp_str, "ROT_FAILED_%i_%s", cpos, tmp_fname);
-	       XAU("whoopwhoop",tmp_str)
+	       XAU("devel_whoopwhoop",tmp_str)
         }
 	
-	//topshim has to be here, as we only want to do it once per sample, have to do atma each exp, or put more logic in.
-     AUERR=CPR_exec("topshim convcomp",WAIT_TERM);
-	 if ( AUERR <0 )
+//topshim has to be here, as we only want to do it once per sample, have to do atma each exp, or put more logic in. 
+// use topshim_watchdog to force timeout and to save topshim data in case of failure
+//added command line option to topshim_watchdog for a message
+sprintf(tmp_str,"janus_topshim_watchdog TOPSHIM_ERROR_%s_%i ordmax=8",tmp_fname,cpos); 
+XCMD(tmp_str);
+//XAU("devel_topshim_watchdog",tmp_str) //failed
+/*or :-
+sprintf(tmp_str,"devel_topshim_watchdog %s_%s",tmp_fname,cpos)
+XCMD(tmp_str);
+*/
+//orig - CPR_exec("topshim_watchdog",WAIT_TERM);
+
+/*	      AUERR=CPR_exec("topshim convcomp",WAIT_TERM);
+       if ( AUERR <0 )
         {
 	       sprintf(tmp_str, "TOPSHIM_FAILED_%i_%s",cpos, tmp_fname);
-	       XAU("whoopwhoop",tmp_str)
+	       XAU("devel_whoopwhoop",tmp_str)
         }
+  */
   //put in here for 700
  //   ROTOFF
  //   sprintf(tmp_cmd, "tune z1z2");
@@ -458,7 +473,7 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 	    if ( AUERR <0 )
 		  {
 		     sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
-	       XAU("whoopwhoop",tmp_str)
+	       XAU("devel_whoopwhoop",tmp_str)
 	       // STOPMSG(tmp_str)
 		  }
 	}
@@ -474,7 +489,7 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 	   fputs( "ACQUISITION FAILED!\n", flog);
 	   fclose( flog );
 	   sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
-	   XAU("whoopwhoop",tmp_str)
+	   XAU("devel_whoopwhoop",tmp_str)
 	}
 			//remove comment for production actually, rotation should be set in par set; line 386 ROT should do it
 		//	CPR_exec("ro off",WAIT_TERM);
@@ -625,7 +640,7 @@ if (proc_or_not==1)
 		      if ( AUERR <0 )
 		         {
 		      	 sprintf(tmp_cmd, "EJECT_ERROR_%i_%s", cpos, tmp_fname);
-	           XAU("whoopwhoop_sx",tmp_cmd)
+	           XAU("devel_whoopwhoop_sx",tmp_cmd)
 	           STOPMSG(tmp_cmd)
 		         }
 	           

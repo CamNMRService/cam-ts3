@@ -1,6 +1,10 @@
 /*New version of auto email							*/
 /*Aim is to put the program defaults into a file, and read that			*/
 /*This file must be called ed.txt and be in c:/windows			   	*/
+/*contains email@here.there.com,sekritpasswordy,c:/log-directory/, d:/zips-directory/ */
+
+/*    camnmrservice@gmail.com,ONETIMEAPP-PASSWORD-CREATE-ON-GOOGLE,c:/auto-email-log/,d:/zips/   */
+
 /*Uses 7za.exe command line version from z-zip.org, placed into C:/windows	*/
 /*Relies on the robocopy command being in windows				*/
 /*uses the output of service-pdfit						*/

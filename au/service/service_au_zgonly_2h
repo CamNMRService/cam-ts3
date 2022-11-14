@@ -1,0 +1,35 @@
+// au prog to run 2H spectra allowing for the fact that the sample may be locked
+//AVIII only 
+
+#include <inc/bsms_program>    /* must be the first statement ****/
+double  lockshift=0, lockpower=0, lockgain;
+float   lockpower_par;
+
+// get current numbers from BSMS
+GETBSMSVAL(BSN_LOCK_SHIFT, lockshift);
+GETBSMSVAL(BSN_LOCK_GAIN,lockgain);
+
+GET_LOCK_POWER(lockpower);
+STOREPAR("CNST 31", lockpower);
+
+
+STOREPAR("LOCNUC","off");
+
+/*  Switch off lock and lock sweep                              */
+LOCK_AND_SWEEP_OFF;
+
+//set minimal lock power
+SET_LOCK_POWER(-60.0);
+
+// acquire - no rga needed
+ZG
+
+/* restore preamplifier for BSMS */
+DATASET("~TEMP",1,1,disk,user);
+RPAR("PROTON","all");
+II;
+// reset lock power and put lock back on
+SET_LOCK_POWER(lockpower);
+LOCK_ON_AFTER_HOLD; /* waits while LOCK PENDING */
+
+QUIT

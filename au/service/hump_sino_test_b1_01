@@ -10,7 +10,7 @@ Verbose and disclaimer set to 0 to automation use
 b1_01 -fix apbk logic
 b1_01 - add nucleus, sino_pp and instrument name to output
 b1_01 - try and fail more gracefully if humpcal fails - use -1.0 in values to indicate
-b1_01 - Nov 22 - Make NOT verbose not pop error box up that can stall automation
+b1_01 - Nov 22 - Make NOT verbose mode  not pop error box up that can stall automation
 */
 
 #include <stdio.h>
@@ -52,15 +52,7 @@ if (verbose ==1) {
   Proc_err(INFO_OPT,"ts_major is %i \n minor %i \n patch %i",ts_major, ts_minor, ts_patch);
   }
 
-if (verbose ==1) {
-   XCMD("setdef ackn ok");
-   XCMD("setdef stdout on");
-   XCMD("setdef stderr on");
-} else {
-   XCMD("setdef ackn no");
-   XCMD("setdef stdout off");
-   XCMD("setdef stderr off");
-}
+
 
 if (disclaimer == 1){
 i1 = Proc_err(QUESTION_OPT,"THIS PROGRAM IS DISTRIBUTED IN THE HOPE THAT IT WILL BE USEFUL, \
@@ -79,17 +71,23 @@ Click OK to agree and continue. \nClick cancel to disagree.\n\n \
 Remove this warning by setting disclaimer to 0 in the AU program.");
 
    if ( i1 == ERR_CANCEL )
-  {
-      if (verbose !=1) {
-         XCMD("setdef ackn ok");
-         XCMD("setdef stdout on");
-         XCMD("setdef stderr on");
-      }
+   {
       ABORT
    }
   else {
   }
 } //end of disclaimer
+
+if (verbose ==1) {
+   XCMD("setdef ackn ok");
+   XCMD("setdef stdout on");
+   XCMD("setdef stderr on");
+} else {
+   XCMD("setdef ackn no");
+   XCMD("setdef stdout off");
+   XCMD("setdef stderr off");
+}
+
 #ifdef HAS_WINDOWS_FEATURES
    sprintf(defaults_file_name,"C:\\Bruker\\%s%i\\poise\\service_hump_sino_1h_defaults_%s",repo_name,ts_major,au_version);
    // Also need a place for the results to go. I'm thinking same place as the helium log will suit us.
@@ -225,6 +223,11 @@ if (defaults_file == NULL)
     XAU(tmp_str,defaults_file_name)
    // XAU("create_hump_sino_file_V4",defaults_file_name)
     sprintf( tmp_str,"Defaults file created - %s \n You need to return to origianl dataset out of this junk one.",defaults_file_name);
+    if (verbose !=1) {
+       XCMD("setdef ackn ok");
+       XCMD("setdef stdout on");
+       XCMD("setdef stderr on");
+    }
     STOPMSG(tmp_str)
     //exit(1);
   }

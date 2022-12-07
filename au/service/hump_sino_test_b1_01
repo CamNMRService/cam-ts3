@@ -339,6 +339,7 @@ if (aqtest == 0)
 {
     sprintf(gui_cmd,"sendgui AQ %f",aq_double);
     XCMD(gui_cmd)
+    ATMA
     ZG
     if ( (ts_major=4) && (ts_minor>=0) && (ts_patch>=6) ) {
     FP

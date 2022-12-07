@@ -17,6 +17,7 @@
         "devel_topshim_watchdog": "c",
         "devel_janus_sx_lagavulin": "c",
         "devel_poise_1h_p1_v4": "c",
-        "devel_topshim_watchdog2": "c"
+        "devel_topshim_watchdog2": "c",
+        "janus-test-suite-devel-01": "c"
     }
 }

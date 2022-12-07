@@ -1,0 +1,51 @@
+
+int test_sample_pos = 60; //Posistion in carousel test sample is in
+
+char hdwerr[PATH_MAX]="";
+char tmp_cmd[PATH_MAX]="";
+char tmp_str[PATH_MAX]="";
+char statusstr[PATH_MAX]="";
+char H_cal_prog[PATH_MAX]="poise_1h_p1_b1_01";
+char C_cal_prog[PATH_MAX]="poise_13c_p1_b1_01";
+char P_cal_prog[PATH_MAX]="poise_31p_p1_b1_01";
+char F_cal_prog[PATH_MAX]="poise_19f_p1_b1_01";
+char HUMP_cal_prog[PATH_MAX]="hump_sino_test_b1_01";
+
+GETCURDATA
+
+sprintf( tmp_cmd, "sx %d",test_sample_pos);
+
+AUERR=CPR_exec(tmp_cmd, WAIT_TERM);
+
+
+if ( AUERR <0 )
+
+	{
+		sprintf( hdwerr, "SAMPLE CHANGER ERROR! Error: %d, trying again...\n", AUERR);
+		sleep( 60 );
+		sprintf( tmp_cmd, "sx %d ",test_sample_pos);
+		AUERR=CPR_exec(tmp_cmd, WAIT_TERM);
+//remove comment around below for production not sure if this is needed, the above line should deal with it
+		/*SX( cpos );*/
+	}
+	if ( AUERR <0 )
+	{
+	    sprintf(statusstr, "***Warning - could not find samples(%d)***",AUERR);
+  	    Show_status(statusstr );
+        sprintf(tmp_str, "INSERT_TEST_SAMPLE_ERROR_%i_%s", test_sample_pos, name);
+	    XAU("whoopwhoop",tmp_str)
+        STOPMSG("INSERT_TEST_SAMPLE_ERROR")
+	}
+/*ok, we have put the sample in the magnet; now run through its exps*/
+XAU(H_cal_prog,"")
+IEXPNO
+XAU(C_cal_prog,"")
+IEXPNO
+XAU(P_cal_prog,"")
+IEXPNO
+XAU(F_cal_prog,"")
+IEXPNO
+//hump has to be last as it runs 2 exps.
+XAU(HUMP_cal_prog,"")
+
+QUIT

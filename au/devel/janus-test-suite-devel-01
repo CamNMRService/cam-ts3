@@ -15,6 +15,8 @@ char C_cal_prog[PATH_MAX]="poise_13c_p1_b1_01";
 char P_cal_prog[PATH_MAX]="poise_31p_p1_b1_01";
 char F_cal_prog[PATH_MAX]="poise_19f_p1_b1_01";
 char HUMP_cal_prog[PATH_MAX]="hump_sino_test_b1_01";
+char solvent[15]="CD3CN";
+char topshim_opt[31]="convcomp";
 
 GETCURDATA
 
@@ -41,23 +43,32 @@ if ( AUERR <0 )
 	    XAU("whoopwhoop",tmp_str)
         STOPMSG("INSERT_TEST_SAMPLE_ERROR")
 	}
-/*ok, we have put the sample in the magnet; now run through its exps*/
+	sprintf(tmp_cmd, "lock %s",solvent);
+	AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
+	if ( AUERR <0 )
+    {
+	    sprintf(tmp_str, "FAILED_TO_LOCK_%s_%i_%s",solvent, cpos, tmp_fname);
+	    XAU("whoopwhoop",tmp_str)
+    }
+	sprintf(tmp_cmd,"topshim %s",topshim_opt); 
+    XCMD(tmp_cmd);
+/*ok, we have put the sample in the magnet, its locked and shimmed; now run through its exps*/
 XAU(H_cal_prog,"")
 IEXPNO
-GETCURDATA
-VIEWDATA_SAMEWIN
+//GETCURDATA
+//VIEWDATA_SAMEWIN
 XAU(C_cal_prog,"")
 IEXPNO
-GETCURDATA
-VIEWDATA_SAMEWIN
+//GETCURDATA
+//VIEWDATA_SAMEWIN
 XAU(P_cal_prog,"")
 IEXPNO
-GETCURDATA
-VIEWDATA_SAMEWIN
+//GETCURDATA
+//VIEWDATA_SAMEWIN
 XAU(F_cal_prog,"")
 IEXPNO
-GETCURDATA
-VIEWDATA_SAMEWIN
+//GETCURDATA
+//VIEWDATA_SAMEWIN
 //hump has to be last as it runs 2 exps.
 XAU(HUMP_cal_prog,"")
 

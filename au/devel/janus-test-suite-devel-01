@@ -47,7 +47,7 @@ if ( AUERR <0 )
 	AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
 	if ( AUERR <0 )
     {
-	    sprintf(tmp_str, "FAILED_TO_LOCK_%s_%i_%s",solvent, cpos, tmp_fname);
+	    sprintf(tmp_str, "FAILED_TO_LOCK_test_sample");
 	    XAU("whoopwhoop",tmp_str)
     }
 	sprintf(tmp_cmd,"topshim %s",topshim_opt); 

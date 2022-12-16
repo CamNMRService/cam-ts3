@@ -1,0 +1,7 @@
+HSQC
+2D H-1/X correlation via double inept transfer using sensitivity improvement.
+Phase sensitive using Echo/Antiecho-TPPI gradient selection with decoupling during acquisition.
+Using trim pulses in inept transfer using shaped pulses for all 180degree pulses on f2 - channel
+With gradients in back-inept and with suppression of COSY type artefacts
+NS=2
+Number Icrements = 256

@@ -103,8 +103,8 @@ Proc_err(INFO_OPT,"ts_major is %i \n minor %i \n patch %i",ts_major, ts_minor, t
 char repo_name[40]="cam-ts"; //Set this to be the name of your repository
 //Handlly print out what its doing as it goes along. Can change to output diff levels of verbosity. (in future)
 //verbose == 0 disclaimer == 0 is no output
-int verbose = 1;
-int disclaimer = 1; 
+int verbose = 0;
+int disclaimer = 0; 
 //Version - the version of this AU program, to ensure defaults files used are of the correct version
 char au_version[8] ="V4";
 //set aqtest = 0 to issue aquisition commands to the spectrometer

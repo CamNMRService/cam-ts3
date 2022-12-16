@@ -1,0 +1,5 @@
+service-13c.std
+SW = 250 to -20ppm
+AQ = 3.8s
+D1 = 1s
+NS = 256

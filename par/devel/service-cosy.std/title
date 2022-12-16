@@ -1,0 +1,4 @@
+COSY
+2D homonuclear shift correlation, using gradient pulses for selection with double quantum filter (set according to gradient ratio)
+NS=1
+Number increments = 256

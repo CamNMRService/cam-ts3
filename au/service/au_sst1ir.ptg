@@ -1,0 +1,202 @@
+/******* -*-C++-*- **********************************************/
+/*  au_sst1ir           16.05.2019                              */
+/****************************************************************/
+/*  Short Description :                                         */
+/*  AU program for measurement of fast T1 measurements.         */
+/****************************************************************/
+/*  Keywords :                                                  */
+/*  T1, automation, acquisition                                 */
+/****************************************************************/
+/*  Description/Usage :                                         */
+/*  AU program for acquisition of fast T1 measurements.         */
+/****************************************************************/
+/*  Author(s) :                                                 */
+/*  Name            : Rainer Kerssebaum                         */
+/*  Organisation    : Bruker BioSpin GmbH                       */
+/*  Email           : rainer.kerssebaum@bruker.com		        */
+/****************************************************************/
+/*  Name    Date    Modification:                               */
+/*  rke     190423  created                                     */
+/****************************************************************/
+/*
+$Id: au_sst1ir,v 1.2 2020/11/05 10:46:07 tilman.sauerbeck Exp $
+*/
+
+AUERR = local_au(curdat);
+QUIT
+
+
+/*  Define some global constants and variables */
+#define TLL 1024
+
+int     debugflag = 0, msgflag = 0, ret;
+const int   nslice = 5;
+
+/* subroutines used */
+static int mksst1irfqlist(const char*, const int, const int);
+static int mksst1irvdlist(const char*, const int);
+static int check_probe(const char*, double*, double*, char*, char*);
+static double round2(double, int);
+
+
+int local_au(const char* curdat)
+{
+    float   bw, bwfg4 = 7.82, gammaH = 4257.74691, gradstr, slice, ofreq, soffs;
+    double  bf1, clen, grad;
+    char    probe_id[TLL], probe_nickname[TLL];
+    const char  shape[] = "G4.1000";
+
+    ret = check_probe(curdat, &grad, &clen, probe_id, probe_nickname);
+    if (debugflag > 2)  printf("%.2f\n%.2f\n%s\n%s\n", grad, clen, probe_id, probe_nickname);
+    if (ret != 0)   ABORT
+
+    FETCHPAR("BF1", &bf1)
+    bw = (float) 10. * bf1;
+    slice = clen * 0.6 / (nslice + 1);
+    soffs = round2(slice / 10., 3);
+    gradstr = bw / slice * 10.;
+    ofreq = round2(gradstr * soffs / 50., 0) * 50.;
+    if (debugflag > 2)  printf("bw %.3f\nslice %.3f\nsoffs %.3f\nradstr %.3f\nofreq %.3f\n", bw, slice, soffs, gradstr, ofreq);
+
+    STOREPAR("P 42", (float) round2(bwfg4 / bw * 1000000., 0) )
+    STOREPAR("SPNAM 9", shape)
+    STOREPAR("SPOAL9", 1.)
+    STOREPAR("SPOFFS9", 0.)
+    STOREPAR("GPZ0", round2(gradstr / gammaH / grad * 100, 2) )
+    STOREPAR("GPNAM 1", "SMSQ10.100")
+    STOREPAR("GPZ1", 23.23)
+
+    /* calc fqlist */
+    ret = mksst1irfqlist(curdat, nslice, (int) ofreq);
+    if (ret != 0)   ABORT
+
+    /* calc vdlist */
+    ret = mksst1irvdlist(curdat, nslice);
+    if (ret != 0)   ABORT
+
+    XCMD("pulsecal fast quiet")
+    XCMD("savepars p1 plw1")
+
+    ZG
+
+    Show_meta(SM_RAWP);
+    return 0;
+}
+
+
+/* subroutines ****************************************************************/
+
+/* subroutine create fq1list for slice offsets ***********************************************/
+static int mksst1irfqlist(const char* curdat, const int nslices, const int slt)
+{
+    int     *fpout;
+    char    fname[PATH_MAX], path[PATH_MAX];
+
+
+    sprintf(fname, "sst1ir%d.%d", nslices, slt);
+    if (debugflag > 1)  printf("fname: %s\n", fname);
+
+    if (getParfileDirForWrite(fname, F1_DIRS, path) < 0)
+    {
+	Proc_err(DEF_ERR_OPT, "%s: %s", fname, path);
+	return -1;
+    }
+    if (debugflag > 1)  printf("path: %s\n", path);
+
+    if ((fpout = fopen(path, "wt")) == 0)
+    {
+	Proc_err(DEF_ERR_OPT, "Cannot open file for writing\n%s", path);
+	ABORT
+    }
+
+    fprintf(fpout, "%d\n", slt * -2);
+    fprintf(fpout, "%d\n", slt * 0);
+    fprintf(fpout, "%d\n", slt * 2);
+    fprintf(fpout, "%d\n", slt * -1);
+    fprintf(fpout, "%d\n", slt * 1);
+
+    fclose(fpout);
+
+    STOREPAR("FQ1LIST", fname)
+
+    return 0;
+} /* end subroutine */
+
+/* subroutine create vdlist for sst1ir delays ***********************************************/
+static int mksst1irvdlist(const char* curdat, const int nslices)
+{
+    int     *fpout, i, td2;
+    float   aq;
+    char    fname[PATH_MAX], path[PATH_MAX];
+    static const float mplier[5]= {0., 1., 3., 5., 12.};
+
+    FETCHPAR("TD", &td2)
+    td2 /= 1024;
+    sprintf(fname, "sst1ir%d.%dk", nslices, td2);
+    if (debugflag > 1)  printf("fname: %s\n", fname);
+    if (getParfileDirForWrite(fname, VD_DIRS, path) < 0)
+    {
+	Proc_err(DEF_ERR_OPT, "%s: %s", fname, path);
+	return -1;
+    }
+    if (debugflag > 1)  printf("path: %s\n", path);
+
+    if ((fpout = fopen(path, "wt")) == 0)
+    {
+	Proc_err(DEF_ERR_OPT, "Cannot open file for writing\n%s", path);
+	ABORT
+    }
+
+    FETCHPAR("AQ", &aq)
+    aq = round2(aq, 2);
+    if (debugflag > 1)  printf("aq: %.3f\n", aq);
+
+    fprintf(fpout, "%.3f\n", 0.005);
+    for (i=1; i<nslices; i++)
+    {
+	fprintf(fpout, "%.3f\n", round2(aq * mplier[i] + 0.005, 2));
+    }
+    fclose(fpout);
+
+    STOREPAR("VDLIST", fname)
+
+    return 0;
+} /* end subroutine */
+
+/* subroutine check_probe ***************************************************/
+static int check_probe(const char* curdat, double* grad, double* clen, char* probe_id, char* probe_nickname)
+{
+    int     coil_num;
+    char*   str_probe;
+    char    txt[TLL] = "", gamp[TLL], gstren[TLL];
+
+    CALL_PROBESERVER("probe_client getParams getInstalledProbe", str_probe);
+    if (debugflag > 2)  printf("%s\n", str_probe);
+
+    (void) sscanf(str_probe, "%[^,]%*c%*[^,]%*c%*[^,]%*c%*[^,]%*c%[^,]%*s", probe_id, probe_nickname);
+    if (debugflag > 2)  printf("Probe: %s %s\n", probe_id, probe_nickname);
+
+    CALL_PROBESERVER("probe_client pushCmdParams getCoilsForNucleus 1H", str_probe);
+    coil_num = atoi(str_probe);
+    if (debugflag > 2)  printf("1H coil: %i\n", coil_num);
+
+    sprintf(txt, "probe_client pushCmdParams getActiveCoilLength %s %i 1H", probe_id, coil_num);
+    CALL_PROBESERVER(txt, str_probe);
+    *clen = atof(str_probe);
+    if (debugflag > 2)  printf("active coil length %.2f mm\n", *clen);
+
+    CALL_PROBESERVER("probe_client pushCmdParams getGradientCurrentAndStrength", str_probe);
+    (void) sscanf(str_probe, "%*[^,]%*c%*[^,]%*c%[^,]%*c%*[^,]%*c%*[^,]%*c%[^,]", gamp, gstren);
+    *grad = atof(gamp) * atof(gstren);
+    if (debugflag > 2)  printf("%.1f G/cm", *grad);
+
+    return 0;
+} /* end subroutine */
+
+/* subroutines ****************************************************************/
+static double round2(double value, const int exp)
+{
+    double fact = pow(10., (double) exp);
+    //printf("sub round2: %d %.1f\n", exp, fact);
+    return round(value * fact + .5) / fact;
+} /* end subroutine */

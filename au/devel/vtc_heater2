@@ -83,7 +83,7 @@ int returnstatus = 0 ;
 	else
 	    strcpy(probeId,  cur_probeInfo[0]);
 		     
-		     Proc_err(ERROR_OPT, "probe is %s", probeId);
+	//	     Proc_err(ERROR_OPT, "probe is %s", probeId);
 		     
 
 

@@ -11,21 +11,41 @@ int defaultflow=535;
 int origheater;
 int defaultchiller=1; //minimal chiller power by default 
 char bscuargs[32];
+char tempdisk[PATH_MAX];
+debug=1; //set to 1 for debug messages
 // CHeck VT unit type so we know what to do
 // 1 is BVT, 2 is BSVT
 
 int isVTU = LibAcqLVtuType();
 // Abort if failure to determine type
+
+	//make temp dataset to avoid faff - need anyway if no open dataset 
+sprintf(tempdisk, "$XWINNMRHOME/data");
+if(debug)
+Proc_err(DEF_ERR_OPT,"disk=%s", tempdisk);
+
+DATASET("~TEMP",1,1,tempdisk,user)  
+
+
+
+
+if(debug)
+Proc_err(DEF_ERR_OPT,"isVTU=%d", isVTU);
+
 if(isVTU < 0)
 {
         Proc_err(DEF_ERR_OPT, "Error: %s \n Please contact NMR Service team for instructions!", LibAcqGetErrMsg());
         ABORT
 }
 
+sleep(5);
+
 // write all the steps only once, with different commands for BVT/BSVT as necessary!
 
-FETCHPARS("TE", &statustemp); //read original te values from dataset for reference
-FETCHPAR("TE", &foregroundtemp);	
+//FETCHPARS("TE", &statustemp); //read original te values from dataset for reference not needed
+
+
+//FETCHPAR("TE", &foregroundtemp);	
 
 // First check heater status
 //
@@ -39,6 +59,10 @@ else
 	XAU("vtu_heater2", "check")
 }
 origheater = AUERR;  /* 0 = off, 1=on, -1=error! */
+
+if(debug)
+Proc_err(DEF_ERR_OPT,"origheater=%d", origheater);
+
 if (origheater <0 ) 
 {							
 	Proc_err(DEF_ERR_OPT, "Error: Failed to get heater status. \n Check that VT is really active and check temperature and gas flow before before proceeding. \n Contact NMR Service team if any questions.");	
@@ -71,7 +95,7 @@ if (origheater ==0 ) // heater is off, so need to set temp and, if BSVT, gasflow
   }
 	if (AUERR!=1) 
 	{
-		STOREPAR("TE", foregroundtemp)  // need to set TE back to original value in the dataset			
+//		STOREPAR("TE", foregroundtemp)  // need to set TE back to original value in the dataset			
 		Proc_err(ERROR_OPT, "Could not turn heater on? Contact NMR service for assistance");
 		ABORT
 	} 
@@ -89,9 +113,9 @@ if (origheater ==0 ) // heater is off, so need to set temp and, if BSVT, gasflow
 														
 	Proc_err(INFO_OPT,"VT initialisation : temperature is being set. Please wait for confirmation message before proceeding");      				
 	TEREADY(120, 0.1)  // wait for temperature to stabilise
-	 Proc_err(DEF_ERR_OPT, "Temperature has been set , close this message and continue");
-	STOREPAR("TE", foregroundtemp)
-  STOREPARS("TE", statustemp)
+	Proc_err(DEF_ERR_OPT, "Temperature has been set , close this message and continue");
+//	STOREPAR("TE", foregroundtemp)
+//  STOREPARS("TE", statustemp)
 	STOP
 }
 else
@@ -103,6 +127,10 @@ else
 																																																				
 	TEGET // read set temp from VT unit
 	FETCHPARS("TE", &settemp);
+	
+	if(debug)
+ Proc_err(DEF_ERR_OPT,"current temp is %f", settemp);
+ 
 	if (abs(settemp-defaulttemp) >10)
 	{
 		Proc_err(DEF_ERR_OPT,"VT initialisation check: Temperature is currently set to %f which is VERY different from default temperature %f. \
@@ -124,12 +152,12 @@ else
     }
    	    	
    	TEREADY(120, 0.1)			
-   	STOREPAR("TE", foregroundtemp)
-   	STOREPARS("TE", settemp)
+ //  	STOREPAR("TE", foregroundtemp)
+//   	STOREPARS("TE", settemp)
    	Proc_err(DEF_ERR_OPT,"VT initialisation done, you can insert sample!");      	
    	STOP   	
 	}
-	else if (abs(settemp-defaulttemp) >0.1)
+	else if (abs(settemp-defaulttemp) >0.2)
 	{
 		Proc_err(DEF_ERR_OPT,"VT initialisation check: Temperature is currently set to %f which is different from default temperature %f. \
 		\n On clicking Close the temperature will be reset to %f K	\n COntact NMR Service team if any questions!", settemp, defaulttemp, defaulttemp);
@@ -147,8 +175,8 @@ else
 			XAU( "vtc_heater2", bscuargs)    	
     }    	
     TEREADY(10, 0.1)
-    STOREPAR("TE", foregroundtemp)
-    STOREPARS("TE", statustemp)
+ //   STOREPAR("TE", foregroundtemp)
+//    STOREPARS("TE", statustemp)
     Proc_err(DEF_ERR_OPT,"VT initialisation done, you can insert sample!");  
     STOP   
 	}

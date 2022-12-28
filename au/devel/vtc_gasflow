@@ -2,6 +2,7 @@
 // argument is flow rate
 // If fails after 10s, wait another 30s and check again.
 float flowmeas, flowset, flowtarget;
+int debug=0;
 if (i_argc=2)
 {
 	// arg given is flow rate desired
@@ -10,13 +11,17 @@ if (i_argc=2)
   VTU_GASFLOW(flowtarget);
   sleep(10);
   VTU_GASFLOW_STATUS(flowset,flowmeas) ;
-  Proc_err(DEF_ERR_OPT,"got to here 1, flowset=%f, flowmeas=%f", flowset, flowmeas);
+   if(debug)
+    Proc_err(DEF_ERR_OPT," flowset=%f, flowmeas=%f", flowset, flowmeas);
   if ((fabs(flowset-flowmeas)<10) || (flowmeas==flowtarget))
   {
   	// flow successfully set
   	AUERR=0;
-//  	Proc_err(DEF_ERR_OPT,"success first time %f %f %f", flowmeas, flowtarget, flowset);
-  	STOP
+  	
+  	if(debug)
+    Proc_err(DEF_ERR_OPT,"success first time %f %f %f", flowmeas, flowtarget, flowset);
+
+   	STOP
   }
   else if((flowmeas==flowtarget) || (fabs(flowset-flowmeas)>10))
   {
@@ -26,13 +31,14 @@ if (i_argc=2)
     {
    		// flow successfully set
    		AUERR=0;
-   		
-//  	Proc_err(DEF_ERR_OPT,"success second time");
+   		if(debug)
+	  	Proc_err(DEF_ERR_OPT,"success second time");
   		STOP
     }
     else
     {
     	//flow not reached
+    	
     	Proc_err(DEF_ERR_OPT,"Error: Flow was set to %f but only reached %f", flowset, flowmeas);
     	ABORT
     }

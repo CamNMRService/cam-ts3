@@ -162,7 +162,7 @@ else
 	if(debug)
  Proc_err(DEF_ERR_OPT,"current temp is %f", settemp);
  
-	if (abs(settemp-defaulttemp) >10)
+	if (fabs(settemp-defaulttemp) >10)
 	{
 		Proc_err(DEF_ERR_OPT,"VT initialisation check: Temperature is currently set to %f which is VERY different from default temperature %f. \
 		\n On clicking Close the temperature will be reset to %f K \

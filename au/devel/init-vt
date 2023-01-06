@@ -25,7 +25,12 @@ XCMD("setdef ackn on")
 
 
 // read defautl VT gas flow from probeserver
-CALL_PROBESERVER("probe_client pushCmdParams getRecommendedVTGasFlow", default_flow);
+CALL_PROBESERVER("probe_client pushCmdParams getRecommendedVTGasFlow", default_flow); 
+if (AUERR)
+{
+	Proc_err(DEF_ERR_OPT,"no probe installed or no default flow set - aborting - contact NMR service team");
+	ABORT
+}
  
 if(debug)
 Proc_err(DEF_ERR_OPT, "%s", default_flow);

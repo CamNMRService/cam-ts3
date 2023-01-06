@@ -1,0 +1,593 @@
+/*** ^^A -*-C++-*- **********************************************/
+/*	vtu_heater2		22.01.2002			*/
+/****************************************************************/
+/*	Short Description :					*/
+/*	AU program to switch  the VTU Heater			*/
+/****************************************************************/
+/*	Keywords :						*/
+/*	VTU, 		Heater 					*/
+/****************************************************************/
+/*	Description/Usage :					*/
+/*	AU program to switch  the VTU Heater			*/
+/****************************************************************/
+/*	Author(s) :						*/
+/*	Name		: Guenter Schmidt			*/
+/*	Organisation	: Bruker Analytik			*/
+/*	Email		: guenter.schmidt@bruker.de		*/
+/****************************************************************/
+/*	Name		Date	Modification:			*/
+/*	gsc		20020122	created			*/
+/*	agi		20020225  fix base16 bug, add check opt.*/
+/*      agi 		20030820  update for 3.5 compiler       */
+/****************************************************************/
+/*  Options:
+
+	    vtu_heater2 	reports status and message
+	xau vtu_heater2 on	turns heater on
+	xau vtu_heater2 off	turns heater off
+	xau vtu_heater2 check	reports status only (0=off, 1=on)
+*/
+/*
+$Id: vtu_airflow,v 1.2 2001/12/13 14:42:43 gsc Exp $
+*/
+/* * This definition is needed to tell the Linker, */
+#define USE_SXUTIL
+#define USE_LIBACQ
+#define USE_LIBRRS
+#ifdef _MSC_VER /* native Visual C++ */
+# define strcasecmp _stricmp
+#endif
+
+/* to scan lib/sxutil.a for unresolved functions   */
+char *Pntr;
+if ((Pntr = getenv("DEBUG_VTU")) != NULL)
+{
+    extern FILE  *VtuDebugPntr;
+    VtuDebugPntr = fopen(Pntr,"wt");
+}
+AUERR = Vtu_program(curdat,cmd);
+
+QUIT /*** End of normal AU program code ***/
+
+/*
+ * QUIT is the terminating brace of the main function.
+ * From there on you are on the 'base level'
+ */
+
+#include <lib/lib_tty.h>
+
+/* ASCII code definitions used by Eurotherm Unit */
+#define	STX		0x02
+#define	ETX		0x03
+#define	EOT		0x04
+#define	ENQ		0x05
+#define	ACK		0x06
+#define	NAK		0x15
+
+/* Eurotherm enquiries */
+#define	C_TERMINATE		((char *)(EOT))
+#define	C_SCROLL		((char *)(ACK))
+#define	C_REPEAT		((char *)(NAK))
+
+#define         BVT2000		0
+#define         BDTC		1
+#define         BVT3300		2
+#define         BVT3000		3
+#define         BVT3200		4
+#define         DUAL		5
+#define         INCONNU		-1
+
+#define		INCONNU		-1
+#define		EURO_818	818
+#define		EURO_847	847
+#define		EURO_902	902
+#define		EURO_2416	2416
+
+#define		IsBVT2000	(ModelType == BVT2000)
+#define		IsBDTC		(ModelType == BDTC)
+#define		IsBVT3300	(ModelType == BVT3300)
+#define		IsBVT3000	(ModelType == BVT3000)
+#define		IsBVT3200	(ModelType == BVT3200)
+#define		IsDUAL		(ModelType == DUAL)
+
+#define		Is818		(EuroType == EURO_818)
+#define		Is847		(EuroType == EURO_847)
+#define		Is902		(EuroType == EURO_902)
+#define		Is2416		(EuroType == EURO_2416)
+
+#define		IsHeaterOn	(InterfaceStatus & (1 << 0))
+#define		IsDummy1	(InterfaceStatus & (1 << 1))
+#define		IsEvapConn	(InterfaceStatus & (1 << 2))
+#define		IsGasFMiss	(InterfaceStatus & (1 << 3))
+#define		IsOverheat	(InterfaceStatus & (1 << 4))
+#define		IsExchConn	(InterfaceStatus & (1 << 5))
+#define		IsLn2Refil	(InterfaceStatus & (1 << 6))
+#define		IsLn2Empty	(InterfaceStatus & (1 << 7))
+#define		IsLn2Heat	(InterfaceStatus & (1 << 8))
+#define		IsDummy2	(InterfaceStatus & (1 << 9))
+#define		IsBooster	(InterfaceStatus & (1 << 10))
+#define		IsAuxConn	(InterfaceStatus & (1 << 11))
+#define		IsEvapPresent	(InterfaceStatus & (1 << 12))
+#define		IsExchPresent	(InterfaceStatus & (1 << 13))
+#define		IsReserved3	(InterfaceStatus & (1 << 14))
+#define		IsReserved4	(InterfaceStatus & (1 << 15))
+
+#define		IsDualHeatOn	(InterfaceStatus & (1 << 8))
+#define		IsDualConn	(InterfaceStatus & (1 << 2))
+#define		IsDualOverheat	(InterfaceStatus & (1 << 7))
+
+/*************************/
+/* Some Global Variables */
+/*************************/
+FILE  *VtuDebugPntr;
+int ModelType;
+int EuroType;
+int InterfaceStatus;
+char EuroUnitType;
+char DualEuroUnitType;
+
+char		cUnitGr;
+char		cUnitId;
+
+char		cBoardGr;
+char		cBoardId;
+
+
+int SensorId, CJCId, iDecimalPrecision = 1;
+int DualSensorId, DualCJCId, iDualDecimalPrecision = 1;
+
+
+
+int VtuInit(TTY_DEVICE *VtuDevice)
+{
+    /* Check for legal argument */
+    if ( VtuDevice == NULL)
+    {
+	Proc_err(ERROR_OPT,"VtuInit: NULL argument");
+	return -1;
+    }
+    
+    if (tty_init(VtuDevice ,TEMP_CONFIG_FILE,
+    		TTY_DEFAULT_TIMEOUT ,TEMP_DEFAULT_TTYDEV) == -1)
+    {
+	Proc_err(ERROR_OPT,"VtuInit: %s",tty_errmsg());
+	return -1;
+    }
+    return 0;
+}
+
+int VtuOpen(TTY_DEVICE *VtuDevice)
+{
+    /* Check for legal argument */
+    if ( VtuDevice == NULL)
+    {
+	Proc_err(ERROR_OPT,"VtuOpen: NULL argument");
+	return -1;
+    }
+    
+    if ( tty_open(VtuDevice) == -1 )
+    {
+	Proc_err(ERROR_OPT,"VtuOpen: %s",tty_errmsg());
+	return -1;
+    }
+
+    if (tty_set_timeout(VtuDevice, 1)  == -1)
+    {
+        Proc_err(ERROR_OPT,"VtuCommand: %s",tty_errmsg());
+        return -1;
+    }
+
+    return 0;
+}
+
+int VtuClose(TTY_DEVICE *VtuDevice)
+{
+    /* Check for legal argument */
+    if (NULL == VtuDevice) 
+    {
+	Proc_err(ERROR_OPT,"VtuClose: NULL argument");
+	return -1;
+    }
+
+   /*--------------------*/
+   /* open tty device : */
+   /*--------------------*/
+   if (tty_close(VtuDevice) == -1)
+    {
+	Proc_err(ERROR_OPT,"VtuClose: %s",tty_errmsg());
+	return -1;
+    }
+    return 0;
+}
+
+int VtuCommand(
+    TTY_DEVICE *VtuDevice,
+    char UnitGr,
+    char UnitId,
+    const char *cmd,
+    char *answer
+    )
+{
+    const char *src;
+    char tcmd[32];
+    char *dest;
+    char bcc = 0;
+    char sum;
+    int len;
+    int try;
+    int ret;
+    int tty_lock_status;
+
+    dest = tcmd;	 /* set pointer to destination command string */
+
+    if ( NULL == VtuDevice || NULL ==  cmd || NULL == answer) 
+    {
+	Proc_err(ERROR_OPT,"VtuCommand: NULL argument");
+	return -1;
+    }
+    
+    if (VtuDebugPntr)
+    	fprintf(VtuDebugPntr,"VtuCommand(%c,%c,%s)\n",
+		UnitGr,UnitId,cmd);
+
+    if (cmd == C_REPEAT)			  /* repeat parameter */
+    {
+	*dest++ = NAK;
+	cmd = "C_REPEAT";
+    }
+    else if (cmd == C_SCROLL)			       /* scroll mode */
+    {
+	*dest++ = ACK;
+	cmd = "C_SCROLL";
+    }
+    else if (cmd == C_TERMINATE)	    /* terminate comunication */
+    {
+	*dest++ = EOT;
+	cmd = "C_TERMINATE";
+    }
+    else					       /* new command */
+    {
+	*dest++ = EOT;			     /* reset Eurotherm first */
+      			
+	/* Set Eurotherm address */
+	*dest++ = UnitGr;  
+	*dest++ = UnitGr;
+
+	*dest++ = UnitId;
+	*dest++ = UnitId;
+
+	src = cmd;			      /* copy command  string */
+				    /* third character is \0 for read */
+					      /* else value is to set */
+	if (cmd[2])	
+	{
+	    *dest++ = STX;
+	    bcc = 0;
+	    while (*src)
+	    {
+		bcc ^= *src;
+		*dest++ = *src++;
+	    }
+	    *dest++ = ETX;
+	    bcc ^= ETX;
+	    *dest++ = bcc;
+	}
+	else
+	{
+	    *dest++ = *src++;    /* two bytes of command copy allways */
+	    *dest++ = *src++;
+	    *dest++ = ENQ;
+	}
+
+    }
+
+    *dest = '\0';			 /* terminate command string  */
+    len = dest - tcmd;			     /* and calculate length  */
+
+    if (VtuDebugPntr)
+    {
+	char *ptr;
+	fprintf(VtuDebugPntr,"  send:");
+	for (ptr=tcmd;*ptr;ptr++)
+	{
+	    fprintf(VtuDebugPntr,"%c%c" ,isprint((int)*ptr) ? ' ' : '^'
+		,isprint((int)*ptr) ? *ptr : (*ptr | 0x40));
+	}
+	fprintf(VtuDebugPntr,"\t  bcc=%#4x\n",bcc&0xff);
+    }
+
+    /* Lock tty channel during measurement */
+    if ( !(tty_lock_status= tty_is_locked(VtuDevice)) &&
+	 tty_lock(VtuDevice) == -1)
+    {
+	Proc_err(ERROR_OPT,"VtuCommand: %s",tty_errmsg());
+	return -1;
+    }
+
+
+    if (tty_writestring(VtuDevice,tcmd,(unsigned)len) == -1)
+    {
+	Proc_err(ERROR_OPT,"VtuCommand: %s",tty_errmsg());
+	return -1;
+    }
+
+    if (cmd == C_TERMINATE)			/* No answer expected */
+	return 0;
+
+    try = 5;
+    do 
+    {
+	unsigned char b_val;
+
+	sum = bcc = 0;
+ 					      /* read first character */
+	if (tty_readbyte(VtuDevice,&b_val) == -1)
+	{
+	//	timeout is not an error
+	//      Proc_err(ERROR_OPT,"VtuCommand: %s",tty_errmsg());
+	    return -1;
+	}
+	if (VtuDebugPntr)
+	    fprintf(VtuDebugPntr,"  recv:%c%c",
+		    isprint((int)b_val) ? ' ' : '^',
+		    isprint((int)b_val) ? b_val : (b_val | 0x40));
+
+	switch ((int)b_val)
+	{
+	case ACK:
+	    if (VtuDebugPntr) 
+		fprintf(VtuDebugPntr," == ACK\n");
+	    return 0;
+
+	case NAK:
+	    if (VtuDebugPntr)
+		fprintf(VtuDebugPntr," == NAK\n");
+	    Proc_err(ERROR_OPT,"VtuCommand: Not acknowleged");
+	    return -1;
+	case STX:
+	case EOT:
+	    break;
+	default:
+	    if (VtuDebugPntr)
+		fprintf(VtuDebugPntr,"%s:unexpected answer:%#x=%c%c (retry)"
+			,cmd,b_val
+			,isprint(b_val) ? ' ' : '^'
+			,isprint(b_val) ? b_val : (b_val|0x40));
+
+	}
+
+	dest = answer;
+			      /* read data characters */
+	do 
+	{
+	    ret = tty_readbyte(VtuDevice,&b_val);
+	    sum ^= b_val;
+	    if (b_val == EOT) 
+	    {
+		*dest = '\0';
+		continue;
+	    }
+	    *dest++ = b_val;
+	} while(ret != -1 && b_val != ETX);
+ 					/* read block check character */
+	if (tty_readbyte(VtuDevice,&bcc) == -1)
+	{
+	    continue;
+	}
+	if (VtuDebugPntr)
+	{
+	    char *ptr;
+	    len = dest - answer;
+	    ptr=answer;
+	    do 
+	    {
+		fprintf(VtuDebugPntr,"%c%c",isprint((int)*ptr) ? ' ' : '^'
+		    ,isprint((int)*ptr) ? *ptr : (*ptr | 0x40));
+		ptr++;
+	    } while (len-- > 0);
+	    fprintf(VtuDebugPntr,"\t  bcc=%#4x sum=%#4x\n",bcc,sum);
+	}
+	if (sum != bcc)
+	{
+	    (void)tty_writebyte(VtuDevice,NAK);
+	}
+
+      *dest-- = '\0';
+      *dest-- = '\0';
+    } while ( try-- && sum != bcc);
+
+    if (tty_unlock(VtuDevice) == -1) 
+    {
+	Proc_err(ERROR_OPT,"VtuCommand: %s",tty_errmsg());
+	return -1;
+    }
+    return 0;
+}
+
+int VtuCheckModel(TTY_DEVICE *VtuDevice)
+{
+    char answer[128];
+    char ModelInfo[128];
+    char *VtuPtr;
+
+    cBoardGr = '0';
+    cBoardId = '0';
+
+    cUnitId = '0';
+    cUnitGr = '0';
+
+    if (VtuDebugPntr)
+	fprintf(VtuDebugPntr,"VtuCheckModel()\n");
+
+    /**** Get instrument identity and software version ****/
+    /* * (Not all commands are allowed on all Eurotherm units) */
+    if ( VtuCommand(VtuDevice,cUnitGr,cUnitId,"II",answer) == 0)
+    {
+	VtuPtr = answer + 2;
+	if (*VtuPtr == '>')		/* status parameter */
+	    EuroType = strtol(++VtuPtr,(char **)NULL,16);
+
+	switch (  EuroType)
+	{
+	case 0x847:
+	    EuroType = EURO_847;
+	    if ( VtuCommand(VtuDevice,cUnitGr,cUnitId,"SV",answer) != -1)
+	    {
+		if ( ! strncmp(answer+4,"02",2) )
+		{
+		    ModelType = BDTC;
+		}
+		if ( ! strncmp(answer+4,"03",2) )
+		{
+		    ModelType = BVT3300;
+		}
+	    }
+	    sprintf(ModelInfo,
+		    " %s with Eurotherm 847\n",
+		    IsBDTC ? "BDTC" : "BVT3300");
+	    break;
+	case 0x8180:
+	    ModelType = BVT2000;
+	    EuroType  = EURO_818;
+	    sprintf(ModelInfo," BVT2000 with Eurotherm 818\n");
+	    break;
+	case 0x0902:
+	    ModelType = BVT3000;
+	    EuroType  = EURO_902;
+	    sprintf(ModelInfo," BVT3000 with Eurotherm 902\n");
+	    break;
+	}
+	if (VtuDebugPntr)fprintf(VtuDebugPntr,ModelInfo);
+	Show_status(ModelInfo);
+	return 0;
+    }
+
+    cUnitGr = '0';
+    cUnitId = '1';
+    
+    cBoardGr = 'A';
+    cBoardId = 'A';
+    if ( VtuCommand(VtuDevice,cUnitGr,cUnitId,"II",answer) == 0)
+    {
+	VtuPtr = answer + 2;
+	if (*VtuPtr == '>')		/* status parameter */
+	    EuroType = strtol(++VtuPtr,(char **)NULL,16);
+	if (EuroType == 0x2460)
+	{
+	    EuroType = EURO_2416;
+	    ModelType = BVT3200;
+	    cUnitId = '1';
+	    sprintf(ModelInfo," BVT3200 with Eurotherm 2416\n");
+	}
+    }
+    cUnitGr = '0';
+    cUnitId = '2';
+    if ( VtuCommand(VtuDevice,cUnitGr,cUnitId,"II",answer) != -1)
+    {
+	VtuPtr = answer + 2;
+	if (*VtuPtr == '>')		/* status parameter */
+	    EuroType = strtol(++VtuPtr,(char **)NULL,16);
+	if (EuroType == 0x246)
+	{
+	    EuroType = EURO_2416;
+	    ModelType = DUAL;
+	    cUnitId = '1';
+	    sprintf(ModelInfo," DUAL with Eurotherm 2416\n");
+	}
+    }
+    cUnitId = '1';
+
+    Show_status(ModelInfo);
+
+    if (VtuDebugPntr)fprintf(VtuDebugPntr,ModelInfo);
+
+    return 0;
+}
+
+
+
+int VtuSwitchHeater(TTY_DEVICE *VtuDevice,int HeaterMode)
+{
+    char VtuString[32];
+    char answer[128];
+    char *VtuPtr;
+    int VtuVal;
+
+    if ( EuroType != EURO_818) 
+    {
+
+	/* The Software heater switch not supported on BVT2000 */
+
+	if (HeaterMode == -1 || HeaterMode == -2)
+	{
+	    if ( VtuCommand(VtuDevice,cBoardGr,cBoardId,"IS",answer) == -1)
+		return -1;
+
+	    VtuPtr = answer + 2;
+	    if (*VtuPtr == '>')           /* OK it is a status parameter */
+	    {
+		/* AF is Binary coded */
+		VtuVal = (strtol(++VtuPtr,(char **)NULL,16)&0x0001);	      
+		if (HeaterMode==-1)
+	        	Proc_err(INFO_OPT,"Heater is %s",(VtuVal)? "on" : "off");
+	    }
+	
+	    HeaterMode = VtuVal;
+	}
+	else if (HeaterMode == 0)
+	{
+	    if ( VtuCommand(VtuDevice,cBoardGr,cBoardId,"HP0",answer) == -1)
+		return -1;
+	}
+	else if (HeaterMode == 1)
+	{
+	    if ( VtuCommand(VtuDevice,cBoardGr,cBoardId,"HP1",answer) == -1)
+		return -1;
+	}
+	
+    }
+    else
+    {
+	Proc_err(ERROR_OPT,"BVT2000 does not allow software heater control");
+    }
+    return(HeaterMode);
+}
+
+
+int
+Vtu_program(curdat,cmd)
+char *curdat;	/* current data path name			*/
+char *cmd;	/* eventual command on spec. line		*/
+{
+    TTY_DEVICE      VtuDevice;
+    int HeaterMode = -1;
+    int heater_status;
+
+    if (cmd && (strcasecmp(cmd,"on") == 0))
+	HeaterMode = 1;
+    else if (cmd && (strcasecmp(cmd,"off") == 0))
+	HeaterMode = 0;
+    else if (cmd && (strcasecmp(cmd, "check") == 0))
+	HeaterMode = -2;
+
+    if (VtuInit(&VtuDevice) == -1)
+	return -1;
+
+    if (VtuOpen(&VtuDevice) == -1)
+	return -1;
+
+    if (VtuCheckModel(&VtuDevice) == -1)
+	return -1;
+
+    heater_status = VtuSwitchHeater(&VtuDevice,HeaterMode);
+
+    if (heater_status < 0)
+	return -1;
+   
+
+    /* close communication channel */
+    if (VtuClose(&VtuDevice) == -1)
+	return -1;
+
+    return heater_status;
+}

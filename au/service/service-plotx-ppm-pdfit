@@ -317,12 +317,12 @@ my_1d.curveAttributeId		= curveAttributes.attributeId;
 xpos = -2000;
 xdim = 0;
 ypos =  2600;
-ydim = 11000;
+ydim = 11000; //orig 11000
 cx1 = cx;
 firstspec = 1;
 if(layoutFormat == LayoutPaperSizeA3)
 {
-	ydim = 21000;
+	ydim = 20000; //orig 21000
 }
 
 while(number < numSections)
@@ -424,9 +424,9 @@ while(number < numSections)
 	    vert_scale_text.attributeId	= vert_scale_attributes.attributeId;
 	    vert_scale_text.content		= stringbuf;
 	    vert_scale_text.xPos		= xpos / 1000.0;
-	    vert_scale_text.yPos		= 17.4;
+	    vert_scale_text.yPos		= 16.4; //orig 17.4
 	    if(layoutFormat == LayoutPaperSizeA3)
-		vert_scale_text.yPos = 17.4 + 8.8;
+		vert_scale_text.yPos = 16.4 + 8.8;
 	    vert_scale_text.xDim		= 20.0;
 	    vert_scale_text.yDim		= 0.5;
 	    vert_scale_text.fontSize	= 10;
@@ -654,8 +654,9 @@ void writeLayoutEnd(int numFrom, int numTo, double cx, double sf, LayoutPaperSiz
 	LAYOUT_ADD_ATTRIBUTES(identifier_attributes);
 
 	/* Place title object in layout */
-
-	my_title.xPos = 0.0;
+	my_title.xPos = 20.0; 
+	if(layoutFormat == LayoutPaperSizeA3)
+		my_title.xPos = 25.0;
 	my_title.yPos = 16.4;
 	if(layoutFormat == LayoutPaperSizeA3)
 		my_title.yPos = 25.2;

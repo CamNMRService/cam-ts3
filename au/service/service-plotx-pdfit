@@ -318,12 +318,12 @@ my_1d.curveAttributeId		= curveAttributes.attributeId;
 xpos = -2000;
 xdim = 0;
 ypos =  2600;
-ydim = 11000;
+ydim = 10000;
 cx1 = cx;
 firstspec = 1;
 if(layoutFormat == LayoutPaperSizeA3)
 {
-	ydim = 21000;
+	ydim = 19000;
 }
 
 while(number < numSections)
@@ -425,9 +425,9 @@ while(number < numSections)
 	    vert_scale_text.attributeId	= vert_scale_attributes.attributeId;
 	    vert_scale_text.content		= stringbuf;
 	    vert_scale_text.xPos		= xpos / 1000.0;
-	    vert_scale_text.yPos		= 17.4;
+	    vert_scale_text.yPos		= 16.4; //orig 17.4
 	    if(layoutFormat == LayoutPaperSizeA3)
-		vert_scale_text.yPos = 17.4 + 8.8;
+		vert_scale_text.yPos = 16.4 + 8.8;
 	    vert_scale_text.xDim		= 20.0;
 	    vert_scale_text.yDim		= 0.5;
 	    vert_scale_text.fontSize	= 10;
@@ -542,7 +542,7 @@ void writeLayoutBegin(const char* fn, LayoutPaperSize layoutFormat, const char* 
 	/* This would create a overview plot if enabled          */
 	my_rect.attributeId = 12;
 	my_rect.xPos = 21.9;
-	my_rect.yPos = 16.74;
+	my_rect.yPos = 16.74; 
 	if(layoutFormat == LayoutPaperSizeA3)
 		my_rect.yPos = 16.74 + 8.8;
 
@@ -656,12 +656,14 @@ void writeLayoutEnd(int numFrom, int numTo, double cx, double sf, LayoutPaperSiz
 
 	/* Place title object in layout */
 
-	my_title.xPos = 0.0;
+	my_title.xPos = 20.0; 
+	if(layoutFormat == LayoutPaperSizeA3)
+		my_title.xPos = 25.0;
 	my_title.yPos = 16.4;
 	if(layoutFormat == LayoutPaperSizeA3)
 		my_title.yPos = 25.2;
 
-	my_title.xDim = 19.740;
+	my_title.xDim = 10.740;
 	my_title.yDim = 2.1;
 	my_title.fontSize = 12;
 	my_title.allowAutomaticFontResize = 0;

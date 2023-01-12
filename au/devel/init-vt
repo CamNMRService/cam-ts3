@@ -13,7 +13,7 @@ int defaultchiller=1; //minimal chiller power by default
 char bscuargs[32];
 char xw_home[PATH_MAX];
 char tempdisk[PATH_MAX];
-debug=1; //set to 1 for debug messages
+debug=0; //set to 1 for debug messages
  
 
 // Setdef so that errors don't disappear
@@ -215,8 +215,10 @@ else
 		// No messages needed, don't do anything if BVT
 		//
 			if(debug)
+			{
 			tempdiff=fabs(settemp-defaulttemp);
  			Proc_err(DEF_ERR_OPT,"VT basically correct default-set = %f, just set flow ", tempdiff);
+			}
 		 if ( isVTU==2 )
     {	
     	// BSVT so set chiller and flow    		

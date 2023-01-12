@@ -1,0 +1,29 @@
+int irow;
+GETCURDATA
+   STOREPAR("CY",100.);
+    STOREPAR("MAXI",110.);
+    STOREPAR("MI",10.);
+    STOREPAR("PSIGN",0);
+    STOREPAR("PC",2.0);
+
+    PP;
+    ERRORABORT;
+
+/********************************************/
+/* open and read the pp file                */
+    irow = readPeakList(PROCPATH(0));
+
+    if (irow < 0)
+    {
+	Proc_err(DEF_ERR_OPT, "%s, phase correction aborted", getPeakError());
+	ABORT;
+    }
+
+    if (irow == 0)
+    {
+	Proc_err(DEF_ERR_OPT,
+		 "no peak was found in the 2D file, phase correction aborted");
+	ABORT;
+    }
+    
+    QUIT

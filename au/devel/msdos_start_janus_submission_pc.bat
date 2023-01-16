@@ -1,4 +1,4 @@
-SET file="y:\chemist\rebooting.txt"
+SET file="y:\rebooting.txt"
 cd c:\nmrkiosk\
 start /b nmrkiosk.exe
 REM now start infinite loop

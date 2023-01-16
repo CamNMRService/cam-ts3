@@ -1,4 +1,5 @@
-C:\nmrkiosk\nmrkiosk.exe
+cd c:\nmrkiosk\
+nmrkiosk.exe
 REM now start infinite loop
 :l
 TIMEOUT /T 60

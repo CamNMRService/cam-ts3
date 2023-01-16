@@ -1,4 +1,3 @@
-echo off
 SET file="y:\chemist\rebooting.txt"
 SET spect="arran"
 IF EXIST %file% (

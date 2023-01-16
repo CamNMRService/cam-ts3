@@ -1,5 +1,5 @@
 echo off
-SET file="z:\chemist\rebooting.txt"
+SET file="y:\chemist\rebooting.txt"
 SET spect="arran"
 IF EXIST %file% (
   ECHO %file% is existing

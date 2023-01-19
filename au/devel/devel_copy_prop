@@ -1,48 +1,36 @@
-    /*Program to dump last N lines of the history_j file*/
-    /*takes number of lines as a command line input*/
-    /*Have to define username - PathXwinNMRCurDir() returns curdir/username*/
-    /*djh35 JUlY 2022*/
-    /*djh35 Sep 2022 - added ability to run a system command to find the 
-    login user name - where the history file is saved
-    runs under macos and windows
+    /*Program to copy the prop file from the git repository to the users topspin config directory*/
+
     
-    */
+    
     FILE * input_file;
     FILE * output_file;
     FILE * user_name_file;
     FILE * fbat;
   
-    char str_saved_lines[7]; //Not going to need more than a 7 digit number
-    char line[1024];
-    char input_filename[PATH_MAX] = "";
-    char output_filename[PATH_MAX] = "";
+   
     char user_name_filename[PATH_MAX] = "";
     char bat_file_name[PATH_MAX] = "";
-    char user_name[255] = "chemist"; //shouldn't actually be needed, if login is same as dataset
-    // don't know why  sprintf( input_filename,"%s\\curdir\\%s\\history_j.txt",PathXWinNMRProg(),user );
-    //inserts a blank.
-    //However, lets maybe run a command line program to make a file with the username in
-    //chemist is a good default - we use dump-history mostly for the janus software
+    char user_name[255] = "user"; 
     char read_user_name_cmd[1023] = "";
-    char message[1023];
+    char instrum_name[255] = "";
+    char system_cmd[PATH_MAX] = "";
+    char message[PATH_MAX] = "";
     size_t len = 0;
     ssize_t read;
  
     int line_len = 1024;
     int user_line_line = 255; //same as user_name - not sure is I could've used line_len
-    int num_lines = 0;
-    int total_lines = 0;
-    int saved_lines = 32;
+   
     int i=0;
-    
-    if (i_argc == 3 ) { //assume the argument is number of lines at the end of the file to read
-       sprintf(str_saved_lines,"%s",i_argv[2]); //lets just assume first argument is a filename
-       saved_lines = atoi(str_saved_lines);
-     }
+    int ts_major = GetTsVersionMajor();
+    int ts_minor = GetTsVersionMinor();
+    int ts_patch = GetTsVersionPl();
+  
     GETCURDATA
     VIEWDATA_SAMEWIN
+    FETCHPARS("INSTRUM", instrum_name)
     #ifdef HAS_WINDOWS_FEATURES
-       sprintf( output_filename,"%s\\recent_history.txt",ACQUPATH(0) );
+       
        sprintf( user_name_filename,"%s\\user_name.txt",ACQUPATH(0) );
        sprintf( bat_file_name,"%s\\get_username_bat.bat",ACQUPATH(0) );
        Proc_err (INFO_OPT, "username filename %s", user_name_filename);
@@ -63,7 +51,7 @@
 
       
     #else //Not actually checked this on linux... We have no linux xpectrometers
-       sprintf( output_filename,"%s/recent_history.txt",ACQUPATH(0) );
+      
        sprintf( user_name_filename,"%s/user_name.txt",ACQUPATH(0) );
        sprintf( read_user_name_cmd,"whoami > %s",user_name_filename);
        system( read_user_name_cmd); //do the system command to output username to a file
@@ -86,59 +74,24 @@
          #endif       
        }
 
-    #ifdef HAS_WINDOWS_FEATURES
-       sprintf( input_filename,"%s\\curdir\\%s\\history_j.txt",PathXWinNMRProg(),user_name ); 
-    #else
-        sprintf( input_filename,"%s/curdir/%s/history_j.txt",PathXWinNMRProg(),user_name ); 
-    #endif
 
-    Proc_err (INFO_OPT, "input filename - %s\nOutput filename - %s\n read_user_name_cmd - %s \n user_name - %s", input_filename, output_filename,read_user_name_cmd,user_name);
-    
-    input_file = fopen(input_filename, "r");
-    if (input_file == NULL){
-       sprintf(message,"failed to open file - %s",input_filename);
-       STOPMSG(message);
-    }
+//output command to copy
 
-    while ((read = fgets(line, line_len, input_file)) != NULL) {
-     //   printf("Retrieved line of length %zu:\n", read);
-     //Proc_err (INFO_OPT, "%s", line);
-     total_lines++;
-    }
-    Proc_err(INFO_OPT,"number of lines read from history_j = %i",total_lines);
-    fclose(input_file);
-
-    if (total_lines < saved_lines){
-       saved_lines=total_lines;
-    }
-    
-    input_file = fopen(input_filename, "r");
-    if (input_file == NULL){
-       sprintf(message,"failed to open file - %s",input_filename);
-       STOPMSG(message);
-    }
+       #ifdef HAS_WINDOWS_FEATURES
        
-
-    num_lines = 0;
-    output_file = fopen(output_filename,"w");
-    if (output_file == NULL){
-     sprintf(message,"failed to open file - %s",output_filename);
-       STOPMSG(message);
-    }
+       sprintf( system_cmd,"copy \\Bruker\\cam-ts%i\\serv-windows-parfile-dirs.prop \\Users\\%s\\.topspin-%s\\prop\parfile-dirs.prop",ts_major, user_name, instrum_name );
+       sprintf( bat_file_name,"%s\\copy-prop.bat",ACQUPATH(0) );
       
- 
-     while ((read = fgets(line, line_len, input_file)) != NULL) {
-     //Proc_err (INFO_OPT, "%s", line);
-     if ( (num_lines >= (total_lines - saved_lines) ) )
-     {
-        fputs( line, output_file);
-     }
-      num_lines++;
-    // if (num_lines >= saved_lines){
-    // 	break;
-    // }
-    }
-    fclose(input_file);
-    fclose(output_file);
+       fbat = fopen(bat_file_name,"w");
+       fputs( system_cmd,fbat);
+       fclose(fbat);
+       system(bat_file_name);
+
+      
+    #else //Not actually checked this on linux... We have no linux xpectrometers
+       sprintf( system_cmd,"cp /opt/cam-ts%i/serv-linux-parfile-dirs.prop ~/.topspin-%s/prop/parfile-dirs.prop",ts_major, instrum_name );
+       system( system_cmd); //do the system command to copy file
+    #endif
+    
  
    QUIT

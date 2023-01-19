@@ -79,7 +79,7 @@
 
        #ifdef HAS_WINDOWS_FEATURES
        
-       sprintf( system_cmd,"copy \\Bruker\\cam-ts%i\\serv-windows-parfile-dirs.prop \\Users\\%s\\.topspin-%s\\prop\parfile-dirs.prop",ts_major, user_name, instrum_name );
+       sprintf( system_cmd,"copy \\Bruker\\cam-ts%i\\serv-windows-parfile-dirs.prop \\Users\\%s\\.topspin-%s\\prop\\parfile-dirs.prop",ts_major, user_name, instrum_name );
        sprintf( bat_file_name,"%s\\copy-prop.bat",ACQUPATH(0) );
       
        fbat = fopen(bat_file_name,"w");

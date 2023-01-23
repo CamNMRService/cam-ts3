@@ -70,7 +70,7 @@ FETCHPAR("NUC1",&nucleus)
 FETCHPAR("PULPROG", pulse_prog)
 FETCHPARS("OWNER", owner_name)
 exp_time = CalcExpTime();
-sprintf(user_name,"bogus-%s--", user);
+sprintf(user_name,"bogus-%s--%s--", user,owner_name);
 // get spectrum acquisition time
 now = localtime(&dtime_s);
 sprintf(date_str, "%04i/%02i/%02i %02i:%02i:%02i", now->tm_year+1900, 1+now->tm_mon, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);

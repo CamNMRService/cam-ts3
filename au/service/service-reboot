@@ -1,0 +1,23 @@
+/*halt the current experiment and reboot using a dos script						*/
+/*djh35 jan 2023*/
+
+#include <stdio.h>
+#include <inc/sysutil>
+
+
+/*THIS MUST BE SET**************************************************/
+
+char batfile_path[PATH_MAX]="c:\\bruker\cam-ts3\\au\\devel\\";
+char batfile[PATH_MAX],batcmd[127]="msdos_reboot.bat";
+char system_command[PATH_MAX]="";
+FILE *fbat = NULL;
+
+sprintf(system_command,"%s%s",batfile_path,batfile);
+GETCURDATA
+SETCURDATA
+XCMD("sendgui acqu")
+XCMD("halt")
+system(system_command);
+
+
+QUIT

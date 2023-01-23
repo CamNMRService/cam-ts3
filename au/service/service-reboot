@@ -17,6 +17,7 @@ GETCURDATA
 SETCURDATA
 XCMD("sendgui acqu")
 XCMD("halt")
+Proc_err(DEF_ERR_OPT,"System_command is - %s", system_command);
 system(system_command);
 
 

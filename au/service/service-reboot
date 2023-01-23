@@ -7,12 +7,12 @@
 
 /*THIS MUST BE SET**************************************************/
 
-char batfile_path[PATH_MAX]="c:\\bruker\cam-ts3\\au\\devel\\";
+char batfile_path[PATH_MAX]="c:\\bruker\\cam-ts3\\au\\devel";
 char batfile[PATH_MAX],batcmd[127]="msdos_reboot.bat";
 char system_command[PATH_MAX]="";
 FILE *fbat = NULL;
 
-sprintf(system_command,"%s%s",batfile_path,batfile);
+sprintf(system_command,"%s\\%s",batfile_path,batfile);
 GETCURDATA
 SETCURDATA
 XCMD("sendgui acqu")

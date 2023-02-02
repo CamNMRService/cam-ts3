@@ -1,5 +1,10 @@
 echo off
 cls
+msg * /time:60 "System will reboot shortly. Please halt your experiments. There will be 5 more warnings."
+msg * /time:60 "System will reboot shortly. Please halt your experiments. There will be 4 more warnings."
+msg * /time:60 "System will reboot shortly. Please halt your experiments. There will be 3 more warnings."
+msg * /time:60 "System will reboot shortly. Please halt your experiments. There will be 2 more warnings."
+msg * /time:60 "SYSTEM REBOOT - LAST WARNING. Please halt your experiments!!"
 set txt=Arran rebooting
 echo %txt% > "e:\chemist\rebooting.txt"
 date /T >> "e:\chemist\rebooting.txt"

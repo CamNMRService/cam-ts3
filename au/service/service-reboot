@@ -1,5 +1,6 @@
 /*halt the current experiment and reboot using a dos script						*/
 /*djh35 jan 2023*/
+/*NOT FINISHED WIP**/
 
 #include <stdio.h>
 #include <inc/sysutil>

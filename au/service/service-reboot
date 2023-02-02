@@ -7,7 +7,7 @@
 
 /*THIS MUST BE SET**************************************************/
 
-char batfile_path[PATH_MAX]="c:\\bruker\\cam-ts3\\au\\devel";
+char batfile_path[PATH_MAX]="c:\\bruker\\cam-ts3\\au\\os_scripts";
 char batfile[PATH_MAX]="msdos_reboot.bat";
 char system_command[PATH_MAX]="";
 int s_to_reboot=60;

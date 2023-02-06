@@ -119,7 +119,8 @@ proc_or_not=1;
 
 
 Proc_err ( INFO_OPT, "Starting program");
-sleep(delaytime);
+//sleep(delaytime);
+sleep(120); //initial delay to allow topspin to start before doing anything else
 XCMD("setdef ackn no");
 XCMD("setdef stdout no");
 XCMD("setdef stderr no");
@@ -237,6 +238,8 @@ Proc_err(INFO_OPT,"disk=%s",disk);
 GETCURDATA
 VIEWDATA_SAMEWIN
 
+sprintf(tmp_cmd, "ii restart");
+AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 sprintf(tmp_cmd, "ii");
 AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 if ( AUERR <0 )

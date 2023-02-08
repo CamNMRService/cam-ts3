@@ -33,8 +33,9 @@ XCMD("sendgui acqu")
 GETCURDATA
 SETCURDATA
 XCMD("halt")
+//Uncomment below to call a reboot script
 //Proc_err(DEF_ERR_OPT,"System_command is - %s", system_command);
-system(system_command);
+//system(system_command);
 
 
 QUIT

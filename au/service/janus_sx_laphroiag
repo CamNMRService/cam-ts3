@@ -108,12 +108,14 @@ int get_proc_or_not_val(FILE *pornot);
 time_t lt;
 
 GETCURDATA;
+proc_or_not = 1; //dont need the below
+/*
 while ((proc_or_not < 1) || (proc_or_not > 4))
 {
 	Proc_err(DEF_ERR_OPT,"Control wheter or not we print. Enter :-\n 1. for no processing at all. \n 2. For print and email everything. \n 3. For email processed data, no printing. \n 4. Print but don't email.");
 	GETINT("Enter a number from 1 to 4", proc_or_not);
 }
-
+*/
 
 
 Proc_err ( INFO_OPT, "Starting program");

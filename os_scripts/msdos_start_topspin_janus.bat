@@ -1,4 +1,4 @@
-SET file=E:\chemist\rebooting.txt
+SET file=E:\chemist\spect_rebooting.txt
 IF EXIST %file% (
   ECHO %file% is existing
   DEL %file%

@@ -1,11 +1,11 @@
 echo off
 cls
-c:\windows\system32\msg.exe * /time:60 "System will reboot shortly. Please halt your experiments. There will be 4 more warnings."
-c:\windows\system32\msg.exe "System will reboot shortly. Please halt your experiments. There will be 3 more warnings."
-c:\windows\system32\msg.exe "System will reboot shortly. Please halt your experiments. There will be 2 more warnings."
-c:\windows\system32\msg.exe "System will reboot shortly. Please halt your experiments. There will be 1 more warning."
-c:\windows\system32\msg.exe "SYSTEM REBOOT - LAST WARNING. Please halt your experiments!!"
-REM TIMEOUT /T 300 /nobreak
+start c:\windows\system32\msg.exe * /time:60 "System will reboot shortly. Please halt your experiments. There will be 4 more warnings."
+start c:\windows\system32\msg.exe * /time:60 "System will reboot shortly. Please halt your experiments. There will be 3 more warnings."
+start c:\windows\system32\msg.exe * /time:60 "System will reboot shortly. Please halt your experiments. There will be 2 more warnings."
+start c:\windows\system32\msg.exe * /time:60 "System will reboot shortly. Please halt your experiments. There will be 1 more warning."
+start c:\windows\system32\msg.exe * /time:60 "SYSTEM REBOOT - LAST WARNING. Please halt your experiments!!"
+TIMEOUT /T 300 /nobreak
 set txt=Arran rebooting
 echo %txt% > "e:\chemist\rebooting.txt"
 date /T >> "e:\chemist\rebooting.txt"

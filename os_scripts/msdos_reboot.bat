@@ -7,12 +7,12 @@ start c:\windows\system32\msg.exe * /time:60 "System will reboot shortly. Please
 start c:\windows\system32\msg.exe * /time:60 "SYSTEM REBOOT - LAST WARNING. Please halt your experiments!!"
 TIMEOUT /T 300 /nobreak
 set txt=Arran rebooting
-SET file="e:\spect_rebooting.txt"
+SET file="e:\chemist\spect_rebooting.txt"
 echo %txt% > %file%
 date /T >> %file%
 time /t >> %file%
 set %txt%=Reboot janus
-SET file="e:\janus_rebooting.txt"
+SET file="e:\chemist\janus_rebooting.txt"
 echo %txt% > %file%
 shutdown /r /t 120 /c NMR_automation_starting /d p:0:0
 exit

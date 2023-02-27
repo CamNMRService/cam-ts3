@@ -405,7 +405,13 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 	       XAU("whoopwhoop",tmp_str)
         }
 		sprintf(tmp_cmd, "lock %s",solvent);
+	    
 		AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
+		if ( AUERR <0 )
+        {
+	       AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
+        }
+	
 		if ( AUERR <0 )
         {
 	       sprintf(tmp_str, "FAILED_TO_LOCK_%s_%i_%s",solvent, cpos, tmp_fname);
@@ -637,7 +643,7 @@ if (proc_or_not==1)
 		#ifdef	HAS_WINDOWS_FEATURES
 		
           // sprintf(tmp_cmd,"robocopy C:\\Bruker\\TopSpin3.6.4\\data\\topshimData /S %s\\topshimData_%s_%d", ACQUPATH(0),name, expno);  
-          sprintf( tmp_cmd, "7za a  %s\\topshimData_%s_%i.zip C:\\Bruker\\TopSpin3.6.4\\data\\topshimDatax -r ",ACQUPATH(0),name,expno);
+          sprintf( tmp_cmd, "7za a  %s\\topshimData_%s_%i.zip C:\\Bruker\\TopSpin3.6.4\\data\\topshimData\\",ACQUPATH(0),name,expno);
 	
         #else 
            sprintf(tmp_cmd,"cp -rp /opt/topspin3.6.4/data/topshimData %s/topshimData_%s_%d", AQCUPATH(0),name, expno);

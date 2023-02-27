@@ -635,10 +635,10 @@ if (proc_or_not==1)
 		//OK, now copy the topshim data to the dataset somewhere
 		#ifdef	HAS_WINDOWS_FEATURES
 		
-           sprintf(tmp_cmd,"robocopy C:\\Bruker\\TopSpin3.6.4\\data\\topshimData /S %s\\topshimData_%s_%d", ACQU(0),name, expno);  
+           sprintf(tmp_cmd,"robocopy C:\\Bruker\\TopSpin3.6.4\\data\\topshimData /S %s\\topshimData_%s_%d", ACQUPATH(0),name, expno);  
        
         #else 
-           sprintf(tmp_cmd,"cp -rp /opt/topspin3.6.4/data/topshimData %s/topshimData_%s_%d", AQCU(0),name, expno);
+           sprintf(tmp_cmd,"cp -rp /opt/topspin3.6.4/data/topshimData %s/topshimData_%s_%d", AQCUPATH(0),name, expno);
         #endif
 		Proc_err(DEF_ERR_OPT,tmp_cmd);
         system(tmp_cmd);  

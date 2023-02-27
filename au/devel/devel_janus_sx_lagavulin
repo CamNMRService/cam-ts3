@@ -76,7 +76,8 @@ char    janusup[80], expttime[40], exptsfile[80], protocol[80];
 char    sxcmd[255], gradshim[20], comments[1024], command[1024], snostr[1024], tmp_cmd[256];
 char    statusstr[1024], awmfile[80],tmparchpath[1024],fidpath[1024],procau[1024];
 char	  proclist[1024],procinstruct[1024];
-
+char    reportdest[PATH_MAX];
+char    reportsource[PATH_MAX];
 char   *env_name, *file_data, *field, *ed;
 FILE   *fprod = NULL, *facqu = NULL, *ferror = NULL, *fwarn = NULL;
 FILE   *fshim = NULL, *fwait = NULL, *ftitle = NULL, *fsx = NULL;
@@ -635,14 +636,18 @@ if (proc_or_not==1)
 		//OK, now copy the topshim data to the dataset somewhere
 		#ifdef	HAS_WINDOWS_FEATURES
 		
-           sprintf(tmp_cmd,"robocopy C:\\Bruker\\TopSpin3.6.4\\data\\topshimData /S %s\\topshimData_%s_%d", ACQUPATH(0),name, expno);  
-       
+          // sprintf(tmp_cmd,"robocopy C:\\Bruker\\TopSpin3.6.4\\data\\topshimData /S %s\\topshimData_%s_%d", ACQUPATH(0),name, expno);  
+          sprintf( tmp_cmd, "7za a  %s\\topshimData_%s_%i.zip C:\\Bruker\\TopSpin3.6.4\\data\\topshimDatax -r ",ACQUPATH(0),name,expno);
+	
         #else 
            sprintf(tmp_cmd,"cp -rp /opt/topspin3.6.4/data/topshimData %s/topshimData_%s_%d", AQCUPATH(0),name, expno);
         #endif
 		Proc_err(DEF_ERR_OPT,tmp_cmd);
         system(tmp_cmd);  
-        XCMD("sendgui topshim report");
+       
+        strcpy(reportdest, ACQUPATH("topshim_report.txt"));
+        sprintf(reportsource, "%s/%s/topshim_report.txt", PathXWinNMRProg(), PathXWinNMRCurDir());
+        dircp(reportsource, reportdest);
 		if ( access(waitfile,R_OK)!=0)
 	        {
 	           /*PUT_SAMPLE_BACK*/

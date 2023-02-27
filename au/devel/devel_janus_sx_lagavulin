@@ -631,7 +631,7 @@ if (proc_or_not==1)
 
 		fclose(fprod);
 		LastSample=FALSE;
-
+        sendgui("topshim report");
 		//OK, now copy the topshim data to the dataset somewhere
 		#ifdef	HAS_WINDOWS_FEATURES
 		

@@ -11,7 +11,7 @@
 char batfile_path[PATH_MAX]="c:\\bruker\\cam-ts3\\os_scripts";
 char batfile[PATH_MAX]="msdos_reboot.bat";
 char system_command[PATH_MAX]="";
-int s_to_reboot=60;
+int s_to_reboot=300;
 int num_warnings=10;
 int time_left=s_to_reboot;
 int loop;

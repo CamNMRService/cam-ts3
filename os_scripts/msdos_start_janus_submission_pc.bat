@@ -22,7 +22,7 @@ cd c:\msdos_scripts\
 REM c:\msdos_scripts\msdos_reboot_janus.bat
 IF EXIST %file% (
   ECHO %file% is existing
-  shutdown /r /t 180 /c %spect%_automation_starting /d p:0:0
+  shutdown /r /t 300 /c %spect%_automation_starting /d p:0:0
 ) 
 goto l
 

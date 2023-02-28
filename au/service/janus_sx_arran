@@ -56,6 +56,10 @@
 /*Set default file location and settings*/
 /* 220125 patch by djh to not do atma for 1h */
 
+// 2023_02_27 PTG moved atma so only done once, before topshim
+// Added repeat lock attempt in case of lock failure
+
+
 //20220606 added getprosol
 /****************************************/
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
@@ -411,12 +415,29 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 		sprintf(tmp_cmd, "lock %s",solvent);
 		AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
 		if ( AUERR <0 )
-        {
+        { 
+        // error, so have another go:
+ 				AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
+ 				if ( AUERR <0 )
+ 				// error again, so email:
 	       sprintf(tmp_str, "FAILED_TO_LOCK_%s_%i_%s",solvent, cpos, tmp_fname);
 	       XAU("whoopwhoop",tmp_str)
         }
 	//	sprintf(tmp_cmd, "ROT");
 	//	AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
+	
+	// move atma to here for Arran (only), as we clearly only need to tune once!!
+	// and better to have before topshim. NB junk/10/1 must be a proton/carbon dataset
+	
+	 sprintf(tmp_cmd,"atma");
+	    AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+	    if ( AUERR <0 )
+		  {
+		     sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
+	       XAU("whoopwhoop",tmp_str)
+	         // STOPMSG(tmp_str)
+	    }
+	
 	ROT
 		if ( AUERR <0 )
         {
@@ -471,14 +492,7 @@ CPR_exec("topshim_watchdog",WAIT_TERM);
      	//end glenfairn mod
    */  	
    
-      sprintf(tmp_cmd,"atma");
-	    AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
-	    if ( AUERR <0 )
-		  {
-		     sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
-	       XAU("whoopwhoop",tmp_str)
-	         // STOPMSG(tmp_str)
-	    }
+     
 	    
 	    sprintf(tmp_cmd,"xaua");
     	AUERR=CPR_exec(tmp_cmd,WAIT_TERM);

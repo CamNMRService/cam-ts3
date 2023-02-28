@@ -60,6 +60,8 @@
 /*20220920 - added option to call topshim_watchdog with a command line 
 argument for a message
 - had to mod topshim_watchdog too*/
+//PTG 2023_02_28 Modifed atma behaviour to manually turn spinning off first and then turn it on afterwards if needed
+//PTG 2023_02_28 Modifed lock behaviour to try again before emailing...
 /****************************************/
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 char def_file[255]="d:/chemist/defaults-csv.txt"; //janus software defaults
@@ -410,10 +412,15 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 		AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
 		if ( AUERR <0 )
         {
-	      sprintf(tmp_str, "FAILED_TO_LOCK_%s_%i_%s",solvent, cpos, tmp_fname);
-	     
-	       XAU("devel_whoopwhoop",tmp_str)
-        }
+        // lock failed, try again:
+        AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
+        if ( AUERR <0 )
+        	{
+        		// failed again, email
+	      		sprintf(tmp_str, "FAILED_TO_LOCK_%s_%i_%s",solvent, cpos, tmp_fname); 
+	    		   XAU("devel_whoopwhoop",tmp_str)
+       		}
+       	}
 	//	sprintf(tmp_cmd, "ROT");
 	//	AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
   	ROT
@@ -468,6 +475,8 @@ XCMD(tmp_str);
 	//	XCMD("sendgui atma");
 	if ( strstr ( experiment, "janus-1h") == NULL ) //strstr returns a pointer if a match
 	{
+			// stop spinning
+			ROTOFF
       sprintf(tmp_cmd,"atma");
 		  AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 	    if ( AUERR <0 )
@@ -476,6 +485,7 @@ XCMD(tmp_str);
 	       XAU("devel_whoopwhoop",tmp_str)
 	       // STOPMSG(tmp_str)
 		  }
+		  ROT // does "ro acqu"
 	}
 	sprintf(tmp_cmd,"xaua");
 	AUERR=CPR_exec(tmp_cmd,WAIT_TERM);

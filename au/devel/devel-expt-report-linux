@@ -1,0 +1,193 @@
+/* devel-expt-report*/
+/* output/append experimental details to a csv report*/
+/* now with added orig file parsing!*/
+/* plan to munge unique id from iconnmr with sample name to make a useful, unique id for */
+/* a database say*/
+/* march 2023 - make it work for linux*/
+/* just stripping stuff out - also adding making the userp1 the email address*/
+/* by parsing the orig file*/
+
+//#include <time.h>
+#include <inc/exptUtil>
+#include <time.h>
+/*
+int ts_major = GetTsVersionMajor();
+int ts_minor = GetTsVersionMinor();
+int ts_patch = GetTsVersionPl();
+*/
+
+int verbose=1; //set to 1 to be verbose
+
+char report_filename[PATH_MAX]=""; //goes in same location as helium log
+char local_report_filename[PATH_MAX]=""; //goes in (root) data directory
+char email_address[PATH_MAX]="";
+sprintf( report_filename, "%s/logfiles/expt-report.csv", PathXWinNMRProg() );
+/*****************************/
+FILE *report_file_pointer = NULL;
+FILE *orig_file_pointer = NULL;
+FILE *fp;
+
+int exp_time = 0;
+int num_scans = 0;
+int line_len = 0;
+int date_unix;
+char instrum_name[40]="";
+char data_path[PATH_MAX]="";
+char orig_path[PATH_MAX];
+char experiment[80]="";
+char nucleus[6]="";
+char pulse_prog[80]="";
+char date_str[50]="";
+char line1[PATH_MAX]="";
+char line3[PATH_MAX]="";
+char line5[PATH_MAX]="";
+char sample_name[1024]="UNKNOWN_SAMPLE_NAME"; //lets have so decent defauts to scan
+char group[1024]="UNKNOWN_GROUP";          //for if we can't red orig file
+char crsid[40]="UNKNOWN_CRS_ID";
+time_t now_s, dtime_s, cdtime_s;     /* seconds since 1970 */
+struct tm *now;     /* structure with year, month etc. */
+
+if (verbose ==1) {
+//   Proc_err(INFO_OPT,"ts_major is %i \n minor %i \n patch %i",ts_major, ts_minor, ts_patch);
+}
+
+#ifdef HAS_WINDOWS_FEATURES
+ //  if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
+   // 	sprintf(report_filename,"C:\\Bruker\\diskless\\prog\\logfiles\\expt-report.csv");
+   //}
+   //else{
+      sprintf( report_filename, "%s\\logfiles\\expt-report.csv", PathXWinNMRProg() );
+   //}
+#else //Not actually checked this on linux... We have no linux xpectrometers
+ 		//if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
+    	//sprintf(report_filename,"/opt/diskless/prog/logfiles/expt-report.csv");
+   //}
+   //else{
+      sprintf( report_filename, "%s/logfiles/expt-report.csv", PathXWinNMRProg() );
+   //}
+#endif
+
+if (verbose ==1) {
+//   Proc_err(INFO_OPT,"expt-report file location - %s",report_filename);
+}
+
+GETCURDATA
+SETCURDATA
+FETCHPARS("INSTRUM", instrum_name)
+FETCHPARS("EXP",experiment)
+FETCHPARS("DATE", &date_unix)
+FETCHPARS("DATE", &dtime_s)
+strcpy(data_path,ACQUPATH("acqus") );
+FETCHPARS("NS",&num_scans)
+FETCHPAR("NUC1",&nucleus)
+FETCHPAR("PULPROG", pulse_prog)
+exp_time = CalcExpTime();
+
+// get spectrum acquisition time
+now = localtime(&dtime_s);
+sprintf(date_str, "%04i/%02i/%02i %02i:%02i:%02i", now->tm_year+1900, 1+now->tm_mon, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
+
+if(verbose == 1){
+   Proc_err(DEF_ERR_OPT,"Instrument name defined as :- %s", instrum_name);
+   Proc_err(DEF_ERR_OPT,"Dataset name is :-  %s", name);
+   Proc_err(DEF_ERR_OPT,"Experiment performed is :- %s", experiment);
+   Proc_err(DEF_ERR_OPT,"Dataset unix date is :- %i", date_unix);
+   Proc_err(DEF_ERR_OPT,"Dataset date (converted) is :- %s", date_str);
+   Proc_err(DEF_ERR_OPT,"Disk defined as :- %s", disk);
+   Proc_err(DEF_ERR_OPT,"Data path is :- %s", data_path);
+   Proc_err(DEF_ERR_OPT,"Data expno is :- %i", expno);
+   Proc_err(DEF_ERR_OPT,"Number of scans is :- %i", num_scans);
+   Proc_err(DEF_ERR_OPT,"Nuc1 is :- %s", nucleus);
+   Proc_err(DEF_ERR_OPT,"Defined Experiment time in seconds is :-  %i ", exp_time);
+
+}
+
+//Now open and read orig filename - ifdef bogus?
+
+/*
+#ifdef HAS_WINDOWS_FEATURES
+
+    sprintf(orig_path,"%s\\orig",ACQUPATH(0) );
+
+#else{
+      sprintf( orig_path,"%s/orig",ACQUPATH(0) );
+    }
+#endif
+*/
+
+sprintf( orig_path,"%sorig",ACQUPATH(0) );
+if (verbose ==1) {
+   Proc_err(INFO_OPT,"orig file location - %s",orig_path);
+}
+
+
+
+orig_file_pointer = fopen(orig_path,"r");
+if (orig_file_pointer == NULL)
+{
+  Proc_err(DEF_ERR_OPT,"Can't open orig file - %s", orig_path);
+  //  exit(1); // don't exit here, best to write something to the report probably.
+  //handle/report the error though somehow
+  sprintf(group,"ORIG_FILE_ERROR"); 
+  sprintf(crsid,"ORIG_FILE_ERROR");
+  sprintf(sample_name,"ORIG_FILE_ERROR");
+}
+else {
+//Now do parsing. read line by line...or is it token by token?
+
+   fscanf(orig_file_pointer, "%s", line1);
+   fscanf(orig_file_pointer, "%s", group);
+   fscanf(orig_file_pointer, "%s", line3);
+   fscanf(orig_file_pointer, "%s", crsid);
+   fscanf(orig_file_pointer, "%s", line5);
+   fscanf(orig_file_pointer, "%s", sample_name);
+
+   fclose(orig_file_pointer);
+}
+
+if (verbose ==1) {
+ 	 Proc_err(INFO_OPT," line1 - %s \n line3 - %s \n line5 - %s",line1, line3, line5);
+   Proc_err(INFO_OPT," group - %s \n crsid - %s \n sample_name - %s",group, crsid, sample_name);
+}
+
+//Ok, now lets make an email address from the CRSID and store it as userp1 for email au program
+
+sprintf(email_address,"%s@cam.ac.uk");
+STOREPAR("USERP1",email_address);
+
+//Now open report file and write to it.
+report_file_pointer = fopen(report_filename,"a+");
+if (report_file_pointer == NULL)
+{
+  Proc_err(DEF_ERR_OPT,"Can't open report file - %s", report_filename);
+  exit(1);
+}
+else
+{
+  fprintf(report_file_pointer,"%s-%s-%s-%s,",group,crsid,sample_name,name);
+  fprintf(report_file_pointer,"%s,%s,%s,%s,",instrum_name, name, group, crsid);
+  fprintf(report_file_pointer,"%s,%s,%i,%s,",sample_name,experiment, date_unix, date_str);
+  fprintf(report_file_pointer,"%s,%s,%i,%s,",disk, data_path, expno, nucleus);
+  fprintf(report_file_pointer,"%s,%i,%i\n",pulse_prog, num_scans, exp_time);
+  fclose(report_file_pointer);
+} 
+//now lets make another report file in a directory a user can see
+//Now open report file and write to it.
+//sprintf(local_report_filename,"%s\\..\\..\\..\\..\\expt-report.csv",ACQUPATH(0) );
+sprintf(local_report_filename,"%s/../../../../expt-report.csv",ACQUPATH(0) );
+report_file_pointer = fopen(local_report_filename,"a+");
+if (report_file_pointer == NULL)
+{
+  Proc_err(DEF_ERR_OPT,"Can't open report file - %s", report_filename);
+  exit(1);
+}
+else
+{
+  fprintf(report_file_pointer,"%s-%s-%s-%s,",group,crsid,sample_name,name);
+  fprintf(report_file_pointer,"%s,%s,%s,%s,",instrum_name, name, group, crsid);
+  fprintf(report_file_pointer,"%s,%s,%i,%s,",sample_name,experiment, date_unix, date_str);
+  fprintf(report_file_pointer,"%s,%s,%i,%s,",disk, data_path, expno, nucleus);
+  fprintf(report_file_pointer,"%s,%i,%i\n",pulse_prog, num_scans, exp_time);
+  fclose(report_file_pointer);
+} 
+QUIT

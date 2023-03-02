@@ -19,7 +19,7 @@
 /*THIS MUST BE SET**************************************************/
 
 char body_file[PATH_MAX]="/dev/null";
-char zip_dir[PATH_MAX]="/data/zips";
+char zip_dir[PATH_MAX]="/data/zips/";
 char log_dir[PATH_MAX]="";
 /******************************************************************/
 
@@ -75,68 +75,41 @@ if (strchr(email,'@') == NULL)
 	ABORT
 }
 
+
+
+
+
 /*make up a batfile with commands to zip up the data, then run the batch file*/
 //sprintf( zip_cmd_str, "robocopy  %s%s\\%s /S %s%s",disk,user,name,zip_dir,name);
-sprintf( zip_cmd_str, "cp -rp %s%s/%s  %s%s",disk,user,name,zip_dir,name);
+
+sprintf( zip_cmd_str, "cp -rp %s  %s%s",ACQUPATH(0),zip_dir,name);
 Proc_err(INFO_OPT, "zip_cmd_str to copy is %s",zip_cmd_str);
-system(zip_cmd_str)
+system(zip_cmd_str);
 sprintf( zip_name, "%s\%s.zip", zip_dir ,name);
 //now make the command to zip the file using z7a, with password if type as command option
 sprintf( zip_cmd_str, "7za a  %s %s%s -r -x'!1r' -x'!1i' -x'!2rr' -x'!2ir' -x'!2ri' -x'!2ii'",zip_name, zip_dir,name);
 Proc_err(INFO_OPT, "zip_cmd_str is %s",zip_cmd_str);
 system(zip_cmd_str);
-//Ok, made the zip file, now to email it using sendemail
-/*Stage 1	*/ 
-/*now get first pdf of dataset*/
-/*better check there is data there, or we'll infinite loop*/
-
-/*now get first pdf of dataset*/
-/*better check there is data there, or we'll infinite loop*/
-(void) sprintf(directory, "%s%s/%s", disk, user, name);
-i_limit = gethighest(directory);
-if (i_limit>999) i_limit=999;
-i_exp=1;
-
-while (i_exp < i_limit)
-{
-	sprintf( data_File, "%s%s/%s/%d/pulseprogram", disk, user, name, i_exp );
-	if( access( data_File, R_OK ) == 0 )
-	{	
-		/*make a name of the syntax created by service-pdfit */
-		DATASET(name, i_exp, procno, disk, user)
-//		VIEWDATA_SAMEWIN
-		SETCURDATA
-		FETCHPAR("PULPROG", &pul)
-		FETCHPAR("NUC1",nuc1)
-
-		sprintf( pdfname, "%s%s/%s/%d/pdata/%d/%s-%s-%s-%d.pdf",disk, user, name, i_exp, procno, name, pul, nuc1, suffix);
-		if( access( pdfname, R_OK ) == 0 ) // if there is a pdf there
-			{															
-			pdfthere=1;	
-			break;
-			}
-	}
-	i_exp++;
-}
-
-/*Now email the zip, and the pdf if there is one.*/
+//mutt -x -s 'NMR data for test' -a "/data/zips/test.zip"  -- nmr@ch.cam.ac.uk < /dev/null
 /*first create the sendemail command we're going to run*/
 if (pdfthere==1) { 
 //	sprintf (email_cmd_str, "sendemail -f %s -t %s -u %s -m %s -a  %s %s -s smtp.gmail.com:587 -o tls=yes -xu %s -xp %s", user_id, email,name, body, zip_name, pdfname, user_id, password);
-sprintf(email_cmd_str,"mutt -s 'NMR data for %s' -a \"%s\" -a \"%s\"  -- %s < %s ",name,zip_name,pdfname,email,body_file);
+sprintf(email_cmd_str,"mutt -x -s 'NMR data for %s' -a \"%s\" -a \"%s\"  -- %s <%s ",name,zip_name,pdfname,email,body_file);
 }
 else	{
 //	sprintf (email_cmd_str, "sendemail -f %s -t %s -u %s -m %s -a %s -s smtp.gmail.com:587 -o tls=yes -xu %s -xp %s", user_id, email,name, body, zip_name, user_id, password);
-sprintf(email_cmd_str,"mutt -s 'NMR data for %s' -a \"%s\"  -- %s < %s ",name,zip_name,email,body_file);
+sprintf(email_cmd_str,"mutt -x -s 'NMR data for %s' -a \"%s\"  -- %s <%s ",name,zip_name,email,body_file);
 }
 
-Show_status(email_cmd_str);
 
+Proc_err(INFO_OPT, "email_cmd_str is %s",email_cmd_str);
 /*send the email*/
 system(email_cmd_str);
+/*
+*/
 
+/*
 
-/*append the email address sent to and filename to a statusfile*/
 statusprint = fopen(emailedlist, "a");
 static const char *CurrentTime(void)
 {
@@ -182,4 +155,5 @@ if (verbose==1){
 	Proc_err(INFO_OPT,"email_cmd_str is :- %s\n", email_cmd_str);
 }
 
+*/
 QUIT

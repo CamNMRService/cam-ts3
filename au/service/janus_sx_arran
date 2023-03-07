@@ -61,6 +61,8 @@
 
 
 //20220606 added getprosol
+
+//2023_03_07 switched to janus_topshim_watchdog
 /****************************************/
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 char def_file[255]="e:/chemist/defaults-csv.txt"; //janus software defaults
@@ -419,9 +421,11 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
         // error, so have another go:
  				AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
  				if ( AUERR <0 )
- 				// error again, so email:
-	       sprintf(tmp_str, "FAILED_TO_LOCK_%s_%i_%s",solvent, cpos, tmp_fname);
-	       XAU("whoopwhoop",tmp_str)
+				{
+					// error again, so email:
+					sprintf(tmp_str, "FAILED_TO_LOCK_%s_%i_%s",solvent, cpos, tmp_fname);
+					XAU("whoopwhoop",tmp_str)
+				}
         }
 	//	sprintf(tmp_cmd, "ROT");
 	//	AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
@@ -448,7 +452,8 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 	//topshim has to be here, as we only want to do it once per sample, have to do atma each exp, or put more logic in.
  
 // use topshim_watchdog to force timeout and to save topshim data in case of failure
-CPR_exec("topshim_watchdog",WAIT_TERM);
+sprintf(tmp_str,"janus_topshim_watchdog TOPSHIM_ERROR_%s_%i",tmp_fname,cpos); 
+XCMD(tmp_str);
 /*	      AUERR=CPR_exec("topshim convcomp",WAIT_TERM);
        if ( AUERR <0 )
         {

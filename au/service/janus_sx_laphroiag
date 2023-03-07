@@ -57,6 +57,8 @@
 /* 220125 patch by djh to not do atma for 1h */
 
 //20220606 added getprosol
+
+//2023_03_07 switched to janus_topshim_watchdog, added second go at locking before email
 /****************************************/
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 char def_file[255]="f:/chemist/defaults-csv.txt"; //janus software defaults
@@ -408,9 +410,15 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 		sprintf(tmp_cmd, "lock %s",solvent);
 		AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
 		if ( AUERR <0 )
-        {
-	       sprintf(tmp_str, "FAILED_TO_LOCK_%s_%i_%s",solvent, cpos, tmp_fname);
-	       XAU("whoopwhoop",tmp_str)
+        { 
+        // error, so have another go:
+ 				AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
+ 				if ( AUERR <0 )
+				{
+ 				// error again, so email:
+				sprintf(tmp_str, "FAILED_TO_LOCK_%s_%i_%s",solvent, cpos, tmp_fname);
+				XAU("whoopwhoop",tmp_str)
+				}
         }
 	//	sprintf(tmp_cmd, "ROT");
 	//	AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
@@ -420,7 +428,10 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 	       sprintf(tmp_str, "ROT_FAILED_%i_%s", cpos, tmp_fname);
 	       XAU("whoopwhoop",tmp_str)
         }
-    CPR_exec("topshim_watchdog",WAIT_TERM); 
+ //   CPR_exec("topshim_watchdog",WAIT_TERM); 
+ 
+ sprintf(tmp_str,"janus_topshim_watchdog TOPSHIM_ERROR_%s_%i",tmp_fname,cpos); 
+XCMD(tmp_str);
 	//topshim has to be here, as we only want to do it once per sample, have to do atma each exp, or put more logic in.
  //commented out below - probably won't work with topshim_watchdog au program. Best call whoopwhoop from there.
  /*    AUERR=CPR_exec("topshim z6",WAIT_TERM);

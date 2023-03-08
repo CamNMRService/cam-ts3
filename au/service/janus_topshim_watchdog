@@ -33,6 +33,11 @@ int ts_patch = GetTsVersionPl();
 FILE *pidfile;
 FILE *lockfile;
 
+//set topshim_option to just a blank character - will this prevent errors?
+
+
+sprintf(topshim_option," ");
+
 if (i_argc == 3 ) { //assume the argument is a message to send
     sprintf(message,"%s",i_argv[2]); 
 }

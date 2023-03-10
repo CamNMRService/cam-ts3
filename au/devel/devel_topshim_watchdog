@@ -1,13 +1,19 @@
-//topshim_watchdog
+//devel_topshim_watchdog
 //AU program to run topshim, and kill it after a while if not done.
 //if it fails or is killed move the topshimdata
 //to a folder with the name of the current experiment
 //So that you can look at the data and see what might have gone wrong
 
+//Usage :-
+// devel_topshim_watchdog MESSAGE _ON_FAILURE (required) topshim_option_a (optional) topshim_option_b (optional) topshim_option_c (optional)
 //ptg 2022/03/08 correct path to curdir for lock file, and properly get it to delete file - argument is file path not FILE pointer
 //djh35 2022/10 removed stuff specific to being called from janus
 //added option to pass 3 more arguments to topshim, eg ordmax=, selwid=
-
+//djh35 2023/03/09 - 
+// -Code for the first option to be a message.
+// -Declare options to be spaces on definition (should prevent bug of unknown memory contents being used as an argument for topshim)
+// UNTRAPPED BEHAVIOUR - if the au program is NOT called with a message as the first argument -
+// The first (intended option for topshim) will be ignored
 #include <time.h>
 time_t now_s, dtime_s;		  	/* seconds since 1970 */
 struct tm *now;	  		/* structure with year, month etc. */
@@ -22,9 +28,10 @@ char datestamp[256];
 char lockpath[PATH_MAX];
 char pidpath[PATH_MAX];
 char message[1023];
-char topshim_option_a[255];
-char topshim_option_b[255];
-char topshim_option_c[255];
+char default_topshim_cmd[255]="";
+char topshim_option_a[255]=" ";
+char topshim_option_b[255]=" ";
+char topshim_option_c[255]=" ";
 char topshim_timeout[8]="300";
 int pid;
 int ts_major = GetTsVersionMajor();
@@ -36,7 +43,9 @@ FILE *lockfile;
 
 GETCURDATA 
 
-// 
+// DEFAULT TOPSHIM COMMAND
+
+sprintf(default_topshim_cmd,"topshim plotall convcomp");
 
 /* get current time for timestamping the copy - can't use experiment name here because kiosk */
 now_s=time(NULL);
@@ -50,7 +59,7 @@ fclose(lockfile);
 
 // start the watchdog AU and then carry on
 
-if (i_argc > 5 ){
+if (i_argc > 6 ){
     sprintf(tmp_str,"Too many arguments passed to %s",i_argv[0]);
     STOPMSG(tmp_str)
 }
@@ -59,25 +68,31 @@ sprintf(tmp_str,"devel_topshimkiller %s",topshim_timeout);
 CPR_exec(tmp_str, WAIT_START); 
 
 if (i_argc == 3 ) { 
-   sprintf(topshim_option_a,"%s",i_argv[2]); 
-   // execute topshim as desired
-   sprintf(tscommand,"topshim plotall convcomp %s",topshim_option_a);
+   sprintf(message,"%s",i_argv[2]); 
+   // command to execute topshim as desired
+   sprintf(tscommand,"%s",default_topshim_cmd);
    XCMD(tscommand);
 }
-
-if (i_argc == 4) {
+if (i_argc == 4 ) { 
    sprintf(topshim_option_a,"%s",i_argv[2]); 
-   sprintf(topshim_option_b,"%s",i_argv[3]); 
    // execute topshim as desired
-   sprintf(tscommand,"topshim plotall convcomp %s %s",topshim_option_a, topshim_option_b);
+   sprintf(tscommand,"%s %s",default_topshim_cmd,topshim_option_a);
+   XCMD(tscommand);
 }
 
 if (i_argc == 5) {
    sprintf(topshim_option_a,"%s",i_argv[2]); 
    sprintf(topshim_option_b,"%s",i_argv[3]); 
+   // execute topshim as desired
+   sprintf(tscommand,"%s %s %s",default_topshim_cmd,topshim_option_a, topshim_option_b);
+}
+
+if (i_argc == 6) {
+   sprintf(topshim_option_a,"%s",i_argv[2]); 
+   sprintf(topshim_option_b,"%s",i_argv[3]); 
    sprintf(topshim_option_c,"%s",i_argv[4]); 
    // execute topshim as desired
-   sprintf(tscommand,"topshim plotall convcomp %s %s %s",topshim_option_a, topshim_option_b, topshim_option_c);
+   sprintf(tscommand,"%s %s %s %s",default_topshim_cmd,topshim_option_a, topshim_option_b, topshim_option_c);
 }
 
 // delete the lockfile  *and kill the killer program!!!!!* if topshim completes OK

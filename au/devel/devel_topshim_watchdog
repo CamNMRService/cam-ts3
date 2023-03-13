@@ -27,7 +27,7 @@ char tmp_str[PATH_MAX];
 char datestamp[256];
 char lockpath[PATH_MAX];
 char pidpath[PATH_MAX];
-char message[1023];
+char message[1023]="null_message";
 char default_topshim_cmd[255]=" ";
 char topshim_option_a[255]=" ";
 char topshim_option_b[255]=" ";

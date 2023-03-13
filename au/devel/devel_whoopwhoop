@@ -19,6 +19,7 @@ char message[1023]="NULL_WHOOPWHOOP_MESSAGE";
 
 char cmd_str[1024];
 int i=0;
+int args;
 int line_len=255;//same as instrum_name
 char num_lines[7]="256"; //number of lines at end of history to dump has to be a string!	
 
@@ -28,9 +29,21 @@ curinst_file = fopen(curinst_path, "r");
 fgets(instrum_name, line_len, curinst_file);
 fclose(curinst_file);
 
+args=i_argc;
+
 if (i_argc == 3)
 {
    sprintf(message,"%s",i_argv[2]);
+}
+
+//need to replace dashes, as it mangles the email command
+
+for (i=0;i<strlen(message);i++)
+{
+   if( message[i]=='-')
+   {
+   	   message[i] = '_';
+   }
 }
 
 GETCURDATA
@@ -50,10 +63,10 @@ while (i < strlen(instrum_name) )
 }
 //Proc_err (INFO_OPT, "instrum_name_trunc - %s", instrum_name_trunc);
 
-if (i_argv == 3)
+if (args == 3)
 {
-   sprintf(title,"ERROR %s %s %s",instrum_name, cmd, message); //no dashes allowed
-   sprintf(body,"%s %s WHOOP WHOOP!!! Problem with %s command!", instrum_name, cmd, message); //no dashes allowed
+   sprintf(title,"ERROR WITH %s %s",instrum_name, message); //no dashes allowed
+   sprintf(body,"%s WHOOP WHOOP!!! Problem with %s command!", instrum_name, message); //no dashes allowed
 } else 
 {
 	 sprintf(title,"ERROR %s %s",instrum_name, cmd); //no dashes allowed

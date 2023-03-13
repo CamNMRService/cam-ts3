@@ -28,11 +28,14 @@ char datestamp[256];
 char lockpath[PATH_MAX];
 char pidpath[PATH_MAX];
 char message[1023]="null_message";
+char email_message[1023]="null message";
 char default_topshim_cmd[255]=" ";
 char topshim_option_a[255]=" ";
 char topshim_option_b[255]=" ";
 char topshim_option_c[255]=" ";
 char topshim_timeout[8]="300";
+int i;
+int args;
 int pid;
 int ts_major = GetTsVersionMajor();
 int ts_minor = GetTsVersionMinor();
@@ -58,6 +61,7 @@ lockfile = fopen(lockpath, "wt");
 fclose(lockfile);
 
 // start the watchdog AU and then carry on
+args = i_argc;
 
 if (i_argc > 6 ){
     sprintf(tmp_str,"Too many arguments passed to %s",i_argv[0]);
@@ -75,7 +79,7 @@ if (i_argc == 3 ) {
 if (i_argc == 4 ) { 
 	 sprintf(message,"%s",i_argv[2]);
    sprintf(topshim_option_a,"%s",i_argv[3]); 
-   // execute topshim as desired
+   // command to execute topshim as desired
    sprintf(tscommand,"%s %s",default_topshim_cmd,topshim_option_a);
 }
 
@@ -83,7 +87,7 @@ if (i_argc == 5) {
 	 sprintf(message,"%s",i_argv[2]);
    sprintf(topshim_option_a,"%s",i_argv[3]); 
    sprintf(topshim_option_b,"%s",i_argv[4]); 
-   // execute topshim as desired
+   // command to execute topshim as desired
    sprintf(tscommand,"%s %s %s",default_topshim_cmd,topshim_option_a, topshim_option_b);
 }
 
@@ -92,7 +96,7 @@ if (i_argc == 6) {
    sprintf(topshim_option_a,"%s",i_argv[3]); 
    sprintf(topshim_option_b,"%s",i_argv[4]); 
    sprintf(topshim_option_c,"%s",i_argv[5]); 
-   // execute topshim as desired
+   // command to execute topshim as desired
    sprintf(tscommand,"%s %s %s %s",default_topshim_cmd,topshim_option_a, topshim_option_b, topshim_option_c);
 }
 
@@ -121,15 +125,26 @@ if (pidfile = fopen(pidpath, "rt"))
 
 }
 
+sprintf(email_message,"%s_%s",message,tscommand);
+
+for (i=0;i<strlen(email_message);i++)
+{
+   if( email_message[i]==' ' || email_message[i]=='-')
+   {
+   	   email_message[i] = '_';
+   }
+}
+
 // check for failed execution, if so save the topshim plotall output
 if(AUERR)
 {
-   if (i_argc > 2 ) { //assume the argument is a message to send
-         XAU("whoopwhoop",message);
+	Proc_err(DEF_ERR_OPT,"args=%i /n email_message=%s",args,email_message);
+   if (args > 2 ) { //assume the argument is a message to send
+         XAU("devel_whoopwhoop",email_message);
    } else
    {
-         sprintf(tmp_str, "TOPSHIM_FAILED_%s",name);
-         XAU("whoopwhoop",tmp_str)
+         sprintf(tmp_str, "TOPSHIM_FAILED_%s_%s",name,tscommand);
+         XAU("devel_whoopwhoop",tmp_str)
    }
    sleep(5);
    // don't repeat topshim!!

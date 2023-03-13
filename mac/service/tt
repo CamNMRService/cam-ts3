@@ -1,0 +1,12 @@
+#tt is the name of the macro to process any tube test spectra in CDCl3 in the same manner
+sr 13.31
+efp
+apks
+abs
+cy 200
+pscal global
+maxi 1000
+pc 1.5
+mi 5
+pps
+

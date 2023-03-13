@@ -74,23 +74,26 @@ if (i_argc == 3 ) {
    XCMD(tscommand);
 }
 if (i_argc == 4 ) { 
-   sprintf(topshim_option_a,"%s",i_argv[2]); 
+	 sprintf(message,"%s",i_argv[2]);
+   sprintf(topshim_option_a,"%s",i_argv[3]); 
    // execute topshim as desired
    sprintf(tscommand,"%s %s",default_topshim_cmd,topshim_option_a);
    XCMD(tscommand);
 }
 
 if (i_argc == 5) {
-   sprintf(topshim_option_a,"%s",i_argv[2]); 
-   sprintf(topshim_option_b,"%s",i_argv[3]); 
+	 sprintf(message,"%s",i_argv[2]);
+   sprintf(topshim_option_a,"%s",i_argv[3]); 
+   sprintf(topshim_option_b,"%s",i_argv[4]); 
    // execute topshim as desired
    sprintf(tscommand,"%s %s %s",default_topshim_cmd,topshim_option_a, topshim_option_b);
 }
 
 if (i_argc == 6) {
-   sprintf(topshim_option_a,"%s",i_argv[2]); 
-   sprintf(topshim_option_b,"%s",i_argv[3]); 
-   sprintf(topshim_option_c,"%s",i_argv[4]); 
+	 sprintf(message,"%s",i_argv[2]);
+   sprintf(topshim_option_a,"%s",i_argv[3]); 
+   sprintf(topshim_option_b,"%s",i_argv[4]); 
+   sprintf(topshim_option_c,"%s",i_argv[5]); 
    // execute topshim as desired
    sprintf(tscommand,"%s %s %s %s",default_topshim_cmd,topshim_option_a, topshim_option_b, topshim_option_c);
 }

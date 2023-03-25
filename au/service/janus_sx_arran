@@ -663,7 +663,7 @@ if (proc_or_not==1)
 		      if ( AUERR <0 )
 		         {
 		      	 sprintf(tmp_cmd, "EJECT_ERROR_%i_%s", cpos, tmp_fname);
-	           XAU("whoopwhoop_sx",tmp_cmd)
+	           XAU("whoopwhoop",tmp_cmd)
 	           STOPMSG(tmp_cmd)
 		         }
 	           

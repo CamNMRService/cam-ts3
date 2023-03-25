@@ -1,0 +1,240 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_LINE_LENGTH 1024
+
+// int main() {
+    char line[MAX_LINE_LENGTH];
+    char *error;
+    char *message;
+    char *buffer;
+    int line_count = 0;
+    int while_count = 1;
+    int match_line_number = -1;
+    int lines_to_include;
+    FILE *history_file;
+    FILE *output_file;
+    FILE *search_file;
+
+////
+    char history_file_name[PATH_MAX] = "not_defined";
+    char output_file_name[PATH_MAX] = "not defined";
+    char search_file_name[PATH_MAX] = "not defined";
+    char user_name_filename[PATH_MAX] = "unknown";
+    char bat_file_name[PATH_MAX] = "not_defined";
+    char read_user_name_cmd[PATH_MAX] = "no_cmd";
+    char prog_err[PATH_MAX] = "no_error"; 
+    char user_name[256] = "unknown_user";    
+    int line_len = 1024; 
+    int ts_major = GetTsVersionMajor();
+    int ts_minor = GetTsVersionMinor();
+    int ts_patch = GetTsVersionPl();        
+    FILE *user_name_file;  
+    FILE *fbat;  
+    GETCURDATA
+    VIEWDATA_SAMEWIN
+    #ifdef HAS_WINDOWS_FEATURES
+       sprintf(search_file_name,"C:\\Bruker\\cam-ts%i\\error_search.csv",ts_major);
+       Proc_err(INFO_OPT, "First check ! errors_file_name is - %s", errors_file_name);
+    #else //Not actually checked this on linux... We have no linux xpectrometers
+ 	     sprintf(search_file_name,"/opt/cam-ts%i/error_search.csv",ts_major);
+    #endif
+
+    #ifdef HAS_WINDOWS_FEATURES
+       sprintf( output_file_name,"%s\\error_summary.txt",ACQUPATH(0) );
+       sprintf( user_name_filename,"%s\\user_name.txt",ACQUPATH(0) );
+       sprintf( bat_file_name,"%s\\get_username_bat.bat",ACQUPATH(0) );
+       Proc_err (INFO_OPT, "username filename %s", user_name_filename);
+       i=0;
+       while (user_name_filename[i]!='\0')
+       {   	
+           if(user_name_filename[i]=='/')
+           {
+               user_name_filename[i]='\\';
+           }
+           i++;
+       } 
+       i=0; //forgot this at first! Neat bug....
+      while (output_file_name[i]!='\0')
+       {   	
+           if(output_file_name[i]=='/')
+           {
+               output_file_name[i]='\\';
+           }
+           i++;
+       } 
+       i=0;
+
+       sprintf(read_user_name_cmd,"echo %%USERNAME%% > %s",user_name_filename);
+       fbat = fopen(bat_file_name,"w");
+       fputs(read_user_name_cmd,fbat);
+       fclose(fbat);
+       system(bat_file_name);
+
+
+      
+    #else //Not actually checked this on linux... We have no linux xpectrometers
+       sprintf( output_file_name,"%s/error_summary.txt",ACQUPATH(0) );
+       sprintf( user_name_filename,"%s/user_name.txt",ACQUPATH(0) );
+       sprintf( read_user_name_cmd,"whoami > %s",user_name_filename);
+       system( read_user_name_cmd); //do the system command to output username to a file
+    #endif
+     
+    Proc_err(INFO_OPT, "user_name_filename is - %s\noutput_file_name is - %s", user_name_filename, output_file_name);
+
+    user_name_file = fopen(user_name_filename, "r");
+       if (user_name_file == NULL) {
+        sprintf(prog_err,"failed to open file user_name_filename- %s",user_name_filename);
+          STOPMSG(prog_err);
+       }
+       else {
+         fgets(user_name,line_len,user_name_file);
+         fclose(user_name_file);
+         #ifdef HAS_WINDOWS_FEATURES
+           user_name[strlen(user_name)-1]=NULL; //remove trailing char read from file
+           user_name[strlen(user_name)-2]=NULL; //remove trailing char read from file
+         #else
+           user_name[strlen(user_name)-1]=NULL; //remove trailing char read from file
+         #endif       
+       }
+
+    #ifdef HAS_WINDOWS_FEATURES
+       sprintf( history_file_name,"%s\\curdir\\%s\\history_j.txt",PathXWinNMRProg(),user_name ); 
+    #else
+        sprintf( history_file_name,"%s/curdir/%s/history_j.txt",PathXWinNMRProg(),user_name ); 
+    #endif
+
+    Proc_err (INFO_OPT, "search_file_name - %s\nhistory filename - %s\nOutput filename - %s\n read_user_name_cmd - %s \n user_name - %s", search_file_name,history_file_name, output_file_name,read_user_name_cmd,user_name);
+    
+    
+    //chatgpt below            
+//////
+
+    // open the error search file for reading
+    search_file = fopen(search_file_name, "r");
+    if (search_file == NULL) {
+        sprintf(prog_err,"Error: could not open error search file\n",search_file_name);
+        STOPMSG(prog_err);
+    }
+
+    // read the error search file line by line
+    while (fgets(line, MAX_LINE_LENGTH, search_file) != NULL) {
+        //printf("While count is : %i\n",while_count);
+        // parse the line into error, lines_to_include, and message fields
+        
+        if(line[0] == '\n')
+        {
+            sprintf(prog_err,"Line begins with a newline - must be at end of the file\n");
+            STOPMSG(prog_err);
+        }
+        
+        char *token = strtok(line, ",");
+        
+       // printf("line is - %s\n",line);
+       // printf("got to here %s\n ",token);
+        if (token != NULL)
+        {
+               Proc_err(DEF_ERR_OPT,"Got to line 138. Token - %s",token);
+           //  printf("got to here %s\n ",token);
+        error = strdup(token);
+          //   printf("got to here %s\n ",token);
+        token = strtok(NULL, ",");
+          //   printf("got to here %s\n ",token);
+        lines_to_include = atoi(token);
+          //   printf("got to here %s\n ",token);
+        token = strtok(NULL, ",");
+           //  printf("got to here %s\n ",token);
+        message = strdup(token);
+          //   printf("got to here %s\n ",token);
+        }//
+        message[strcspn(message, "\n")] = '\0'; // remove newline character from message
+
+        // open the history file for reading
+        history_file = fopen(history_file_name, "r");
+    
+        if (history_file == NULL) {
+            sprintf(prog_err,"Error: could not open history file - %s\n",history_file_name);
+            free(error);
+            free(message);
+            STOPMSG(prog_err);
+        }
+
+        // search for the last occurrence of the error string in the history file
+        line_count = 0;
+        while (fgets(line, MAX_LINE_LENGTH, history_file) != NULL) {
+            line_count++;
+            if (strstr(line, error) != NULL) {
+                match_line_number = line_count;
+            }
+        }
+
+        // close the history file
+        fclose(history_file);
+
+        // if no match was found, skip to the next line in the error search file
+        if (match_line_number == -1) {
+            printf("No match found for error string: %s\n", error);
+            free(error);
+            free(message);
+            continue;
+        }
+
+        // allocate memory for the buffer
+        buffer = malloc(MAX_LINE_LENGTH * (lines_to_include + 1));
+        if (buffer == NULL) {
+            sprintf(prog_err,"Error: could not allocate memory for buffer\n");
+            free(error);
+            free(message);
+            STOPMSG(prog_err);
+        }
+
+        // open the errors file for writing
+        output_file = fopen(output_file_name, "a");
+        if (output_file == NULL) {
+            sprintf(prog_err,"Error: could not open output file - %s\n",output_file_name);
+            free(error);
+            free(message);
+            free(buffer);
+            STOPMSG(prog_err);
+        }
+
+        // reopen the history file for reading
+        history_file = fopen(history_file_name, "r");
+        if (history_file == NULL) {
+            sprintf(prog_err,"Error: could not open history file -%s\n",history_file_name);
+            free(error);
+            free(message);
+            free(buffer);
+            fclose(output_file);
+            STOPMSG(prog_err);
+        }
+
+        // read the history file again, this time copying the specified number of lines before the match and the match line to the buffer
+        line_count = 0;
+        buffer[0] = '\0'; // clear the buffer
+        while (fgets(line, MAX_LINE_LENGTH, history_file) != NULL) {
+            line_count++;
+            if (line_count >= match_line_number - lines_to_include && line_count <= match_line_number) {
+                strcat(buffer, line);
+            }
+        }
+
+        // write the buffer and message to the errors file
+        fprintf(output_file, "*********\nFound error: %s\n", error);
+        fprintf(output_file, "*********\nMessage: %s\n\n", message);
+        fprintf(output_file, "Error found on line %d\n", match_line_number);
+        fprintf(output_file, "%s", buffer);
+        fprintf(output_file, "\n"); // add a newline between entries
+
+        // close the files and free memory
+        fclose(history_file);
+        fclose(output_file);
+        free(error);
+        free(message);
+        while_count++;
+    }       
+fclose(search_file);
+QUIT
+//return 0;
+//}

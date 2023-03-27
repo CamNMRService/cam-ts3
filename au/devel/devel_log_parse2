@@ -31,12 +31,13 @@
     int ts_minor = GetTsVersionMinor();
     int ts_patch = GetTsVersionPl();        
     FILE *user_name_file;  
-    FILE *fbat;  
+    FILE *fbat; 
+    int i=0; 
     GETCURDATA
     VIEWDATA_SAMEWIN
     #ifdef HAS_WINDOWS_FEATURES
        sprintf(search_file_name,"C:\\Bruker\\cam-ts%i\\error_search.csv",ts_major);
-       Proc_err(INFO_OPT, "First check ! errors_file_name is - %s", errors_file_name);
+       Proc_err(INFO_OPT, "First check ! search_file_name is - %s", search_file_name);
     #else //Not actually checked this on linux... We have no linux xpectrometers
  	     sprintf(search_file_name,"/opt/cam-ts%i/error_search.csv",ts_major);
     #endif
@@ -135,7 +136,7 @@
        // printf("got to here %s\n ",token);
         if (token != NULL)
         {
-               Proc_err(DEF_ERR_OPT,"Got to line 138. Token - %s",token);
+           //    Proc_err(DEF_ERR_OPT,"Got to line 138. Token - %s",token);
            //  printf("got to here %s\n ",token);
         error = strdup(token);
           //   printf("got to here %s\n ",token);
@@ -179,7 +180,7 @@
             free(message);
             continue;
         }
-
+ 
         // allocate memory for the buffer
         buffer = malloc(MAX_LINE_LENGTH * (lines_to_include + 1));
         if (buffer == NULL) {

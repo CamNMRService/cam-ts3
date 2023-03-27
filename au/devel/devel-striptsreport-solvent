@@ -1,0 +1,96 @@
+//striptopshimreport
+// read the juicy bots from a long topshim logfile with lots of runs
+ // read only for one solvent
+
+//Variables:
+
+
+char logfilepath[PATH_MAX];
+char logfilename[PATH_MAX];
+char resultfilepath[PATH_MAX];
+char temp[PATH_MAX];
+char temp2[PATH_MAX]; 
+char setsolvent[32];
+
+char line[256];
+char duration[32], solvent[32], lqf[6], dummy1[16], dummy2[16];
+char *begin, *end;
+char *op = NULL;
+FILE *logfile, *resultfile;
+
+double f1p, f2p;
+float width,b0stdev, envelope;// width from hwcal and lineshape quality factor from topshim report
+
+GETSTRING("solvent?", setsolvent);
+
+// Build path to logfile
+
+sprintf(logfilepath, ACQUPATH("topshimreport"));
+
+// make path to and open result file
+
+sprintf(resultfilepath, ACQUPATH("topshimsummary"));
+
+if ( ( resultfile = fopen (resultfilepath, "wt") ) == NULL) 
+{
+	Proc_err(INFO_OPT, "could not open file %s for writing", resultfilepath);
+ABORT
+}
+
+
+// open logfile
+
+
+if ( ( logfile = fopen (logfilepath, "r") ) == NULL)
+{
+	Proc_err(INFO_OPT, "could not open file %s", logfilepath);
+ABORT
+}
+
+ 
+
+// exctract the solvent 
+while (fgets(line, sizeof line,logfile) != NULL) /* read a line */
+    {   
+    	  // find line containing solvent
+      	if (strstr(line, "solvent") != NULL)
+    	{
+    	  	sscanf(line, "%s %s %s", dummy1 , dummy2, solvent);
+		  }
+		  // check solvent againt desired one
+		  
+		  if (strcmp(solvent, setsolvent) == 0)
+		
+      {
+    	
+    	  if (strstr(line, "duration") != NULL)
+    	  {
+    	  	begin=strstr(line,"\=");
+       		begin+=1;
+       		end=strstr(begin, "c");
+       		op=malloc(end- begin+ 1 );
+       		if (op==NULL)
+       		{
+       			Proc_err(ERROR_OPT, "error in memory allocation");
+       			ABORT
+       		}
+       		else
+       		{
+       			memcpy(op, begin, end - begin);
+          	op[end-begin] = '\0';
+          	if(strstr(op,"min")==NULL)
+          	sprintf(temp2," 0 min %s \n", op);
+          	else
+          	sprintf(temp2, "%s \n",op);
+       		}
+       		fputs (temp2, resultfile);
+    	  }
+     	}
+    }
+
+fclose(logfile);
+
+fclose(resultfile);
+
+
+QUIT

@@ -1,0 +1,113 @@
+//striptopshimreport
+// read the juicy bots from a long topshim logfile with lots of runs
+
+
+//Variables:
+
+
+char logfilepath[PATH_MAX];
+char logfilename[PATH_MAX];
+char resultfilepath[PATH_MAX];
+char temp[PATH_MAX];
+char temp2[PATH_MAX];
+
+char line[256];
+char duration[32], solvent[32], lqf[6], dummy1[16], dummy2[16];
+char *begin, *end;
+char *op = NULL;
+FILE *logfile, *resultfile;
+
+double f1p, f2p;
+float width,b0stdev, envelope;// width from hwcal and lineshape quality factor from topshim report
+
+
+
+// Build path to logfile
+
+sprintf(logfilepath, ACQUPATH("topshimreport"));
+
+// make path to and open result file
+
+sprintf(resultfilepath, ACQUPATH("topshimsummary"));
+
+if ( ( resultfile = fopen (resultfilepath, "wt") ) == NULL) 
+{
+	Proc_err(INFO_OPT, "could not open file %s for writing", resultfilepath);
+ABORT
+}
+
+
+// open logfile
+
+
+if ( ( logfile = fopen (logfilepath, "r") ) == NULL)
+{
+	Proc_err(INFO_OPT, "could not open file %s", logfilepath);
+ABORT
+}
+
+ 
+
+// exctract the solvent 
+while (fgets(line, sizeof line,logfile) != NULL) /* read a line */
+    {   
+    	  // find line containing solvent
+      	if (strstr(line, "solvent") != NULL)
+    	{
+    	  	sscanf(line, "%s %s %s", dummy1 , dummy2, solvent);
+    	  	fputs (solvent, resultfile);
+	       	fputs (" ", resultfile);
+		  }
+    	  
+		
+        if (strstr(line, "Lineshape") != NULL)
+		{
+       		begin=strstr(line,"\=");
+       		begin+=1;
+       		end=begin+6;
+       		op=malloc(end- begin+ 1 );
+       		if (op==NULL)
+       		{
+       			Proc_err(ERROR_OPT, "error in memory allocation");
+       			ABORT
+       		}
+       		else
+       		{
+       			memcpy(op, begin, end - begin);
+          	op[end-begin] = '\0';
+          	strcpy(temp, "lqf= ");
+          	strcat(temp, op);
+       		}
+       		 fputs (temp, resultfile);
+		       fputs (" ", resultfile);
+    	 }
+    	
+    	  if (strstr(line, "duration") != NULL)
+    	  {
+    	  	begin=strstr(line,"\=");
+       		begin+=1;
+       		end=strstr(begin, "c");
+       		op=malloc(end- begin+ 1 );
+       		if (op==NULL)
+       		{
+       			Proc_err(ERROR_OPT, "error in memory allocation");
+       			ABORT
+       		}
+       		else
+       		{
+       			memcpy(op, begin, end - begin);
+          	op[end-begin] = '\0';
+          	strcpy(temp2, " time= ");
+          	strcat(temp2, op);
+          	strcat(temp2, "\n");
+       		}
+       		fputs (temp2, resultfile);
+    	  }
+    }
+
+fclose(logfile);
+
+fclose(resultfile);
+
+
+QUIT

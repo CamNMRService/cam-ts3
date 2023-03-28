@@ -53,9 +53,8 @@ if ( AUERR <0 )
 	sprintf(tmp_cmd,"topshim %s",topshim_opt); 
     XCMD(tmp_cmd);
 /*ok, we have put the sample in the magnet, its locked and shimmed; now run through its exps*/
-XAU(HUMP_cal_prog,"")
-IEXPNO
-IEXPNO //as hump makes two experiments
+//XAU(HUMP_cal_prog,"")
+//IEXPNO //as hump makes two experiments
 XAU(H_cal_prog,"")
 IEXPNO
 //GETCURDATA

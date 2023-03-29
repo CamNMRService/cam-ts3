@@ -3,7 +3,7 @@
 /*WIP*/
 
 
-int test_sample_pos = 10; //Posistion in carousel test sample is in
+int test_sample_pos = 1; //Posistion in carousel test sample is in
 
 char hdwerr[PATH_MAX]="";
 char tmp_cmd[PATH_MAX]="";

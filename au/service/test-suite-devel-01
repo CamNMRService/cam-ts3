@@ -41,8 +41,6 @@ if ( AUERR <0 )
 		sleep( 60 );
 		sprintf( tmp_cmd, "sx %d ",test_sample_pos);
 		AUERR=CPR_exec(tmp_cmd, WAIT_TERM);
-//remove comment around below for production not sure if this is needed, the above line should deal with it
-		/*SX( cpos );*/
 	}
 	if ( AUERR <0 )
 	{

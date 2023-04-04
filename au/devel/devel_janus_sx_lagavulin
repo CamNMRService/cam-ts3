@@ -106,6 +106,9 @@ char logfile[255];
 char email[80]="camnmrservice@gmail.com";
 int get_proc_or_not_val(FILE *pornot);
 
+int ts_major = GetTsVersionMajor();
+int ts_minor = GetTsVersionMinor();
+int ts_patch = GetTsVersionPl();
 time_t lt;
 
 GETCURDATA;
@@ -666,7 +669,7 @@ CPR_exec("janus-email",WAIT_TERM);
 #ifdef	HAS_WINDOWS_FEATURES
 		
 // sprintf(tmp_cmd,"robocopy C:\\Bruker\\TopSpin3.6.4\\data\\topshimData /S %s\\topshimData_%s_%d", ACQUPATH(0),name, expno);  
-    sprintf( tmp_cmd, "7za a  %s\\topshimData_%s_%i.zip C:\\Bruker\\TopSpin3.6.4\\data\\topshimData\\",ACQUPATH(0),name,expno);
+    sprintf( tmp_cmd, "7za a  %s\\topshimData_%s_%i.zip C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData\\",ACQUPATH(0),name,expno,ts_major,ts_minor,ts_patch);
 	
 #else 
     sprintf(tmp_cmd,"cp -rp /opt/topspin3.6.4/data/topshimData %s/topshimData_%s_%d", AQCUPATH(0),name, expno);

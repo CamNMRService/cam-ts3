@@ -260,7 +260,7 @@ if ( AUERR <0 )
 	XAU("devel_whoopwhoop",tmp_str)
 } else {
     RPAR(test_parset, "all")
-    sprintf(tmp_str, "atma");
+    sprintf(tmp_cmd, "atma");
     AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
     if ( AUERR <0 )
     {

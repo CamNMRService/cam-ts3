@@ -109,6 +109,10 @@ int get_proc_or_not_val(FILE *pornot);
 int ts_major = GetTsVersionMajor();
 int ts_minor = GetTsVersionMinor();
 int ts_patch = GetTsVersionPl();
+
+int test_pos = 60;
+char test_parset[256] = "C13CPD";
+
 time_t lt;
 
 GETCURDATA;
@@ -245,6 +249,26 @@ if ( AUERR <0 )
 {
 	sprintf(tmp_str, "INITIAL_II_ERROR");
 	XAU("whoopwhoop",tmp_str)
+	STOPMSG("Janus stopped - initial ii error")
+}
+
+sprintf(tmp_cmd, "sx %i", test_pos);
+AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+if ( AUERR <0 )
+{
+	sprintf(tmp_str, "INITIAL_TEST_SAMPLE_SX_%i_ERROR",test_pos);
+	XAU("whoopwhoop",tmp_str)
+} else {
+    RPAR(test_parset, "all")
+    sprintf(tmp_str, "atma");
+    AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+    if ( AUERR <0 )
+    {
+	   sprintf(tmp_str, "INITIAL_TEST_SAMPLE_ATMA_ERROR");
+	   XAU("whoopwhoop",tmp_str)
+	   STOPMSG("Janus stopped - initial ii error")
+    }
+
 }
 
 //CPR_exec("ii", WAIT_TERM);

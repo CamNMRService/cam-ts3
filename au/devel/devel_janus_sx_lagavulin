@@ -499,8 +499,23 @@ CPR_exec("topshim_watchdog",WAIT_TERM);
      	}
      	//end glenfairn mod
    */  	
-   
+    
+	if ( strstr ( experiment, "janus-1h") == NULL ) //strstr returns a pointer if a match
+	{
+			// stop spinning
+			ROTOFF
       sprintf(tmp_cmd,"atma");
+		  AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+	    if ( AUERR <0 )
+		  {
+		     sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
+	       XAU("devel_whoopwhoop",tmp_str)
+	       // STOPMSG(tmp_str)
+		  }
+		  ROT // does "ro acqu"
+	}
+	
+   /*   sprintf(tmp_cmd,"atma");
 	    AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 	    if ( AUERR <0 )
 		  {
@@ -508,7 +523,8 @@ CPR_exec("topshim_watchdog",WAIT_TERM);
 	       XAU("whoopwhoop",tmp_str)
 	         // STOPMSG(tmp_str)
 	    }
-	    
+	 */
+	   
 	    sprintf(tmp_cmd,"xaua");
     	AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
       if ( AUERR <0 )

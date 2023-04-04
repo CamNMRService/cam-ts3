@@ -248,7 +248,7 @@ AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 if ( AUERR <0 )
 {
 	sprintf(tmp_str, "INITIAL_II_ERROR");
-	XAU("whoopwhoop",tmp_str)
+	XAU("devel_whoopwhoop",tmp_str)
 	STOPMSG("Janus stopped - initial ii error")
 }
 
@@ -257,7 +257,7 @@ AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 if ( AUERR <0 )
 {
 	sprintf(tmp_str, "INITIAL_TEST_SAMPLE_SX_%i_ERROR",test_pos);
-	XAU("whoopwhoop",tmp_str)
+	XAU("devel_whoopwhoop",tmp_str)
 } else {
     RPAR(test_parset, "all")
     sprintf(tmp_str, "atma");
@@ -265,7 +265,7 @@ if ( AUERR <0 )
     if ( AUERR <0 )
     {
 	   sprintf(tmp_str, "INITIAL_TEST_SAMPLE_ATMA_ERROR");
-	   XAU("whoopwhoop",tmp_str)
+	   XAU("devel_whoopwhoop",tmp_str)
 	   STOPMSG("Janus stopped - initial ii error")
     }
 
@@ -372,7 +372,7 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 {
 	Proc_err ( INFO_OPT,"%s",fidpath);
 	sprintf(tmp_str, "OVERWRITE_FID_ERROR_%i_%s", cpos,tmp_fname);
-	XAU("whoopwhoop",tmp_str)
+	XAU("devel_whoopwhoop",tmp_str)
 //	XAU("whoopwhoop",cmd)
 	exit(1);
 }
@@ -416,7 +416,7 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 		skipsample=1;
 // email us but don't quit in case it's not a real problem and is just skipping sample!!
         sprintf(tmp_str, "INSERT_ERROR_%i_%s", cpos, tmp_fname);
-	    XAU("whoopwhoop",tmp_str)
+	    XAU("devel_whoopwhoop",tmp_str)
 	}
 /*ok, we have put the sample in the magnet; now run through its exps*/
 	if (skipsample==0)
@@ -429,7 +429,7 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
         if ( AUERR <0 )
         {
 	       sprintf(tmp_str, "FAILED_TO_READ_SHIMS_%s_%i_%s",shimset, cpos, tmp_fname);
-	       XAU("whoopwhoop",tmp_str)
+	       XAU("devel_whoopwhoop",tmp_str)
         }
 		sprintf(tmp_cmd, "lock %s",solvent);
 	    
@@ -442,7 +442,7 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 		if ( AUERR <0 )
         {
 	       sprintf(tmp_str, "FAILED_TO_LOCK_%s_%i_%s",solvent, cpos, tmp_fname);
-	       XAU("whoopwhoop",tmp_str)
+	       XAU("devel_whoopwhoop",tmp_str)
         }
 	//	sprintf(tmp_cmd, "ROT");
 	//	AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
@@ -450,7 +450,7 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 		if ( AUERR <0 )
         {
 	       sprintf(tmp_str, "ROT_FAILED_%i_%s", cpos, tmp_fname);
-	       XAU("whoopwhoop",tmp_str)
+	       XAU("devel_whoopwhoop",tmp_str)
         }
 		ROT
 	//topshim has to be here, as we only want to do it once per sample, have to do atma each exp, or put more logic in.
@@ -537,7 +537,7 @@ CPR_exec("topshim_watchdog",WAIT_TERM);
 	       fputs( "ACQUISITION FAILED!\n", flog);
 	       fclose( flog );
 	       sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
-	       XAU("whoopwhoop",tmp_str)
+	       XAU("devel_whoopwhoop",tmp_str)
 	       STOPMSG("XAUA Failed. Maybe check IPSO")
     	}
 			//remove comment for production actually, rotation should be set in par set; line 386 ROT should do it
@@ -695,7 +695,7 @@ if (proc_or_not==1)
 		      if ( AUERR <0 )
 		         {
 		      	 sprintf(tmp_cmd, "EJECT_ERROR_%i_%s", cpos, tmp_fname);
-	           XAU("whoopwhoop_sx",tmp_cmd)
+	           XAU("devel_whoopwhoop_sx",tmp_cmd)
 	           STOPMSG(tmp_cmd)
 		         }
 	           

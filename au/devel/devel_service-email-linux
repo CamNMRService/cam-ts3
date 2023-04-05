@@ -1,0 +1,159 @@
+/*New version of auto email							*/
+/*Aim is to put the program defaults into a file, and read that			*/
+/*This file must be called ed.txt and be in c:/windows			   	*/
+/*contains email@here.there.com,sekritpasswordy,c:/log-directory/, d:/zips-directory/ */
+
+/*    camnmrservice@gmail.com,ONETIMEAPP-PASSWORD-CREATE-ON-GOOGLE,c:/auto-email-log/,d:/zips/   */
+
+/*Uses 7za.exe command line version from z-zip.org, placed into C:/windows	*/
+/*Relies on the robocopy command being in windows				*/
+/*uses the output of service-pdfit						*/
+/*Takes a command line option of a zip password and verbose 
+/*March 2023 - version for Topspin2.1 on Linux			*/
+/*removed option to zip with a password*/
+
+#include <stdio.h>
+#include <inc/sysutil>
+
+
+/*THIS MUST BE SET**************************************************/
+
+char body_file[PATH_MAX]="/dev/null";
+char zip_dir[PATH_MAX]="/data/zips/";
+char log_dir[PATH_MAX]="";
+/******************************************************************/
+
+char in_data[PATH_MAX];
+char user_id[255];
+char password[255];
+
+
+
+char orig_au[255],proc_au[255];
+char email[255];
+char status1[127]="emailing";
+char zip_cmd_str[2048]="\n";
+char email_cmd_str[2048]="\n";
+
+
+char zip_name[PATH_MAX]="unset";
+char pdfname[PATH_MAX]="unset";
+char pul[255],nuc1[7];
+char directory[PATH_MAX];
+char emailedlist[PATH_MAX] = "unset";
+char status_string[127]="working";
+char temp_str[PATH_MAX]="temp string";
+char data_File[PATH_MAX];
+int finish=0;
+int suffix=1;
+int ch;
+int cmdstatus,orig_expno,i_limit=999,i_exp=1,pdfthere=0,i;
+int verbose=0;
+
+
+FILE *plist = NULL;
+FILE *fdef = NULL;
+FILE *fbat = NULL;
+FILE *statusprint = NULL;
+
+
+
+sprintf(emailedlist,"%s/emailed-list.txt",log_dir);
+//Need to do following to get details from experiment
+GETCURDATA
+FETCHPAR("PULPROG", &pul)
+FETCHPAR("NUC1",nuc1)
+
+
+FETCHPAR("USERP1",email)
+/*email[strlen(email)-1]=NULL; needed to strip last char from string*/
+
+STOREPAR("USERP3", status1)
+if (strchr(email,'@') == NULL)
+{
+	Proc_err(INFO_OPT, "No email address found");
+	ABORT
+}
+
+
+
+
+
+/*make up a batfile with commands to zip up the data, then run the batch file*/
+//sprintf( zip_cmd_str, "robocopy  %s%s\\%s /S %s%s",disk,user,name,zip_dir,name);
+
+sprintf( zip_cmd_str, "cp -rp %s  %s%s",ACQUPATH(0),zip_dir,name);
+Proc_err(INFO_OPT, "zip_cmd_str to copy is %s",zip_cmd_str);
+system(zip_cmd_str);
+sprintf( zip_name, "%s\%s.zip", zip_dir ,name);
+//now make the command to zip the file using z7a, with password if type as command option
+sprintf( zip_cmd_str, "7za a  %s %s%s -r -x'!1r' -x'!1i' -x'!2rr' -x'!2ir' -x'!2ri' -x'!2ii'",zip_name, zip_dir,name);
+Proc_err(INFO_OPT, "zip_cmd_str is %s",zip_cmd_str);
+system(zip_cmd_str);
+//mutt -x -s 'NMR data for test' -a "/data/zips/test.zip"  -- nmr@ch.cam.ac.uk < /dev/null
+/*first create the sendemail command we're going to run*/
+if (pdfthere==1) { 
+//	sprintf (email_cmd_str, "sendemail -f %s -t %s -u %s -m %s -a  %s %s -s smtp.gmail.com:587 -o tls=yes -xu %s -xp %s", user_id, email,name, body, zip_name, pdfname, user_id, password);
+sprintf(email_cmd_str,"mutt -x -s 'NMR data for %s' -a \"%s\" -a \"%s\"  -- %s <%s ",name,zip_name,pdfname,email,body_file);
+}
+else	{
+//	sprintf (email_cmd_str, "sendemail -f %s -t %s -u %s -m %s -a %s -s smtp.gmail.com:587 -o tls=yes -xu %s -xp %s", user_id, email,name, body, zip_name, user_id, password);
+sprintf(email_cmd_str,"mutt -x -s 'NMR data for %s' -a \"%s\"  -- %s <%s ",name,zip_name,email,body_file);
+}
+
+
+Proc_err(INFO_OPT, "email_cmd_str is %s",email_cmd_str);
+/*send the email*/
+system(email_cmd_str);
+/*
+*/
+
+/*
+
+statusprint = fopen(emailedlist, "a");
+static const char *CurrentTime(void)
+{
+    time_t clock;
+    (void) time(&clock);
+    return ctime(&clock);
+}
+sprintf(status_string, "%s,%s,%s\r\n", email,name,CurrentTime());
+fputs( status_string, statusprint);
+//comment below out for production
+//verbose=1;
+if (verbose==1){
+	
+	sprintf(status_string,"user_id is :- %s\n",user_id);
+	fputs( status_string, statusprint);
+	sprintf(status_string,"password is :- %s\n",password);
+	fputs( status_string, statusprint);
+	sprintf(status_string,"log_dir is :- %s\n",log_dir);
+	fputs( status_string, statusprint);
+	sprintf(status_string,"zip_dir is :- %s\n",zip_dir);
+	fputs( status_string, statusprint);
+	sprintf(status_string, "zip_name is :- %s\n", zip_name);
+	fputs( status_string, statusprint);
+	sprintf(status_string,"zip_cmd_str is :- %s\n", zip_cmd_str);
+	fputs( status_string, statusprint);
+	sprintf(status_string,"pdfname is :- %s, pdf there is- %i\n",pdfname,pdfthere);
+	fputs( status_string, statusprint);
+	sprintf(status_string,"email_cmd_str is :- %s\n", email_cmd_str);
+	fputs( status_string, statusprint);
+}
+fclose(statusprint);
+
+//if verbose, display info on what happened
+if (verbose==1){
+	
+	Proc_err(INFO_OPT,"user_id is :- %s\n",user_id);
+	Proc_err(INFO_OPT,"log_dir is :- %s\n",log_dir);
+	Proc_err(INFO_OPT,"zip_dir is :- %s\n",zip_dir);
+	Proc_err(INFO_OPT,"parsed defaults file\n");
+	Proc_err(INFO_OPT,"zip_name is :- %s\n", zip_name);
+	Proc_err(INFO_OPT,"zip_cmd_str is :- %s\n", zip_cmd_str);
+	Proc_err(INFO_OPT,"pdfname is :- %s, pdf there is- %i\n",pdfname,pdfthere);
+	Proc_err(INFO_OPT,"email_cmd_str is :- %s\n", email_cmd_str);
+}
+
+*/
+QUIT

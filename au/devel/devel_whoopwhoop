@@ -8,16 +8,18 @@ FILE *fbat = NULL;
 char instrum_name[255]="spect";
 char instrum_name_trunc[255]="spect";
 char password[255]="esbnrinuhltzukoi";
-char email_to[255]="nmr@ch.cam.ac.uk";
+char email_to[255]="djh35@cam.ac.uk";
 char title[255]="JANUS ERROR";
 char body[1023]="WHOOP WHOOP!!! janus problem";
 char email_from[255]="camnmrservice@gmail.com";
 char batfile[PATH_MAX]="c:\\windows\\top-copy.bat";
 char batcmd[PATH_MAX]="c:\\windows\\top-copy.bat";
+char message[1023]="NULL_WHOOPWHOOP_MESSAGE";
 
 
 char cmd_str[1024];
 int i=0;
+int args;
 int line_len=255;//same as instrum_name
 char num_lines[7]="256"; //number of lines at end of history to dump has to be a string!	
 
@@ -26,6 +28,23 @@ sprintf(curinst_path, "%s/instr/curinst", PathXWinNMRConf() );
 curinst_file = fopen(curinst_path, "r");
 fgets(instrum_name, line_len, curinst_file);
 fclose(curinst_file);
+
+args=i_argc;
+
+if (i_argc == 3)
+{
+   sprintf(message,"%s",i_argv[2]);
+}
+
+//need to replace dashes, as it mangles the email command
+
+for (i=0;i<strlen(message);i++)
+{
+   if( message[i]=='-')
+   {
+   	   message[i] = '_';
+   }
+}
 
 GETCURDATA
 //FETCHPARS("INSTRUM", instrum_name)
@@ -44,8 +63,16 @@ while (i < strlen(instrum_name) )
 }
 //Proc_err (INFO_OPT, "instrum_name_trunc - %s", instrum_name_trunc);
 
-sprintf(title,"JANUS ERROR %s %s",instrum_name, cmd); //no dashes allowed
-sprintf(body,"%s %s WHOOP WHOOP!!! Problem with Janus automation!", instrum_name, cmd); //no dashes allowed
+if (args == 3)
+{
+   sprintf(title,"ERROR WITH %s %s",instrum_name, message); //no dashes allowed
+   sprintf(body,"%s WHOOP WHOOP!!! Problem with %s command!", instrum_name, message); //no dashes allowed
+} else 
+{
+	 sprintf(title,"ERROR %s %s",instrum_name, cmd); //no dashes allowed
+   sprintf(body,"%s %s WHOOP WHOOP!!!", instrum_name, cmd); //no dashes allowed
+}
+
 
 //Proc_err (INFO_OPT, "instrum_name_trunc - %s", instrum_name_trunc);
 //Proc_err (INFO_OPT, "body - %s", body);

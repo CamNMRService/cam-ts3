@@ -1,0 +1,41 @@
+/*halt the current experiment and reboot using a dos script						*/
+/*djh35 jan 2023*/
+/*NOT FINISHED WIP**/
+
+#include <stdio.h>
+#include <inc/sysutil>
+
+
+/*THIS MUST BE SET**************************************************/
+
+char batfile_path[PATH_MAX]="c:\\bruker\\cam-ts3\\os_scripts";
+char batfile[PATH_MAX]="msdos_reboot.bat";
+char system_command[PATH_MAX]="";
+int s_to_reboot=300;
+int num_warnings=10;
+int time_left=s_to_reboot;
+int loop;
+
+FILE *fbat = NULL;
+
+sprintf(system_command,"%s\\%s",batfile_path,batfile);
+
+Proc_err(INFO_OPT, "The system will reboot into automation mode in %i seconds",s_to_reboot);
+
+for ( loop = 1; loop < num_warnings; loop++)
+{
+   sleep(s_to_reboot/num_warnings);
+   time_left=time_left-(s_to_reboot/num_warnings);
+   Proc_err(INFO_OPT, "The system will start rebooting into automation mode in %i seconds",time_left);
+}
+
+XCMD("sendgui acqu")
+GETCURDATA
+SETCURDATA
+XCMD("halt")
+//Uncomment below to call a reboot script
+//Proc_err(DEF_ERR_OPT,"System_command is - %s", system_command);
+//system(system_command);
+
+
+QUIT

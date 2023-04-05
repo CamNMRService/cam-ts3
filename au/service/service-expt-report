@@ -1,4 +1,4 @@
-/* devel-expt-report*/
+/* service-expt-report*/
 /* output/append experimental details to a csv report*/
 //#include <time.h>
 #include <inc/exptUtil>
@@ -9,7 +9,7 @@ int ts_minor = GetTsVersionMinor();
 int ts_patch = GetTsVersionPl();
 
 
-int verbose=0; //set to 1 to be verbose
+int verbose=1; //set to 1 to be verbose
 
 char report_filename[PATH_MAX]="";
 sprintf( report_filename, "%s/logfiles/expt-report.csv", PathXWinNMRProg() );
@@ -27,6 +27,8 @@ char experiment[80]="";
 char nucleus[6]="";
 char pulse_prog[80]="";
 char date_str[50]="";
+char owner_name[63]="";
+char user_name[63]="";
 
 time_t now_s, dtime_s, cdtime_s;     /* seconds since 1970 */
 struct tm *now;     /* structure with year, month etc. */
@@ -57,6 +59,7 @@ if (verbose ==1) {
 
 GETCURDATA
 SETCURDATA
+//VIEWDATA_SAMEWIN
 FETCHPARS("INSTRUM", instrum_name)
 FETCHPARS("EXP",experiment)
 FETCHPARS("DATE", &date_unix)
@@ -65,14 +68,17 @@ strcpy(data_path,ACQUPATH("acqus") );
 FETCHPARS("NS",&num_scans)
 FETCHPAR("NUC1",&nucleus)
 FETCHPAR("PULPROG", pulse_prog)
+FETCHPARS("OWNER", owner_name)
 exp_time = CalcExpTime();
-
+sprintf(user_name,"bogus-%s--%s--", user,owner_name);
 // get spectrum acquisition time
 now = localtime(&dtime_s);
 sprintf(date_str, "%04i/%02i/%02i %02i:%02i:%02i", now->tm_year+1900, 1+now->tm_mon, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
 
 if(verbose == 1){
    Proc_err(DEF_ERR_OPT,"Instrument name defined as :- %s", instrum_name);
+   Proc_err(DEF_ERR_OPT,"Owner name defined as :- %s", owner_name);
+   Proc_err(DEF_ERR_OPT,"User name defined as :- %s", user_name);
    Proc_err(DEF_ERR_OPT,"Dataset name is :-  %s", name);
    Proc_err(DEF_ERR_OPT,"Experiment performed is :- %s", experiment);
    Proc_err(DEF_ERR_OPT,"Dataset unix date is :- %i", date_unix);
@@ -97,7 +103,9 @@ if (report_file_pointer == NULL)
 }
 else
 {
-  fprintf(report_file_pointer,"%s,%s,%s,%i,%s,%s,%s,%i,%s,%s,%i,%i\n", instrum_name, name, experiment, date_unix, date_str, disk, data_path, expno, nucleus, pulse_prog, num_scans, exp_time);
-  fclose(report_file_pointer);
+	fprintf(report_file_pointer,"%s,%s,%s,%i,%s,%s,%s,%i,%s,%s,%i,%i\n", instrum_name, name, experiment, date_unix, date_str, disk, data_path, expno, nucleus, pulse_prog, num_scans, exp_time);
+ // fprintf(report_file_pointer,"%s,%s,%s,%s,%i,%s,%s,%s,%i,%s,%s,%i,%i\n", instrum_name, owner_name, name, experiment, date_unix, date_str, disk, data_path, expno, nucleus, pulse_prog, num_scans, exp_time);
+ //just CANNOT get it to print the user...
+   fclose(report_file_pointer);
 }
 QUIT

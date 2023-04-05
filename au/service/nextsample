@@ -1,0 +1,17 @@
+//AU program for searching through a samplechanger when you can't see which p
+//positions are occupied
+int pos=1;
+char msg[256], sxcmd[256];
+GETCURDATA
+GETINT("start from position?", pos)
+TIMES(60)
+sprintf(sxcmd,"sx %d", pos);
+XCMD(sxcmd)
+if(AUERR==0)
+{
+	sprintf(msg, "sample %d in", pos);
+	STOPMSG(msg);
+}
+pos+=1;
+END
+QUIT

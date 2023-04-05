@@ -1,0 +1,66 @@
+/*test-suite-hump-devel-01*/
+/*The au program is designed to be called from 	command line with position test sample is in*/
+/*WIP*/
+
+
+int test_sample_pos = 1; //Posistion in carousel test sample is in
+
+char hdwerr[PATH_MAX]="";
+char tmp_cmd[PATH_MAX]="";
+char tmp_str[PATH_MAX]="";
+char statusstr[PATH_MAX]="";
+//name of au program to run a given test.
+char H_cal_prog[PATH_MAX]="poise_1h_p1_b1_01";
+char C_cal_prog[PATH_MAX]="poise_13c_p1_b1_01";
+char P_cal_prog[PATH_MAX]="poise_31p_p1_b1_01";
+char F_cal_prog[PATH_MAX]="poise_19f_p1_b1_01";
+char HUMP_cal_prog[PATH_MAX]="hump_sino_test_b1_01";
+char solvent[15]="CD3CN";
+char topshim_opt[31]="convcomp tunea plotall";
+char str_pos[PATH_MAX]="1";
+
+GETCURDATA
+
+if (i_argc == 3 ) { //assume the argument is the position sample is in
+       sprintf(str_pos,"%s",i_argv[2]); //lets just assume first argument is a position
+       test_sample_pos = atoi(str_pos);
+}
+else{
+	STOPMSG("Need to define the sample posisition as argument to this program");
+}
+
+sprintf( tmp_cmd, "sx %i",test_sample_pos);
+
+AUERR=CPR_exec(tmp_cmd, WAIT_TERM);
+
+
+if ( AUERR <0 )
+
+	{
+		sprintf( hdwerr, "SAMPLE CHANGER ERROR! Error: %d, trying again...\n", AUERR);
+		sleep( 60 );
+		sprintf( tmp_cmd, "sx %d ",test_sample_pos);
+		AUERR=CPR_exec(tmp_cmd, WAIT_TERM);
+	}
+	if ( AUERR <0 )
+	{
+	    sprintf(statusstr, "***Warning - could not find samples(%d)***",AUERR);
+  	    Show_status(statusstr );
+        sprintf(tmp_str, "INSERT_TEST_SAMPLE_ERROR_%i_%s", test_sample_pos, name);
+	    XAU("whoopwhoop",tmp_str)
+        STOPMSG("INSERT_TEST_SAMPLE_ERROR")
+	}
+	sprintf(tmp_cmd, "lock %s",solvent);
+	AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
+	if ( AUERR <0 )
+    {
+	    sprintf(tmp_str, "FAILED_TO_LOCK_test_sample");
+	    XAU("whoopwhoop",tmp_str)
+    }
+	sprintf(tmp_cmd,"topshim %s",topshim_opt); 
+    XCMD(tmp_cmd);
+/*ok, we have put the sample in the magnet, its locked and shimmed; now run through its exps*/
+
+XAU(HUMP_cal_prog,"")
+
+QUIT

@@ -8,6 +8,8 @@
 //djh35 2022/09/20 Add option to send messsage according to commandline option
 //do output to correct version directory
 
+//ptg 2023_03_07 temporarily disable emailing as we get too many!!
+
 #include <time.h>
 time_t now_s, dtime_s;		  	/* seconds since 1970 */
 struct tm *now;	  		/* structure with year, month etc. */
@@ -30,6 +32,11 @@ int ts_patch = GetTsVersionPl();
 
 FILE *pidfile;
 FILE *lockfile;
+
+//set topshim_option to just a blank character - will this prevent errors?
+
+
+sprintf(topshim_option," ");
 
 if (i_argc == 3 ) { //assume the argument is a message to send
     sprintf(message,"%s",i_argv[2]); 
@@ -95,13 +102,14 @@ if (pidfile = fopen(pidpath, "rt"))
 // check for failed execution
 if(AUERR)
 {
-	if (i_argc == 3 ) { //assume the argument is a message to send
-       XAU("whoopwhoop",message);
-	} else
-	   {
-	     sprintf(tmp_str, "TOPSHIM_FAILED");
-	     XAU("whoopwhoop",tmp_str)
-	   }
+// temp remove email stuff
+//	if (i_argc == 3 ) { //assume the argument is a message to send
+//       XAU("whoopwhoop",message);
+//	} else
+//	   {
+//	     sprintf(tmp_str, "TOPSHIM_FAILED");
+//	     XAU("whoopwhoop",tmp_str)
+//	   }
 
 
    sleep(5);

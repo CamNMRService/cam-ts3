@@ -250,7 +250,8 @@ FILE *fpi, *fpo;
       calibration of 360o pulse and pulsecal :
       *****/
 
-pl_offset_h = 0.23;  //cal SmartProbe 2022_03_22
+//pl_offset_h = 0.23;  //dch cryo
+pl_offset_h = 0.7;  //old DUL
 pl_offset_c = 0.0;
 pl_offset_f = 0.0;
 pl_offset_p = 0.0;

@@ -383,6 +383,17 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 
 /*END MOD*/
 
+// Check "protocol" entry from prod file to see if this is a system test
+// and if so change cpos to 60
+
+if ( strstr ( protocol, "POS60") != NULL )
+{
+	// found test sample string in protocol so set pos to 60
+	cpos=60;
+}
+
+
+
 /*remove comment for production */
 	sprintf( tmp_cmd, "sx %d",cpos);
 //	sprintf( sxcmd, "sendgui sx %d",cpos);

@@ -34,13 +34,15 @@ Proc_err(INFO_OPT,"%s",directory);
 	 	 FETCHPAR("NUC1",nuc1)
 	 	 FETCHPAR("NUC2",nuc2)
 		 
-	 	 if  ( (strcmp(pul, "zg" )==0) || 
+	 	 if  ( ( (strcmp(pul, "zg" )==0) || 
 		       (strcmp(pul, "zg30" )==0) || 
-			   (strcmp(pul, "noesypr1d")==0) 
-			&& (!strcmp(nuc1,"1H"))
+			   (strcmp(pul, "noesypr1d")==0) )			   
+			   && (strcmp(nuc1,"1H")==0)
 			)
 	 	 {
+	 	 		 	
 	 	 	  sprintf(au_p,"service-1h-proc");
+	 	 	  	Proc_err(INFO_OPT,"%s",au_p); 	 	 	  
 	 	 	  STOREPAR("AUNMP", au_p)
 	 	 	  XAU("service-1h-proc",cmd);
 	 	 	  goto next;

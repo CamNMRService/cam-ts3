@@ -5,6 +5,8 @@
 //Ptg 2023/03/29 added tunea and plotall to topshim options
 // and save the topshim data
 
+//02: calling new hump test with shimfile saving, temp only doing hump test
+
 
 int test_sample_pos = 60; //Posistion in carousel test sample is in
 
@@ -89,20 +91,20 @@ if ( AUERR <0 )
 /*ok, we have put the sample in the magnet, its locked and shimmed; now run through its exps*/
 //XAU(HUMP_cal_prog,"")
 //IEXPNO //as hump makes two experiments
-XAU(H_cal_prog,"")
-IEXPNO
+//XAU(H_cal_prog,"")
+//IEXPNO
 //GETCURDATA
 //VIEWDATA_SAMEWIN
-XAU(C_cal_prog,"")
-IEXPNO
+//XAU(C_cal_prog,"")
+//IEXPNO
 //GETCURDATA
 //VIEWDATA_SAMEWIN
-XAU(P_cal_prog,"")
-IEXPNO
+//XAU(P_cal_prog,"")
+//IEXPNO
 //GETCURDATA
 //VIEWDATA_SAMEWIN
-XAU(F_cal_prog,"")
-IEXPNO
+//XAU(F_cal_prog,"")
+//IEXPNO
 //GETCURDATA
 //VIEWDATA_SAMEWIN
 //hump has to be last as it runs 2 exps.

@@ -1,15 +1,18 @@
 /*made by GSK originally, slightly modded by DJH at Cambridge Uni 2013*/
+/*more mod 2023 - fix bugs and try xiref*/
 
 #include <stdio.h>
 #include <inc/sysutil>
 
 char homepul[40], pul[40], directory[PATH_MAX], data_File[PATH_MAX];
+char cmd_str[PATH_MAX]="null";
+
 int mode, dexpno, i_expno, i_limit, Hexpno, Cexpno;
 float Hsr, Csr;
 
 Hexpno=0;
 Cexpno=0;
-i_expno=10;
+i_expno=1;
 Hsr=0.0;
 Csr=0.0;
 
@@ -34,25 +37,34 @@ while (i_expno < i_limit)
 {
 sprintf( data_File, "%s%s/%s/%d/fid", disk, user, name, i_expno );
 if( access( data_File, R_OK ) == 0 )
- {
- DATASET(name, i_expno, procno, disk, user)
- FETCHPAR("PULPROG", &pul)
-
- if  (strstr(pul, "zg30" ))
-	{
-	SETCURDATA
-	/*XAUPW*/	/*optional process 1H, if required*/
-	Hexpno = expno;
-	}
-  if ((strstr(pul, "zgpg30")) || (strstr(pul, "zgdc30")) || (strstr(pul, "udeft")) )
-	{
-	SETCURDATA
-	/*XAUPW*/	/*optional process 13C, if required*/
-	Cexpno = expno+6000;
-	}
- }	
+{
+   DATASET(name, i_expno, procno, disk, user)
+   FETCHPAR("PULPROG", &pul)
+   Proc_err(INFO_OPT,"pulprog for %i is %s\n",i_expno,pul);
+   if ( (strcmp(pul, "zg30" )==0) || (strcmp(pul, "zg" )==0) )
+	 {
+	    Hexpno = i_expno;
+	   Proc_err(INFO_OPT,"Hexpno = %i",Hexpno);	  
+	  }
+    if ((strstr(pul, "zgpg30")) || (strstr(pul, "zgdc30")) || (strstr(pul, "udeft")) )
+	  {
+	    Cexpno = i_expno;
+	    Proc_err(INFO_OPT,"Cexpno = %i",Cexpno);	  
+  	}
+}	
 i_expno++;
 }
+
+
+
+Proc_err(INFO_OPT, "Final Hexpno = %i \n Cexpno = %i \n ", Hexpno, Cexpno );
+
+DATASET(name,dexpno,procno,disk,user)
+
+sprintf(cmd_str,"xiref %i",Hexpno);
+//Proc_err(INFO_OPT, "cmd_str is %s",cmd_str);
+XCMD(cmd_str);
+
 
 if ((strstr(homepul, "cosygpmfqf")) || 
 		(strstr (homepul, "cosy")) ||
@@ -61,24 +73,13 @@ if ((strstr(homepul, "cosygpmfqf")) ||
 		(strstr(homepul, "mlevph")) ||
 		(strstr(homepul, "dipsi"))
 		)
-	Cexpno = Hexpno;	/*test for homo 2D*/
+{
+	Cexpno = Hexpno;	//*test for homo 2D
+}
 
-if ( Cexpno != 0)
-{
-DATASET(name,Cexpno,procno,disk,user)
-FETCHPAR("SR",&Csr)
-}
-DATASET(name,Hexpno,procno,disk,user)
-FETCHPAR("SR",&Hsr)
-DATASET(name,dexpno,procno,disk,user)
-if ( Cexpno  != 0)
-{
-	Csr=Csr-0.0;
-STOREPAR1("SR",Csr)
 DATASET3(name,Cexpno,procno,disk,user)
-}
-STOREPAR("SR",Hsr)
 DATASET2(name,Hexpno,procno,disk,user)
+
 DATASET(name,dexpno,procno,disk,user)
 
 QUIT

@@ -1,0 +1,111 @@
+
+/*The au program is designed to be called from janus_sx*/
+/*But can be called outside of it - just make sure the sample is all set up to go*/
+
+//Ptg 2023/03/29 added tunea and plotall to topshim options
+// and save the topshim data
+
+
+int test_sample_pos = 60; //Posistion in carousel test sample is in
+
+char hdwerr[PATH_MAX]="";
+char tmp_cmd[PATH_MAX]="";
+char tmp_str[PATH_MAX]="";
+char statusstr[PATH_MAX]="";
+//name of au program to run a given test.
+char H_cal_prog[PATH_MAX]="poise_1h_p1_b1_01";
+char C_cal_prog[PATH_MAX]="poise_13c_p1_b1_01";
+char P_cal_prog[PATH_MAX]="poise_31p_p1_b1_01";
+char F_cal_prog[PATH_MAX]="poise_19f_p1_b1_01";
+char HUMP_cal_prog[PATH_MAX]="hump_sino_test_b1_02";
+char solvent[15]="CD3CN";
+char topshim_opt[31]="convcomp tunea plotall";
+char command[PATH_MAX];
+
+// fetch versions:
+int ts_major = GetTsVersionMajor();
+int ts_minor = GetTsVersionMinor();
+int ts_patch = GetTsVersionPl();
+
+// date stuff
+
+#include <time.h>
+time_t now_s, dtime_s;		  	/* seconds since 1970 */
+struct tm *now;	  		/* structure with year, month etc. */
+char datestamp[256];
+
+
+GETCURDATA
+
+sprintf( tmp_cmd, "sx %d",test_sample_pos);
+
+AUERR=CPR_exec(tmp_cmd, WAIT_TERM);
+
+
+if ( AUERR <0 )
+
+	{
+		sprintf( hdwerr, "SAMPLE CHANGER ERROR! Error: %d, trying again...\n", AUERR);
+		sleep( 60 );
+		sprintf( tmp_cmd, "sx %d ",test_sample_pos);
+		AUERR=CPR_exec(tmp_cmd, WAIT_TERM);
+//remove comment around below for production not sure if this is needed, the above line should deal with it
+		/*SX( cpos );*/
+	}
+	if ( AUERR <0 )
+	{
+	    sprintf(statusstr, "***Warning - could not find samples(%d)***",AUERR);
+  	    Show_status(statusstr );
+        sprintf(tmp_str, "INSERT_TEST_SAMPLE_ERROR_%i_%s", test_sample_pos, name);
+	    XAU("whoopwhoop",tmp_str)
+        STOPMSG("INSERT_TEST_SAMPLE_ERROR")
+	}
+	sprintf(tmp_cmd, "lock %s",solvent);
+	AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
+	if ( AUERR <0 )
+    {
+	    sprintf(tmp_str, "FAILED_TO_LOCK_test_sample");
+	    XAU("whoopwhoop",tmp_str)
+    }
+	sprintf(tmp_cmd,"topshim %s",topshim_opt); 
+    XCMD(tmp_cmd);
+	
+	/* get current time for timestamping the topshim data copy - can't use experiment name here because kiosk */
+	now_s=time(NULL);
+	now = localtime(&now_s);
+	sprintf(datestamp, "%d_%d_%d_%d_%d_%d", now->tm_year+1900, 1+now->tm_mon, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
+
+	
+	//save the topshimdata for reference:
+	
+	   #ifdef	HAS_WINDOWS_FEATURES
+   sprintf(command,"ren C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData topshimData_Systemtest_%s", ts_major,ts_minor,ts_patch,datestamp);  
+   //  Proc_err(DEF_ERR_OPT,command);
+   #else 
+   sprintf(command,"mv /opt/topspin%i.%i.%i/data/topshimData /opt/topspin%i.%i.%i/data/topshimData_Systemtest_%s", ts_major,ts_minor,ts_patch,datestamp,ts_major,ts_minor,ts_patch);
+   #endif
+   system(command);
+	
+/*ok, we have put the sample in the magnet, its locked and shimmed; now run through its exps*/
+//XAU(HUMP_cal_prog,"")
+//IEXPNO //as hump makes two experiments
+XAU(H_cal_prog,"")
+IEXPNO
+//GETCURDATA
+//VIEWDATA_SAMEWIN
+XAU(C_cal_prog,"")
+IEXPNO
+//GETCURDATA
+//VIEWDATA_SAMEWIN
+XAU(P_cal_prog,"")
+IEXPNO
+//GETCURDATA
+//VIEWDATA_SAMEWIN
+XAU(F_cal_prog,"")
+IEXPNO
+//GETCURDATA
+//VIEWDATA_SAMEWIN
+//hump has to be last as it runs 2 exps.
+XAU(HUMP_cal_prog,"")
+
+QUIT

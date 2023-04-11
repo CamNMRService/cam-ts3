@@ -1,6 +1,7 @@
 /*made by GSK originally, heavily modded by DJH at Cambridge UNi*/
 /*does default processing of dataset*/
 /*2018 - Sep. Mod to include wet*/
+/*2023 - djh35 - fix 1H dtection - needs strcmp not strstr*/
 
 #include <stdio.h>
 #include <inc/sysutil>
@@ -32,7 +33,12 @@ Proc_err(INFO_OPT,"%s",directory);
 	 	 FETCHPAR("PULPROG", &pul)
 	 	 FETCHPAR("NUC1",nuc1)
 	 	 FETCHPAR("NUC2",nuc2)
-	 	 if  ((strstr(pul, "zg30" ) || (strstr(pul, "noesypr1d"))) && (!strcmp(nuc1,"1H")))
+		 
+	 	 if  ( (strcmp(pul, "zg" )==0) || 
+		       (strcmp(pul, "zg30" )==0) || 
+			   (strcmp(pul, "noesypr1d")==0) 
+			&& (!strcmp(nuc1,"1H"))
+			)
 	 	 {
 	 	 	  sprintf(au_p,"service-1h-proc");
 	 	 	  STOREPAR("AUNMP", au_p)

@@ -44,12 +44,12 @@ if( access( data_File, R_OK ) == 0 )
    if ( (strcmp(pul, "zg30" )==0) || (strcmp(pul, "zg" )==0) )
 	 {
 	    Hexpno = i_expno;
-	   // Proc_err(INFO_OPT,"Hexpno = %i",Hexpno);	  
+	   Proc_err(INFO_OPT,"Hexpno = %i",Hexpno);	  
 	  }
     if ((strstr(pul, "zgpg30")) || (strstr(pul, "zgdc30")) || (strstr(pul, "udeft")) )
 	  {
 	    Cexpno = i_expno;
-	    //Proc_err(INFO_OPT,"Cexpno = %i",Cexpno);	  
+	    Proc_err(INFO_OPT,"Cexpno = %i",Cexpno);	  
   	}
 }	
 i_expno++;
@@ -57,7 +57,7 @@ i_expno++;
 
 
 
-//Proc_err(INFO_OPT, "Final Hexpno = %i \n Cexpno = %i \n ", Hexpno, Cexpno );
+Proc_err(INFO_OPT, "Final Hexpno = %i \n Cexpno = %i \n ", Hexpno, Cexpno );
 
 DATASET(name,dexpno,procno,disk,user)
 

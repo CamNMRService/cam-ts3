@@ -65,6 +65,10 @@ if ( AUERR <0 )
 
 End sx stuff */
 
+// force RO off because janus might have turned spinning on!
+
+ROTOFF
+
 sprintf(tmp_cmd, "lock %s",solvent);
 	AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
 	if ( AUERR <0 )

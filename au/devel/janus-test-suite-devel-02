@@ -39,7 +39,7 @@ char datestamp[256];
 
 GETCURDATA
 
-/* remove SX stuff for 
+/* remove SX stuff for now
 sprintf( tmp_cmd, "sx %d",test_sample_pos);
 
 AUERR=CPR_exec(tmp_cmd, WAIT_TERM);
@@ -98,20 +98,12 @@ sprintf(tmp_cmd, "lock %s",solvent);
 /*ok, we have put the sample in the magnet, its locked and shimmed; now run through its exps*/
 XAU(H_cal_prog,"")
 IEXPNO
-GETCURDATA
-VIEWDATA_SAMEWIN
 XAU(C_cal_prog,"")
 IEXPNO
-GETCURDATA
-VIEWDATA_SAMEWIN
 XAU(P_cal_prog,"")
 IEXPNO
-GETCURDATA
-VIEWDATA_SAMEWIN
 XAU(F_cal_prog,"")
 IEXPNO
-GETCURDATA
-VIEWDATA_SAMEWIN
 //hump has to be last as it runs 2 exps.
 XAU(HUMP_cal_prog,"")
 

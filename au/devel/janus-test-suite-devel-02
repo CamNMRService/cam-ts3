@@ -5,8 +5,8 @@
 //Ptg 2023/03/29 added tunea and plotall to topshim options
 // and save the topshim data
 
-//02: calling new hump test with shimfile saving, temp only doing hump test
-
+//02: calling new hump test with shimfile saving
+// removed SX handling as main janus now does that
 
 int test_sample_pos = 60; //Posistion in carousel test sample is in
 
@@ -39,6 +39,7 @@ char datestamp[256];
 
 GETCURDATA
 
+/* remove SX stuff for 
 sprintf( tmp_cmd, "sx %d",test_sample_pos);
 
 AUERR=CPR_exec(tmp_cmd, WAIT_TERM);
@@ -46,23 +47,25 @@ AUERR=CPR_exec(tmp_cmd, WAIT_TERM);
 
 if ( AUERR <0 )
 
-	{
-		sprintf( hdwerr, "SAMPLE CHANGER ERROR! Error: %d, trying again...\n", AUERR);
-		sleep( 60 );
-		sprintf( tmp_cmd, "sx %d ",test_sample_pos);
-		AUERR=CPR_exec(tmp_cmd, WAIT_TERM);
-//remove comment around below for production not sure if this is needed, the above line should deal with it
-		/*SX( cpos );*/
-	}
-	if ( AUERR <0 )
-	{
-	    sprintf(statusstr, "***Warning - could not find samples(%d)***",AUERR);
-  	    Show_status(statusstr );
-        sprintf(tmp_str, "INSERT_TEST_SAMPLE_ERROR_%i_%s", test_sample_pos, name);
-	    XAU("whoopwhoop",tmp_str)
-        STOPMSG("INSERT_TEST_SAMPLE_ERROR")
-	}
-	sprintf(tmp_cmd, "lock %s",solvent);
+{
+	sprintf( hdwerr, "SAMPLE CHANGER ERROR! Error: %d, trying again...\n", AUERR);
+	sleep( 60 );
+	sprintf( tmp_cmd, "sx %d ",test_sample_pos);
+	AUERR=CPR_exec(tmp_cmd, WAIT_TERM);
+
+}
+if ( AUERR <0 )
+{
+    sprintf(statusstr, "***Warning - could not find samples(%d)***",AUERR);
+    Show_status(statusstr );
+    sprintf(tmp_str, "INSERT_TEST_SAMPLE_ERROR_%i_%s", test_sample_pos, name);
+    XAU("whoopwhoop",tmp_str)
+    STOPMSG("INSERT_TEST_SAMPLE_ERROR")
+}
+
+End sx stuff */
+
+sprintf(tmp_cmd, "lock %s",solvent);
 	AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
 	if ( AUERR <0 )
     {
@@ -89,24 +92,24 @@ if ( AUERR <0 )
    system(command);
 	
 /*ok, we have put the sample in the magnet, its locked and shimmed; now run through its exps*/
-//XAU(HUMP_cal_prog,"")
-//IEXPNO //as hump makes two experiments
-//XAU(H_cal_prog,"")
-//IEXPNO
-//GETCURDATA
-//VIEWDATA_SAMEWIN
-//XAU(C_cal_prog,"")
-//IEXPNO
-//GETCURDATA
-//VIEWDATA_SAMEWIN
-//XAU(P_cal_prog,"")
-//IEXPNO
-//GETCURDATA
-//VIEWDATA_SAMEWIN
-//XAU(F_cal_prog,"")
-//IEXPNO
-//GETCURDATA
-//VIEWDATA_SAMEWIN
+XAU(HUMP_cal_prog,"")
+IEXPNO //as hump makes two experiments
+XAU(H_cal_prog,"")
+IEXPNO
+GETCURDATA
+VIEWDATA_SAMEWIN
+XAU(C_cal_prog,"")
+IEXPNO
+GETCURDATA
+VIEWDATA_SAMEWIN
+XAU(P_cal_prog,"")
+IEXPNO
+GETCURDATA
+VIEWDATA_SAMEWIN
+XAU(F_cal_prog,"")
+IEXPNO
+GETCURDATA
+VIEWDATA_SAMEWIN
 //hump has to be last as it runs 2 exps.
 XAU(HUMP_cal_prog,"")
 

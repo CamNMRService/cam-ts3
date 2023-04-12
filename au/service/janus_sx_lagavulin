@@ -472,7 +472,15 @@ if ( strstr ( protocol, "POS60") != NULL )
 	//topshim has to be here, as we only want to do it once per sample, have to do atma each exp, or put more logic in.
  
 // use topshim_watchdog to force timeout and to save topshim data in case of failure
-CPR_exec("topshim_watchdog",WAIT_TERM);
+//NB janus_topshim_watchdog can take an option for an additional option to pass to topshim
+//should be called with janus_topshim_watchdog MESSAGE_NO_SPACES_OR DASHES ordmax=5
+
+//sprintf(tmp_str,"janus_topshim_watchdog TOPSHIM_FAILED_%i_%s",cpos,tmp_fname);
+
+//for instance.
+//janus_topshim_watchdog should also take care of the whoopwhoop email
+
+CPR_exec("janus_topshim_watchdog",WAIT_TERM);
 /*	      AUERR=CPR_exec("topshim convcomp",WAIT_TERM);
        if ( AUERR <0 )
         {

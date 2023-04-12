@@ -22,11 +22,13 @@ dexpno = expno;
 FETCHPAR("PULPROG", &homepul)
 
 (void) sprintf(directory, "%s%s/%s", disk, user, name);
-Proc_err(INFO_OPT,"%s",directory);
-
-	sprintf( data_File, "%s%s/%s/%d/pulseprogram", disk, user, name, expno );
+//Proc_err(INFO_OPT,"%s",directory);
+	//sprintf( data_File, "%s%s/%s/%d/pulseprogram", disk, user, name, expno );
+	sprintf( data_File, "%s", ACQUPATH("acqus") );
+//	Proc_err(INFO_OPT,"%s",data_File);
 	if( access( data_File, R_OK ) == 0 )
 	 {
+//	 	 Proc_err(INFO_OPT,"access to %s ok",data_File);	 	
 	 	 DATASET(name, expno, procno, disk, user)
 	 	 VIEWDATA_SAMEWIN
 	 	 SETCURDATA

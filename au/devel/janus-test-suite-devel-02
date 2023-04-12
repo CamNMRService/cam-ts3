@@ -92,8 +92,6 @@ sprintf(tmp_cmd, "lock %s",solvent);
    system(command);
 	
 /*ok, we have put the sample in the magnet, its locked and shimmed; now run through its exps*/
-XAU(HUMP_cal_prog,"")
-IEXPNO //as hump makes two experiments
 XAU(H_cal_prog,"")
 IEXPNO
 GETCURDATA

@@ -2,6 +2,7 @@
 /*does default processing of dataset*/
 /*2018 - Sep. Mod to include wet*/
 /*2023 - djh35 - fix 1H dtection - needs strcmp not strstr*/
+/*fix unusual dir structure and no pulseprog - better to look for AQQUS*/
 
 #include <stdio.h>
 #include <inc/sysutil>

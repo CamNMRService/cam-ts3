@@ -57,6 +57,11 @@
 /* 220125 patch by djh to not do atma for 1h */
 
 //20220606 added getprosol
+
+
+//2023_04_11 SX checks if this is the test experiment and changes position to 60 if so
+// This avoids test expt failures if no sample in set position, and avoids wasting time shimming
+// on different sample
 /****************************************/
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 char def_file[255]="f:/chemist/defaults-csv.txt"; //janus software defaults

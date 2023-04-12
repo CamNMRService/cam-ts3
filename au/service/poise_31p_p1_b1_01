@@ -408,6 +408,8 @@ if (aqtest == 0)
     SINO
     STOREPAR("PULPROG",p_program)
     FETCHPARS("SINO", &initial_sino_result)
+    // PTG: make a processed copy of this spectrum:
+    WRP(2);
     //now run optimisation - set pulprog back to what it should be!
     //At this point we could set LB and AQ back to param defaults, but it doesnt seem necessary
     STOREPAR("PULPROG",p_program)

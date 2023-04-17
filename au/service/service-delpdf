@@ -52,9 +52,9 @@ Proc_err(INFO_OPT,"pdfname=%s",pdfname);
 
   	for(i = 0; i <= strlen(pdfname); i++)
   	{
-  		if(pdfname[i] == '/')  
+  		if(pdfname[i] == "/")  
 		  {
-  			pdfname[i] = '\\';
+  			pdfname[i] = "\\";
  		  }
   	}
     sprintf (cmd_str, "del %s", pdfname);

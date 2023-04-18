@@ -32,6 +32,7 @@ char lockpath[PATH_MAX];
 char pidpath[PATH_MAX];
 char message[1023];
 char topshim_option[255];
+char bat_cmd_path[PATH_MAX]="NULL";
 int pid;
 int ts_major = GetTsVersionMajor();
 int ts_minor = GetTsVersionMinor();
@@ -39,6 +40,9 @@ int ts_patch = GetTsVersionPl();
 
 FILE *pidfile;
 FILE *lockfile;
+FILE *fbat=NULL;
+
+sprintf(bat_cmd_path,"C:\\Bruker\\TopSpin%i.%i.%i\\data\\xcopy_tsData.bat",ts_major,ts_minor,ts_patch);
 
 //set topshim_option to just a blank character - will this prevent errors?
 
@@ -107,8 +111,11 @@ if (pidfile = fopen(pidpath, "rt"))
 }
 
 sprintf(command,"xcopy C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData_%s\\ /E /H", ts_major,ts_minor,ts_patch,ts_major,ts_minor,ts_patch,datestamp);
-   Proc_err(DEF_ERR_OPT,command);
-  system(command);
+Proc_err(DEF_ERR_OPT,command);
+fbat = fopen(bat_cmd_path, "w");
+fputs( tmp_str,fbat);
+fclose(fbat);
+system(bat_cmd_path);
 
 // check for failed execution
 if(AUERR)

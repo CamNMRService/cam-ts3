@@ -113,7 +113,7 @@ if (pidfile = fopen(pidpath, "rt"))
 sprintf(command,"xcopy C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData_%s\\ /E /H", ts_major,ts_minor,ts_patch,ts_major,ts_minor,ts_patch,datestamp);
 Proc_err(DEF_ERR_OPT,command);
 fbat = fopen(bat_cmd_path, "w");
-fputs( tmp_str,fbat);
+fputs( command,fbat);
 fclose(fbat);
 system(bat_cmd_path);
 

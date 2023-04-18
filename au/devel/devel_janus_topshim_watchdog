@@ -9,6 +9,11 @@
 //do output to correct version directory
 
 //ptg 2023_03_07 temporarily disable emailing as we get too many!!
+//djh 2023_04_18 - change ren to xcopy for the topshimData - allows janus to zip topshimData to dataset.
+
+//example usage :- 
+//janus_topshim_watchdog THIS_IS_A_MESSAGE_TO_SEND ordmax=8
+
 
 #include <time.h>
 time_t now_s, dtime_s;		  	/* seconds since 1970 */

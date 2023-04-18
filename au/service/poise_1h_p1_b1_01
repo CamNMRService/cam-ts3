@@ -551,10 +551,9 @@ if (deviation >= max_deviation) {
   //do something
 }
 
-if (verbose !=1) {
-   XCMD("setdef ackn ok");
-   XCMD("setdef stdout on");
-   XCMD("setdef stderr on");
 
-}
+XCMD("setdef ackn ok");
+XCMD("setdef stdout on");
+XCMD("setdef stderr on");
+
 QUIT

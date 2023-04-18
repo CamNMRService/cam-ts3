@@ -13,6 +13,8 @@
 
 //example usage :- 
 //janus_topshim_watchdog THIS_IS_A_MESSAGE_TO_SEND ordmax=8
+//NB the message can't have spaces in... Ortherwise would look like more command line options.
+
 
 
 #include <time.h>

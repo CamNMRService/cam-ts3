@@ -103,7 +103,7 @@ if (pidfile = fopen(pidpath, "rt"))
 if(AUERR)
 {
 // temp remove email stuff
-//	if (i_argc == 3 ) { //assume the argument is a message to send
+//	if (i_argc > 2 ) { //assume the argument is a message to send
 //       XAU("whoopwhoop",message);
 //	} else
 //	   {

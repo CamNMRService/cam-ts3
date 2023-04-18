@@ -3,15 +3,8 @@
 /*READ DEFAULTS FILE to get correct locations for files and set variables accordingly - ACHIEVED*/
 /*RUNS*/
 
-
-#include <stdio.h>
-#include <inc/sysutil>
-#include <dos.h>
-
 float   delaytime=1.0;
 char pdfname[1024]="";
-char acquname[1024]="";
-char recmd[256]="";
 char samplename[1024]="";
 char snamepath[1024]="";
 char password[1024]="esbnrinuhltzukoi";
@@ -32,9 +25,7 @@ char zip_name[1024]="";
 char file_name[1024]="";
 char in_data[1024]="";
 char pul[256]="",nuc1[20]="";
-char directory[1024];
 char *file_data, *field;
-int i_exp=10,i_limit=1;
 int  pdfthere=0;
 int cmdstatus;
 
@@ -43,7 +34,7 @@ FILE *fbat = NULL;
 FILE *statusprint = NULL;
 FILE *fdef = NULL;
 
-char def_file[255]="e:/chemist/defaults-csv.txt";
+char def_file[255]="f:/chemist/defaults-csv.txt";
 char defaultsfile[80];
 char prefix[40],diskunit[40],suser[40],tunefile[40];
 char archpath[80],archive[20],gradshim[20],shimset[40];
@@ -96,41 +87,20 @@ FETCHPAR("PULPROG", &pul)
 FETCHPAR("NUC1",nuc1)
 //Proc_err(INFO_OPT, "at the start\n");
 
-sprintf(snamepath, "%s%s\\%s\\%d\\pdata\\%d\\samplename", disk, user, name, expno, procno);
-sprintf(pdfname, "%s%s\\%s\\%d\\pdata\\%d\\%s-%s-%s.pdf", disk, user, name, expno, procno, name,nuc1,pul );
+sprintf(snamepath, "%s%s/%s/%d/pdata/%d/samplename", disk, user, name, expno, procno);
+sprintf(pdfname, "%s%s/%s/%d/pdata/%d/%s-%s-%s.pdf", disk, user, name, expno, procno, name,nuc1,pul );
 //sprintf( pdfname, "%s%s/%s/%d/pdata/%d/%s-%s.pdf", disk, user, name, expno, procno, samplename,name );
 sprintf( batfile, "%s%s\\top-copy.bat", diskunit,suser);
 sprintf( emailedlist, "%s%s\\emailed_spectra.txt",diskunit,suser);
 /*print to a file in the data set*/
 
 //Proc_err(INFO_OPT, "pdfname\n");
-(void) sprintf(directory, "%s%s/%s", disk, user, name);
-i_limit = gethighest(directory);
 
-if (i_limit>999) i_limit=999;
-while (i_exp < i_limit)
-{
-	sprintf( acquname,"%s%s/%s/%d/acqu", disk, user, name, i_exp);
-	if (access(acquname,R_OK)==0)
-	{
-		sprintf( recmd, "sendgui re %d",i_exp);
-  	AUERR=CPR_exec(recmd, WAIT_TERM);
-  	GETCURDATA
-  VIEWDATA_SAMEWIN
-  			/*the pdf file created by pdfit has -n.pdf at the end of the filename*/
-		//sprintf( pdfname, "%s%s/%s/%d/pdata/%d/%s-1.pdf", disk, user, name, i_exp, procno,name );	 
-		sprintf(pdfname, "%s%s\\%s\\%d\\pdata\\%d\\%s-%s-%s.pdf", disk, user, name, expno, procno, name,nuc1,pul );
-
-		if( access( pdfname, R_OK ) == 0 ) // if there is a pdf there
-			{															
-		  pdfthere=1;
-			Proc_err(INFO_OPT,"%s - %i",pdfname,pdfthere);	
-			break;
-			}
-	}
-	i_exp++;
+if( access( pdfname, R_OK ) == 0 ) // if there is a pdf there 
+{	
+//	Proc_err(INFO_OPT, "pdf there...\n");
+	pdfthere=1;
 }
-
 
 //Proc_err(INFO_OPT, "fetching email address\n");
 
@@ -163,6 +133,7 @@ system(batfile);
 
 sprintf(zip_name, "%s%s-%s",archpath,samplename,name);
 sprintf( cmd_str,"zip -r -9 %s.zip %s%s -x \*.reg \*1r \*1i \*2ii \*2ir \*2ri \*2rr",dest_name,archpath,file_name);
+//sprintf( cmd_str,"zip -r -9 %s.zip %s%s -x \*1r \*1i \*2ii \*2ir \*2ri \*2rr",dest_name,archpath,file_name);
 //sprintf( cmd_str,"zip -r -9 %s.zip %s -x \*1r \*1i \*2ii \*2ir \*2ri \*2rr",zip_name ,archpath);
 fbat = fopen(batfile, "w");
 fputs( cmd_str, fbat);

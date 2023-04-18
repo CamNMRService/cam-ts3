@@ -121,11 +121,7 @@ char test_parset[256] = "C13CPD";
 time_t lt;
 
 GETCURDATA;
-while ((proc_or_not < 1) || (proc_or_not > 4))
-{
-	Proc_err(DEF_ERR_OPT,"Control wheter or not we print. Enter :-\n 1. for no processing at all. \n 2. For print and email everything. \n 3. For email processed data, no printing. \n 4. Print but don't email.");
-	GETINT("Enter a number from 1 to 4", proc_or_not);
-}
+proc_or_not=1;
 
 
 
@@ -134,17 +130,7 @@ sleep(delaytime);
 XCMD("setdef ackn no");
 XCMD("setdef stdout on");
 XCMD("setdef stderr on");
-/*
-if ( (pidfile = fopen("jrlock.txt", "rt")) != NULL)
-{
-	fscanf(pidfile, "%d", &pid);
-	fclose(pidfile);
-	Proc_err(INFO_OPT, "killing PID = %d !", pid);
-	sprintf(command, "kill %d", pid);
-	CPR_exec(command, CONT_EX);
-}
 
- CPR_exec("xau janus_reproc",CONT_EX);*/
 
 /*--------------------------------------------------------------*/
 /*--- Get defaults from the defaults file ----------------------*/
@@ -276,7 +262,7 @@ if ( AUERR <0 )
 
 }
 
-//CPR_exec("ii", WAIT_TERM);
+
 
 
 /*--------------------------------------------------------------*/
@@ -466,10 +452,11 @@ if ( strstr ( protocol, "POS60") != NULL )
 		if ( AUERR <0 )
         {
 	       sprintf(tmp_str, "ROT_FAILED_%i_%s", cpos, tmp_fname);
-	       XAU("whoopwhoop",tmp_str)
+	     //  XAU("whoopwhoop",tmp_str)
+		 ROT
         }
-		ROT
-	//topshim has to be here, as we only want to do it once per sample, have to do atma each exp, or put more logic in.
+		
+//topshim has to be here, as we only want to do it once per sample, have to do atma each exp, or put more logic in.
  
 // use topshim_watchdog to force timeout and to save topshim data in case of failure
 //NB janus_topshim_watchdog can take an option for an additional option to pass to topshim
@@ -488,12 +475,7 @@ CPR_exec("janus_topshim_watchdog",WAIT_TERM);
 	       XAU("whoopwhoop",tmp_str)
         }
   */
-  //put in here for 700
- //   ROTOFF
- //   sprintf(tmp_cmd, "tune z1z2");
- //   CPR_exec(tmp_cmd,WAIT_START);
- //   sleep(15);
-  //end of 700 additions
+
 		nexpt=10;
 		while ((fgets( experiment, 155, fprod)!=NULL)&&(strlen(experiment)>2)) //this is slightly magic to me, but reads prod into experiment
 		{
@@ -509,49 +491,27 @@ CPR_exec("janus_topshim_watchdog",WAIT_TERM);
 			STOREPAR( "SOLVENT", solvent )
 			GETPROSOL //needed since paracon!
 
-	/* Below mod is current on glenfairn
-	    if ( strstr ( experiment, "janus-1h") == NULL ) //strstr returns a pointer if a match
-	    {
-        sprintf(tmp_cmd,"atma");
-	    	AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
-	      if ( AUERR <0 )
-		    {
-		       sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
-	         XAU("whoopwhoop",tmp_str)
-	         // STOPMSG(tmp_str)
-	    	}
-     	}
-     	//end glenfairn mod
-   */  	
+	
     
 	if ( strstr ( experiment, "janus-1h") == NULL ) //strstr returns a pointer if a match
 	{
-			// stop spinning
-			ROTOFF
-      sprintf(tmp_cmd,"atma");
-		  AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+		// stop spinning
+		ROTOFF
+        sprintf(tmp_cmd,"atma");
+		AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 	    if ( AUERR <0 )
 		  {
 		     sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
 	       XAU("whoopwhoop",tmp_str)
 	       // STOPMSG(tmp_str)
 		  }
-		  ROT // does "ro acqu"
+		ROT // does "ro acqu"
 	}
 	
-   /*   sprintf(tmp_cmd,"atma");
-	    AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
-	    if ( AUERR <0 )
-		  {
-		     sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
-	       XAU("whoopwhoop",tmp_str)
-	         // STOPMSG(tmp_str)
-	    }
-	 */
 	   
-	    sprintf(tmp_cmd,"xaua");
-    	AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
-      if ( AUERR <0 )
+	sprintf(tmp_cmd,"xaua");
+    AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+    if ( AUERR <0 )
     	{
 	       Show_status( "***Acquisition failed***" );
 	       fwarn = fopen(warnfile,"w");
@@ -564,13 +524,10 @@ CPR_exec("janus_topshim_watchdog",WAIT_TERM);
 	       XAU("whoopwhoop",tmp_str)
 	       STOPMSG("XAUA Failed. Maybe check IPSO")
     	}
-			//remove comment for production actually, rotation should be set in par set; line 386 ROT should do it
-		//	CPR_exec("ro off",WAIT_TERM);
+
 			lt=time(NULL);
 			sprintf(expttime, ctime(&lt));
 			expttime[strlen(expttime)-1]=NULL;
-//removed stuff about logging to archive dir.
-			//sprintf(janusup, "c:/chemist/jup.txt");
 			sprintf(janusup, "%s%s\\jup.txt",diskunit,suser);
 			Show_status( "opening local janusup to append");
 			sleep(delaytime);
@@ -607,17 +564,7 @@ CPR_exec("janus_topshim_watchdog",WAIT_TERM);
 			fclose(sname);
 			STOREPAR("USERP2", samplename);
 
-/*End mod*/
-/*			parmo=1;
-			FETCHPAR ("PARMODE", &parmo)
-			if (parmo==1)
-			{
-				STOREPAR ("PF2DU", diskunit)
-				STOREPAR ("PF2NAME", tmp_fname)
-				STOREPAR ("PF2EXP", 10)
-				STOREPAR ("PF2PROC", 1)
-			}
-*/
+
 /*slight mod to XAUP command to allow it to finish before going on...*/
 			FETCHPAR ("AUNMP",&procau)
 /*find ou what processing mode we're in*/
@@ -629,42 +576,8 @@ CPR_exec("janus_topshim_watchdog",WAIT_TERM);
 			CPR_exec("xaup",WAIT_TERM);
 			//	XCMD("xaup")
 			}
-			/*
-			else
-			//so if we have done exp 10, add it to the processing list if IN mode 1. Didn't really work, the janus_print always lost the race to process
-					{
 
-			    if(nexpt==10)
-						{
-						plist = fopen (proclist,"a+");
-						if (plist == NULL)
-						{
-								Proc_err(INFO_OPT, "Can't open %s to add to processing list", proclist);
-								//exit(1);
-								//maybe instead of quit here; write what we want to do to a failed processing file
-						} else
-							{
-								sprintf(procinstruct, "%s,%s,chemist,pdf\n",tmp_fname,diskunit);
-								Proc_err(INFO_OPT,"%s",procinstruct);
-								fputs(procinstruct,plist);
-								fclose(plist);
-							}
-						}
-					}
-
-				if ( AUERR <0 )
-				{
-					Show_status( "***Processing failed***" );
-					fwarn = fopen(warnfile,"w");
-					fputs( "Processing failed", fwarn);
-					fclose( fwarn );
-					flog = fopen(logfile,"a+");
-					fputs( "PROCESSING FAILED\n", flog);
-					fclose( flog );
-				}
-						sleep(delaytime);
-						*/
-			/*if there's no email address in the comments file, set it to camnmr, useful for testing*/
+	/*if there's no email address in the comments file, set it to camnmr, useful for testing*/
      /*the comments variable is read from the prod file.*/
      /*email is a variable set at the start of this program to camnmr@gmail.com*/
       STOREPAR("USERP5",comments);

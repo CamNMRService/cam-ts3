@@ -132,8 +132,8 @@ while ((proc_or_not < 1) || (proc_or_not > 4))
 Proc_err ( INFO_OPT, "Starting program");
 sleep(delaytime);
 XCMD("setdef ackn no");
-XCMD("setdef stdout no");
-XCMD("setdef stderr no");
+XCMD("setdef stdout on");
+XCMD("setdef stderr on");
 /*
 if ( (pidfile = fopen("jrlock.txt", "rt")) != NULL)
 {

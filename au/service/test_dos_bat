@@ -1,0 +1,7 @@
+//test_dos_bat
+
+char bat_cmd_path[PATH_MAX];
+
+sprintf(bat_cmd_path,"F:\\chemist\\xcopy_tsData.bat");
+system(bat_cmd_path);
+QUIT

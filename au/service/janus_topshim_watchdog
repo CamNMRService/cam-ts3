@@ -9,6 +9,13 @@
 //do output to correct version directory
 
 //ptg 2023_03_07 temporarily disable emailing as we get too many!!
+//djh 2023_04_18 - change ren to xcopy for the topshimData - allows janus to zip topshimData to dataset.
+
+//example usage :- 
+//janus_topshim_watchdog THIS_IS_A_MESSAGE_TO_SEND ordmax=8
+//NB the message can't have spaces in... Ortherwise would look like more command line options.
+
+
 
 #include <time.h>
 time_t now_s, dtime_s;		  	/* seconds since 1970 */
@@ -25,6 +32,7 @@ char lockpath[PATH_MAX];
 char pidpath[PATH_MAX];
 char message[1023];
 char topshim_option[255];
+char bat_cmd_path[PATH_MAX]="NULL";
 int pid;
 int ts_major = GetTsVersionMajor();
 int ts_minor = GetTsVersionMinor();
@@ -32,7 +40,10 @@ int ts_patch = GetTsVersionPl();
 
 FILE *pidfile;
 FILE *lockfile;
+FILE *fbat=NULL;
 
+//sprintf(bat_cmd_path,"C:\\Bruker\\TopSpin%i.%i.%i\\data\\xcopy_tsData.bat",ts_major,ts_minor,ts_patch);
+sprintf(bat_cmd_path,"F:\\chemist\\xcopy_tsData.bat",ts_major,ts_minor,ts_patch);
 //set topshim_option to just a blank character - will this prevent errors?
 
 
@@ -98,6 +109,14 @@ if (pidfile = fopen(pidpath, "rt"))
 	CPR_exec(command, CONT_EX);
 
 }
+ 
+//test 
+
+sprintf( command, "robocopy C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData /S C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData_%s",ts_major,ts_minor,ts_patch,ts_major,ts_minor,ts_patch,datestamp);
+ //sprintf(command,"xcopy C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData_%s\\ /E /H \n", ts_major,ts_minor,ts_patch,ts_major,ts_minor,ts_patch,datestamp);
+system(command);
+
+
 
 // check for failed execution
 if(AUERR)
@@ -116,12 +135,24 @@ if(AUERR)
    // don't repeat topshim!!
    // XCMD(tscommand)
    #ifdef	HAS_WINDOWS_FEATURES
-   sprintf(command,"ren C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData topshimData_%s", ts_major,ts_minor,ts_patch,datestamp);  
-   //  Proc_err(DEF_ERR_OPT,command);
+  // sprintf(command,"ren C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData topshimData_%s", ts_major,ts_minor,ts_patch,datestamp);  
+  //xcopy just doesnt seem to run, not even in a bat file
+  //   sprintf(command,"xcopy C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData_%s\\ /E /H \n", ts_major,ts_minor,ts_patch,ts_major,ts_minor,ts_patch,datestamp);
+     sprintf( command, "robocopy C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData /S C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData_%s",ts_major,ts_minor,ts_patch,ts_major,ts_minor,ts_patch,datestamp);
+   /* code if you want to make a bat file to run the command
+       fbat = fopen(bat_cmd_path, "w");
+     fputs( command,fbat);
+     fclose(fbat);
+     Proc_err(DEF_ERR_OPT,bat_cmd_path,command);
+       // system(bat_cmd_path); //which is why we mess about with a bat file.
+   */    
+   system(command);  //dunno why the system command is unreliable with xcopy
+
    #else 
-   sprintf(command,"mv /opt/topspin%i.%i.%i/data/topshimData /opt/topspin%i.%i.%i/data/topshimData_%s", ts_major,ts_minor,ts_patch,datestamp,ts_major,ts_minor,ts_patch);
+     sprintf(command,"mv /opt/topspin%i.%i.%i/data/topshimData /opt/topspin%i.%i.%i/data/topshimData_%s", ts_major,ts_minor,ts_patch,datestamp,ts_major,ts_minor,ts_patch);
+     system(command);   
    #endif
-   system(command);
+   
   //report copying now automatic
 //  strcpy(reportdest, ACQUPATH("topshim_report.txt"));
 //  sprintf(reportsource, "%s/%s/topshim_report.txt", PathXWinNMRProg(), PathXWinNMRCurDir());

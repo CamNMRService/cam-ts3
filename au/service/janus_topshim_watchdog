@@ -139,7 +139,8 @@ if(AUERR)
   //xcopy just doesnt seem to run, not even in a bat file
   //   sprintf(command,"xcopy C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData_%s\\ /E /H \n", ts_major,ts_minor,ts_patch,ts_major,ts_minor,ts_patch,datestamp);
 
-     sprintf( command, "robocopy C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData /S C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData_%s",ts_major,ts_minor,ts_patch,ts_major,ts_minor,ts_patch,datestamp);
+    // sprintf( command, "robocopy C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData /S C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData_%s ",ts_major,ts_minor,ts_patch,ts_major,ts_minor,ts_patch,datestamp);
+    sprintf( command, "robocopy C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData /S C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData_%s >NUL 2>NUL",ts_major,ts_minor,ts_patch,ts_major,ts_minor,ts_patch,datestamp);
     /* code if you want to make a bat file to run the command
        fbat = fopen(bat_cmd_path, "w");
      fputs( command,fbat);

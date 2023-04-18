@@ -21,7 +21,7 @@
 time_t now_s, dtime_s;		  	/* seconds since 1970 */
 struct tm *now;	  		/* structure with year, month etc. */
 
-char command[PATH_MAX];
+char command[1023];
 char tscommand[PATH_MAX];
 char experiment[100];
 char reportdest[PATH_MAX];
@@ -109,7 +109,7 @@ if (pidfile = fopen(pidpath, "rt"))
 sprintf(command,"xcopy C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData_%s\\ /E /H", ts_major,ts_minor,ts_patch,datestamp,ts_major,ts_minor,ts_patch);
    Proc_err(DEF_ERR_OPT,command);
   system(command);
-   
+
 // check for failed execution
 if(AUERR)
 {

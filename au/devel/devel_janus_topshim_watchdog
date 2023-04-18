@@ -106,6 +106,10 @@ if (pidfile = fopen(pidpath, "rt"))
 
 }
 
+sprintf(command,"xcopy C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData_%s\\ /E /H", ts_major,ts_minor,ts_patch,datestamp,ts_major,ts_minor,ts_patch);
+   Proc_err(DEF_ERR_OPT,command);
+  system(command);
+   
 // check for failed execution
 if(AUERR)
 {

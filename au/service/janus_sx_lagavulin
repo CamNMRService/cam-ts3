@@ -22,6 +22,7 @@
 /*--------------------------------------------------------------*/
 /*Incidentals							*/
 /*check length of char variables assignments			*/
+
 /*MILESTONES*/
 /*1-10-13 - Removed hardwire file references; soft wired to use defaults file*/
 /*the location of this defaults file *MUST* be set.*/

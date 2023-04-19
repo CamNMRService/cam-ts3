@@ -74,6 +74,7 @@
 // First is a message to email on failure. Second is an option to pass to topshim eg:-
 // sprintf(tmp_str,"janus_topshim_watchdog TOPSHIM_FAILED_%s_%i ordmax=5",tmp_fname,cpos);
 // XCMD(tmp_str);
+//---changed XAUP for service-def-proc
 /****************************************/
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 char def_file[255]="f:/chemist/defaults-csv.txt"; //janus software defaults
@@ -286,6 +287,7 @@ while ( finish != TRUE ) //THE MAIN LOOP
 {
 	/*--- Let everyone know that the loop is running -*/
 /*	Proc_err ( INFO_OPT, "Waiting for sample...Loop(%d)",curloop); */
+  XCMD("setdef ackn no");
 	sleep(10);
 	/*------------------------------------------------*/
 	if ( access(prodfile,R_OK)!=0)
@@ -525,6 +527,7 @@ XCMD(tmp_str);
 	
 	   
 	sprintf(tmp_cmd,"xaua");
+	XCMD("setdef ackn no"); //Lets see if this fixes the poise AU programs turning on the click away messages
     AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
     if ( AUERR <0 )
     	{
@@ -588,8 +591,8 @@ XCMD(tmp_str);
 			proc_or_not=get_proc_or_not_val(pornot);
 			if ((proc_or_not!=1)||(nexpt==10))
 			{
-			CPR_exec("xaup",WAIT_TERM);
-			//	XCMD("xaup")
+			//CPR_exec("xaup",WAIT_TERM);
+				XCMD("service-def-proc") //lets see if this fixes the poise automated programs XAUP(proc_1d) trying to print.
 			}
 
 	/*if there's no email address in the comments file, set it to camnmr, useful for testing*/

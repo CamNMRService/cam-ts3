@@ -63,6 +63,18 @@
 //2023_04_11 SX checks if this is the test experiment and changes position to 60 if so
 // This avoids test expt failures if no sample in set position, and avoids wasting time shimming
 // on different sample
+//general tidy on 230418 to remove old commented out code and consolidate changes
+//--- a copy of the topshimData for the sample is zipped and saved to the last exp of the dataset
+//*after* emailing
+//--- a test sample - int test_pos = 60; has atma for 1H run on it, after initial ii on junk dataset
+// char test_parset[256] = "C13CPD";
+//--- if the experiment=janus-1h atma is *NOT* run.
+//--- janus_topshim_watchdog is implemented and called with command-line arguments. 
+// First is a message to email on failure. Second is an option to pass to topshim eg:-
+// sprintf(tmp_str,"janus_topshim_watchdog TOPSHIM_FAILED_%s_%i ordmax=5",tmp_fname,cpos);
+// XCMD(tmp_str);
+//---changed XAUP for service-def-proc
+//---sprinkled some more setdef ackn no - when poise is called, it might turn click awway messages on again
 /****************************************/
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 char def_file[255]="f:/chemist/defaults-csv.txt"; //janus software defaults
@@ -514,6 +526,7 @@ XCMD(tmp_str);
 	
 	   
 	sprintf(tmp_cmd,"xaua");
+	XCMD("setdef ackn no"); //Lets see if this fixes the poise AU programs turning on the click away messages
     AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
     if ( AUERR <0 )
     	{
@@ -643,8 +656,11 @@ if (proc_or_not==1)
 	        LastSample=TRUE;
 		      sleep( delaytime );
 	        }
+//janus-email needs the location of the defaults file to be passed to it
+sprintf(tmp_str,"janus-email %s",def_file);
+XCMD(tmp_str);
 
-CPR_exec("janus-email",WAIT_TERM);
+//CPR_exec("janus-email",WAIT_TERM);
 
 //OK, now copy the topshim data to the dataset somewhere
 #ifdef	HAS_WINDOWS_FEATURES

@@ -46,9 +46,11 @@ XCMD("setdef ackn no")
 XCMD("setdef stderr off")
 XCMD("setdef stdout off")
 */
-sprintf(err_message,"This au program needs to be called with an argument that is the location of the defaults file eg %s",def_file);
+
 if (i_argc !=3){
-	Proc_err( INFO_OPT, "%s",err_message);	
+	sprintf(err_message,"This au program needs to be called with an argument that is the location of the defaults file eg %s",def_file);
+	Proc_err( INFO_OPT, "%s",err_message);
+	STOPMSG(err_message);	
 }
 
 if (i_argc == 3 ) { //assume the argument is a location of the defaults file

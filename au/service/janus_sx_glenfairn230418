@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------*/
-/* Title	: Program janus_sx_glenfairn				*/
+/* Title	: Program devel_janus_sx_glenfairn				*/
 /*has specific parts for this instrument */
 /* WORK IN PROGRESS TO UPDATE TO TOPSPIN 3			*/
 /* Topspin 3 update done by djh in cambridge*/
@@ -22,7 +22,6 @@
 /*--------------------------------------------------------------*/
 /*Incidentals							*/
 /*check length of char variables assignments			*/
-
 /*MILESTONES*/
 /*1-10-13 - Removed hardwire file references; soft wired to use defaults file*/
 /*the location of this defaults file *MUST* be set.*/
@@ -58,24 +57,11 @@
 /* 220125 patch by djh to not do atma for 1h */
 
 //20220606 added getprosol
-
-
-//2023_04_11 SX checks if this is the test experiment and changes position to 60 if so 
-// POS60 must be in submission PC definition
-// This avoids test expt failures if no sample in set position, and avoids wasting time shimming
-// on different sample
-//general tidy on 230418 to remove old commented out code and consolidate changes
-//--- a copy of the topshimData for the sample is zipped and saved to the last exp of the dataset
-//*after* emailing
-//--- a test sample - int test_pos = 60; has atma for 1H run on it, after initial ii on junk dataset
-// char test_parset[256] = "C13CPD";
-//--- if the experiment=janus-1h atma is *NOT* run.
-//--- janus_topshim_watchdog is implemented and called with command-line arguments. 
-// First is a message to email on failure. Second is an option to pass to topshim eg:-
-// sprintf(tmp_str,"janus_topshim_watchdog TOPSHIM_FAILED_%s_%i ordmax=5",tmp_fname,cpos);
-// XCMD(tmp_str);
-//---changed XAUP for service-def-proc
-//---sprinkled some more setdef ackn no - when poise is called, it might turn click awway messages on again
+/*20220920 - added option to call topshim_watchdog with a command line 
+argument for a message
+- had to mod topshim_watchdog too*/
+//PTG 2023_02_28 Modifed atma behaviour to manually turn spinning off first and then turn it on afterwards if needed
+//PTG 2023_02_28 Modifed lock behaviour to try again before emailing...
 /****************************************/
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 char def_file[255]="d:/chemist/defaults-csv.txt"; //janus software defaults
@@ -95,8 +81,7 @@ char    janusup[80], expttime[40], exptsfile[80], protocol[80];
 char    sxcmd[255], gradshim[20], comments[1024], command[1024], snostr[1024], tmp_cmd[256];
 char    statusstr[1024], awmfile[80],tmparchpath[1024],fidpath[1024],procau[1024];
 char	  proclist[1024],procinstruct[1024];
-char    reportdest[PATH_MAX];
-char    reportsource[PATH_MAX];
+
 char   *env_name, *file_data, *field, *ed;
 FILE   *fprod = NULL, *facqu = NULL, *ferror = NULL, *fwarn = NULL;
 FILE   *fshim = NULL, *fwait = NULL, *ftitle = NULL, *fsx = NULL;
@@ -125,26 +110,33 @@ char logfile[255];
 char email[80]="camnmrservice@gmail.com";
 int get_proc_or_not_val(FILE *pornot);
 
-int ts_major = GetTsVersionMajor();
-int ts_minor = GetTsVersionMinor();
-int ts_patch = GetTsVersionPl();
-
-int test_pos = 60;
-char test_parset[256] = "C13CPD";
-
 time_t lt;
 
 GETCURDATA;
-proc_or_not=1;
+while ((proc_or_not < 1) || (proc_or_not > 4))
+{
+	Proc_err(DEF_ERR_OPT,"Control wheter or not we print. Enter :-\n 1. for no processing at all. \n 2. For print and email everything. \n 3. For email processed data, no printing. \n 4. Print but don't email.");
+	GETINT("Enter a number from 1 to 4", proc_or_not);
+}
 
 
 
 Proc_err ( INFO_OPT, "Starting program");
 sleep(delaytime);
 XCMD("setdef ackn no");
-XCMD("setdef stdout on");
-XCMD("setdef stderr on");
+XCMD("setdef stdout no");
+XCMD("setdef stderr no");
+/*
+if ( (pidfile = fopen("jrlock.txt", "rt")) != NULL)
+{
+	fscanf(pidfile, "%d", &pid);
+	fclose(pidfile);
+	Proc_err(INFO_OPT, "killing PID = %d !", pid);
+	sprintf(command, "kill %d", pid);
+	CPR_exec(command, CONT_EX);
+}
 
+ CPR_exec("xau janus_reproc",CONT_EX);*/
 
 /*--------------------------------------------------------------*/
 /*--- Get defaults from the defaults file ----------------------*/
@@ -253,30 +245,10 @@ AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 if ( AUERR <0 )
 {
 	sprintf(tmp_str, "INITIAL_II_ERROR");
-	XAU("whoopwhoop",tmp_str)
-	STOPMSG("Janus stopped - initial ii error")
+	XAU("devel_whoopwhoop",tmp_str)
 }
 
-sprintf(tmp_cmd, "sx %i", test_pos);
-AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
-if ( AUERR <0 )
-{
-	sprintf(tmp_str, "INITIAL_TEST_SAMPLE_SX_%i_ERROR",test_pos);
-	XAU("whoopwhoop",tmp_str)
-} else {
-    RPAR(test_parset, "all")
-    sprintf(tmp_cmd, "atma");
-    AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
-    if ( AUERR <0 )
-    {
-	   sprintf(tmp_str, "INITIAL_TEST_SAMPLE_ATMA_ERROR");
-	   XAU("whoopwhoop",tmp_str)
-	   STOPMSG("Janus stopped - initial ii error")
-    }
-
-}
-
-
+//CPR_exec("ii", WAIT_TERM);
 
 
 /*--------------------------------------------------------------*/
@@ -288,7 +260,6 @@ while ( finish != TRUE ) //THE MAIN LOOP
 {
 	/*--- Let everyone know that the loop is running -*/
 /*	Proc_err ( INFO_OPT, "Waiting for sample...Loop(%d)",curloop); */
-  XCMD("setdef ackn no");
 	sleep(10);
 	/*------------------------------------------------*/
 	if ( access(prodfile,R_OK)!=0)
@@ -378,7 +349,7 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 {
 	Proc_err ( INFO_OPT,"%s",fidpath);
 	sprintf(tmp_str, "OVERWRITE_FID_ERROR_%i_%s", cpos,tmp_fname);
-	XAU("whoopwhoop",tmp_str)
+	XAU("devel_whoopwhoop",tmp_str)
 //	XAU("whoopwhoop",cmd)
 	exit(1);
 }
@@ -388,17 +359,6 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 	comments[strlen(comments)-1]=NULL;
 
 /*END MOD*/
-
-// Check "protocol" entry from prod file to see if this is a system test
-// and if so change cpos to 60
-
-if ( strstr ( protocol, "POS60") != NULL )
-{
-	// found test sample string in protocol so set pos to 60
-	cpos=60;
-}
-
-
 
 /*remove comment for production */
 	sprintf( tmp_cmd, "sx %d",cpos);
@@ -433,7 +393,7 @@ if ( strstr ( protocol, "POS60") != NULL )
 		skipsample=1;
 // email us but don't quit in case it's not a real problem and is just skipping sample!!
         sprintf(tmp_str, "INSERT_ERROR_%i_%s", cpos, tmp_fname);
-	    XAU("whoopwhoop",tmp_str)
+	    XAU("devel_whoopwhoop",tmp_str)
 	}
 /*ok, we have put the sample in the magnet; now run through its exps*/
 	if (skipsample==0)
@@ -442,58 +402,59 @@ if ( strstr ( protocol, "POS60") != NULL )
 		GETCURDATA
 		STOREPAR( "SOLVENT", solvent)
 		sprintf(tmp_cmd, "rsh %s",shimset);
-        AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
-        if ( AUERR <0 )
-        {
-	       sprintf(tmp_str, "FAILED_TO_READ_SHIMS_%s_%i_%s",shimset, cpos, tmp_fname);
-	       XAU("whoopwhoop",tmp_str)
-        }
+    AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+    if ( AUERR <0 )
+    {
+	     sprintf(tmp_str, "FAILED_TO_READ_SHIMS_%s_%i_%s",shimset, cpos, tmp_fname);
+	     XAU("devel_whoopwhoop",tmp_str)
+    }
 		sprintf(tmp_cmd, "lock %s",solvent);
-	    
 		AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
 		if ( AUERR <0 )
         {
-	       AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
-        }
-	
-		if ( AUERR <0 )
-        {
-	       sprintf(tmp_str, "FAILED_TO_LOCK_%s_%i_%s",solvent, cpos, tmp_fname);
-	       XAU("whoopwhoop",tmp_str)
-        }
+        // lock failed, try again:
+        AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
+        if ( AUERR <0 )
+        	{
+        		// failed again, email
+	      		sprintf(tmp_str, "FAILED_TO_LOCK_%s_%i_%s",solvent, cpos, tmp_fname); 
+	    		   XAU("devel_whoopwhoop",tmp_str)
+       		}
+       	}
 	//	sprintf(tmp_cmd, "ROT");
 	//	AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
-	ROT
+  	ROT
 		if ( AUERR <0 )
         {
 	       sprintf(tmp_str, "ROT_FAILED_%i_%s", cpos, tmp_fname);
-	     //  XAU("whoopwhoop",tmp_str)
-		 ROT
+	       XAU("devel_whoopwhoop",tmp_str)
         }
-		
-//topshim has to be here, as we only want to do it once per sample, have to do atma each exp, or put more logic in.
- 
+	
+//topshim has to be here, as we only want to do it once per sample, have to do atma each exp, or put more logic in. 
 // use topshim_watchdog to force timeout and to save topshim data in case of failure
-//NB janus_topshim_watchdog can take an option for an additional option to pass to topshim
-//should be called with janus_topshim_watchdog MESSAGE_NO_SPACES_OR DASHES ordmax=5
-
-//janus_topshim_watchdog should also take care of the whoopwhoop email
-
-sprintf(tmp_str,"janus_topshim_watchdog TOPSHIM_FAILED_%s_%i",tmp_fname,cpos);
+//added command line option to topshim_watchdog for a message
+sprintf(tmp_str,"janus_topshim_watchdog TOPSHIM_ERROR_%s_%i ordmax=8",tmp_fname,cpos); 
 XCMD(tmp_str);
+//XAU("devel_topshim_watchdog",tmp_str) //failed
+/*or :-
+sprintf(tmp_str,"devel_topshim_watchdog %s_%s",tmp_fname,cpos)
+XCMD(tmp_str);
+*/
+//orig - CPR_exec("topshim_watchdog",WAIT_TERM);
 
-//old way of calling topshim below
-//CPR_exec("janus_topshim_watchdog",WAIT_TERM);
-
-//	      AUERR=CPR_exec("topshim convcomp",WAIT_TERM);
-/*  no error emails here
+/*	      AUERR=CPR_exec("topshim convcomp",WAIT_TERM);
        if ( AUERR <0 )
         {
 	       sprintf(tmp_str, "TOPSHIM_FAILED_%i_%s",cpos, tmp_fname);
-	       XAU("whoopwhoop",tmp_str)
+	       XAU("devel_whoopwhoop",tmp_str)
         }
   */
-
+  //put in here for 700
+ //   ROTOFF
+ //   sprintf(tmp_cmd, "tune z1z2");
+ //   CPR_exec(tmp_cmd,WAIT_START);
+ //   sleep(15);
+  //end of 700 additions
 		nexpt=10;
 		while ((fgets( experiment, 155, fprod)!=NULL)&&(strlen(experiment)>2)) //this is slightly magic to me, but reads prod into experiment
 		{
@@ -508,45 +469,45 @@ XCMD(tmp_str);
 			GETCURDATA
 			STOREPAR( "SOLVENT", solvent )
 			GETPROSOL //needed since paracon!
+//			if( nexpt != 10) { ROT }
+//remove comment for production
 
-	
-    
+	//	XCMD("sendgui atma");
 	if ( strstr ( experiment, "janus-1h") == NULL ) //strstr returns a pointer if a match
 	{
-		// stop spinning
-		ROTOFF
-        sprintf(tmp_cmd,"atma");
-		AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+			// stop spinning
+			ROTOFF
+      sprintf(tmp_cmd,"atma");
+		  AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 	    if ( AUERR <0 )
 		  {
 		     sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
-	       XAU("whoopwhoop",tmp_str)
+	       XAU("devel_whoopwhoop",tmp_str)
 	       // STOPMSG(tmp_str)
 		  }
-		ROT // does "ro acqu"
+		  ROT // does "ro acqu"
 	}
-	
-	   
 	sprintf(tmp_cmd,"xaua");
-	XCMD("setdef ackn no"); //Lets see if this fixes the poise AU programs turning on the click away messages
-    AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+	AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
     if ( AUERR <0 )
-    	{
-	       Show_status( "***Acquisition failed***" );
-	       fwarn = fopen(warnfile,"w");
-	       fputs( "Acquisition failed", fwarn);
-	       fclose( fwarn );
-	       flog = fopen(logfile,"a+");
-	       fputs( "ACQUISITION FAILED!\n", flog);
-	       fclose( flog );
-	       sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
-	       XAU("whoopwhoop",tmp_str)
-	       STOPMSG("XAUA Failed. Maybe check IPSO")
-    	}
-
+	{
+	   Show_status( "***Acquisition failed***" );
+	   fwarn = fopen(warnfile,"w");
+	   fputs( "Acquisition failed", fwarn);
+	   fclose( fwarn );
+	   flog = fopen(logfile,"a+");
+	   fputs( "ACQUISITION FAILED!\n", flog);
+	   fclose( flog );
+	   sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
+	   XAU("devel_whoopwhoop",tmp_str)
+	}
+			//remove comment for production actually, rotation should be set in par set; line 386 ROT should do it
+		//	CPR_exec("ro off",WAIT_TERM);
 			lt=time(NULL);
 			sprintf(expttime, ctime(&lt));
 			expttime[strlen(expttime)-1]=NULL;
+//removed stuff about logging to archive dir.
+			//sprintf(janusup, "c:/chemist/jup.txt");
 			sprintf(janusup, "%s%s\\jup.txt",diskunit,suser);
 			Show_status( "opening local janusup to append");
 			sleep(delaytime);
@@ -583,7 +544,17 @@ XCMD(tmp_str);
 			fclose(sname);
 			STOREPAR("USERP2", samplename);
 
-
+/*End mod*/
+/*			parmo=1;
+			FETCHPAR ("PARMODE", &parmo)
+			if (parmo==1)
+			{
+				STOREPAR ("PF2DU", diskunit)
+				STOREPAR ("PF2NAME", tmp_fname)
+				STOREPAR ("PF2EXP", 10)
+				STOREPAR ("PF2PROC", 1)
+			}
+*/
 /*slight mod to XAUP command to allow it to finish before going on...*/
 			FETCHPAR ("AUNMP",&procau)
 /*find ou what processing mode we're in*/
@@ -592,11 +563,45 @@ XCMD(tmp_str);
 			proc_or_not=get_proc_or_not_val(pornot);
 			if ((proc_or_not!=1)||(nexpt==10))
 			{
-			//CPR_exec("xaup",WAIT_TERM);
-				XCMD("service-def-proc") //lets see if this fixes the poise automated programs XAUP(proc_1d) trying to print.
+			CPR_exec("xaup",WAIT_TERM);
+			//	XCMD("xaup")
 			}
+			/*
+			else
+			//so if we have done exp 10, add it to the processing list if IN mode 1. Didn't really work, the janus_print always lost the race to process
+					{
 
-	/*if there's no email address in the comments file, set it to camnmr, useful for testing*/
+			    if(nexpt==10)
+						{
+						plist = fopen (proclist,"a+");
+						if (plist == NULL)
+						{
+								Proc_err(INFO_OPT, "Can't open %s to add to processing list", proclist);
+								//exit(1);
+								//maybe instead of quit here; write what we want to do to a failed processing file
+						} else
+							{
+								sprintf(procinstruct, "%s,%s,chemist,pdf\n",tmp_fname,diskunit);
+								Proc_err(INFO_OPT,"%s",procinstruct);
+								fputs(procinstruct,plist);
+								fclose(plist);
+							}
+						}
+					}
+
+				if ( AUERR <0 )
+				{
+					Show_status( "***Processing failed***" );
+					fwarn = fopen(warnfile,"w");
+					fputs( "Processing failed", fwarn);
+					fclose( fwarn );
+					flog = fopen(logfile,"a+");
+					fputs( "PROCESSING FAILED\n", flog);
+					fclose( flog );
+				}
+						sleep(delaytime);
+						*/
+			/*if there's no email address in the comments file, set it to camnmr, useful for testing*/
      /*the comments variable is read from the prod file.*/
      /*email is a variable set at the start of this program to camnmr@gmail.com*/
       STOREPAR("USERP5",comments);
@@ -637,12 +642,6 @@ if (proc_or_not==1)
 
 		fclose(fprod);
 		LastSample=FALSE;
-       
-	   //copy topshim report
-
-        strcpy(reportdest, ACQUPATH("topshim_report.txt"));
-        sprintf(reportsource, "%s/%s/topshim_report.txt", PathXWinNMRProg(), PathXWinNMRCurDir());
-        dircp(reportsource, reportdest);
 		if ( access(waitfile,R_OK)!=0)
 	        {
 	           /*PUT_SAMPLE_BACK*/
@@ -651,7 +650,7 @@ if (proc_or_not==1)
 		      if ( AUERR <0 )
 		         {
 		      	 sprintf(tmp_cmd, "EJECT_ERROR_%i_%s", cpos, tmp_fname);
-	           XAU("whoopwhoop_sx",tmp_cmd)
+	           XAU("devel_whoopwhoop_sx",tmp_cmd)
 	           STOPMSG(tmp_cmd)
 		         }
 	           
@@ -660,19 +659,42 @@ if (proc_or_not==1)
 	        }
 
 CPR_exec("janus-email",WAIT_TERM);
+/*find out what processing mode we're in*/
+/*if we're not in mode 1 or 4, email the data*/
+/*pornot = fopen (pornotfile,"r");
+proc_or_not=get_proc_or_not_val(pornot);
+if ( (proc_or_not!=1) || (proc_or_not!=4) )
+{
+	CPR_exec("janus-email",WAIT_TERM);
+	//	XCMD("janus-email")
+}
+*/
 
-//OK, now copy the topshim data to the dataset somewhere
-#ifdef	HAS_WINDOWS_FEATURES
-		
-// sprintf(tmp_cmd,"robocopy C:\\Bruker\\TopSpin3.6.4\\data\\topshimData /S %s\\topshimData_%s_%d", ACQUPATH(0),name, expno);  
-    sprintf( tmp_cmd, "7za a  %s\\topshimData_%s_%i.zip C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData\\",ACQUPATH(0),name,expno,ts_major,ts_minor,ts_patch);
-	
-#else 
-    sprintf(tmp_cmd,"cp -rp /opt/topspin3.6.4/data/topshimData %s/topshimData_%s_%d", AQCUPATH(0),name, expno);
-#endif
 
-Proc_err(DEF_ERR_OPT,tmp_cmd);
-system(tmp_cmd);  
+//below is commented out; but could be very usefull if we want to abtract processing to another instrument
+//		if (strncmp(archive,"true",3)==0)
+//		{
+//			strcpy(snostr,tmp_fname);
+//			for (x=1;x<strlen(tmp_fname);x++)
+//			{
+//			  snostr[x-1]=tmp_fname[x];
+//			  snostr[x]=NULL;
+//			}
+//
+//			specno=atoi(snostr);
+//			sthou=(int)specno/1000;
+//			sprintf(outpath,"%s%s%d",archpath,prefix,sthou);
+//			sprintf(jcmd_str,"cp -r %s/data/chemist/nmr/%s %s",diskunit,tmp_fname,outpath);
+//			Show_status( jcmd_str);
+//			sleep(1);
+//			system (jcmd_str);
+//			sprintf(tmparchpath,"//stvdsntp001/dis-casschemist/nmr/dpx250/");
+//			sprintf(outpath,"%s%s%d",tmparchpath,prefix,sthou);
+//			sprintf(jcmd_str,"cp -r %s/data/chemist/nmr/%s %s",diskunit,tmp_fname,outpath);
+//			Show_status( jcmd_str);
+//			sleep(1);
+//			system (jcmd_str);
+//		}
 
 /*Now remove the prodfile */
 

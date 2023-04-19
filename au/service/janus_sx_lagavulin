@@ -463,13 +463,16 @@ if ( strstr ( protocol, "POS60") != NULL )
 //NB janus_topshim_watchdog can take an option for an additional option to pass to topshim
 //should be called with janus_topshim_watchdog MESSAGE_NO_SPACES_OR DASHES ordmax=5
 
-// sprintf(tmp_str,"janus_topshim_watchdog TOPSHIM_FAILED_%i_%s",cpos,tmp_fname);
-
-//for instance.
 //janus_topshim_watchdog should also take care of the whoopwhoop email
 
-CPR_exec("janus_topshim_watchdog",WAIT_TERM);
-/*	      AUERR=CPR_exec("topshim convcomp",WAIT_TERM);
+sprintf(tmp_str,"janus_topshim_watchdog TOPSHIM_FAILED_%s_%i",tmp_fname,cpos);
+XCMD(tmp_str);
+
+//old way of calling topshim below
+//CPR_exec("janus_topshim_watchdog",WAIT_TERM);
+
+//	      AUERR=CPR_exec("topshim convcomp",WAIT_TERM);
+/*  no error emails here
        if ( AUERR <0 )
         {
 	       sprintf(tmp_str, "TOPSHIM_FAILED_%i_%s",cpos, tmp_fname);

@@ -75,6 +75,7 @@
 // sprintf(tmp_str,"janus_topshim_watchdog TOPSHIM_FAILED_%s_%i ordmax=5",tmp_fname,cpos);
 // XCMD(tmp_str);
 //---changed XAUP for service-def-proc
+//---sprinkled some more setdef ackn no - when poise is called, it might turn click awway messages on again
 /****************************************/
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 char def_file[255]="f:/chemist/defaults-csv.txt"; //janus software defaults

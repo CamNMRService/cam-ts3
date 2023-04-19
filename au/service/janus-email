@@ -1,4 +1,5 @@
-/*from gsk automation, amended by djh to only output to a pdf*/
+/*janus-email*/
+/*needs to be called with the location of the defaults file*/
 /*MILESTONE*/
 /*READ DEFAULTS FILE to get correct locations for files and set variables accordingly - ACHIEVED*/
 /*RUNS*/
@@ -26,6 +27,7 @@ char file_name[1024]="";
 char in_data[1024]="";
 char pul[256]="",nuc1[20]="";
 char *file_data, *field;
+char err_message[PATH_MAX]="no message";
 int  pdfthere=0;
 int cmdstatus;
 
@@ -44,6 +46,15 @@ XCMD("setdef ackn no")
 XCMD("setdef stderr off")
 XCMD("setdef stdout off")
 */
+sprintf(err_message,"This au program needs to be called with an argument that is the location of the defaults file eg %s",def_file);
+if (i_argc !=3){
+	Proc_err( INFO_OPT, "%s",err_message);	
+}
+
+if (i_argc == 3 ) { //assume the argument is a location of the defaults file
+    sprintf(def_file,"%s",i_argv[2]); 
+}
+
 
 
 strcpy( defaultsfile, def_file );

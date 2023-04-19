@@ -658,8 +658,11 @@ if (proc_or_not==1)
 	        LastSample=TRUE;
 		      sleep( delaytime );
 	        }
+//janus-email needs the location of the defaults file to be passed to it
+sprintf(tmp_str,"janus-email %s",def_file);
+XCMD(tmp_str);
 
-CPR_exec("janus-email",WAIT_TERM);
+//CPR_exec("janus-email",WAIT_TERM);
 
 //OK, now copy the topshim data to the dataset somewhere
 #ifdef	HAS_WINDOWS_FEATURES

@@ -460,12 +460,12 @@ if ( strstr ( protocol, "POS60") != NULL )
         {
 	       sprintf(tmp_str, "FAILED_TO_LOCK_%s_%i_%s",solvent, cpos, tmp_fname);
 	       XAU("whoopwhoop",tmp_str)
-        }
+		}
 
 	// move atma to here for Arran (only), as we clearly only need to tune once!!
 	// and better to have before topshim. NB junk/10/1 must be a proton/carbon dataset
 	
-	 sprintf(tmp_cmd,"atma");
+	    sprintf(tmp_cmd,"atma");
 	    AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 	    if ( AUERR <0 )
 		{
@@ -473,10 +473,10 @@ if ( strstr ( protocol, "POS60") != NULL )
 			XAU("whoopwhoop",tmp_str)
 				// STOPMSG(tmp_str)
 		}
-     }
-	//	sprintf(tmp_cmd, "ROT");
-	//	AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
-	ROT
+     
+	    //	sprintf(tmp_cmd, "ROT");
+	    //	AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
+	    ROT
 		if ( AUERR <0 )
         {
 	       sprintf(tmp_str, "ROT_FAILED_%i_%s", cpos, tmp_fname);

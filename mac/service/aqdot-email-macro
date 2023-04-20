@@ -1,0 +1,14 @@
+efp
+apbk
+pscal global
+cy 80
+maxi 200000
+ppf
+service-delpdf
+service-pdfit
+userp1 nmr@aqdot.com
+email-auto
+userp1 euan.moffat@aqdot.com
+email-auto
+
+

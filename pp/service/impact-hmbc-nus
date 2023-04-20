@@ -1,0 +1,164 @@
+;IMPACT-HMBC 
+;avance-version  
+;phase sensitive HMBC using Echo/Antiecho gradient selection 
+;with three-fold low-pass J-filter to suppress one-bond correlations 
+;no decoupling during acquisition 
+;using constant time for suppressing F1 skew 
+;using ASAP mixing for suppressing F1 ridges 
+; J. Furrer, Chem. Commun. 2010. 
+;Echo/Antiecho scheme 
+;D.O. Cicero, G. Barbato & R. Bazzo, J. Magn. Reson. 148, 209-213 (2001) 
+;Constant time 
+;K. Furihata & H. Seto, Tetrahedron Lett. 39, 7337-7340 (1998) 
+;ASAP method 
+;E. Kupce & R . Freeman, Magn. Reson. Chem. 45, 2-6 (2007) 
+#include <Avance.incl> 
+#include <Grad.incl> 
+#include <Delay.incl> 
+
+prosol relations=<impact>
+
+"cnst30=(1-sfo2/sfo1)/(1+sfo2/sfo1)" 
+define list<gradient> EA1 = { 1.000 -cnst30} 
+define list<gradient> EA2 = { -cnst30 1.000} 
+"p2=p1*2" 
+"d0=3u" 
+"in0=inf1/2"
+"in20=in0" 
+;"------------ Fixed delays, do not change --------------" 
+"DELTA1=1s/(2*(cnst6 + 0.07 * (cnst7-cnst6))) -p16 -d16" 
+"DELTA2=1s/(cnst7+cnst6) -p16 -d16" 
+"DELTA3=1s/(2*(cnst7 - 0.07 * (cnst7-cnst6))) -p16 -d16" 
+"DELTA4=1s/(cnst13*2)" 
+"DELTA5=p2+d0*2" 
+"FACTOR1=(d9/(p6*115.112))/2+0.5" 
+"l1=FACTOR1*2" 
+"d20=in20*td1/2+4u" 
+"p0=p1+((p1/90)*(cnst1-90))"
+
+1 ze  
+2 d11 
+3 d1*0.5 UNBLKGRAD ; beginning of the ASAP period 
+4 p16:gp6 
+  d16 
+  d12 pl10:f1 
+  p6*3.556 ph23 
+  p6*4.556 ph25 
+  p6*3.222 ph23 
+  p6*3.167 ph25 
+  p6*0.333 ph23 
+  p6*2.722 ph25 
+  p6*4.167 ph23 
+  p6*2.944 ph25 
+  p6*4.111 ph23 
+   
+  p6*3.556 ph25 
+  p6*4.556 ph23 
+  p6*3.222 ph25 
+  p6*3.167 ph23 
+  p6*0.333 ph25 
+  p6*2.722 ph23 
+  p6*4.167 ph25 
+  p6*2.944 ph23 
+  p6*4.111 ph25 
+  p6*3.556 ph25 
+  p6*4.556 ph23 
+  p6*3.222 ph25 
+  p6*3.167 ph23 
+  p6*0.333 ph25 
+  p6*2.722 ph23 
+  p6*4.167 ph25 
+  p6*2.944 ph23 
+  p6*4.111 ph25 
+  p6*3.556 ph23 
+  p6*4.556 ph25 
+  p6*3.222 ph23 
+  p6*3.167 ph25 
+  p6*0.333 ph23 
+  p6*2.722 ph25 
+  p6*4.167 ph23 
+  p6*2.944 ph25 
+  p6*4.111 ph23 
+  lo to 4 times l1 
+  d12 
+  p16:gp6 
+  d16 
+  d1*0.5 pl1:f1  ; end of the ASAP period 
+5 p0 ph1     ; Ernst angle 
+  DELTA1      ; tau 1 
+  p16:gp2 
+  d16 
+  p3:f2 ph3 
+  DELTA2     ; tau 2 
+  p16:gp3 
+  d16 
+  p3:f2 ph3 
+  DELTA3     ;tau 3 
+  p16:gp4 
+  d16 
+  p3:f2 ph3 
+  DELTA4     ;Delta 
+  p16:gp5 
+  d16 
+  d20      ;constant time delay 
+   
+  p3:f2 ph4 
+  d0 
+  p2 ph2 
+  d0 
+  p16:gp1*EA1 
+  d16 
+  (p24:sp7 ph5):f2 
+  DELTA5 
+  p16:gp1*EA2 
+  d16 pl2:f2 
+  (p3 ph5):f2 
+  d20      ;constant time delay 
+  4u BLKGRAD 
+  go=2 ph31 
+  d11 mc #0 to 2  
+     F1EA( calgrad(EA1) & calgrad(EA2), caldel(d0, +in0) & caldel(d20, -in20) & calph(ph4, +180) & calph(ph31, +180) )
+exit  
+   
+ph1=0 
+ph2=0 0 0 0 2 2 2 2 
+ph3=0  
+ph4=0 2 
+ph5=0 0 0 0 0 0 0 0 2 2 2 2 2 2 2 2 
+ph6=0 
+ph7=1 
+ph23=1 
+ph25=3 
+ph31=0 2 0 2 0 2 0 2 2 0 2 0 2 0 2 0 
+;pl1 : f1 channel - power level for pulse (default)
+;pl2 : f2 channel - power level for pulse (default)
+;pl10 : f1 channel - power level for ASAP
+;sp7: f2 channel - shaped pulse (180degree refocussing)
+;spnam7: Crp60comp.4
+;p0 : f1 channel - high power pulse - Ernst Angle
+;p2 : f1 channel - 180 degree high power pulse
+;p3 : f2 channel - 90 degree high power pulse
+;p6 : f1 channel - 90 degree ASAP pulse (ca. 50 us)
+;p16: homospoil/gradient pulse [1 msec]
+;p24: f2 channel - 180 degree shaped pulse for refocussing
+; = 2msec for Crp60comp.4
+;d1 : relaxation delay; 1-5 * T1
+;d6 : delay for evolution of long range couplings (1/2Jlr)
+;d9 : ASAP mixing time (ca. 40 ms)
+;d16: delay for homospoil/gradient recovery
+;d20: constant time delay (in20*td1/2+4u)
+;cnst1 = Ernst angle 100 seems a good compromise for diff T1s
+;cnst6: = 1J(XH)min
+;cnst7: = 1J(XH)max
+;cnst13: = J(XH) long range
+;NS: 2 * n
+;DS: 16
+;gpz1: 80%
+;gpz2: 37%
+;gpz3: -19%
+;gpz4: -11%
+;gpz5: -7%
+;gpz6: -17%
+;gpnam1-6: SINE.100
+;PH_mod(F1): pk (or no)
+;use xfb and xf2m

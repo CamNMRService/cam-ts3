@@ -1,0 +1,12 @@
+char solvent[32];
+FETCHPAR("SOLVENT", solvent);
+if(strcmp(solvent, "CDCl3"))
+
+Proc_err(DEF_ERR_OPT, "chloroform");
+
+else
+
+Proc_err(DEF_ERR_OPT, "not");
+
+QUIT
+

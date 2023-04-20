@@ -21,6 +21,7 @@
 time_t now_s, dtime_s;		  	/* seconds since 1970 */
 struct tm *now;	  		/* structure with year, month etc. */
 
+char solvent[64];
 char command[PATH_MAX];
 char tscommand[PATH_MAX];
 char experiment[100];

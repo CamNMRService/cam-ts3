@@ -10,6 +10,11 @@ char titlefile[PATH_MAX], titletext[512], titletextnew[512];
 char pdfname[PATH_MAX]="";
 char auproc[127]="null_proc";
 char up1[127];
+
+int ts_major = GetTsVersionMajor();
+int ts_minor = GetTsVersionMinor();
+int ts_patch = GetTsVersionPl();
+
 FILE *ftitle = NULL;
 
 /*get the command line value if present*/
@@ -40,9 +45,11 @@ fputs( titletextnew, ftitle);
 fputs( titletext, ftitle); 
 fclose( ftitle);
 
-/*set sr value to solvent. Need to edit the AU per instrument*/
+/*set sr value to solvent. Need to edit the AU per instrument
+depreceated - really need to find 1H and do xiref
+*/
 
-XAU("service-13cref","");
+//XAU("service-13cref","");
 
 /*do a bit of processing to check the result*/
 EFP
@@ -67,11 +74,21 @@ STOREPAR("F2P", -10.0);
 STOREPAR("MI", 1.0);
 STOREPAR("PC", 0.2);
 
-ABS
-XCMD("apkm");
-PP
-APKS
-XAU("service_nohump","");
+if ( (ts_major>=4) && (ts_minor>=2)  ) 
+{
+    EFP
+    XCMD("sendgui apbk")
+    XCMD("sendgui apbk -bo" )
+}
+else
+	{
+	   ABS
+       XCMD("apkm");
+       PP
+       APKS
+       XAU("service_nohump","");
+    }
+
 PP
 while (finish==0)
 {
@@ -96,13 +113,22 @@ STOREPAR("USERP5",auproc)
 STOREPAR("USERP1",up1)
 DATASET(name,orig_exp,procno,disk,user);
 VIEWDATA_SAMEWIN
-XAU("service-13cref","");
+//XAU("service-13cref",""); //depreceated
 EFP
-ABS
-XCMD("apkm");
-PP
-APKS
-XAU("service_nohump","");
+if ( (ts_major>=4) && (ts_minor>=2) ) 
+{
+     Proc_err(DEF_ERR_OPT,"doing apbk as ts_major=%i and ts_minor=%i",ts_major,ts_minor);
+    XCMD("sendgui apbk")
+    XCMD("sendgui apbk -bo" )
+}
+else 
+   {
+      ABS
+      XCMD("apkm");
+      PP
+      APKS
+      XAU("service_nohump","");
+   }
 PP
 //AUTOPLOT;
 QUIT

@@ -140,7 +140,7 @@ proc_or_not=1;
 
 
 Proc_err ( INFO_OPT, "Starting program");
-sleep(delaytime);
+sleep(120); //initial delay to allow topspin to start before doing anything else
 XCMD("setdef ackn no");
 XCMD("setdef stdout on");
 XCMD("setdef stderr on");

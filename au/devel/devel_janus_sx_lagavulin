@@ -75,6 +75,7 @@
 // XCMD(tmp_str);
 //---changed XAUP for service-def-proc
 //---sprinkled some more setdef ackn no - when poise is called, it might turn click awway messages on again
+//Added/moved code for title writing so its erased in 'w' mode, then appended after XAUA. Retains any title XAUA writes
 /****************************************/
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 char def_file[255]="f:/chemist/defaults-csv.txt"; //janus software defaults

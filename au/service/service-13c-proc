@@ -1,3 +1,4 @@
+/*service-13c-proc*/
 /*program to automatically process 13c spectra*/
 /*runs a CONVDTA to do a backwards prediction to remove n points*/
 /*n being entered at the command line or 24 by default*/
@@ -120,7 +121,7 @@ if ( ((ts_major>=4) && (ts_minor>1) )
    || ((ts_major==3) && (ts_minor>0) && (ts_patch>=6))
    ) 
 {
-    Proc_err(DEF_ERR_OPT,"doing apbk as we have  ts_major=%i and ts_minor=%i",ts_major,ts_minor);
+   // Proc_err(DEF_ERR_OPT,"doing apbk as we have  ts_major=%i and ts_minor=%i",ts_major,ts_minor);
     XCMD("sendgui apbk")
     XCMD("sendgui apbk -bo" )
 }

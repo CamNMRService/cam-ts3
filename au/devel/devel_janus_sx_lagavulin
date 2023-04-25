@@ -668,7 +668,7 @@ sprintf(tmp_str,"janus-email %s",def_file);
 XCMD(tmp_str);
 
 //CPR_exec("janus-email",WAIT_TERM);
-
+XCMD("setdef ackn no");
 //OK, now copy the topshim data to the dataset somewhere
 #ifdef	HAS_WINDOWS_FEATURES
 		

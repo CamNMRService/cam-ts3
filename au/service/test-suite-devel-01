@@ -16,7 +16,7 @@ char P_cal_prog[PATH_MAX]="poise_31p_p1_b1_01";
 char F_cal_prog[PATH_MAX]="poise_19f_p1_b1_01";
 char HUMP_cal_prog[PATH_MAX]="hump_sino_test_b1_01";
 char solvent[15]="CD3CN";
-char topshim_opt[31]="convcomp";
+char topshim_opt[31]="convcomp tunea plotall";
 char str_pos[PATH_MAX]="1";
 
 GETCURDATA

@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------*/
-/* Title	: Program devel_janus_sx_lagavulin				*/
+/* Title	: Program janus_sx_laphroiag				*/
 /*has specific parts for this instrument */
 /* WORK IN PROGRESS TO UPDATE TO TOPSPIN 3			*/
 /* Topspin 3 update done by djh in cambridge*/
@@ -287,7 +287,7 @@ while ( finish != TRUE ) //THE MAIN LOOP
 {
 	/*--- Let everyone know that the loop is running -*/
 /*	Proc_err ( INFO_OPT, "Waiting for sample...Loop(%d)",curloop); */
-XCMD("setdef ackn no");
+  XCMD("setdef ackn no");
 	sleep(10);
 	/*------------------------------------------------*/
 	if ( access(prodfile,R_OK)!=0)
@@ -591,8 +591,8 @@ XCMD(tmp_str);
 			proc_or_not=get_proc_or_not_val(pornot);
 			if ((proc_or_not!=1)||(nexpt==10))
 			{
-			CPR_exec("xaup",WAIT_TERM);
-			//	XCMD("xaup")
+			//CPR_exec("xaup",WAIT_TERM);
+				XCMD("service-def-proc") //lets see if this fixes the poise automated programs XAUP(proc_1d) trying to print.
 			}
 
 	/*if there's no email address in the comments file, set it to camnmr, useful for testing*/

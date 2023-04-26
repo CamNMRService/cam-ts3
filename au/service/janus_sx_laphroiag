@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------*/
-/* Title	: Program janus_sx_laphroiag				*/
+/* Title	: Program devel_janus_sx_laphroiag				*/
 /*has specific parts for this instrument */
 /* WORK IN PROGRESS TO UPDATE TO TOPSPIN 3			*/
 /* Topspin 3 update done by djh in cambridge*/
@@ -75,6 +75,7 @@
 // XCMD(tmp_str);
 //---changed XAUP for service-def-proc
 //---sprinkled some more setdef ackn no - when poise is called, it might turn click awway messages on again
+//Added/moved code for title writing so its erased in 'w' mode, then appended after XAUA. Retains any title XAUA writes
 /****************************************/
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 char def_file[255]="f:/chemist/defaults-csv.txt"; //janus software defaults
@@ -287,7 +288,7 @@ while ( finish != TRUE ) //THE MAIN LOOP
 {
 	/*--- Let everyone know that the loop is running -*/
 /*	Proc_err ( INFO_OPT, "Waiting for sample...Loop(%d)",curloop); */
-  XCMD("setdef ackn no");
+
 	sleep(10);
 	/*------------------------------------------------*/
 	if ( access(prodfile,R_OK)!=0)
@@ -315,6 +316,7 @@ while ( finish != TRUE ) //THE MAIN LOOP
 	/*---Now extract the data from the line-----------*/
 	if ( file_data == NULL ) //what to do if no data from prod file
 	{
+		XCMD("setdef ackn no");
 		fclose( fprod );
 		proderrcount++;
 		if (proderrcount>2)
@@ -525,7 +527,12 @@ XCMD(tmp_str);
 		ROT // does "ro acqu"
 	}
 	
-	   
+	//Add a space to title here in 'w' mode to erase any guff
+	sprintf( titlefile, "%s%s/%s/%d/pdata/1/title", diskunit, user,tmp_fname, nexpt );
+	ftitle = fopen( titlefile, "w" ); 
+	fputs ( " ", ftitle );
+	fclose ( ftitle );
+	
 	sprintf(tmp_cmd,"xaua");
 	XCMD("setdef ackn no"); //Lets see if this fixes the poise AU programs turning on the click away messages
     AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
@@ -555,7 +562,7 @@ XCMD(tmp_str);
 			fclose( fjup );
 			/*CHECK*/
 			sprintf( titlefile, "%s%s/%s/%d/pdata/1/title", diskunit, user,tmp_fname, nexpt );
-			ftitle = fopen( titlefile, "w" );
+			ftitle = fopen( titlefile, "a" ); //open in append mode to add to any existing title
 			sprintf( titletext, "%s\n%s\n%s\n%s\n%s\nPosition: %d\n%s", tmp_fname, oi, juser, experiment, solvent, cpos, comments );
 			fputs ( titletext, ftitle );
 			fclose ( ftitle );
@@ -591,8 +598,8 @@ XCMD(tmp_str);
 			proc_or_not=get_proc_or_not_val(pornot);
 			if ((proc_or_not!=1)||(nexpt==10))
 			{
-			//CPR_exec("xaup",WAIT_TERM);
-				XCMD("service-def-proc") //lets see if this fixes the poise automated programs XAUP(proc_1d) trying to print.
+			CPR_exec("service-def-proc",WAIT_TERM);
+			//	XCMD("xaup")
 			}
 
 	/*if there's no email address in the comments file, set it to camnmr, useful for testing*/
@@ -662,7 +669,7 @@ sprintf(tmp_str,"janus-email %s",def_file);
 XCMD(tmp_str);
 
 //CPR_exec("janus-email",WAIT_TERM);
-
+XCMD("setdef ackn no");
 //OK, now copy the topshim data to the dataset somewhere
 #ifdef	HAS_WINDOWS_FEATURES
 		

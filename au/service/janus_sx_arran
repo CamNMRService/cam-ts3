@@ -288,7 +288,7 @@ while ( finish != TRUE ) //THE MAIN LOOP
 {
 	/*--- Let everyone know that the loop is running -*/
 /*	Proc_err ( INFO_OPT, "Waiting for sample...Loop(%d)",curloop); */
-  XCMD("setdef ackn no");
+ 
 	sleep(10);
 	/*------------------------------------------------*/
 	if ( access(prodfile,R_OK)!=0)
@@ -316,6 +316,7 @@ while ( finish != TRUE ) //THE MAIN LOOP
 	/*---Now extract the data from the line-----------*/
 	if ( file_data == NULL ) //what to do if no data from prod file
 	{
+		XCMD("setdef ackn no");
 		fclose( fprod );
 		proderrcount++;
 		if (proderrcount>2)

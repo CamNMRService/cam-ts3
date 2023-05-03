@@ -598,7 +598,7 @@ XCMD(tmp_str);
 			proc_or_not=get_proc_or_not_val(pornot);
 			if ((proc_or_not!=1)||(nexpt==10))
 			{
-			CPR_exec("service-def-proc",WAIT_TERM);
+			CPR_exec("service-def-proc",WAIT_TERM); //fix for poise xaup being wrong
 			//	XCMD("xaup")
 			}
 

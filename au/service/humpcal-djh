@@ -1,0 +1,243 @@
+/********-*-C++-*- **********************************************/
+/*	humpcal		09.06.1997				*/
+/****************************************************************/
+/*	Short Description :					*/
+/*	This AU program performs the 'hump test' - it measures	*/
+/*	the width of a peak at 0.55% and 0.11% of its signal	*/
+/*	height.							*/
+/****************************************************************/
+/*	Keywords :						*/
+/*	hump test, half width					*/
+/****************************************************************/
+/*	Description/Usage :					*/
+/*	This program calculates the width of a peak at		*/
+/*	0.55% and 0.11% of its signal height. The result	*/
+/*	is referred to as the 'hump test'. The AU program	*/
+/*	was primarily written to determine the width of		*/
+/*	the Chloroform peak, but can be applied to other	*/
+/*	singular peaks as well. The result is written to the	*/
+/*	file 'humpcal.txt' in the processed data directory	*/
+/*	and is also displayed in foreground.			*/
+/*	This function uses a file called linutil which		*/
+/*	resides in the /.../prog/include/inc directory.		*/
+/*								*/
+/*	Important Note : This routine uses the peak found	*/
+/*			 by the peak picking in the current	*/
+/*			 region of interest.			*/
+/*								*/
+/****************************************************************/
+/*	Author(s) :						*/
+/*	Name		: Mike Engelhardt			*/
+/*	Organisation	: Bruker BioSpin GmbH			*/
+/*	Email		: michael.engelhardt@bruker.com		*/
+/****************************************************************/
+/*	Name	Date		Modification:			*/
+/*	eng	970609		created				*/
+/*	ge	20061213	adapted to xml peak format	*/
+/*	ge	20071206	new data path			*/
+/*	ge	20081125	interchanged lower and upper	*/
+/*	ge	20100122	reinserted PP			*/
+/****************************************************************/
+/*
+/*MOD by djh35 to *not* return an error code if it fails*/
+
+/*$Id: humpcal,v 1.20.2.1 2017/10/04 08:14:48 wem Exp $*/
+
+
+AUERR = local_au(curdat);
+QUIT
+
+#include <inc/linutil>
+
+int local_au(const char *curdat)
+{
+    const char* pppath;
+    FILE *fp;
+    double upwidth, lowwidth, halfwidth, hw2, upl, upr, lowl, lowr;
+    double confidfact, curpos;
+    float sr;
+    int fd, posx, upthr, upval, lowval, minpoints, intens, si, i;
+    int byteorder, numPeaks;
+    int maxPeakNo = 0;
+    int ret;
+    double oldcy;
+    float oldmi, oldmaxi, oldpc;
+
+    upwidth = 0.0;
+    lowwidth = 0.0;
+
+/* Save some original parameters */
+
+    FETCHPAR("CY",&oldcy)
+    FETCHPAR("MI",&oldmi)
+    FETCHPAR("MAXI",&oldmaxi)
+    FETCHPAR("PC",&oldpc)
+
+/* Find peak of interest */
+
+    STOREPAR("CY",     100.0)
+    STOREPAR("MI",      50.0)
+    STOREPAR("MAXI", 10000.0)
+    STOREPAR("PC",       4.0)
+    PP
+    ret = AUERR;
+
+    STOREPAR("CY",   oldcy)
+    STOREPAR("MI",   oldmi)
+    STOREPAR("MAXI", oldmaxi)
+    STOREPAR("PC",   oldpc)
+
+    Show_meta(SM_PROC | SM_PROCP);
+
+    AUERR = ret;
+    ERRORABORT
+
+/* read result of peak picking */
+    numPeaks = readPeakList(PROCPATH(0));
+
+    if (numPeaks == -1)
+    {
+	Proc_err(DEF_ERR_OPT, "%s", getPeakError());
+
+//	ABORT;
+   return 0;
+    }
+    if (numPeaks == 0)
+    {
+	Proc_err(DEF_ERR_OPT, "No peak found!\n"
+			      "Please do peak picking (pps) first,\n"
+			      "then run humpcal again.");
+//	ABORT;
+   return 0;
+    }
+    if (numPeaks > 1)
+    {
+	double maxIntensity = 0.0;
+
+	Proc_err(DEF_ERR_OPT, "More than one peak in this region, using the maximum peak");
+	for (i = 0; i < numPeaks; i++)
+	{
+	    double intensity = getPeakIntensity(i);
+	    if (maxIntensity < intensity)
+	    {
+		maxIntensity = intensity;
+		maxPeakNo = i;
+	    }
+	}
+    }
+    curpos = getPeakFreqHz(maxPeakNo);
+    posx = getPeakAddress(maxPeakNo);
+    freePeakList();
+
+/* Read intensity of reference point from 1r file */
+
+    FETCHPARS("SI",&si);
+    if (posx < 0  ||  posx >= si)
+    {
+	Proc_err(DEF_ERR_OPT, "Peak position outside spectrum detected");
+//	ABORT;
+   return 0;
+    }
+    pppath = PROCPATH("1r");
+    if ((fd = open(pppath,O_RDONLY)) == -1)
+    {
+	Perror(DEF_ERR_OPT,pppath);
+//	ABORT;
+   return 0;
+    }
+    if (lseek(fd, 4 * posx, SEEK_SET) == -1)
+    {
+	Perror(DEF_ERR_OPT,pppath);
+	close(fd);
+//	ABORT;
+   return 0;
+    }
+    i = read(fd,&intens,sizeof(int));
+    if (i != sizeof(int))
+    {
+	Proc_err(DEF_ERR_OPT, "%s\n%s", pppath, i < 0 ? strerror(errno)
+						      : "read off limits");
+	close(fd);
+//	ABORT;
+   return 0;
+    }
+    close(fd);
+    FETCHPARS("BYTORDP", &byteorder)
+    local_swap4(&intens, sizeof(int), byteorder);
+
+/* Determine half width at half height */
+
+    upthr = 0.8 * intens;		/* start fit at this level */
+    upval = 0.5 * intens;		/* height at 50% intensity */
+    lowval = 0.5 * intens;		/* height at 50% intensity */
+    minpoints = 10;
+    confidfact = 2.0;		/* confidence factor : number of */
+				/* additional points for fitting */
+
+    if (peakwidth(curdat, posx, posx, upthr, upval, lowval, minpoints,
+		  confidfact, &upl, &upr, &lowl, &lowr, &halfwidth, &hw2))
+    {
+//	ABORT;
+   return 0;
+    }
+
+/* Determine hump width */
+
+    upthr = 0.01 * intens;		/* start fit at this level   */
+    upval = 0.0055 * intens;		/* height at 0.55% intensity */
+    lowval = 0.0011 * intens;		/* height at 0.11% intensity */
+    minpoints = 20;
+
+    if (peakwidth(curdat, posx, posx, upthr, upval, lowval, minpoints,
+		  confidfact, &upl, &upr, &lowl, &lowr, &upwidth, &lowwidth))
+    {
+//	ABORT;
+   return 0;
+    }
+
+/* Round values for printout of results */
+
+    halfwidth = ((double)(iround(halfwidth*100.0)))/100.0;
+    upwidth = ((double)(iround(upwidth*10.0)))/10.0;
+    lowwidth = ((double)(iround(lowwidth*10.0)))/10.0;
+    upr = ((double)(iround(upr*10.0)))/10.0;
+    upl = ((double)(iround(upl*10.0)))/10.0;
+    lowr = ((double)(iround(lowr*10.0)))/10.0;
+    lowl = ((double)(iround(lowl*10.0)))/10.0;
+
+/* Report results */
+
+    if (i_argc > 2  &&  strcmp(i_argv[2], "orderly_message") == 0)
+	Proc_err(INFO_OPT, "Hump:\n"
+			   "at 0.55%%: between %.1f and %.1f Hz = %.1f Hz\n"
+			   "at 0.11%%: between %.1f and %.1f Hz = %.1f Hz\n"
+			   "at 50%%: Half width = %.2f Hz at %.1f Hz",
+		 upl,  upr,  upwidth,
+		 lowl, lowr, lowwidth,
+		 halfwidth, curpos);
+    else
+	Proc_err(INFO_OPT, "Hump:\n"
+			   "at 0.11%%: between %.1f and %.1f Hz = %.1f Hz\n"
+			   "at 0.55%%: between %.1f and %.1f Hz = %.1f Hz\n"
+			   "at 50%%: Half width at %.1f Hz = %.2f Hz",
+		 lowl, lowr, lowwidth,
+		 upl,  upr,  upwidth,
+		 curpos, halfwidth);
+
+/* humpcal.txt is path to ASCII file for results - open it */
+
+    pppath = PROCPATH("humpcal.txt");
+    if ((fp = fopen(pppath, "wt")) == 0)
+    {
+	Proc_err(DEF_ERR_OPT, "%s\n%s", "Cannot open file for writing:", pppath);
+//	ABORT;
+   return 0;
+    }
+
+    FETCHPARS("SR", &sr)
+    curpos += sr;	  /* determine SR value so that signal is at 0 */
+    fprintf(fp,"%.1f\n%.1f\n%.2f\n%.2f\n",
+	    upwidth,lowwidth,halfwidth,curpos);
+    fclose(fp);
+    return 0;
+}

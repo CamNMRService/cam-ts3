@@ -1,0 +1,30 @@
+/*** ^^A -*-C++-*- **********************************************/
+/*	au_zg			10.10.1990			*/
+/****************************************************************/
+/*	Short Description :					*/
+/*	General AU program for data acquisition.		*/
+/****************************************************************/
+/*	Keywords :						*/
+/*	zg							*/
+/****************************************************************/
+/*	Description/Usage :					*/
+/*	General AU program for data acquisition.		*/
+/*	First an rga is done, then the acquisition is started.	*/
+/****************************************************************/
+/*	Author(s) :						*/
+/*	Name		: Peter Dvortsak			*/
+/*	Organisation	: Bruker Analytik			*/
+/*	Email		: peter.dvortsak@bruker.de		*/
+/****************************************************************/
+/*	Name		Date	Modification:			*/
+/*	pdv		901010	created				*/
+/****************************************************************/
+/*
+$Id: au_zg,v 1.5 2000/07/12 11:39:39 gsc Exp $
+*/
+
+GETCURDATA
+XCMD("topshim tunea convcomp");
+RGA
+ZG
+QUIT

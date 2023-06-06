@@ -76,6 +76,7 @@
 // XCMD(tmp_str);
 //---changed XAUP for service-def-proc
 //---sprinkled some more setdef ackn no - when poise is called, it might turn click awway messages on again
+//PTG 2023/06/06 forced RO=0 after rpar in junk dataset, so it doesn't spin at all
 /****************************************/
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 char def_file[255]="e:/chemist/defaults-csv.txt"; //janus software defaults
@@ -266,6 +267,7 @@ if ( AUERR <0 )
 } else {
     RPAR(test_parset, "all")
     sprintf(tmp_cmd, "atma");
+	STOREPAR("RO",0)
     AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
     if ( AUERR <0 )
     {

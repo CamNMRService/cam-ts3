@@ -720,12 +720,13 @@ if(sampleproblem==1)
     strcat(sampleinfostring,"\n PLease contact the NMR service team in case of any questions");
     strcpy(sampleinfofile,ACQUPATH("sampleinfo"));
     sampleinfo = fopen (sampleinfofile,"a+");
+    Proc_err(INFO_OPT,"%s",sampleinfostring);
 	if (sampleinfo == NULL)
 	{
 		Proc_err(INFO_OPT, "Can't open %s to write sample problem info", sampleinfofile);
 	} else
 	{
-		
+		Proc_err(INFO_OPT,"%s",sampleinfostring);
 		fputs(sampleinfostring,sampleinfo);
 		fclose(sampleinfo);
         Proc_err(INFO_OPT,"%s",sampleinfostring);

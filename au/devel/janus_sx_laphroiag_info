@@ -727,7 +727,7 @@ if(sampleproblem==1)
 
 }
 //janus-email needs the location of the defaults file to be passed to it
-sprintf(tmp_str,"janus-email %s",def_file);
+sprintf(tmp_str,"devel-janus-email-sampleinfo %s",def_file);
 XCMD(tmp_str);
 
 //CPR_exec("janus-email",WAIT_TERM);

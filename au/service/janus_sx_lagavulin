@@ -77,6 +77,7 @@
 //---sprinkled some more setdef ackn no - when poise is called, it might turn click awway messages on again
 //Added/moved code for title writing so its erased in 'w' mode, then appended after XAUA. Retains any title XAUA writes
 /****************************************/
+//PTG 2023/06/06 atma storewobb 700
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 char def_file[255]="f:/chemist/defaults-csv.txt"; //janus software defaults
 float   delaytime=1.0;
@@ -516,7 +517,7 @@ XCMD(tmp_str);
 	{
 		// stop spinning
 		ROTOFF
-        sprintf(tmp_cmd,"atma");
+        sprintf(tmp_cmd,"atma storewobb 700");
 		AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 	    if ( AUERR <0 )
 		  {

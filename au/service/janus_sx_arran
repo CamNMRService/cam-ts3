@@ -77,6 +77,7 @@
 //---changed XAUP for service-def-proc
 //---sprinkled some more setdef ackn no - when poise is called, it might turn click awway messages on again
 //PTG 2023/06/06 forced RO=0 after rpar in junk dataset, so it doesn't spin at all
+//PTG 2023/06/06 atma storewobb 700
 /****************************************/
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 char def_file[255]="e:/chemist/defaults-csv.txt"; //janus software defaults
@@ -468,7 +469,7 @@ if ( strstr ( protocol, "POS60") != NULL )
 	// move atma to here for Arran (only), as we clearly only need to tune once!!
 	// and better to have before topshim. NB junk/10/1 must be a proton/carbon dataset
 	
-	    sprintf(tmp_cmd,"atma");
+	    sprintf(tmp_cmd,"atma storewobb 700");
 	    AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 	    if ( AUERR <0 )
 		{

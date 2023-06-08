@@ -237,8 +237,7 @@ if (pornot == NULL)
 	fclose(pornot);
 }
 
-/* initialse sample info string:*/
-sprintf(sampleinfostring,"Problems found with this sample:\n");
+
 
 pornot = fopen (pornotfile,"r");
 proc_or_not=get_proc_or_not_val(pornot);
@@ -420,6 +419,10 @@ if ( strstr ( protocol, "POS60") != NULL )
 	sprintf( tmp_cmd, "sx %d",cpos);
 //	sprintf( sxcmd, "sendgui sx %d",cpos);
 	AUERR=CPR_exec(tmp_cmd, WAIT_TERM);
+
+    /* initialse sample info string:*/
+sprintf(sampleinfostring,"Problems found with this sample:\n");
+sampleproblem=0;
 
 
 	if ( AUERR <0 )

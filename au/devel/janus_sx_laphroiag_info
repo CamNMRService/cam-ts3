@@ -716,6 +716,7 @@ if ((pulsecalfile = fopen(pulsecalfilename, "r")) != 0)
 // write out info file in current dataset for janus purposes, if necessary
 if(sampleproblem==1)
 {
+    Proc_err(INFO_OPT,"%s",sampleinfostring);
     strcat(sampleinfostring,"\n PLease contact the NMR service team in case of any questions");
     strcpy(sampleinfofile,ACQUPATH("sampleinfo"));
     sampleinfo = fopen (sampleinfofile,"a+");

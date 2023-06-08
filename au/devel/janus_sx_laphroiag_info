@@ -504,9 +504,9 @@ if (AUERR<0)
 {
         strcat(sampleinfostring,"Failed to shim: check spectrum quality - lineshape may be bad, check sample is clear, check sample filling is >40mm\n");
         sampleproblem=1;
-        Proc_err(INFO_OPT,"AUERR=%d", AUERR);
+        Proc_err(INFO_OPT,"topshim fail - AUERR=%d", AUERR);
 }
-
+Proc_err(INFO_OPT,"after topshim AUERR=%d", AUERR);
 
 //old way of calling topshim below
 //CPR_exec("janus_topshim_watchdog",WAIT_TERM);

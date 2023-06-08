@@ -80,7 +80,7 @@
 //PTG 2023/06/06 atma storewobb 700
 
 /*
-Devel version: adding creation of an info file which reports any errors with lock, atma , topshim
+Devel version: adding creation of an info file which reports any errors with lock, atma , topshim, and long proton pulse
 */
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 char def_file[255]="f:/chemist/defaults-csv.txt"; //janus software defaults
@@ -104,6 +104,11 @@ char    reportdest[PATH_MAX];
 char    reportsource[PATH_MAX];
 char    sampleinfofile[PATH_MAX];
 char sampleinfostring[PATH_MAX];// just make one string, and write to file at the end so that we aer in the dataset from which janus email runs
+char    pulsecalfilename[PATH_MAX];
+char pulsecalcontent[128];
+char pulsecalerror[256];
+FILE *pulsecalfile = NULL;
+float p1, statusp1;
 char   *env_name, *file_data, *field, *ed;
 FILE   *fprod = NULL, *facqu = NULL, *ferror = NULL, *fwarn = NULL;
 FILE   *fshim = NULL, *fwait = NULL, *ftitle = NULL, *fsx = NULL;
@@ -688,9 +693,26 @@ if (proc_or_not==1)
 		      sleep( delaytime );
 	        }
 
+/* Check for a pulsecal file in the root NAME directory, and if it's there check the P1 vs s P1*/
+sprintf(pulsecalfilename,"%s\\%s\pulsecal",disk,name);
+if ((pulsecalfile = fopen(pulsecalfilename, "r")) != 0)
+{
+	if( fgets(pulsecalcontent,128,pulsecalfile) !=NULL)
+    {
+        sscanf(pulsecalcontent,"%f %f", &p1, &statusp1);
+        if (p1/statusp1 > 1.2)
+        {
+            sampleproblem=1;
+            sprintf(pulsecalerror,"Measured proton pulse %fus is more than 20% longer than reference pulse length %fus - data quality may be compromised.\n Does your sample have high ionic strength?\n ", p1, statusp1);
+            strcat(sampleinfostring,pulsecalerror);
+        }
+    }
+} 
+
 // write out info file in current dataset for janus purposes, if necessary
 if(sampleproblem==1)
 {
+    strcat(sampleinfostring,"\n PLease contact the NMR service team in case of any questions");
     strcpy(sampleinfofile,ACQUPATH("sampleinfo"));
     sampleinfo = fopen (sampleinfofile,"a+");
 	if (sampleinfo == NULL)

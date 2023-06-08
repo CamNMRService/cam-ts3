@@ -34,7 +34,7 @@ char pulsecalfilename[PATH_MAX];
 FILE *results_file = NULL;
 FILE *pulsecalfile = NULL;
 sprintf(results_file_name,"C:\\Bruker\\diskless\\prog\\logfiles\\pulsecallog");
-sprintf(pulsecalfilename,"%s\\%s\pulsecal",disk,name);
+sprintf(pulsecalfilename,"%s\\%s\\pulsecal",disk,name);
 GETCURDATA
 RGA
 ZG

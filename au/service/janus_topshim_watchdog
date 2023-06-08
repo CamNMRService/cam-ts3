@@ -15,7 +15,7 @@
 //janus_topshim_watchdog THIS_IS_A_MESSAGE_TO_SEND ordmax=8
 //NB the message can't have spaces in... Ortherwise would look like more command line options.
 
-
+// PTG 2023_06_08 ABORT when it fails so returns auerr=-1
 
 #include <time.h>
 time_t now_s, dtime_s;		  	/* seconds since 1970 */
@@ -162,6 +162,8 @@ if(AUERR)
 //  strcpy(reportdest, ACQUPATH("topshim_report.txt"));
 //  sprintf(reportsource, "%s/%s/topshim_report.txt", PathXWinNMRProg(), PathXWinNMRCurDir());
 //  dircp(reportsource, reportdest);
+// it failed so we need to ABORT:
+ABORT
 }
 
 

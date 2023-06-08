@@ -504,6 +504,7 @@ if (AUERR<0)
 {
         strcat(sampleinfostring,"Failed to shim: check spectrum quality - lineshape may be bad, check sample is clear, check sample filling is >40mm\n");
         sampleproblem=1;
+        Proc_err(INFO_OPT,"AUERR=%d", AUERR)
 }
 
 
@@ -723,6 +724,7 @@ if(sampleproblem==1)
 		
 		fputs(sampleinfostring,sampleinfo);
 		fclose(sampleinfo);
+        Proc_err(INFO_OPT,"%s",sampleinfostring);
 	}
 
 }

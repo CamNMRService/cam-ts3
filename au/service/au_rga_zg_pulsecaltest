@@ -38,7 +38,7 @@ ZG
 XAU("pulsecal","quiet")
 FETCHPAR("P 1", &p1)
 FETCHPARS("SOLVENT",solvent)
-sprintf(results_content,"%s %s %d\n",name,solvent,p1);
+sprintf(results_content,"%s %s %f\n",name,solvent,p1);
 if ((results_file = fopen(results_file_name, "a+")) == 0)
 {
 	STOP

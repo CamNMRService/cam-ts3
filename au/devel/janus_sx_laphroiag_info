@@ -717,9 +717,9 @@ if ((pulsecalfile = fopen(pulsecalfilename, "r")) != 0)
 if(sampleproblem==1)
 {
     Proc_err(INFO_OPT,"%s",sampleinfostring);
-    strcat(sampleinfostring,"\n PLease contact the NMR service team in case of any questions");
+    strcat(sampleinfostring,"\n Dummy string");
     strcpy(sampleinfofile,ACQUPATH("sampleinfo"));
-    sampleinfo = fopen (sampleinfofile,"a+");
+    sampleinfo = fopen (sampleinfofile,"w");
     Proc_err(INFO_OPT,"%s",sampleinfostring);
 	if (sampleinfo == NULL)
 	{

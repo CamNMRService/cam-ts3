@@ -116,11 +116,10 @@ if( access( pdfname, R_OK ) == 0 ) // if there is a pdf there
 //	Proc_err(INFO_OPT, "pdf there...\n");
 	pdfthere=1;
 }
-strcpy(sampleinfofile,ACQUPATH("SampleProblems"));
+strcpy(sampleinfofile,ACQUPATH("SampleProblems.txt"));
 if( access( sampleinfofile, R_OK ) == 0 ) // if there is a sampleinfo file there there 
 {	
-//	Proc_err(INFO_OPT, "pdf there...\n");
-	sampleinfo=1;
+	sampleinfo=1; // set flag
 }
 
 //Proc_err(INFO_OPT, "fetching email address\n");

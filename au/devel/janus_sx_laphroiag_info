@@ -81,6 +81,9 @@
 
 /*
 Devel version: adding creation of an info file which reports any errors with lock, atma , topshim, and long proton pulse
+Made string for holding info file text, long enough...
+Removed various debugging messages
+
 */
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 char def_file[255]="f:/chemist/defaults-csv.txt"; //janus software defaults
@@ -103,7 +106,7 @@ char	  proclist[1024],procinstruct[1024];
 char    reportdest[PATH_MAX];
 char    reportsource[PATH_MAX];
 char    sampleinfofile[PATH_MAX];
-char sampleinfostring[PATH_MAX];// just make one string, and write to file at the end so that we aer in the dataset from which janus email runs
+char sampleinfostring[2048];// just make one string, and write to file at the end so that we aer in the dataset from which janus email runs
 char    pulsecalfilename[PATH_MAX];
 char pulsecalcontent[128];
 char pulsecalerror[256];
@@ -421,7 +424,7 @@ if ( strstr ( protocol, "POS60") != NULL )
 	AUERR=CPR_exec(tmp_cmd, WAIT_TERM);
 
     /* initialse sample info string:*/
-sprintf(sampleinfostring,"Problems found with this sample:\n");
+sprintf(sampleinfostring,"Problems occurred while running this sample:\n");
 sampleproblem=0;
 
 
@@ -505,11 +508,11 @@ sprintf(tmp_str,"janus_topshim_watchdog TOPSHIM_FAILED_%s_%i",tmp_fname,cpos);
 XCMD(tmp_str);
 if (AUERR<0)
 {
-        strcat(sampleinfostring,"Failed to shim: check spectrum quality - lineshape may be bad, check sample is clear, check sample filling is >40mm\n");
+        strcat(sampleinfostring,"Failed to shim: check spectrum quality - lineshape may be bad. Check sample is clear, check sample filling is >40mm, check for precipitate at the bottom.\n");
         sampleproblem=1;
         Proc_err(INFO_OPT,"topshim fail - AUERR=%d", AUERR);
 }
-Proc_err(INFO_OPT,"after topshim AUERR=%d", AUERR);
+
 
 //old way of calling topshim below
 //CPR_exec("janus_topshim_watchdog",WAIT_TERM);
@@ -716,20 +719,16 @@ if ((pulsecalfile = fopen(pulsecalfilename, "r")) != 0)
 // write out info file in current dataset for janus purposes, if necessary
 if(sampleproblem==1)
 {
-    Proc_err(INFO_OPT,"%s",sampleinfostring);
-    strcat(sampleinfostring,"\n Dummy string");
-    strcpy(sampleinfofile,ACQUPATH("sampleinfo"));
+    strcat(sampleinfostring,"\n Please contact the NMR service team in case of any questions!");
+    strcpy(sampleinfofile,ACQUPATH("SampleProblems"));
     sampleinfo = fopen (sampleinfofile,"w");
-    Proc_err(INFO_OPT,"%s",sampleinfostring);
 	if (sampleinfo == NULL)
 	{
 		Proc_err(INFO_OPT, "Can't open %s to write sample problem info", sampleinfofile);
 	} else
 	{
-		Proc_err(INFO_OPT,"%s",sampleinfostring);
 		fputs(sampleinfostring,sampleinfo);
 		fclose(sampleinfo);
-        Proc_err(INFO_OPT,"%s",sampleinfostring);
 	}
 
 }

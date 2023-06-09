@@ -116,7 +116,7 @@ if( access( pdfname, R_OK ) == 0 ) // if there is a pdf there
 //	Proc_err(INFO_OPT, "pdf there...\n");
 	pdfthere=1;
 }
-strcpy(sampleinfofile,ACQUPATH("sampleinfo"));
+strcpy(sampleinfofile,ACQUPATH("SampleProblems"));
 if( access( sampleinfofile, R_OK ) == 0 ) // if there is a sampleinfo file there there 
 {	
 //	Proc_err(INFO_OPT, "pdf there...\n");

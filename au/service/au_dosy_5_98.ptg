@@ -1,0 +1,38 @@
+/******* -*-C++-*- **********************************************/
+/*  au_dosy         29.04.2013                                  */
+/****************************************************************/
+/*  Short Description :                                         */
+/*  AU program for acquisition of DOSY data in automation.      */
+/****************************************************************/
+/*  Keywords :                                                  */
+/*  DOSY, automation, acquisition                               */
+/****************************************************************/
+/*  Description/Usage :                                         */
+/*  AU program for acquisition of DOSY data in automation.      */
+/*  rga is executed, then acquisition is started.               */
+/****************************************************************/
+/*  Author(s) :                                                 */
+/*  Name            : Rainer Kerssebaum                         */
+/*  Organisation    : Bruker BioSpin GmbH                       */
+/*  Email           : rainer.kerssebaum@bruker-biospin.de       */
+/****************************************************************/
+/*  Name    Date    Modification:                               */
+/*  rke     030819  created                                     */
+/*  rke     130429  modified to bypass spooler                  */
+/****************************************************************/
+/*
+$Id: au_dosy,v 1.2 2013/05/10 09:25:19 wem Exp $
+*/
+
+int     td1;
+
+FETCHPAR1("TD", &td1)
+// set lock.2 to avoid lineshape distortions - autophase not perfect
+XMAC("lock.2")
+AUTOPHASE 
+sleep(5);
+AUTOPHASE
+// Use 14% minimum gradient as lower amplitude points are bad with doubleSTE
+sprintf(text, "dosy 5 98 %d l y y y", td1);
+XCMD(text)
+QUIT

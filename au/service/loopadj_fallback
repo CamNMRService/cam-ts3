@@ -1,0 +1,108 @@
+/*** ^^A -*-C++-*- **********************************************/
+/*	loopadjnew		28.07.1999			*/
+/****************************************************************/
+/*	Short Description :					*/
+/*	Parameter optimization au program which calculates	*/
+/*	the lock parameters loop filter, loop gain and loop	*/
+/*	time for optimal long-time stability after adjusting 	*/
+/*	lock phase and lock gain to optimal.			*/
+/****************************************************************/
+/*	Keywords :						*/
+/*	optimization, loop filter, loop gain, loop time,	*/
+/*	lock phase, lock gain					*/
+/****************************************************************/
+/*	Description/Usage :					*/
+/*								*/
+/*	1. Adjust Lock Power for saturation.			*/
+/*	2. Then adjust the Lock power 2 to 3 dB below that	*/
+/*	   point.						*/
+/*	3. Start this AU program with				*/
+/*								*/
+/*		xau loopadj					*/
+/*								*/
+/*	   from the XWINNMR command line.			*/
+/*								*/
+/*	This au program will automatically adjust the lock	*/
+/* 	phase and lock gain to appropiate values. The lock	*/
+/* 	gain value is read into the equations to calculate the 	*/
+/*	correct loop time, filter and gain for that lock gain 	*/
+/*	value. The results will give optimal stability for 	*/
+/*	long term experiments. 					*/
+/*								*/
+/*	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!	*/
+/* 	This program will not produce the very best line shape	*/ 
+/*	or signal to noise.					*/
+/*	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!	*/
+/*								*/
+/*	This AU program is a near copy of Paul Fagerness	*/
+/*	program as listed in TAMU NMR Newsletter November 1997	*/
+/*	but uses some simpler equations for the calculations.	*/
+/****************************************************************/
+/*	Author(s) 	:					*/
+/*	Name		: Mike Brown				*/
+/*	Organisation	: Bruker USA, Houston			*/
+/*	Email		: mike.brown@bruker.nmr.com		*/
+/****************************************************************/
+/*	Name		Date	Modification:			*/
+/*	meb		971203	created				*/
+/*	eng		990713	revised version			*/
+/*	eng		990726  added automatic lock phase and 	*/
+/*				lock gain adjust		*/
+/*	meb		990728  equations modified 		*/
+/*								*/
+// fallback to weak regulation if gain >120 
+/****************************************************************/
+/*
+$Id:$
+*/
+
+float loopgain, lockgain, looptime;
+int loopfilter;
+double aa, bb, cc, dd, ee, xx;
+
+/* First, optimize lock phase and lock gain */
+XCMD("autophase");
+XCMD("autogain");
+
+/* Test for proper input, lock gain between 120 and 84 */
+
+GetBsmsFloatValue(BSMS_LOCK_GAIN,&lockgain);
+
+xx = lockgain;
+if (xx > 118.0) 
+{
+  xx=118.0;
+}
+
+/* Equation for loopfilter= aa X Lock Gain ^ ( bb / Lock Gain ) */
+
+aa = 2.6743515e-05;
+bb = 337.53647;
+
+loopfilter = (aa*pow(xx,(bb/xx)));
+PutBsmsFloatValue(BSMS_LOOP_FILTER,loopfilter);
+
+/* Equation for loopgain = aa - bb X Lock Gain */
+
+aa =93.318454;
+bb =0.93188816;
+loopgain =aa-(bb*xx);
+PutBsmsFloatValue(BSMS_LOOP_GAIN, loopgain);
+
+/* Equation for looptime = aa - ( bb X lock gain ) + ( cc * lock gain ) - ( dd X lock gain ^3 ) */
+
+aa = 11.767976;
+bb = 0.35032894;
+cc = 0.0033479054;
+dd = 9.9817562e-06;
+
+looptime = aa-(bb*xx)+(cc*xx*xx)-(dd*xx*xx*xx);
+PutBsmsFloatValue(BSMS_LOOP_TIME, looptime);
+
+(void) sprintf (text,"Loop Filter = %6d\n"
+		"Loop Gain   = %6.2f\n"
+		"Loop Time   = %6.2f",loopfilter, loopgain, looptime);
+
+QUITMSG(text);
+
+/* stat of sub-routines for adjustment of lock phase and lock gain */

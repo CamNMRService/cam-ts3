@@ -28,6 +28,8 @@ else
 }
 
 origheater = AUERR;  /* 0 = off, 1=on, -1=error! */
+Proc_err(INFO_OPT,"The heater is %d");
+
  }
 
  // if we exited th while loop we are in error state, eitehr off or comms problem - send email and pop up error

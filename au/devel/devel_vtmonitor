@@ -1,0 +1,39 @@
+/* vtmonitor */
+/* AU program to monitor the VTU / BSVT status and pop up error and send email if it's turned off*/
+
+ int origheater=1;
+
+/* whether a BSVT is present (2) or not       */
+
+int isVTU = LibAcqLVtuType();
+
+// Abort if failure to determine type
+if(isVTU < 0)
+{
+        Proc_err(DEF_ERR_OPT, "Error: %s", LibAcqGetErrMsg());
+        ABORT
+}
+ while (origheater==1)
+ {
+ // call vtu_heater to check status
+sleep(120);
+/* see whether VT unit is on */
+if ( isVTU==2 )
+{
+	XAU("vtc_heater2", "bsvt check")
+}
+else
+{
+	XAU("vtu_heater2", "check")
+}
+
+origheater = AUERR;  /* 0 = off, 1=on, -1=error! */
+ }
+
+ // if we exited th while loop we are in error state, eitehr off or comms problem - send email and pop up error
+Proc_err(DEF_ERR_OPT,"WARNING: VTU not switched on! CHeck ASAP");
+XAU("whoopwhoop","Arran VTU failure!!")
+STOPMSG("WARNING: VTU not switched on! CHeck ASAP")
+
+QUIT
+

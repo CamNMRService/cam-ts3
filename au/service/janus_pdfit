@@ -1,0 +1,40 @@
+/*Au program to produce pdf output*/
+/*Written by Duncan Howe djh35@cam.ac.uk*/
+/*2013, mod December to use generic Topspin3 PROCPATH(0) */
+/*2016, mod to add pulseprogram and nucleus to pdf name*/
+
+char pdfname[PATH_MAX]="null";
+char pul[255],nuc1[7];
+int finish=0;
+int suffix=1;
+GETCURDATA;
+DATASET( name, expno, procno, disk, user);
+FETCHPAR("PULPROG", &pul)
+FETCHPAR("NUC1",nuc1)
+XCMD("dpl1");
+
+while (finish==0)
+{
+	sprintf( pdfname, "%s/%s-%s-%s-%d.pdf",PROCPATH(0),name, pul, nuc1, suffix);
+	
+	//sprintf( pdfname, "%s%s/pdfs/%s-%s-%s-%d.pdf",disk, user, name, pul, nuc1, suffix);
+//sprintf( pdfname, "%s/%s-%d.pdf",PROCPATH(0),name,suffix);
+	if(access(pdfname, R_OK) != 0) // if we can't read pdf file assume its not there
+	{
+		finish=1;
+	}
+	else
+	{
+		suffix++;
+		
+	}
+}
+Proc_err(INFO_OPT,"pdfname=%s",pdfname);
+AUTOPLOT_TO_FILE(pdfname);
+
+/* uncomment to produce a archive of pdfs
+sprintf( pdfname, "e:/pdf/%s.pdf", name );
+AUTOPLOT_TO_FILE(pdfname);
+*/
+QUIT
+

@@ -18,7 +18,7 @@ char H_cal_prog[PATH_MAX]="poise_1h_p1_b1_01";
 char C_cal_prog[PATH_MAX]="poise_13c_p1_b1_01";
 char P_cal_prog[PATH_MAX]="poise_31p_p1_b1_01";
 char F_cal_prog[PATH_MAX]="poise_19f_p1_b1_01";
-char HUMP_cal_prog[PATH_MAX]="hump_sino_test_b1_01";
+char HUMP_cal_prog[PATH_MAX]="hump_sino_test_b1_02";
 char solvent[15]="CD3CN";
 char topshim_opt[31]="convcomp tunea plotall";
 char command[PATH_MAX];

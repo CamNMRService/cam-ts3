@@ -78,7 +78,9 @@
 //Added/moved code for title writing so its erased in 'w' mode, then appended after XAUA. Retains any title XAUA writes
 /****************************************/
 //PTG 2023/06/06 atma storewobb 700
+//djh 2023/06/14 make it handle the (reserved) pPOS 59 - can be used to run special service experiments
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
+
 char def_file[255]="d:/chemist/defaults-csv.txt"; //janus software defaults
 float   delaytime=1.0;
 int     expt=1, curloop=1, cpos, specno, jexpt, jsolv, finish=FALSE,i=1;
@@ -400,6 +402,11 @@ if ( strstr ( protocol, "POS60") != NULL )
 	cpos=60;
 }
 
+if ( strstr ( protocol, "POS59") != NULL )
+{
+	// found test sample string in protocol so set pos to 60
+	cpos=59;
+}
 
 
 /*remove comment for production */

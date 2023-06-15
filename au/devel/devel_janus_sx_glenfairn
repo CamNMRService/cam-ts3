@@ -79,6 +79,13 @@
 /****************************************/
 //PTG 2023/06/06 atma storewobb 700
 //djh 2023/06/14 make it handle the (reserved) POS 59 - can be used to run special service experiments
+//djh 2023/06/15 - make a call to devel_get_sxpress_status on sx error
+//changed tmp_cmd to 1024 in size
+// line 280 -
+// sprintf(tmp_cmd,"wget http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", sxpress_ip);
+// system(tmp_cmd);
+//added variable char sxpress_ip[16]="149.236.99.251"; to call devel_get_sxpress with
+
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 char def_file[255]="d:/chemist/defaults-csv.txt"; //janus software defaults
 float   delaytime=1.0;
@@ -94,9 +101,10 @@ char    exptfile[80], diskunit[40];
 char    prefix[40], shimset[40], defaultsfile[80], hdwerr[80];
 char    archpath[80], archive[20], jcmd_str[1024], outpath[1024];
 char    janusup[80], expttime[40], exptsfile[80], protocol[80];
-char    sxcmd[255], gradshim[20], comments[1024], command[1024], snostr[1024], tmp_cmd[256];
+char    sxcmd[255], gradshim[20], comments[1024], command[1024], snostr[1024], tmp_cmd[1024];
 char    statusstr[1024], awmfile[80],tmparchpath[1024],fidpath[1024],procau[1024];
 char	  proclist[1024],procinstruct[1024];
+char    sxpress_ip[16]="149.236.99.251";
 char    reportdest[PATH_MAX];
 char    reportsource[PATH_MAX];
 char   *env_name, *file_data, *field, *ed;
@@ -263,8 +271,10 @@ sprintf(tmp_cmd, "sx %i", test_pos);
 AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 if ( AUERR <0 )
 {
+	sprintf(tmp_cmd,"wget http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", sxpress_ip);
+	system(tmp_cmd);
 	sprintf(tmp_str, "INITIAL_TEST_SAMPLE_SX_%i_ERROR",test_pos);
-	XAU("whoopwhoop",tmp_str)
+	XAU("devel_whoopwhoop",tmp_str)
 } else {
     RPAR(test_parset, "all")
     sprintf(tmp_cmd, "atma");
@@ -273,7 +283,7 @@ if ( AUERR <0 )
     {
 	   sprintf(tmp_str, "INITIAL_TEST_SAMPLE_ATMA_ERROR");
 	   XAU("whoopwhoop",tmp_str)
-	   STOPMSG("Janus stopped - initial ii error")
+	   STOPMSG("Janus stopped - initial atma error")
     }
 
 }
@@ -439,8 +449,10 @@ if ( strstr ( protocol, "POS59") != NULL )
 		fclose( flog );
 		skipsample=1;
 // email us but don't quit in case it's not a real problem and is just skipping sample!!
+        sprintf(tmp_cmd,"wget http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", sxpress_ip);
+	    system(tmp_cmd);
         sprintf(tmp_str, "SX_INSERT_ERROR_%i_%s", cpos, tmp_fname);
-	    XAU("whoopwhoop",tmp_str)
+	    XAU("devel_whoopwhoop",tmp_str)
 	}
 /*ok, we have put the sample in the magnet; now run through its exps*/
 	if (skipsample==0)

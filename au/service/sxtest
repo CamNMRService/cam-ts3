@@ -1,0 +1,6 @@
+char sxcmd[32];
+int cpos=4;
+sprintf( sxcmd, "sx %d ",cpos);
+	AUERR=CPR_exec(sxcmd, WAIT_TERM);
+	Proc_err(DEF_ERR_OPT,"auerr=%d", AUERR);
+	QUIT

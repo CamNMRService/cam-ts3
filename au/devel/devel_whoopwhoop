@@ -73,7 +73,7 @@ while (i < strlen(instrum_name) )
 if (args == 3)
 {
    sprintf(title,"ERROR WITH %s %s",instrum_name, message); //no dashes allowed
-   sprintf(body,"%s WHOOP WHOOP!!! Problem with %s command!", instrum_name, message); //no dashes allowed
+   sprintf(body,"%s THIS IS A TEST... WHOOP WHOOP!!! Problem with %s command!", instrum_name, message); //no dashes allowed
 } else 
 {
 	 sprintf(title,"ERROR %s %s",instrum_name, cmd); //no dashes allowed

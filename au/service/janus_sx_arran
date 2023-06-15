@@ -78,6 +78,7 @@
 //---sprinkled some more setdef ackn no - when poise is called, it might turn click awway messages on again
 //PTG 2023/06/06 forced RO=0 after rpar in junk dataset, so it doesn't spin at all
 //PTG 2023/06/06 atma storewobb 700
+//djh 2023/06/14 make it handle the (reserved) pPOS 59 - can be used to run special service experiments
 /****************************************/
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 char def_file[255]="e:/chemist/defaults-csv.txt"; //janus software defaults
@@ -402,7 +403,11 @@ if ( strstr ( protocol, "POS60") != NULL )
 	cpos=60;
 }
 
-
+if ( strstr ( protocol, "POS59") != NULL )
+{
+	// found test sample string in protocol so set pos to 59
+	cpos=59;
+}
 
 /*remove comment for production */
 	sprintf( tmp_cmd, "sx %d",cpos);

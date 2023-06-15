@@ -439,7 +439,7 @@ if ( strstr ( protocol, "POS59") != NULL )
 		fclose( flog );
 		skipsample=1;
 // email us but don't quit in case it's not a real problem and is just skipping sample!!
-        sprintf(tmp_str, "INSERT_ERROR_%i_%s", cpos, tmp_fname);
+        sprintf(tmp_str, "SX_INSERT_ERROR_%i_%s", cpos, tmp_fname);
 	    XAU("whoopwhoop",tmp_str)
 	}
 /*ok, we have put the sample in the magnet; now run through its exps*/

@@ -98,7 +98,7 @@ fclose(recent_hist_file);
 
 if ( strstr(message,"SX") ) //we've been called due to a SX error
 {
-  sxpress_status_file = fopen(sxpress_status_path);
+  sxpress_status_file = fopen(sxpress_status_path,"r");
   if(sxpress_status_path != NULL ) //there is a status file there
   {
      if(num_attachments==0)

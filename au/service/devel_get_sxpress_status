@@ -1,7 +1,7 @@
 
 GETCURDATA
 char tmp_cmd[1024];
-char sxpress_ip[16]="149.236.99.251"
+char sxpress_ip[16]="149.236.99.251";
 
 //how about we allow definition by command line?
 

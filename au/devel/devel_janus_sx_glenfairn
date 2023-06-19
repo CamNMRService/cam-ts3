@@ -437,7 +437,7 @@ if ( strstr ( protocol, "POS59") != NULL )
 		sprintf( sxcmd, "sx %d ",cpos);
 		sprintf(tmp_cmd,"wget http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", sxpress_ip);
 	    system(tmp_cmd); //lets download the webpage with the samplejet status on
-		XAU("devel_parse_sexpress_web")
+		XAU("devel_parse_sexpress_web","")
 		AUERR=CPR_exec(sxcmd, WAIT_TERM);
 //remove comment around below for production not sure if this is needed, the above line should deal with it
 		/*SX( cpos );*/

@@ -78,14 +78,14 @@
 
            if ( strstr(out_line,"Error") )
            {
-            sprintf(out_txt,"time_buffer%s\n",out_line);
-		        fputs( out_line, output_file);
+            sprintf(out_txt,"%s%s\n",time_buffer,out_line);
+		        fputs( out_txt, output_file);
             
            }
            if ( strstr(out_line,"Changer Status") )
            {
-             sprintf(out_txt,"time_buffer%s\n",out_line);
-             fputs(out_line, output_file);
+             sprintf(out_txt,"%s%s\n",time_buffer,out_line);
+             fputs(out_txt, output_file);
            }
            fclose(output_file);
         }

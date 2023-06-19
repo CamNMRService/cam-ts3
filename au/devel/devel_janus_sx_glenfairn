@@ -104,7 +104,7 @@ char    janusup[80], expttime[40], exptsfile[80], protocol[80];
 char    sxcmd[255], gradshim[20], comments[1024], command[1024], snostr[1024], tmp_cmd[1024];
 char    statusstr[1024], awmfile[80],tmparchpath[1024],fidpath[1024],procau[1024];
 char	  proclist[1024],procinstruct[1024];
-char    sxpress_ip[16]="149.236.99.251";
+char    sxpress_ip[16]="149.236.99.34";
 char    reportdest[PATH_MAX];
 char    reportsource[PATH_MAX];
 char   *env_name, *file_data, *field, *ed;

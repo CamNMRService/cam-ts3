@@ -1,0 +1,13 @@
+char solvent[128];
+char experiment[128];
+int test;
+FETCHPAR("SOLVENT",solvent);
+FETCHPAR("EXP",experiment);
+
+if (strstr(solvent,"H2O"))
+{
+	Proc_err(DEF_ERR_OPT,"h2o %s",  experiment);
+	//protonated solvent only!! 
+
+}
+ QUIT

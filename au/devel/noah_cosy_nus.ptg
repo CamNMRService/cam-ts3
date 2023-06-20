@@ -42,12 +42,14 @@ if((i_argc > 2) && (strlen(i_argv[2]) > 1))   // processing options
 FETCHPARS("ZGOPTNS", zgoptns);
 if (strstr(zgoptns,"-DNUS"))
 {
+Proc_err(DEF_ERR_OPT, "found -DNUS in zgoptns - %s", zgoptns);
 FETCHPARS("VPLIST", vclistname);
 	if (getParfileDirForRead(vclistname, VC_DIRS, vclistpath) < 0)
     {
-      Proc_err(DEF_ERR_OPT, "VC list called %s not found in %s - is this really an NUS NOAH dataset?",vclistname, vclistpath);
+      Proc_err(DEF_ERR_OPT,"VC list called %s not found in %s - is this really an NUS NOAH dataset?",vclistname, vclistpath);
       ABORT
     }
+Proc_err(DEF_ERR_OPT,"vclist name is - %s vclistpath is - %s",vclistname,vclistpath);    
 dircp(vclistpath, ACQUPATH("nuslist"));
 	
 	if ( (fptr1 = fopen (ACQUPATH("nuslist"),"r")) == NULL )
@@ -86,9 +88,14 @@ dircp(vclistpath, ACQUPATH("nuslist"));
     }
 
     (void) fclose (fptr1);
-	
-	STOREPARS("FNTYPE", 2)
-	STOREPAR("FNTYPE", 2)
+	Proc_err(DEF_ERR_OPT,"maxfid is - %i",maxfid);
+	STOREPARS("FnTYPE", 2)
+	STOREPAR("FnTYPE", 2)
+  sprintf(cmd, "1 FnMODE QF"); 
+  XCMD (cmd)
+  sprintf(cmd, "1s FnMODE QF"); 
+  XCMD (cmd)
+
 	// TD needs to be at least the largest real point index in the nuslist
 	STOREPAR1("TD", maxfid)
 }
@@ -108,5 +115,12 @@ XCMD ("1 SR 0")
 XCMD ("2 NLEV 20")
 XCMD ("sendgui levcalc")
 XCMD ("2 SPECTYP COSY")
+  STOREPARS("FnTYPE", 2)
+	STOREPAR("FnTYPE", 2)
+  sprintf(cmd, "1 FnMODE QF"); 
+  XCMD (cmd)
+  sprintf(cmd, "1s FnMODE QF"); 
+  XCMD (cmd)
+  STOREPAR1("TD", maxfid)
 QUIT
 

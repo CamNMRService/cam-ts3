@@ -87,7 +87,8 @@ dircp(vclistpath, ACQUPATH("nuslist"));
 	STOREPARS("FNTYPE", 2)
 	STOREPAR("FNTYPE", 2)
 	// TD needs to be at least 2x the largest complex point index in the nuslist
-	STOREPAR1("TD", maxfid*2)
+	STOREPAR1("TD", (maxfid*2)+2)
+  STOREPARS("NusTD", (maxfid*2)+2)
 }
 
 XCMD ("2 WDW QSINE")

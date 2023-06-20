@@ -89,7 +89,8 @@ dircp(vclistpath, ACQUPATH("nuslist"));
 	STOREPARS("FnTYPE", 2)
 	STOREPAR("FnTYPE", 2)
 	// TD needs to be at least the largest real point index in the nuslist
-	STOREPAR1("TD", maxfid)
+	STOREPAR1("TD", maxfid+2)
+  STOREPARS("NusTD", maxfid+2)
 }
 //  need to set FnType always
 sprintf(cmd, "1 FnMODE QF"); 

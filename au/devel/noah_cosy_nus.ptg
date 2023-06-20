@@ -24,12 +24,14 @@
 /****************************************************************/
 
 // NUS: reads VPLIST for COSY. Assumes QF: max TD is set from 1x longest list entry, rather than 2x for E-A
+// Fix the bugs: don't call proc_noah in this case
 
 char zgoptns[256];
 FILE* fptr1;
 char vclistname[PATH_MAX], vclistpath[PATH_MAX], line[PATH_MAX];
 int listentry[1024];
 int numpts, ret, fidsf1, maxfid;
+int fntp;
 if((i_argc > 2) && (strlen(i_argv[2]) > 1))   // processing options
 {
   sprintf(cmd, "1 FnMODE %s", i_argv[2]); 
@@ -109,18 +111,18 @@ XCMD ("2 SSB 0")
 XCMD ("2 PH_mod no")
 XCMD ("1 PH_mod mc")
 XAU ("fixF1", "")
-XAU ("proc_noah", "")  
+
+XFB
+// Check for NUS.
+FETCHPARS("FnTYPE", &fntp)
+if (fntp == 2) {
+    XHT2
+}
 XCMD ("abs1")
 XCMD ("1 SR 0")
 XCMD ("2 NLEV 20")
+XCMD ("2 LEV0 20")
 XCMD ("sendgui levcalc")
 XCMD ("2 SPECTYP COSY")
-  STOREPARS("FnTYPE", 2)
-	STOREPAR("FnTYPE", 2)
-  sprintf(cmd, "1 FnMODE QF"); 
-  XCMD (cmd)
-  sprintf(cmd, "1s FnMODE QF"); 
-  XCMD (cmd)
-  STOREPAR1("TD", maxfid)
 QUIT
 

@@ -27,7 +27,7 @@ char zgoptns[256];
 FILE* fptr1;
 char vclistname[PATH_MAX], vclistpath[PATH_MAX], line[PATH_MAX];
 int listentry[4096];
-int numpts, ret, fidsf1, maxfid;
+int numpts, ret, fidsf1, maxfid, fntp;
 
 if((i_argc > 2) && (strlen(i_argv[2]) > 1))   // processing options
 {
@@ -101,7 +101,12 @@ XCMD ("1 SSB 2")
 XCMD ("2 SSB 2")
 XCMD ("2 PH_mod pk")
 XCMD ("1 PH_mod pk")
-XAU ("proc_noah", "")
+XFB
+// Check for NUS.
+FETCHPARS("FnTYPE", &fntp)
+if (fntp == 2) {
+    XHT2
+}
 XCMD ("sendgui apk2d")
 XCMD ("2 NLEV 20")
 XCMD ("sendgui levcalc")

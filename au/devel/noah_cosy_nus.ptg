@@ -25,6 +25,7 @@
 
 // NUS: reads VPLIST for COSY. Assumes QF: max TD is set from 1x longest list entry, rather than 2x for E-A
 // Fix the bugs: don't call proc_noah in this case
+// And check for NUScosy here rather than NUS (allows for separate control of NUS for COSY)
 
 char zgoptns[256];
 FILE* fptr1;
@@ -36,7 +37,7 @@ int fntp;
 
 
 FETCHPARS("ZGOPTNS", zgoptns);
-if (strstr(zgoptns,"-DNUS"))
+if (strstr(zgoptns,"-DNUScosy"))
 {
 Proc_err(DEF_ERR_OPT, "found -DNUS in zgoptns - %s", zgoptns);
 FETCHPARS("VPLIST", vclistname);

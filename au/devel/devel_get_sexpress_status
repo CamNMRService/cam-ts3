@@ -1,7 +1,7 @@
 
 GETCURDATA
 char tmp_cmd[1024];
-char IP[16]="149.236.99.251"
+char IP[16]="149.236.99.251";
 
 if (i_argc == 3 ) { //assume the argument is IP address
    sprintf(IP,"%s",i_argv[2]); 

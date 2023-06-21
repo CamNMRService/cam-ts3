@@ -680,8 +680,8 @@ if (proc_or_not==1)
 		     
 		      if ( AUERR <0 )
 		         {
-	 
-		      	   sprintf(tmp_cmd, "SX_EJECT_ERROR_%i_%s", cpos, tmp_fname);
+	             XAU("devel_parse_sexpress_web","")//lets parse the log 
+		      	 sprintf(tmp_cmd, "SX_EJECT_ERROR_%i_%s", cpos, tmp_fname);
 	             XAU("devel_whoopwhoop",tmp_cmd)
 	             STOPMSG(tmp_cmd)
 		         }

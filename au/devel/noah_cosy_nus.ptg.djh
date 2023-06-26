@@ -1,0 +1,125 @@
+/****************************************************************/
+/*      noah_cosy - process NOAH H-H correlation experiments    */
+/*      18.04.2017                                              */
+/****************************************************************/
+/*      Short Description :                                     */
+/*      AU program for processing NOAH H-H correlation          */
+/*      experiments.                                            */
+/****************************************************************/
+/*      Keywords :                                              */
+/*      NOAH, noah_cosy, automation                             */
+/****************************************************************/
+/*      Description/Usage : noah_cosy FnMODE (optional).        */
+/*      Default FnMODE is Echo-Antiecho. Used in splitx_au.     */
+/****************************************************************/
+/*      Author(s) :                                             */
+/*      Name            : Eriks Kupce                           */
+/*      Organisation    : Bruker BioSpin                        */
+/*      Email           : eriks.kupce@bruker.com                */
+/****************************************************************/
+/*      Name            Date    Modification:                   */
+/*      eku             170418  created                         */
+/*      eku             231118  updated for NUS                 */
+/*      eku             040219  updated to allow mixed FnMODE   */
+/****************************************************************/
+
+// NUS: reads VPLIST for COSY. Assumes QF: max TD is set from 1x longest list entry, rather than 2x for E-A
+
+char zgoptns[256];
+FILE* fptr1;
+char vclistname[PATH_MAX], vclistpath[PATH_MAX], line[PATH_MAX];
+int listentry[1024];
+int numpts, ret, fidsf1, maxfid;
+if((i_argc > 2) && (strlen(i_argv[2]) > 1))   // processing options
+{
+  sprintf(cmd, "1 FnMODE %s", i_argv[2]); 
+  XCMD (cmd)
+  sprintf(cmd, "1s FnMODE %s", i_argv[2]); 
+  XCMD (cmd)
+}
+
+
+FETCHPARS("ZGOPTNS", zgoptns);
+if (strstr(zgoptns,"-DNUS"))
+{
+Proc_err(DEF_ERR_OPT, "found -DNUS in zgoptns - %s", zgoptns);
+FETCHPARS("VPLIST", vclistname);
+	if (getParfileDirForRead(vclistname, VC_DIRS, vclistpath) < 0)
+    {
+      Proc_err(DEF_ERR_OPT,"VC list called %s not found in %s - is this really an NUS NOAH dataset?",vclistname, vclistpath);
+      ABORT
+    }
+Proc_err(DEF_ERR_OPT,"vclist name is - %s vclistpath is - %s",vclistname,vclistpath);    
+dircp(vclistpath, ACQUPATH("nuslist"));
+	
+	if ( (fptr1 = fopen (ACQUPATH("nuslist"),"r")) == NULL )
+    {
+      Proc_err(DEF_ERR_OPT, "Could not open nuslist file in dataset. Processing aborted!");
+      ABORT
+    }
+
+    /* Read first point index value, then scan for total no. of delay values. */
+
+    if ( fgets (line,sizeof(line),fptr1) == NULL )
+    {
+      Proc_err(DEF_ERR_OPT, "No nuslist entry found - check original VCLIST\n %s", vclistname);
+      (void) fclose (fptr1);
+      ABORT
+    }
+
+    if ( (ret = sscanf (line,"%d",&listentry[0])) != 1 )
+    {
+      Proc_err(DEF_ERR_OPT, "--- nuslist has no valid entries ---");
+      (void) fclose (fptr1);
+      ABORT
+    }
+
+    numpts = 1;
+
+    /* Check for more point index values and find the largest */
+    maxfid=1;
+    while ( fgets (line,sizeof(line),fptr1) != NULL )
+    {
+      if ( (ret = sscanf (line,"%d",&listentry[numpts])) != 1 )
+        break;
+      if (listentry[numpts] > maxfid)
+     { maxfid=listentry[numpts];}
+      numpts++;
+    }
+
+    (void) fclose (fptr1);
+	Proc_err(DEF_ERR_OPT,"maxfid is - %i",maxfid);
+	STOREPARS("FnTYPE", 2)
+	STOREPAR("FnTYPE", 2)
+  sprintf(cmd, "1 FnMODE QF"); 
+  XCMD (cmd)
+  sprintf(cmd, "1s FnMODE QF"); 
+  XCMD (cmd)
+
+	// TD needs to be at least the largest real point index in the nuslist
+	STOREPAR1("TD", maxfid)
+}
+
+
+
+XCMD ("2 WDW SINE")
+XCMD ("1 WDW SINE")
+XCMD ("1 SSB 0")
+XCMD ("2 SSB 0")
+XCMD ("2 PH_mod no")
+XCMD ("1 PH_mod mc")
+XAU ("fixF1", "")
+XAU ("proc_noah", "")  
+XCMD ("abs1")
+XCMD ("1 SR 0")
+XCMD ("2 NLEV 20")
+XCMD ("sendgui levcalc")
+XCMD ("2 SPECTYP COSY")
+
+  STOREPAR1("TD", maxfid)
+  STOREPARS("FnTYPE", 2)
+	STOREPAR("FnTYPE", 2)
+  XCMD ("1 FnMODE QF")
+  XCMD ("1s FnMODE QF")
+QUIT
+

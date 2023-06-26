@@ -1,9 +1,0 @@
-
-GETCURDATA
-char tmp_cmd[1024];
-
-sprintf(tmp_cmd,"wget http://149.236.99.251/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html");
-
-system(tmp_cmd);
-
-QUIT

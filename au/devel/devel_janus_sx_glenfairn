@@ -271,9 +271,9 @@ sprintf(tmp_cmd, "sx %i", test_pos);
 AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 sprintf(tmp_cmd,"wget http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", sxpress_ip);
 system(tmp_cmd);
-XAU("devel_parse_sexpress_web","")
 if ( AUERR <0 )
 {
+	XAU("devel_parse_sexpress_web","")
 	sprintf(tmp_str, "INITIAL_TEST_SAMPLE_SX_%i_ERROR",test_pos);
 	XAU("devel_whoopwhoop",tmp_str)
 } else {
@@ -288,7 +288,7 @@ if ( AUERR <0 )
     }
 
 }
-
+XAU("devel_parse_sexpress_web","") //test sample is in, parse the sx logs
 
 
 
@@ -418,13 +418,10 @@ if ( strstr ( protocol, "POS59") != NULL )
 	cpos=59;
 }
 
-/*remove comment for production */
 	sprintf( tmp_cmd, "sx %d",cpos);
 	AUERR=CPR_exec(tmp_cmd, WAIT_TERM);
-  sprintf(tmp_cmd,"wget http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", sxpress_ip);
+    sprintf(tmp_cmd,"wget http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", sxpress_ip);
 	system(tmp_cmd);
-	//below line cuases auerr check to fail...
-//	XAU("devel_parse_sexpress_web","")
 
 	if ( AUERR <0 )
 
@@ -438,28 +435,28 @@ if ( strstr ( protocol, "POS59") != NULL )
 
 		AUERR=CPR_exec(sxcmd, WAIT_TERM);
 		sprintf(tmp_cmd,"wget http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", sxpress_ip);
-	  system(tmp_cmd); //lets download the webpage with the samplejet status on
-//		XAU("devel_parse_sexpress_web","")
-//remove comment around below for production not sure if this is needed, the above line should deal with it
-		/*SX( cpos );*/
+		system(tmp_cmd); //lets download the webpage with the samplejet status on
+
 	}
 	if ( AUERR <0 )
 	{
 	  sprintf(statusstr, "***Warning - could not find samples(%d)***",AUERR);
-  	Show_status(statusstr );
-		fwarn = fopen( warnfile,"w" );
-		sprintf( hdwerr, "Could not find sample: %d\n", AUERR);
-		fputs( hdwerr, fwarn );
-		fclose( fwarn );
-		flog = fopen(logfile,"a+");
-		fputs( hdwerr, flog);
-		fclose( flog );
-		skipsample=1;
+  	  Show_status(statusstr );
+	  fwarn = fopen( warnfile,"w" );
+	  sprintf( hdwerr, "Could not find sample: %d\n", AUERR);
+	  fputs( hdwerr, fwarn );
+	  fclose( fwarn );
+	  flog = fopen(logfile,"a+");
+	  fputs( hdwerr, flog);
+	  fclose( flog );
+	  skipsample=1;
 // email us but don't quit in case it's not a real problem and is just skipping sample!!
-    XAU("devel_parse_sexpress_web","")
-    sprintf(tmp_str, "SX_INSERT_ERROR_%i_%s", cpos, tmp_fname);
+      sprintf(tmp_cmd,"wget http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", sxpress_ip);
+	  XAU("devel_parse_sexpress_web","")
+      sprintf(tmp_str, "SX_INSERT_ERROR_%i_%s", cpos, tmp_fname);
 	  XAU("devel_whoopwhoop",tmp_str)
 	}
+	 XAU("devel_parse_sexpress_web","") //lets parse any samplexpress log as we have the sample in now.
 /*ok, we have put the sample in the magnet; now run through its exps*/
 	if (skipsample==0)
 	{
@@ -678,18 +675,18 @@ if (proc_or_not==1)
 	           /*PUT_SAMPLE_BACK*/
 	           /*remove comment on next line for production*/
 		      AUERR=CPR_exec("sx ej",WAIT_TERM);
-		      sprintf(tmp_cmd,"wget http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", sxpress_ip);
+              sprintf(tmp_cmd,"wget http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", sxpress_ip);
 	          system(tmp_cmd); //lets download the webpage with the samplejet status on
 		     
 		      if ( AUERR <0 )
 		         {
-		           XAU("devel_parse_sexpress_web","")
-		      	   sprintf(tmp_cmd, "SX_EJECT_ERROR_%i_%s", cpos, tmp_fname);
+	             XAU("devel_parse_sexpress_web","")//lets parse the log 
+		      	 sprintf(tmp_cmd, "SX_EJECT_ERROR_%i_%s", cpos, tmp_fname);
 	             XAU("devel_whoopwhoop",tmp_cmd)
 	             STOPMSG(tmp_cmd)
 		         }
-	           
-	        LastSample=TRUE;
+	          XAU("devel_parse_sexpress_web","")//lets parse the log 
+	          LastSample=TRUE;
 		      sleep( delaytime );
 	        }
 //janus-email needs the location of the defaults file to be passed to it

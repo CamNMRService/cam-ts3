@@ -416,7 +416,11 @@ if ( strstr ( protocol, "POS60") != NULL )
 	cpos=60;
 }
 
-
+if ( strstr ( protocol, "POS59") != NULL )
+{
+	// found test sample string in protocol so set pos to 59
+	cpos=59;
+}
 
 /*remove comment for production */
 	sprintf( tmp_cmd, "sx %d",cpos);

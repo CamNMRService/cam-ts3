@@ -85,7 +85,6 @@ dircp(vclistpath, ACQUPATH("nuslist"));
     }
 
     (void) fclose (fptr1);
-	Proc_err(DEF_ERR_OPT,"maxfid is - %i",maxfid);
 	STOREPARS("FnTYPE", 2)
 	STOREPAR("FnTYPE", 2)
 	// TD needs to be at least the largest real point index in the nuslist

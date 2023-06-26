@@ -159,6 +159,11 @@ ph31=0 2 0 2 0 2 0 2 2 0 2 0 2 0 2 0
 ;gpz4: -5.5%
 ;gpz5: -3.5%
 ;gpz6: -8.5%
-;gpnam1-6: SINE.100
+;gpnam1: SINE.100
+;gpnam2: SINE.100
+;gpnam3: SINE.100
+;gpnam4: SINE.100
+;gpnam5: SINE.100
+;gpnam6: SINE.100
 ;PH_mod(F1): pk (or no)
 ;use xfb and xf2m

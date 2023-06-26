@@ -39,14 +39,14 @@ int fntp;
 FETCHPARS("ZGOPTNS", zgoptns);
 if (strstr(zgoptns,"-DNUScosy"))
 {
-Proc_err(DEF_ERR_OPT, "found -DNUS in zgoptns - %s", zgoptns);
+
 FETCHPARS("VPLIST", vclistname);
 	if (getParfileDirForRead(vclistname, VC_DIRS, vclistpath) < 0)
     {
       Proc_err(DEF_ERR_OPT,"VC list called %s not found in %s - is this really an NUS NOAH dataset?",vclistname, vclistpath);
       ABORT
     }
-Proc_err(DEF_ERR_OPT,"vclist name is - %s vclistpath is - %s",vclistname,vclistpath);    
+   
 dircp(vclistpath, ACQUPATH("nuslist"));
 	
 	if ( (fptr1 = fopen (ACQUPATH("nuslist"),"r")) == NULL )

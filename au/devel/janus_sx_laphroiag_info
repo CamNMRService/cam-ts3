@@ -484,9 +484,12 @@ sampleproblem=0;
 	
 		if ( AUERR <0 )
         {
-	       sprintf(tmp_str, "FAILED_TO_LOCK_%s_%i_%s",solvent, cpos, tmp_fname);
+	       //Just set sampleproblem flag here and email
+		   // If topshim fails , add the lock failure string but not otherwise-
+		   // If topshim succeeds it must have  been locked so false alarm
+		   sprintf(tmp_str, "FAILED_TO_LOCK_%s_%i_%s",solvent, cpos, tmp_fname);
 	       XAU("whoopwhoop",tmp_str)
-            strcat(sampleinfostring,"Failed to lock: check sample is clear, sample filling is >40mm, solvent is deuterated\n");
+            
             sampleproblem=1;
 
         }
@@ -512,9 +515,12 @@ sprintf(tmp_str,"janus_topshim_watchdog TOPSHIM_FAILED_%s_%i",tmp_fname,cpos);
 XCMD(tmp_str);
 if (AUERR<0)
 {
-        strcat(sampleinfostring,"Failed to shim: check spectrum quality - lineshape may be bad. Check sample is clear, check sample filling is >40mm, check for precipitate at the bottom.\n");
-        sampleproblem=1;
-        Proc_err(INFO_OPT,"topshim fail - AUERR=%d", AUERR);
+	if (sampleproblem==1)
+	{
+		strcat(sampleinfostring,"Failed to lock: check sample is clear, sample filling is >40mm, solvent is deuterated\n");
+	}
+    strcat(sampleinfostring,"Failed to shim: check spectrum quality - lineshape may be bad. Check sample is clear, check sample filling is >40mm, check for precipitate at the bottom.\n");
+    sampleproblem=1;
 }
 
 

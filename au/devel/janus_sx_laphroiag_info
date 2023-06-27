@@ -523,7 +523,7 @@ if (AUERR<0)
 		sprintf(tmp_str,"Failed to lock: check sample is clear, sample filling is >40mm, solvent is deuterated\n \
 		Solvent is listed as %s, if this is not as expected there is probably a rogue character in the Sample ID such as a comma.\n \
 		In this case resubmit with correct SAmple ID- only letters, numbers, underscores, dashes and full stops allowed", solvent);
-		strcat(sampleinfostring,tmp_str)
+		strcat(sampleinfostring,tmp_str);
 	}
     strcat(sampleinfostring,"Failed to shim: check spectrum quality - lineshape may be bad. Check sample is clear, check sample filling is >40mm, check for precipitate at the bottom.\n");
     sampleproblem=1;

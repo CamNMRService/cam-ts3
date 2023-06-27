@@ -388,8 +388,6 @@ while ( finish != TRUE ) //THE MAIN LOOP
 			strcpy( comments, field);
 		}
 	field = strtok( NULL, ",");
-	
-		
 	}
 	flog = fopen(logfile,"a+");
 	lt=time(NULL);
@@ -536,6 +534,16 @@ if (AUERR<0)
 	}
     strcat(sampleinfostring,"Failed to shim: check spectrum quality - lineshape may be bad. Check sample is clear, check sample filling is >40mm, check for precipitate at the bottom.\n");
     sampleproblem=1;
+}
+else
+{
+	if (sampleproblem==1)
+	{
+		sprintf(tmp_str,"Sample failed to lock, but shimmed OK: check spectrum is OK and shfts are sensible.\n \
+		Solvent is listed as %s, if this is not as expected there is probably a rogue character in the Sample ID such as a comma.\n \
+		In this case if necessary resubmit with correct SAmple ID- only letters, numbers, underscores, dashes and full stops allowed", solvent);
+		strcat(sampleinfostring,tmp_str);
+	}
 }
 
 

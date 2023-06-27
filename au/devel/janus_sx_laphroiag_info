@@ -379,9 +379,18 @@ while ( finish != TRUE ) //THE MAIN LOOP
 
 	field = strtok( NULL, "," );
 	strcpy( protocol, field );
-
+    
+	
+	while( field != NULL )
+	{
+	if (strchr(field,'@') != NULL)
+		{
+			strcpy( comments, field);
+		}
 	field = strtok( NULL, ",");
-	strcpy( comments, field);
+	
+		
+	}
 	flog = fopen(logfile,"a+");
 	lt=time(NULL);
 	sprintf(expttime, ctime(&lt));

@@ -83,6 +83,8 @@
 Devel version: adding creation of an info file which reports any errors with lock, atma , topshim, and long proton pulse
 Made string for holding info file text, long enough...
 Removed various debugging messages
+Now lock errors only do anythign if shim also fails
+Added note about solvent to SampleProblems file and warnign to check for strange characters
 
 */
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
@@ -95,7 +97,7 @@ int     skipsample, pid, x, proc_or_not=0, sampleproblem=0;
 char    oi[80], juser[50], suser[40], in_data[1024], tmp_fname[1024];
 char    shimfile[80], acqufile[80];
 char    experiment[155], solvent[40], tunefile[40], sxfile[80];
-char    tmp_str[180], titlefile[80], titletext[80];
+char    tmp_str[1024], titlefile[80], titletext[80];
 char    exptfile[80], diskunit[40];
 char    prefix[40], shimset[40], defaultsfile[80], hdwerr[80];
 char    archpath[80], archive[20], jcmd_str[1024], outpath[1024];
@@ -488,7 +490,7 @@ sampleproblem=0;
 		   // If topshim fails , add the lock failure string but not otherwise-
 		   // If topshim succeeds it must have  been locked so false alarm
 		   sprintf(tmp_str, "FAILED_TO_LOCK_%s_%i_%s",solvent, cpos, tmp_fname);
-	       XAU("whoopwhoop",tmp_str)
+	      
             
             sampleproblem=1;
 
@@ -517,7 +519,11 @@ if (AUERR<0)
 {
 	if (sampleproblem==1)
 	{
-		strcat(sampleinfostring,"Failed to lock: check sample is clear, sample filling is >40mm, solvent is deuterated\n");
+		 XAU("whoopwhoop",tmp_str);
+		sprintf(tmp_str,"Failed to lock: check sample is clear, sample filling is >40mm, solvent is deuterated\n \
+		Solvent is listed as %s, if this is not as expected there is probably a rogue character in the Sample ID such as a comma.\n \
+		In this case resubmit with correct SAmple ID- only letters, numbers, underscores, dashes and full stops allowed", solvent);
+		strcat(sampleinfostring,tmp_str)
 	}
     strcat(sampleinfostring,"Failed to shim: check spectrum quality - lineshape may be bad. Check sample is clear, check sample filling is >40mm, check for precipitate at the bottom.\n");
     sampleproblem=1;

@@ -37,6 +37,8 @@
   size_t tdr = 0;
   char path[PATH_MAX + 64], proc_nm[8], str[32], *ch, str1[128];
   FILE **fp;
+  char titlefile[PATH_MAX], titletext[1024];
+FILE *ftitle = NULL;
 
 
 

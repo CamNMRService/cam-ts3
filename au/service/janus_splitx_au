@@ -234,7 +234,8 @@ expno=oexpno;
 SETCURDATA
 strcpy(titlefile,PROCPATH("title"));
 ftitle = fopen( titlefile, "a" );
-sprintf( titletext, "\n \nThis is a NOAH dataset with %d experiments in 1.\nSee experiment number %d onwards for the extracted data which can be processed as indicated in the title.",nbl,nexpno);
+sprintf( titletext, "\n \nThis is a NOAH dataset with %d experiments in 1.\nSee experiment number %d onwards for the extracted data \
+which can be processed as indicated in the title. \nFor details of the NOAH experiments see references at https://nmr-genesis.co.uk",nbl,nexpno);
 fputs ( titletext, ftitle );
 fclose ( ftitle );
 

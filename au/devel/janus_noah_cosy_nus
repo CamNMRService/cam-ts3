@@ -117,7 +117,7 @@ XCMD ("2 SPECTYP COSY")
 
 strcpy(titlefile,PROCPATH("title"));
 ftitle = fopen( titlefile, "a" );
-sprintf( titletext, "\n%s\n%s", "Experiment: NOAH-dqfCOSY", "Process with xfb;abs1;abs2;levcalc");
+sprintf( titletext, "\n Experiment: NOAH-dqfCOSY \nProcess with xfb;abs1;abs2;levcalc");
 fputs ( titletext, ftitle );
 fclose ( ftitle );
 QUIT

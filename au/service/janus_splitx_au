@@ -229,7 +229,9 @@ FILE *ftitle = NULL;
   while (++i < nbl);
   
   // Add to title - need to do at end because we don't need to pass this onwards to the sub datasets
-
+  //return to correct dataset first!
+expno=oexpno;
+SETCURDATA
 strcpy(titlefile,PROCPATH("title"));
 ftitle = fopen( titlefile, "a" );
 sprintf( titletext, "\n\n This is a NOAH dataset with %d experiments in 1.\n See experiment number %d onwards for the extracted data which can be processed as indicated in the title.",nbl,nexpno);

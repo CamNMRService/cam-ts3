@@ -108,7 +108,7 @@ XCMD ("2 NLEV 20")
 XCMD ("2 LEV0 5")
 XCMD ("2 SPECTYP HMBC")
 
-strcpy(titlefile,PROCPATH("title"))
+strcpy(titlefile,PROCPATH("title"));
 ftitle = fopen( titlefile, "a" );
 sprintf( titletext, "\n%s\n%s", "Experiment: NOAH-HMBC", "Process with xfb;xht2;xf2m;abs1;abs2;levcalc");
 fputs ( titletext, ftitle );

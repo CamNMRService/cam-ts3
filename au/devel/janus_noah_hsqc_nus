@@ -107,7 +107,7 @@ XCMD ("sendgui apk2d")
 XCMD ("2 NLEV 20")
 
 XCMD ("2 SPECTYP HSQC")
-strcpy(titlefile,PROCPATH("title"))
+strcpy(titlefile,PROCPATH("title"));
 ftitle = fopen( titlefile, "a" );
 sprintf( titletext, "\n%s\n%s", "Experiment: NOAH-HSQC", "Process with xfb;xht2;apk2d;xfb;levcalc");
 fputs ( titletext, ftitle );

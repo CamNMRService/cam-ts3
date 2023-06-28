@@ -1,0 +1,123 @@
+/****************************************************************/
+/*      noah_hmbc - process NOAH HMBC correlation experiments   */
+/*      18.04.2017                                              */
+/****************************************************************/
+/*      Short Description :                                     */
+/*      AU program for processing NOAH HMBC correlation         */
+/*      experiments.                                            */
+/****************************************************************/
+/*      Keywords :                                              */
+/*      NOAH, noah_hmbc, automation                             */
+/****************************************************************/
+/*      Description/Usage : noah_hmbc FnMODE (optional).        */
+/*      Default FnMODE is Echo-Antiecho. Used in splitx_au.     */
+/****************************************************************/
+/*      Author(s) :                                             */
+/*      Name            : Eriks Kupce                           */
+/*      Organisation    : Bruker BioSpin                        */
+/*      Email           : eriks.kupce@bruker.com                */
+/****************************************************************/
+/*      Name            Date    Modification:                   */
+/*      eku             170418  created                         */
+/*      eku             231118  updated for NUS                 */
+/*      eku             040219  updated to allow mixed FnMODE   */
+/****************************************************************/
+// NUS: reads VCLIST from dataset! for HMBC. 
+// Fix the bugs: don't call proc_noah in this case
+// Janus version: don't actually process, but put some extra info in the title file
+
+char zgoptns[256];
+FILE* fptr1;
+char vclistname[PATH_MAX], vclistpath[PATH_MAX], line[PATH_MAX];
+int listentry[1024];
+int numpts, ret, fidsf1, maxfid, fntp;
+char titlefile[PATH_MAX], titletext[1024];
+FILE *ftitle = NULL;
+
+
+if((i_argc > 2) && (strlen(i_argv[2]) > 1))   // processing options
+{
+  sprintf(cmd, "1 FnMODE %s", i_argv[2]); 
+  XCMD (cmd)
+  sprintf(cmd, "1s FnMODE %s", i_argv[2]); 
+  XCMD (cmd)
+}
+FETCHPARS("ZGOPTNS", zgoptns);
+if (strstr(zgoptns,"-DNUS"))
+{
+strcpy(vclistpath,ACQUPATH("vclist"));
+dircp(vclistpath, ACQUPATH("nuslist"));
+	
+	if ( (fptr1 = fopen (ACQUPATH("nuslist"),"r")) == NULL )
+    {
+      Proc_err(DEF_ERR_OPT, "Could not open nuslist file in dataset. Processing aborted!");
+      ABORT
+    }
+
+    /* Read first point index value, then scan for total no. of delay values. */
+
+    if ( fgets (line,sizeof(line),fptr1) == NULL )
+    {
+      Proc_err(DEF_ERR_OPT, "No nuslist entry found - check original VCLIST\n %s", vclistname);
+      (void) fclose (fptr1);
+      ABORT
+    }
+
+    if ( (ret = sscanf (line,"%d",&listentry[0])) != 1 )
+    {
+      Proc_err(DEF_ERR_OPT, "--- nuslist has no valid entries ---");
+      (void) fclose (fptr1);
+      ABORT
+    }
+
+    numpts = 1;
+
+    /* Check for more point index values and find the largest */
+    maxfid=1;
+    while ( fgets (line,sizeof(line),fptr1) != NULL )
+    {
+      if ( (ret = sscanf (line,"%d",&listentry[numpts])) != 1 )
+        break;
+      if (listentry[numpts] > maxfid)
+     { maxfid=listentry[numpts];}
+      numpts++;
+    }
+
+    (void) fclose (fptr1);
+	
+	STOREPARS("FNTYPE", 2)
+	STOREPAR("FNTYPE", 2)
+	// TD needs to be at least 2x the largest complex point index in the nuslist
+	STOREPAR1("TD", (maxfid*2)+2)
+  STOREPAR1S("NusTD", (maxfid*2)+2)
+}
+
+XCMD ("2 WDW QSINE")
+XCMD ("1 WDW QSINE")
+XCMD ("1 SSB 2")
+XCMD ("2 SSB 4")
+XCMD ("2 PH_mod no")
+XCMD ("1 PH_mod no")
+/*
+XFB
+// Check for NUS.
+FETCHPARS("FnTYPE", &fntp)
+if (fntp == 2) {
+    XHT2
+}
+XF2M
+XCMD ("abs1")
+
+XCMD ("sendgui levcalc")
+*/
+XCMD ("2 NLEV 20")
+XCMD ("2 LEV0 5")
+XCMD ("2 SPECTYP HMBC")
+
+strcpy(titlefile,PROCPATH("title"))
+ftitle = fopen( titlefile, "a" );
+sprintf( titletext, "\n%s\n%s", "Experiment: NOAH-HMBC", "Process with xfb;xht2;xf2m;abs1;abs2;levcalc");
+fputs ( titletext, ftitle );
+fclose ( ftitle );
+QUIT
+

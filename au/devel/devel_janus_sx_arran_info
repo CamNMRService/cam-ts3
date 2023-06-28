@@ -95,7 +95,7 @@ char def_file[255]="e:/chemist/defaults-csv.txt"; //janus software defaults
 float   delaytime=1.0;
 int     expt=1, curloop=1, cpos, specno, jexpt, jsolv, finish=FALSE,i=1;
 int     LastSample, FatalError=FALSE, nexpt, parmo, proderrcount, sthou;
-int     skipsample, pid, x, proc_or_not=0;
+int     skipsample, pid, x, proc_or_not=0,sampleproblem=0;
 
 char    oi[80], juser[50], suser[40], in_data[1024], tmp_fname[1024];
 char    shimfile[80], acqufile[80];

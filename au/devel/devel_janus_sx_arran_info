@@ -669,7 +669,7 @@ else
 			FETCHPAR ("AUNMP",&procau)
 
             // if splitx_au we need to run it
-            if(strcmp(procau,"splitx_au")==0)
+            if(strcmp(procau,"janus_splitx_au")==0)
             {
                 CPR_exec(procau,WAIT_START);
             }

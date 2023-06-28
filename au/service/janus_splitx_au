@@ -1,0 +1,239 @@
+/****************************************************************/
+/*      janus_splitx_au - split  NOAH experiments  and add title info        */
+/*      18.04.2017                                              */
+/****************************************************************/
+/*      Short Description :                                     */
+/*      AU program to split and process NOAH expts based on     */
+/*      setting of NBL and userP1-P5 parameters.                */
+/****************************************************************/
+/*      Keywords :                                              */
+/*      NOAH, splitx, automation                                */
+/****************************************************************/
+/*      Description/Usage : splitx_au                           */
+/*      split a NOAH data set based on the setting of the NBL   */
+/*      parameter; automatically process the NOAH spectra       */
+/*      according to AU processing programs defined by userP1-P5*/
+/*      parameters                                              */
+/****************************************************************/
+/*      Author(s) :                                             */
+/*      Name            : Eriks Kupce                           */
+/*      Organisation    : Bruker BioSpin                        */
+/*      Email           : eriks.kupce@bruker.com                */
+/****************************************************************/
+/*      Name            Date    Modification:                   */
+/*      eku             170418  created                         */
+/*      eku             231118  updated for NUS                         */
+/****************************************************************/
+// PTG: updated for our NUS implementation: all the NUS handling done by the experiment specific AU programs
+// NUS processing params are just taken from parent dataset
+// Writes info about NOAH dataset to title as well
+
+  int size[3];
+  int    *irow;
+  double *drow;
+  int i, j, k, td, td1, tds, td1s, tdx, dlen, nus;
+  int oexpno, nexpno, byteorder, parmode;
+  int nbl = 0, fntype = 0, dtypa = 0;
+  size_t tdr = 0;
+  char path[PATH_MAX + 64], proc_nm[8], str[32], *ch, str1[128];
+  FILE **fp;
+
+
+
+/***** get dataset and parameters *****/
+
+  FETCHPAR("PARMODE", &parmode)
+  FETCHPAR("NBL", &nbl)
+
+  if (parmode != 1) STOPMSG("Program is only suitable for 2D")
+  if ((nbl<2) || (nbl>8)) STOPMSG("Program is only suitable for 8 > NBL > 1")
+
+  FETCHPARS("DTYPA", &dtypa)  
+  FETCHPARS("BYTORDA", &byteorder)
+  FETCHPARS("TD", &tds)
+  FETCHPAR1("TD", &td1)
+  FETCHPAR1S("TD", &td1s)
+
+ 
+        
+  tdr = (size_t)tds;
+  if (dtypa == 0)
+  {
+    tdr  = ((tdr + 255) / 256) * 256;
+    dlen = 4;
+  }
+  else if (dtypa == 2)
+  {
+    tdr  = ((tdr + 127) / 128) * 128;
+    dlen = 8;
+  }
+  else
+    STOPMSG("Program is only suitable for integer or double data")
+    
+  if (tds <= 0  ||  tdr > MAXINT)
+  {
+    Proc_err(DEF_ERR_OPT, "%s%d%s%d\n%s",
+			  "acquisition status parameter TD{F",
+			  parmode + 1, "} = ", tds, "out of range");
+    ABORT
+  }      
+
+  td = (int) tdr; 
+
+  if (td <= 0  ||  td > 64 * 1024 * 1024)
+    STOPMSG("TD{F2} out of range")
+  if (td1s <= 0  ||  td1s > 64 * 1024 * 1024)
+    STOPMSG("TD{F1} out of range")
+  tdx = nbl*td;
+  if ((double) tdx >= 2. * 1024 * 1024 * 1024 / dlen)
+    STOPMSG("amount of memory requested too large")
+
+/***** get input *****/
+
+  oexpno = expno;
+  nexpno = expno * 10 + 1;
+/*  GETINT("Enter EXPNO to store new dataset:", nexpno) */
+  if (nexpno <= 0)
+    STOPMSG("invalid expno value")
+
+/***** check files *****/
+
+  for(i=0; i<nbl; i++)
+  {
+    WRAPARAM(nexpno+i)
+    ERRORABORT
+  }
+
+  fp = (FILE **) calloc(nbl+1, sizeof(FILE *));
+  
+  (void)strcpy(path, ACQUPATH("ser"));
+  if ((fp[nbl] = fopen(path, "rb")) == 0)
+    STOPMSG(strcat(path, " - cannot open file for reading"))
+    
+  for(i=0; i<nbl; i++)
+  {
+    expno = nexpno+i;
+    (void)strcpy(path, ACQUPATH("ser"));
+    if ((fp[i] = fopen(path, "wb")) == 0)
+      STOPMSG(strcat(path, " - cannot open file for writing"))
+  }
+
+  expno = oexpno;
+
+/***** allocate memory *****/
+
+  if (dtypa == 0)
+  {
+    if((irow = (int*)malloc(tdx * dlen)) == 0)
+    STOPMSG("cannot get enough memory")
+  }
+  else if (dtypa == 2)
+  {
+    if((drow = (double*)malloc(tdx * dlen)) == 0)
+    STOPMSG("cannot get enough memory")
+  }
+
+/***** split *****/
+
+  Show_status("splitting data"); 
+
+  k = td1s / nbl;
+
+  if (dtypa == 0)
+  {
+    for (i = 0; i < k; i ++)
+    {
+      if (fread(irow, dlen, tdx, fp[nbl]) != (size_t)(tdx))
+        STOPMSG("read failed")
+    
+      local_swap4(irow, tdx * dlen, byteorder);
+
+      for (j = 0; j < nbl; j++)
+      {
+        if (fwrite(irow+j*td, dlen, td, fp[j]) != (size_t)(td))
+          STOPMSG("write failed")
+      }
+    }
+  }
+  else if (dtypa == 2)
+  {
+    for (i = 0; i < k; i ++)
+    {
+      if (fread(drow, dlen, tdx, fp[nbl]) != (size_t)(tdx))
+        STOPMSG("read failed")
+    
+      local_swap4(drow, tdx * dlen, byteorder);
+
+      for (j = 0; j < nbl; j++)
+      {
+        if (fwrite(drow+j*td, dlen, td, fp[j]) != (size_t)(td))
+          STOPMSG("write failed")
+      }
+    }
+  }
+
+/***** free resources *****/
+
+  for(i=0; i<nbl; i++) fclose(fp[i]);
+  fclose(fp[i]);
+
+  if (dtypa == 0) free(irow);
+  else if (dtypa == 2) free(drow);
+
+/***** store parameters and generate audit entry ***/
+
+  td1  /= nbl;
+  td1s /= nbl;
+
+  strcpy(path, ACQUPATH(0));
+  byteorder = local_endian();
+  size[0] = td;
+  size[1] = td1s;
+  i = 0;
+  do
+  {
+    double ymin, ymax;
+    char  autext[PATH_MAX + 256];
+    char* hashbuf = autext + sprintf(autext, "created by splitx");
+
+    hashbuf += sprintf(hashbuf, " %d", nbl);
+    hashbuf += sprintf(hashbuf, " %d. dataset from\n       %s", i + 1, path);
+
+    DATASET(name, nexpno + i, procno, disk, user)
+
+    sprintf(proc_nm, "userP%d", i+1);
+    FETCHPAR(proc_nm, str)
+    STOREPAR("AUNMP", str)
+    STOREPAR("NBL", 1)
+    STOREPARS("NBL", 1)
+    STOREPARS("BYTORDA", byteorder)
+    STOREPAR1("TD", td1)
+    STOREPAR1S("TD", td1s)
+
+ 
+	
+    if (CheckSumFileMax(ACQUPATH("ser"), 0, hashbuf, 0, 0, byteorder, 0, parmode + 1, tds, size, size, &ymin, &ymax) > 0)
+    {
+      (void)AuditCreate(ACQUPATH("audita.txt"), autext);
+      STOREPARS("YMIN_a", ymin)
+      STOREPARS("YMAX_a", ymax)
+    }
+    XAUPW;
+
+    REFRESHDATA
+    XCMD("sendgui browse_update_tree")
+    Show_meta(SM_RAW | SM_RAWP);
+  }
+  while (++i < nbl);
+  
+  // Add to title - need to do at end because we don't need to pass this onwards to the sub datasets
+
+strcpy(titlefile,PROCPATH("title"));
+ftitle = fopen( titlefile, "a" );
+sprintf( titletext, "\n\n This is a NOAH dataset with %d experiments in 1.\n See experiment number %d onwards for the extracted data which can be processed as indicated in the title.",nbl,nexpno);
+fputs ( titletext, ftitle );
+fclose ( ftitle );
+
+  Show_status("splitx done."); 
+
+QUIT

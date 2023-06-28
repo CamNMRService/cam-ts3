@@ -35,13 +35,7 @@ char titlefile[PATH_MAX], titletext[1024];
 FILE *ftitle = NULL;
 
 
-if((i_argc > 2) && (strlen(i_argv[2]) > 1))   // processing options
-{
-  sprintf(cmd, "1 FnMODE %s", i_argv[2]); 
-  XCMD (cmd)
-  sprintf(cmd, "1s FnMODE %s", i_argv[2]); 
-  XCMD (cmd)
-}
+
 FETCHPARS("ZGOPTNS", zgoptns);
 if (strstr(zgoptns,"-DNUS"))
 {

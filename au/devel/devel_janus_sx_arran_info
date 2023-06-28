@@ -759,10 +759,10 @@ if ((pulsecalfile = fopen(pulsecalfilename, "r")) != 0)
 	if( fgets(pulsecalcontent,128,pulsecalfile) !=NULL)
     {
         sscanf(pulsecalcontent,"%f %f", &p1, &statusp1);
-        if (p1/statusp1 > 1.2)
+        if (p1/statusp1 > 1.5)
         {
             sampleproblem=1;
-            sprintf(pulsecalerror,"Measured proton pulse %fus is more than 20% longer than reference pulse length %fus - data quality may be compromised.\n Does your sample have high ionic strength?\n ", p1, statusp1);
+            sprintf(pulsecalerror,"Measured proton pulse %fus is more than 50% longer than reference pulse length %fus - data quality may be compromised.\n Does your sample have high ionic strength?\n ", p1, statusp1);
             strcat(sampleinfostring,pulsecalerror);
         }
     }

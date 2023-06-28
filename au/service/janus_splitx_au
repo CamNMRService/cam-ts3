@@ -234,10 +234,10 @@ expno=oexpno;
 SETCURDATA
 strcpy(titlefile,PROCPATH("title"));
 ftitle = fopen( titlefile, "a" );
-sprintf( titletext, "\n\n This is a NOAH dataset with %d experiments in 1.\n See experiment number %d onwards for the extracted data which can be processed as indicated in the title.",nbl,nexpno);
+sprintf( titletext, "\n \nThis is a NOAH dataset with %d experiments in 1.\nSee experiment number %d onwards for the extracted data which can be processed as indicated in the title.",nbl,nexpno);
 fputs ( titletext, ftitle );
 fclose ( ftitle );
-Proc_err(DEF_ERR_OPT,"%s %s", titlefile, titletext);
+
 
   Show_status("splitx done."); 
 

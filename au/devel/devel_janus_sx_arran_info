@@ -510,6 +510,11 @@ sampleproblem=0;
 	    AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 	    if ( AUERR <0 )
 		{
+			sprintf(tmp_cmd,"atma coarse storewobb 700");
+	    	AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+		}
+		if ( AUERR <0 )
+		{
 				sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
 			XAU("whoopwhoop",tmp_str)
 				// STOPMSG(tmp_str)

@@ -39,7 +39,7 @@ FILE *ftitle = NULL;
 
 
 FETCHPARS("ZGOPTNS", zgoptns);
-if (strstr(zgoptns,"-DNUS"))
+if (strstr(zgoptns,"-DNUScosy"))
 {
 
 strcpy(vclistpath,ACQUPATH("vplist"));

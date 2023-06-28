@@ -12,7 +12,7 @@
 /*      Description/Usage : splitx_au                           */
 /*      split a NOAH data set based on the setting of the NBL   */
 /*      parameter; automatically process the NOAH spectra       */
-/*      according to AU processing programs defined by userP1-P5*/
+/*      according to AU processing programs defined by userA1-A5*/
 /*      parameters                                              */
 /****************************************************************/
 /*      Author(s) :                                             */
@@ -27,6 +27,7 @@
 // PTG: updated for our NUS implementation: all the NUS handling done by the experiment specific AU programs
 // NUS processing params are just taken from parent dataset
 // Writes info about NOAH dataset to title as well
+// Names of processing AUs should now be stored in userA1-5 
 
   int size[3];
   int    *irow;
@@ -203,7 +204,7 @@ FILE *ftitle = NULL;
 
     DATASET(name, nexpno + i, procno, disk, user)
 
-    sprintf(proc_nm, "userP%d", i+1);
+    sprintf(proc_nm, "userA%d", i+1);
     FETCHPAR(proc_nm, str)
     STOREPAR("AUNMP", str)
     STOREPAR("NBL", 1)

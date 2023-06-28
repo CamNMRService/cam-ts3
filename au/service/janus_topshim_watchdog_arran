@@ -15,7 +15,7 @@
 //janus_topshim_watchdog THIS_IS_A_MESSAGE_TO_SEND ordmax=8
 //NB the message can't have spaces in... Ortherwise would look like more command line options.
 
-// check if cdcl3 on arran and dont do tuneaxyz if it is!
+// Now doing tunea always
 
 #include <time.h>
 time_t now_s, dtime_s;		  	/* seconds since 1970 */
@@ -85,6 +85,8 @@ CPR_exec("xau topshimkiller", WAIT_START);
 
 // execute topshim as desired
 //sprintf(tscommand,"topshim plotall convcomp %s",topshim_option);
+
+/* Previously not doing tuneaxyz for CDCl3:
 FETCHPAR("SOLVENT", solvent);
 if(strcmp(solvent, "CDCl3"))
 {
@@ -94,6 +96,10 @@ else
 {
 sprintf(tscommand,"topshim plotall convcomp %s", topshim_option);
 }
+*/
+
+// tuneaxz should be ok for CDCl3 now?
+sprintf(tscommand,"topshim plotall convcomp tuneaxyz %s", topshim_option);
 XCMD(tscommand);
 
 

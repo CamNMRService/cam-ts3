@@ -1,12 +1,7 @@
 /*sample submission software trying to overwrite a V/Z number*/
-//wow, this has eveolved.
-//June 23 - working on a mod to add an attachment of the samplexpress webpage
-#include <string.h>
 
-char sxpress_status_path[PATH_MAX]="C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html";
 char recent_hist_path[PATH_MAX];
 char curinst_path[PATH_MAX];
-FILE *sxpress_status_file = NULL;
 FILE *recent_hist_file = NULL;
 FILE *curinst_file = NULL;
 FILE *fbat = NULL;
@@ -20,14 +15,12 @@ char email_from[255]="camnmrservice@gmail.com";
 char batfile[PATH_MAX]="c:\\windows\\top-copy.bat";
 char batcmd[PATH_MAX]="c:\\windows\\top-copy.bat";
 char message[1023]="NULL_WHOOPWHOOP_MESSAGE";
-char attachments[PATH_MAX]="";
 
 
 char cmd_str[1024];
 int i=0;
 int args;
 int line_len=255;//same as instrum_name
-int num_attachments=0;
 char num_lines[7]="256"; //number of lines at end of history to dump has to be a string!	
 
 
@@ -73,7 +66,7 @@ while (i < strlen(instrum_name) )
 if (args == 3)
 {
    sprintf(title,"ERROR WITH %s %s",instrum_name, message); //no dashes allowed
-   sprintf(body,"%s  WHOOP WHOOP!!! Problem with %s command!", instrum_name, message); //no dashes allowed
+   sprintf(body,"%s WHOOP WHOOP!!! Problem with %s command!", instrum_name, message); //no dashes allowed
 } else 
 {
 	 sprintf(title,"ERROR %s %s",instrum_name, cmd); //no dashes allowed
@@ -87,41 +80,15 @@ XAU( "devel_dump-history", num_lines);
 sprintf(recent_hist_path,"%s\\recent_history.txt",ACQUPATH(0) );
 //Proc_err (INFO_OPT, "recent_hist_path - %s", recent_hist_path);
 recent_hist_file = fopen(recent_hist_path, "r");
-if (recent_hist_file != NULL) //there is a hist file
-{
-  num_attachments = 1;
-  sprintf(attachments,recent_hist_path);
-
-}
-
+    if (recent_hist_file == NULL)
+    {
+       sprintf (cmd_str, "sendemail -f %s -t %s -u %s -m %s -s smtp.gmail.com:587 -o tls=yes -xu %s -xp %s", email_from,  email_to, title, body, email_from, password);
+    }
+    else
+    {
+         sprintf (cmd_str, "sendemail -f %s -t %s -u %s -m %s -a %s -s smtp.gmail.com:587 -o tls=yes -xu %s -xp %s", email_from,  email_to, title, body, recent_hist_path, email_from, password); 
+    }
 fclose(recent_hist_file);
-
-if ( strstr(message,"SX") ) //we've been called due to a SX error
-{
-  sxpress_status_file = fopen(sxpress_status_path,"r");
-  if(sxpress_status_path != NULL ) //there is a status file there
-  {
-     if(num_attachments==0)
-     {
-       sprintf(attachments,"sxpress_status_path");
-     }
-     else 
-     {
-      strcat(attachments," ");
-      strcat(attachments,sxpress_status_path);
-     }
-  }
-  fclose(sxpress_status_file);
-}
-
-if(num_attachments==0)
-  {
-    sprintf (cmd_str, "sendemail -f %s -t %s -u %s -m %s  -s smtp.gmail.com:587 -o tls=yes -xu %s -xp %s", email_from,  email_to, title, body, email_from, password);  
-  }
-  else{
-   sprintf (cmd_str, "sendemail -f %s -t %s -u %s -m %s -s smtp.gmail.com:587 -o tls=yes -xu %s -xp %s -a %s", email_from,  email_to, title, body, email_from, password,attachments); 
-  }  
-
 Proc_err (INFO_OPT, "cmd_str - %s", cmd_str);
 fbat = fopen(batfile, "w");
 fputs( cmd_str, fbat);

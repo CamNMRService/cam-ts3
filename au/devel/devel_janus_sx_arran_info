@@ -765,7 +765,8 @@ if ((pulsecalfile = fopen(pulsecalfilename, "r")) != 0)
         if (p1/statusp1 > 1.5)
         {
             sampleproblem=1;
-            sprintf(pulsecalerror,"Measured proton pulse %fus is more than 50% longer than reference pulse length %fus - data quality may be compromised.\n Does your sample have high ionic strength?\n ", p1, statusp1);
+            sprintf(pulsecalerror,"Measured proton pulse %.2fus is more than 50\% longer than reference pulse length %.2fus - data quality may be compromised.\n Does your sample have high ionic strength?\n \
+			Please talk to the NMR service team about whether medium or thisk wall tubes are more suitable for similar samples. \n", p1, statusp1);
             strcat(sampleinfostring,pulsecalerror);
         }
     }

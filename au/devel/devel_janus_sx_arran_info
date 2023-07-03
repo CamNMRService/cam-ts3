@@ -754,7 +754,7 @@ if (proc_or_not==1)
 		      sleep( delaytime );
 	        }
 /* Check for a pulsecal file in the root NAME directory, and if it's there check the P1 vs s P1*/
-sprintf(pulsecalfilename,"%s\\%s\pulsecal",disk,name);
+sprintf(pulsecalfilename,"%s\\%s\\pulsecal",disk,name);
 if ((pulsecalfile = fopen(pulsecalfilename, "r")) != 0)
 {
 	Proc_err(DEF_ERR_OPT,"pulsecal file found");

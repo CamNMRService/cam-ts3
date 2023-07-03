@@ -160,7 +160,7 @@ proc_or_not=1;
 
 
 Proc_err ( INFO_OPT, "Starting program");
-sleep(120); //initial delay to allow topspin to start before doing anything else
+//sleep(120); //initial delay to allow topspin to start before doing anything else
 XCMD("setdef ackn no");
 XCMD("setdef stdout on");
 XCMD("setdef stderr on");
@@ -277,6 +277,7 @@ if ( AUERR <0 )
 	STOPMSG("Janus stopped - initial ii error")
 }
 
+/*
 sprintf(tmp_cmd, "sx %i", test_pos);
 AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 if ( AUERR <0 )
@@ -297,7 +298,7 @@ if ( AUERR <0 )
 
 }
 
-
+*/
 
 
 /*--------------------------------------------------------------*/

@@ -734,7 +734,7 @@ if (proc_or_not==1)
 	        }
 
 /* Check for a pulsecal file in the root NAME directory, and if it's there check the P1 vs s P1*/
-sprintf(pulsecalfilename,"%s\\%s\pulsecal",disk,name);
+sprintf(pulsecalfilename,"%s\\%s\\pulsecal",disk,name);
 if ((pulsecalfile = fopen(pulsecalfilename, "r")) != 0)
 {
 	if( fgets(pulsecalcontent,128,pulsecalfile) !=NULL)

@@ -516,9 +516,12 @@ sampleproblem=0;
 		}
 		if ( AUERR <0 )
 		{
-				sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
+			sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
 			XAU("whoopwhoop",tmp_str)
-				// STOPMSG(tmp_str)
+			sampleproblem=1;
+			strcat(sampleinfostring, "\n ATMA failed - does your sample have high ionic strength? \n Check \
+with NMR service team about whether medium or thick wall tubes are more appropriate for similar samples.");
+
 		}
      
 	    //	sprintf(tmp_cmd, "ROT");
@@ -546,7 +549,7 @@ if (AUERR<0)
 	if (sampleproblem==1)
 	{
 		 XAU("whoopwhoop",tmp_str);
-		sprintf(tmp_str,"Failed to lock: check sample is clear, sample filling is >40mm, solvent is deuterated\n \
+		sprintf(tmp_str,"\n Failed to lock: check sample is clear, sample filling is >40mm, solvent is deuterated\n \
 		Solvent is listed as %s, if this is not as expected there is probably a rogue character in the Sample ID such as a comma.\n \
 		In this case resubmit with correct SAmple ID- only letters, numbers, underscores, dashes and full stops allowed", solvent);
 		strcat(sampleinfostring,tmp_str);
@@ -558,7 +561,7 @@ else
 {
 	if (sampleproblem==1)
 	{
-		sprintf(tmp_str,"Sample failed to lock, but shimmed OK: check spectrum is OK and shfts are sensible.\n \
+		sprintf(tmp_str,"\n Sample failed to lock, but shimmed OK: check spectrum is OK and shfts are sensible.\n \
 		Solvent is listed as %s, if this is not as expected there is probably a rogue character in the Sample ID such as a comma.\n \
 		In this case if necessary resubmit with correct Sample ID- only letters, numbers, underscores, dashes and full stops allowed", solvent);
 		strcat(sampleinfostring,tmp_str);
@@ -764,7 +767,7 @@ if ((pulsecalfile = fopen(pulsecalfilename, "r")) != 0)
         if (p1/statusp1 > 1.5)
         {
             sampleproblem=1;
-            sprintf(pulsecalerror,"Measured proton pulse %.2fus is more than 50%% longer than the reference pulse length %.2fus - data quality may be compromised.\n Does your sample have high ionic strength?\n 
+            sprintf(pulsecalerror,"\n Measured proton pulse %.2fus is more than 50%% longer than the reference pulse length %.2fus - data quality may be compromised.\n Does your sample have high ionic strength?\n 
 Please talk to the NMR service team about whether medium or thick wall tubes are more suitable for similar samples. \n \n", p1, statusp1);
             strcat(sampleinfostring,pulsecalerror);
         }

@@ -11,6 +11,9 @@
    char out_line[MAX_LINE_LENGTH];
    char out_txt[MAX_LINE_LENGTH];
    char err_txt[MAX_LINE_LENGTH];
+   char tmp_cmd[MAX_LINE_LENGTH];
+   char sexpress_ip[20]="0.0.0.0";
+   char sexpress_prefix[4]="149";
    int i=0;
    int j=0;
    int len=0;
@@ -19,6 +22,15 @@
 
    FILE *output_file;
    FILE *html_file;
+
+if ( (i_argc == 3) && (strcmp(sexpress_ip, sexpress_prefix) !=NULL) )
+{
+
+   sprintf(sexpress_ip,"%s",i_argv[2]);
+   sprintf(tmp_cmd,"wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", sexpress_ip);
+   system(tmp_cmd); 
+}
+
 
    if (html_file == NULL) {
       printf("Failed to open the file.\n");

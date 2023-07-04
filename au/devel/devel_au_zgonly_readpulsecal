@@ -41,14 +41,17 @@
 //for shaped pulses should be checked to ensure that there is no possibility of going past the normal peak power,
 // particularly if very short 180 shapes have been set.
 
+// Now also set the hard pulses after doing getprosol x y
+// Values are set within the if statements for carbon job or not carbon job
+
 char pulsecalfilename[PATH_MAX];
 FILE *pulsecalfile = NULL;
 char instrum[128], result[255];
 sprintf(pulsecalfilename,"%s\\%s\\pulsecal",disk,name);
-char nuc1[8], nuc2[8], prosolstring[256];
+char nuc1[8], nuc2[8], prosolstring[256], CPulse[8],HPulse[8];
 float carbonpulse;
-double carbonfactor;
-float p1, statusp1, protonpower, carbonpower;
+double carbonfactor, realcarbonfactor;
+float protonpulse, statusprotonpulse, protonpower, carbonpower, dummyp1, realcarbonpulse;
 int test;
 GETCURDATA
 
@@ -72,29 +75,33 @@ if ((pulsecalfile=fopen(pulsecalfilename, "r")) != NULL)
 	{
 		// If we read something from the file crack on else abort
 		
-		sscanf(result,"%f %f", &p1, &statusp1); 
+		sscanf(result,"%f %f", &protonpulse, &statusprotonpulse); 
 		
 		// Sanity check the results
-		if( 5.0 < p1 && p1 < 25 && 5.0 < statusp1 && statusp1 < 25)
+		if( 5.0 < protonpulse && protonpulse < 25 && 5.0 < statusprotonpulse && statusprotonpulse < 25)
 		{
 			// we found integers in a vaguely sensible range, continue
 			
-		    if(p1>(statusp1*1.05))
+		    if(protonpulse>(statusprotonpulse*1.05))
 	        { 
             //Proc_err(DEF_ERR_OPT, "long pulse");
 			// pulse is longer than normal, so check how long
 			
-			    if(p1>(statusp1*1.5))
+			    if(protonpulse>(statusprotonpulse*1.5))
 			    {
 				    //Proc_err(DEF_ERR_OPT, "very long pulse");
 				    // pulse too long so pretend it's 1.5x
-				    p1=statusp1*1.5;
+				    dummyp1=statusprotonpulse*1.5;
+				}
+				else
+				{
+					dummyp1=protonpulse;
 				}
 		        // take appropriate value of proton pulse forwards
 			
 	  
 	              // is this a carbon job?
-	             if(strcmp(nuc1,"13C")==0 || strcmp(nuc2,"13C")==0 )
+	            if(strcmp(nuc1,"13C")==0 || strcmp(nuc2,"13C")==0 )
 	            {
 	  	            // Carbon found, check whether observe or not
 	  	            if (strcmp(nuc1,"13C")==0)
@@ -102,14 +109,24 @@ if ((pulsecalfile=fopen(pulsecalfilename, "r")) != NULL)
                         // NUC1 is carbon so read P1/Pl1 for the carbon pulse and pl2 for proton power
 	  		            FETCHPAR("P 1", &carbonpulse);
 	  		            FETCHPAR("PLdB 1", &carbonpower);
-	  		            FETCHPAR("PLdB 2", &protonpower) 
+	  		            FETCHPAR("PLdB 2", &protonpower) ;
+						// define the parameter that is to be set to the carbon pulse
+						// This is not obs so P3 
+						sprintf(CPulse,"P 1");
+						// and proton - this is decouple so P3
+						sprintf(HPulse,"P 3");
 	  	            } 
     	              else if (strcmp(nuc2,"13C")==0)
 	  	            {
                          // NUC2 is carbon so read P3/Pl2 for the carbon pulse and pl1 for proton power
 	  		            FETCHPAR("P 3", &carbonpulse); 
                         FETCHPAR("PLdB 2", &carbonpower);
-                        FETCHPAR("PLdB 1", &protonpower) 
+                        FETCHPAR("PLdB 1", &protonpower);
+						// define the parameter that is to be set to the carbon pulse
+						// This is not obs so P3 
+						sprintf(CPulse,"P 3");
+						// and proton - this is obs so P1
+						sprintf(HPulse,"P 1");
 	  	            }
 	  	    
 	  	            // define relative factor of carbon pulse increase compared to proton
@@ -118,17 +135,34 @@ if ((pulsecalfile=fopen(pulsecalfilename, "r")) != NULL)
                     // NB this is currently just set according to INSTRUM, no accounting for different probes!
 	  	            if(strcmp(instrum,"arran")==0)
 	  	            {
-	  		            carbonfactor=sqrt(p1/statusp1);
+	  		            carbonfactor=sqrt(dummyp1/statusprotonpulse);
 	  	            }
 	  	            else if(strcmp(instrum,"glenfairn")==0)
 	  	            {
-	  		           carbonfactor=sqrt(p1/statusp1);
+	  		           carbonfactor=sqrt(dummyp1/statusprotonpulse);
 	  	            }
 	  	            else carbonfactor=1.0;
 	                //Calculate reference carbon pulse
 	  	            carbonpulse=carbonpulse*carbonfactor;
                     // Build the string for getprosol 
-                    sprintf(prosolstring,"sendgui getprosol 1H %f %f 13C %.2lf %.2lf", p1, protonpower, carbonpulse, carbonpower);
+                    sprintf(prosolstring,"sendgui getprosol 1H %f %f 13C %.2lf %.2lf", dummyp1, protonpower, carbonpulse, carbonpower);
+					// Find real carbon pulse
+					realcarbonfactor=sqrt(protonpulse/statusprotonpulse);
+					realcarbonpulse=carbonpulse*carbonfactor;
+					 // now we can execute getprosol - moved inside loop as we need to do p1/p3 stuff afterwards
+               		 if(dummy)
+               		{
+                    	Proc_err(DEF_ERR_OPT,"Getprosol string is: %s \n CPulse is %s  = %f HPulse is %s = %f", prosolstring,CPulse, realcarbonpulse,HPulse, protonpulse);
+                	}
+                	else
+                	{
+                   	 	XCMD(prosolstring);
+						STOREPAR(CPulse,realcarbonpulse);
+						STOREPAR(HPulse,protonpulse);
+
+
+                	}
+					
                 
 	            }
 	                else
@@ -136,28 +170,36 @@ if ((pulsecalfile=fopen(pulsecalfilename, "r")) != NULL)
                     //Apparently not a carbon job so read appropriate proton power
                     if (strcmp(nuc1,"1H")==0)
 	  	            {
-	  	                FETCHPAR("PLdB 1", &protonpower)
+	  	                FETCHPAR("PLdB 1", &protonpower);
+						// this is obs so we need P1 to be proton pulse
+						sprintf(HPulse,"P 1");
                     }
                     else if (strcmp(nuc2,"1H")==0)
 	  	            {
-	  	                FETCHPAR("PLdB 2", &protonpower)
+	  	                FETCHPAR("PLdB 2", &protonpower);
+						// this is dec somehow?? so we need P1 to be proton pulse (could be 15N expt for example)
+						sprintf(HPulse,"P 3");
                     }
                     else
                     {
                         // we didn't find proton anywhere so abort the getprosol part
                         goto skippulsecal;
                     }
-	                sprintf(prosolstring,"sendgui getprosol 1H %f %f", p1, protonpower);
+	                sprintf(prosolstring,"sendgui getprosol 1H %f %f", dummyp1, protonpower);
+					// now we can execute getprosol - moved inside loop as we need to do p1/p3 stuff afterwards
+               		if(dummy)
+               		{
+                    	Proc_err(DEF_ERR_OPT,"Getprosol string is: %s \n HPulse is %s = %f", prosolstring,HPulse, protonpulse);
+                	}
+                	else
+                	{
+                   	 	XCMD(prosolstring);
+						STOREPAR(HPulse,protonpulse);
+
+                	}
+					
 	            }
-                // now we can execute getprosol
-                if(dummy)
-                {
-                    Proc_err(DEF_ERR_OPT,"Getprosol string is: %s", prosolstring);
-                }
-                else
-                {
-                    XCMD(prosolstring);
-                }
+               
 	        }// if we're not in here then proton pulse is normal so we're not doing anything
 	    }
  	}

@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------*/
-/* Title	: Program janus_sx_lagavulin				*/
+/* Title	: Program janus_sx_lagavulin			*/
 /*has specific parts for this instrument */
 /* WORK IN PROGRESS TO UPDATE TO TOPSPIN 3			*/
 /* Topspin 3 update done by djh in cambridge*/
@@ -79,8 +79,19 @@
 /****************************************/
 //PTG 2023/06/06 atma storewobb 700
 //djh 2023/06/14 make it handle the (reserved) POS 59 - can be used to run special service experiments
+//djh 2023/06/15 - make a call to devel_get_sxpress_status on sx error
+//changed tmp_cmd to 1024 in size
+// line 280 -
+// sprintf(tmp_cmd,"wget http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", sxpress_ip);
+// system(tmp_cmd);
+//added variable char sxpress_ip[16]="149.236.99.251"; to call devel_get_sxpress with
+
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
+/*instrument dependent variables!!!!!!*/
 char def_file[255]="f:/chemist/defaults-csv.txt"; //janus software defaults
+char    sxpress_ip[16]="149.236.99.34"; //lagavulins is joined via a serial connection...
+/*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
+
 float   delaytime=1.0;
 int     expt=1, curloop=1, cpos, specno, jexpt, jsolv, finish=FALSE,i=1;
 int     LastSample, FatalError=FALSE, nexpt, parmo, proderrcount, sthou;
@@ -94,7 +105,7 @@ char    exptfile[80], diskunit[40];
 char    prefix[40], shimset[40], defaultsfile[80], hdwerr[80];
 char    archpath[80], archive[20], jcmd_str[1024], outpath[1024];
 char    janusup[80], expttime[40], exptsfile[80], protocol[80];
-char    sxcmd[255], gradshim[20], comments[1024], command[1024], snostr[1024], tmp_cmd[256];
+char    sxcmd[255], gradshim[20], comments[1024], command[1024], snostr[1024], tmp_cmd[1024];
 char    statusstr[1024], awmfile[80],tmparchpath[1024],fidpath[1024],procau[1024];
 char	  proclist[1024],procinstruct[1024];
 char    reportdest[PATH_MAX];
@@ -261,8 +272,11 @@ if ( AUERR <0 )
 
 sprintf(tmp_cmd, "sx %i", test_pos);
 AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+sprintf(tmp_cmd,"wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", sxpress_ip);
+system(tmp_cmd);
 if ( AUERR <0 )
 {
+	XAU("parse_sexpress_web","")
 	sprintf(tmp_str, "INITIAL_TEST_SAMPLE_SX_%i_ERROR",test_pos);
 	XAU("whoopwhoop",tmp_str)
 } else {
@@ -273,11 +287,11 @@ if ( AUERR <0 )
     {
 	   sprintf(tmp_str, "INITIAL_TEST_SAMPLE_ATMA_ERROR");
 	   XAU("whoopwhoop",tmp_str)
-	   STOPMSG("Janus stopped - initial ii error")
+	   STOPMSG("Janus stopped - initial atma error")
     }
 
 }
-
+XAU("parse_sexpress_web","") //test sample is in, parse the sx logs
 
 
 
@@ -407,11 +421,10 @@ if ( strstr ( protocol, "POS59") != NULL )
 	cpos=59;
 }
 
-/*remove comment for production */
 	sprintf( tmp_cmd, "sx %d",cpos);
-//	sprintf( sxcmd, "sendgui sx %d",cpos);
 	AUERR=CPR_exec(tmp_cmd, WAIT_TERM);
-
+    sprintf(tmp_cmd,"wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", sxpress_ip);
+	system(tmp_cmd);
 
 	if ( AUERR <0 )
 
@@ -422,26 +435,31 @@ if ( strstr ( protocol, "POS59") != NULL )
 		fclose( flog );
 		sleep( 60 );
 		sprintf( sxcmd, "sx %d ",cpos);
+
 		AUERR=CPR_exec(sxcmd, WAIT_TERM);
-//remove comment around below for production not sure if this is needed, the above line should deal with it
-		/*SX( cpos );*/
+		sprintf(tmp_cmd,"wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", sxpress_ip);
+		system(tmp_cmd); //lets download the webpage with the samplejet status on
+
 	}
 	if ( AUERR <0 )
 	{
-	    sprintf(statusstr, "***Warning - could not find samples(%d)***",AUERR);
-  	    Show_status(statusstr );
-		fwarn = fopen( warnfile,"w" );
-		sprintf( hdwerr, "Could not find sample: %d\n", AUERR);
-		fputs( hdwerr, fwarn );
-		fclose( fwarn );
-		flog = fopen(logfile,"a+");
-		fputs( hdwerr, flog);
-		fclose( flog );
-		skipsample=1;
+	  sprintf(statusstr, "***Warning - could not find samples(%d)***",AUERR);
+  	  Show_status(statusstr );
+	  fwarn = fopen( warnfile,"w" );
+	  sprintf( hdwerr, "Could not find sample: %d\n", AUERR);
+	  fputs( hdwerr, fwarn );
+	  fclose( fwarn );
+	  flog = fopen(logfile,"a+");
+	  fputs( hdwerr, flog);
+	  fclose( flog );
+	  skipsample=1;
 // email us but don't quit in case it's not a real problem and is just skipping sample!!
-        sprintf(tmp_str, "INSERT_ERROR_%i_%s", cpos, tmp_fname);
-	    XAU("whoopwhoop",tmp_str)
+      sprintf(tmp_cmd,"wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", sxpress_ip);
+	  XAU("parse_sexpress_web","")
+      sprintf(tmp_str, "SX_INSERT_ERROR_%i_%s", cpos, tmp_fname);
+	  XAU("whoopwhoop",tmp_str)
 	}
+	 XAU("parse_sexpress_web","") //lets parse any samplexpress log as we have the sample in now.
 /*ok, we have put the sample in the magnet; now run through its exps*/
 	if (skipsample==0)
 	{
@@ -660,14 +678,18 @@ if (proc_or_not==1)
 	           /*PUT_SAMPLE_BACK*/
 	           /*remove comment on next line for production*/
 		      AUERR=CPR_exec("sx ej",WAIT_TERM);
+              sprintf(tmp_cmd,"wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", sxpress_ip);
+	          system(tmp_cmd); //lets download the webpage with the samplejet status on
+		     
 		      if ( AUERR <0 )
 		         {
-		      	 sprintf(tmp_cmd, "EJECT_ERROR_%i_%s", cpos, tmp_fname);
-	           XAU("whoopwhoop_sx",tmp_cmd)
-	           STOPMSG(tmp_cmd)
+	             XAU("parse_sexpress_web","")//lets parse the log 
+		      	 sprintf(tmp_cmd, "SX_EJECT_ERROR_%i_%s", cpos, tmp_fname);
+	             XAU("whoopwhoop",tmp_cmd)
+	             STOPMSG(tmp_cmd)
 		         }
-	           
-	        LastSample=TRUE;
+	          XAU("parse_sexpress_web","")//lets parse the log 
+	          LastSample=TRUE;
 		      sleep( delaytime );
 	        }
 //janus-email needs the location of the defaults file to be passed to it

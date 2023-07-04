@@ -1,5 +1,5 @@
 /****************************************************************/
-/*      noah_cosy - process NOAH H-H correlation experiments    */
+/*      janus_noah_cosy_nus - process NOAH H-H correlation experiments    */
 /*      18.04.2017                                              */
 /****************************************************************/
 /*      Short Description :                                     */
@@ -24,6 +24,7 @@
 /****************************************************************/
 
 // NUS: reads VPLIST from dataset! for COSY. Assumes QF: max TD is set from 1x longest list entry, rather than 2x for E-A
+// Looks for -DNUScosy in zgoptns
 // Fix the bugs: don't call proc_noah in this case
 // Janus version: don't actually process, but put some extra info in the title file
 

@@ -83,7 +83,7 @@ if (args == 3)
 
 //Proc_err (INFO_OPT, "instrum_name_trunc - %s", instrum_name_trunc);
 //Proc_err (INFO_OPT, "body - %s", body);
-XAU( "devel_dump-history", num_lines);
+XAU( "dump-history", num_lines);
 sprintf(recent_hist_path,"%s\\recent_history.txt",ACQUPATH(0) );
 //Proc_err (INFO_OPT, "recent_hist_path - %s", recent_hist_path);
 recent_hist_file = fopen(recent_hist_path, "r");
@@ -99,11 +99,11 @@ fclose(recent_hist_file);
 if ( strstr(message,"SX") ) //we've been called due to a SX error
 {
   sxpress_status_file = fopen(sxpress_status_path,"r");
-  if(sxpress_status_path != NULL ) //there is a status file there
+  if(sxpress_status_file != NULL ) //there is a status file there
   {
      if(num_attachments==0)
      {
-       sprintf(attachments,"sxpress_status_path");
+       sprintf(attachments,sxpress_status_path);
      }
      else 
      {

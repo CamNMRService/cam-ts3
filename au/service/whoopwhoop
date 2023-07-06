@@ -1,6 +1,6 @@
 /*sample submission software trying to overwrite a V/Z number*/
 //wow, this has eveolved.
-//June 23 - working on a mod to add an attachment of the samplexpress webpage
+//June 23 - working on a mod to add an attachment of the samplexpress/samplejet webpage
 #include <string.h>
 
 char sxpress_status_path[PATH_MAX]="C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html";

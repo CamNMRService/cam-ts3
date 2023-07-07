@@ -12,6 +12,8 @@ b1_01 - add nucleus, sino_pp and instrument name to output
 b1_01 - try and fail more gracefully if humpcal fails - use -1.0 in values to indicate
 b1_01 - Nov 22 - Make NOT verbose mode  not pop error box up that can stall automation
 B1_02 -  April 2023 - moved half width spec to defaults file and writing of shim files if spec passed
+         July 2023 - added topshim before acq - kept same verion number for simplicity
+                  and humpcal-djh which has MAXI set to 100000 due to bug
 */
 
 #include <stdio.h>
@@ -346,6 +348,9 @@ if (aqtest == 0)
     sprintf(gui_cmd,"sendgui AQ %f",aq_double);
     XCMD(gui_cmd)
     ATMA
+    // add topshim here with full tunea - maybe important if it's run all the otehr tests first
+    // and also we want to make sure it adjusts XZ/YZ
+    XCMD("topshim plotall tunea convcomp")
     ZG
     if ( (ts_major=4) && (ts_minor>=0) && (ts_patch>=6) ) {
     FP
@@ -360,7 +365,7 @@ if (aqtest == 0)
 }
 
 //XAU("djh-humpcal","") //I've found sometimes I've had to change parameters and roll my own humpcal
-XAU("humpcal","")
+XAU("humpcal-djh","")
 //Get the humpcal results
 strcpy(hump_file_path, PROCPATH("humpcal.txt"));
 

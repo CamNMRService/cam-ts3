@@ -77,7 +77,7 @@ int local_au(const char *curdat)
 
     STOREPAR("CY",     100.0)
     STOREPAR("MI",      50.0)
-    STOREPAR("MAXI", 10000.0)
+    STOREPAR("MAXI", 100000.0)
     STOREPAR("PC",       4.0)
     PP
     ret = AUERR;

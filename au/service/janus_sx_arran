@@ -90,6 +90,7 @@ Removed various debugging messages
 Now lock errors only do anythign if shim also fails
 Added note about solvent to SampleProblems file and warnign to check for strange characters
 And added pulse length check and associated message in SAmpleProblems
+WIth POS40 currently for test sample
 
 */
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
@@ -423,10 +424,11 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 // Check "protocol" entry from prod file to see if this is a system test
 // and if so change cpos to 60
 
-if ( strstr ( protocol, "POS60") != NULL )
+
+if ( strstr ( protocol, "POS40") != NULL )
 {
-	// found test sample string in protocol so set pos to 60
-	cpos=60;
+	// found test sample string in protocol so set pos to 40
+	cpos=40;
 }
 
 if ( strstr ( protocol, "POS59") != NULL )

@@ -300,7 +300,7 @@ else
 {
     RPAR(test_parset, "all")
 	sleep(60);
-    sprintf(tmp_cmd, "atma storewob 700");
+    sprintf(tmp_cmd, "atma storeWobb 700");
 	STOREPAR("RO",0)
     AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
     if ( AUERR <0 )

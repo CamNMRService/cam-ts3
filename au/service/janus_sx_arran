@@ -90,7 +90,7 @@ Removed various debugging messages
 Now lock errors only do anythign if shim also fails
 Added note about solvent to SampleProblems file and warnign to check for strange characters
 And added pulse length check and associated message in SAmpleProblems
-WIth POS40 currently for test sample
+WIth POS41 currently for test sample
 
 */
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
@@ -152,7 +152,7 @@ int ts_major = GetTsVersionMajor();
 int ts_minor = GetTsVersionMinor();
 int ts_patch = GetTsVersionPl();
 
-int test_pos = 60;
+int test_pos = 41;
 char test_parset[256] = "C13CPD";
 
 time_t lt;
@@ -425,16 +425,16 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 // and if so change cpos to 60
 
 
-if ( strstr ( protocol, "POS40") != NULL )
+if ( strstr ( protocol, "POS41") != NULL )
 {
-	// found test sample string in protocol so set pos to 40
-	cpos=40;
+	// found test sample string in protocol so set pos to 41
+	cpos=41;
 }
 
-if ( strstr ( protocol, "POS59") != NULL )
+if ( strstr ( protocol, "POS42") != NULL )
 {
 	// found test sample string in protocol so set pos to 59
-	cpos=59;
+	cpos=42;
 }
 
 /*remove comment for production */

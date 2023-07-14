@@ -278,6 +278,8 @@ Proc_err(INFO_OPT,"diskunit=%s",diskunit);
 Proc_err(INFO_OPT,"disk=%s",disk);
 SETCURDATA
 VIEWDATA_SAMEWIN
+RPAR(test_parset, "all")
+
 
 sprintf(tmp_cmd, "ii");
 AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
@@ -298,7 +300,6 @@ if ( AUERR <0 )
 } 
 else 
 {
-    RPAR(test_parset, "all")
 	sleep(60);
     sprintf(tmp_cmd, "atma storeWobb 700");
 	STOREPAR("RO",0)

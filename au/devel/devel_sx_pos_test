@@ -18,7 +18,7 @@ GETSTRING("Enter the sXpress IP address (type ha to find out)", sxpress_ip );
 sprintf(wget_cmd,"wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", sxpress_ip);
 
 
-GETINT("Please enter the number of scans:", reps);
+GETINT("Please enter the number of reps:", reps);
 
 if ( (reps<min_reps) || (reps>max_reps) )
 {
@@ -45,11 +45,11 @@ else{
 
 }
 
-for (i = 0; i < reps; i++) {
+for (i = 1; i < reps; i++) {
             // Perform the desired operations inside the loop
     sx_error=1;
     sprintf(sx_cmd,"sx %i",pos);
-    sx_error=CPR_exec(tmp_cmd, WAIT_TERM);
+    sx_error=CPR_exec(sx_cmd, WAIT_TERM);
     system(wget_cmd);
     if ( sx_error < 0 )
     {
@@ -64,7 +64,7 @@ for (i = 0; i < reps; i++) {
 
     sx_error=1;
     sprintf(sx_cmd,"sx ej");
-    sx_error=CPR_exec(tmp_cmd, WAIT_TERM);
+    sx_error=CPR_exec(sx_cmd, WAIT_TERM);
     system(wget_cmd);
     if ( sx_error < 0 )
     {

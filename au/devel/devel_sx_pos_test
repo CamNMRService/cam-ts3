@@ -12,7 +12,7 @@ int pos=59;
 int max_pos=60;
 int sx_error=1;
 int i=0;
-
+int delaytime=5;
 
 GETSTRING("Enter the sXpress IP address (type ha to find out)", sxpress_ip );
 sprintf(wget_cmd,"wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", sxpress_ip);
@@ -62,6 +62,8 @@ for (i = 1; i < reps; i++) {
         XAU("parse_sexpress_web",""); 
     }
 
+    sleep( delaytime );
+    
     sx_error=1;
     sprintf(sx_cmd,"sx ej");
     sx_error=CPR_exec(sx_cmd, WAIT_TERM);

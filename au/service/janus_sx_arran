@@ -269,6 +269,16 @@ Proc_err ( INFO_OPT, "Waiting for sample...");
 
 /*the below becomes the place the data is stored. Done in the old skool path format for compatibility*/
 sprintf(diskunit,"%sdata\\%s\\nmr\\",diskunit,suser);
+
+// temporary move to junk dataset - need something known to exist
+DATASET ( "junk", 10, 1, diskunit, suser)
+Proc_err(INFO_OPT,"diskunit=%s",diskunit);
+Proc_err(INFO_OPT,"disk=%s",disk);
+GETCURDATA
+VIEWDATA_SAMEWIN
+
+// now make systest dataset
+
 lt=time(NULL);
 ltstruc = localtime(&lt);
 sprintf(datestamp, "%d_%d_%d_%d_%d_%d", ltstruc->tm_year+1900, ltstruc->tm_mon, ltstruc->tm_mday, ltstruc->tm_hour, ltstruc->tm_min, ltstruc->tm_sec);
@@ -528,7 +538,7 @@ sampleproblem=0;
         }
 	
 		if ( AUERR <0 )
-{
+		{	
 	       //Just set sampleproblem flag here 
 		   // If topshim fails , add the lock failure string but not otherwise-
 		   // If topshim succeeds it must have  been locked so false alarm
@@ -539,8 +549,8 @@ sampleproblem=0;
 
         }
 
-	// move atma to here for Arran (only), as we clearly only need to tune once!!
-	// and better to have before topshim. NB junk/10/1 must be a proton/carbon dataset
+		// move atma to here for Arran (only), as we clearly only need to tune once!!
+		// and better to have before topshim. NB junk/10/1 must be a proton/carbon dataset
 	
 	    sprintf(tmp_cmd,"atma storewobb 700");
 	    AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
@@ -559,15 +569,8 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 
 		}
      
-	    //	sprintf(tmp_cmd, "ROT");
-	    //	AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
-	    ROT
-		if ( AUERR <0 )
-        {
-	       sprintf(tmp_str, "ROT_FAILED_%i_%s", cpos, tmp_fname);
-	     //  XAU("whoopwhoop",tmp_str)
-		 ROT
-        }
+//	No spinning for cryoprobe...
+	   
 		
 //topshim has to be here, as we only want to do it once per sample, have to do atma each exp, or put more logic in.
  

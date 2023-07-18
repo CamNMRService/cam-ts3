@@ -1,0 +1,85 @@
+
+//devel_sx_pos_test
+char sxpress_ip[24]="149.236.99.34";
+char wget_cmd[1024]="";
+char sx_cmd[8]="";
+char tmp_cmd[1024]="";
+char tmp_str[1024]="";
+int reps=1;
+int min_reps=1;
+int max_reps=50;
+int pos=59;
+int max_pos=60;
+int sx_error=1;
+int i=0;
+int delaytime=5;
+
+GETSTRING("Enter the sXpress IP address (type ha to find out)", sxpress_ip );
+sprintf(wget_cmd,"wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", sxpress_ip);
+
+
+GETINT("Please enter the number of reps:", reps);
+
+if ( (reps<min_reps) || (reps>max_reps) )
+{
+    reps=3;
+}
+
+
+if  (i_argc == 3)
+{
+    pos = atoi(i_argv[2]);
+}
+else{
+    GETINT("Please enter the position you want to check",pos);
+
+    if (pos>60)
+    {
+        pos=59;
+    }
+
+    if (pos<1)
+    {
+        pos=1;
+    }
+
+}
+
+for (i = 1; i < reps; i++) {
+            // Perform the desired operations inside the loop
+    sx_error=1;
+    sprintf(sx_cmd,"sx %i",pos);
+    sx_error=CPR_exec(sx_cmd, WAIT_TERM);
+    system(wget_cmd);
+    if ( sx_error < 0 )
+    {
+        XAU("parse_sexpress_web","");
+        sprintf(tmp_str, "SX_INSERT_ERROR__POS_%i_ATTEMPT_%i", pos,i);
+        XAU("whoopwhoop",tmp_str);
+        STOPMSG(tmp_str);
+    }
+    else{
+        XAU("parse_sexpress_web",""); 
+    }
+
+    sleep( delaytime );
+    
+    sx_error=1;
+    sprintf(sx_cmd,"sx ej");
+    sx_error=CPR_exec(sx_cmd, WAIT_TERM);
+    system(wget_cmd);
+    if ( sx_error < 0 )
+    {
+        XAU("parse_sexpress_web","");
+        sprintf(tmp_str, "SX_EJECT_ERROR__POS_%i_ATTEMPT_%i", pos,i);
+        XAU("whoopwhoop",tmp_str);
+        STOPMSG(tmp_str);
+    }
+    else{
+        XAU("parse_sexpress_web",""); 
+    }
+
+
+}	          
+
+QUIT

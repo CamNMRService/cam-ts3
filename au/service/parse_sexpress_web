@@ -87,6 +87,11 @@
              sprintf(out_txt,"%s%s\n",time_buffer,out_line);
              fputs(out_txt, output_file);
            }
+           if ( strstr(out_line,"Transfering sample back") )
+           {
+             sprintf(out_txt,"%s%s\n",time_buffer,out_line);
+             fputs(out_txt, output_file);
+           }
            fclose(output_file);
         }
     }

@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------*/
-/* Title	: Program devel_janus_sx_lagavulin				*/
+/* Title	: Program janus_sx_lagavulin			*/
 /*has specific parts for this instrument */
 /* WORK IN PROGRESS TO UPDATE TO TOPSPIN 3			*/
 /* Topspin 3 update done by djh in cambridge*/
@@ -77,12 +77,32 @@
 //---sprinkled some more setdef ackn no - when poise is called, it might turn click awway messages on again
 //Added/moved code for title writing so its erased in 'w' mode, then appended after XAUA. Retains any title XAUA writes
 /****************************************/
+//PTG 2023/06/06 atma storewobb 700
+//djh 2023/06/14 make it handle the (reserved) POS 59 - can be used to run special service experiments
+//djh 2023/06/15 - make a call to devel_get_sxpress_status on sx error
+//changed tmp_cmd to 1024 in size
+// line 280 -
+// sprintf(tmp_cmd,"wget http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", sxpress_ip);
+// system(tmp_cmd);
+//added variable char sxpress_ip[16]="149.236.99.251"; to call devel_get_sxpress with
+//July/august 2023
+/*dded creation of an info file which reports any errors with lock, atma , topshim, and long proton pulse
+Made string for holding info file text, long enough...
+Removed various debugging messages
+Now lock errors only do anythign if shim also fails
+Added note about solvent to SampleProblems file and warnign to check for strange characters
+And added pulse length check and associated message in SAmpleProblems*/
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
+/*instrument dependent variables!!!!!!*/
 char def_file[255]="f:/chemist/defaults-csv.txt"; //janus software defaults
+char    sxpress_ip[16]="149.236.99.34"; //lagavulins is joined via a serial connection...
+int test_pos = 60;
+/*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
+
 float   delaytime=1.0;
 int     expt=1, curloop=1, cpos, specno, jexpt, jsolv, finish=FALSE,i=1;
 int     LastSample, FatalError=FALSE, nexpt, parmo, proderrcount, sthou;
-int     skipsample, pid, x, proc_or_not=0;
+int     skipsample, pid, x, proc_or_not=0,sampleproblem=0;
 
 char    oi[80], juser[50], suser[40], in_data[1024], tmp_fname[1024];
 char    shimfile[80], acqufile[80];
@@ -92,11 +112,20 @@ char    exptfile[80], diskunit[40];
 char    prefix[40], shimset[40], defaultsfile[80], hdwerr[80];
 char    archpath[80], archive[20], jcmd_str[1024], outpath[1024];
 char    janusup[80], expttime[40], exptsfile[80], protocol[80];
-char    sxcmd[255], gradshim[20], comments[1024], command[1024], snostr[1024], tmp_cmd[256];
+char    sxcmd[255], gradshim[20], comments[1024], command[1024], snostr[1024], tmp_cmd[1024];
 char    statusstr[1024], awmfile[80],tmparchpath[1024],fidpath[1024],procau[1024];
-char	  proclist[1024],procinstruct[1024];
+char	proclist[1024],procinstruct[1024];
 char    reportdest[PATH_MAX];
 char    reportsource[PATH_MAX];
+
+char    sampleinfofile[PATH_MAX];
+char    sampleinfostring[2048];// just make one string, and write to file at the end so that we aer in the dataset from which janus email runs
+char    pulsecalfilename[PATH_MAX];
+char    pulsecalcontent[128];
+char    pulsecalerror[256];
+FILE    *pulsecalfile = NULL;
+float   p1, statusp1;
+
 char   *env_name, *file_data, *field, *ed;
 FILE   *fprod = NULL, *facqu = NULL, *ferror = NULL, *fwarn = NULL;
 FILE   *fshim = NULL, *fwait = NULL, *ftitle = NULL, *fsx = NULL;
@@ -106,6 +135,7 @@ FILE  *sname = NULL;
 FILE 	*fbat=NULL;
 FILE	*plist=NULL;
 FILE	*pornot=NULL;
+FILE    *sampleinfo=NULL;
 
 char  samplename[80], snamefile[255];
 
@@ -129,10 +159,13 @@ int ts_major = GetTsVersionMajor();
 int ts_minor = GetTsVersionMinor();
 int ts_patch = GetTsVersionPl();
 
-int test_pos = 60;
+
 char test_parset[256] = "C13CPD";
 
 time_t lt;
+struct tm *ltstruc;	  		/* structure with year, month etc. */
+char datestamp[256];
+char testdata[256];
 
 GETCURDATA;
 proc_or_not=1;
@@ -242,11 +275,16 @@ Proc_err ( INFO_OPT, "Waiting for sample...");
 
 /*the below becomes the place the data is stored. Done in the old skool path format for compatibility*/
 sprintf(diskunit,"%sdata\\%s\\nmr\\",diskunit,suser);
-DATASET ( "junk", 10, 1, diskunit, suser)
+lt=time(NULL);
+ltstruc = localtime(&lt);
+sprintf(datestamp, "%d_%d_%d_%d_%d_%d", ltstruc->tm_year+1900, ltstruc->tm_mon, ltstruc->tm_mday, ltstruc->tm_hour, ltstruc->tm_min, ltstruc->tm_sec);
+sprintf(testdata,"Systest_%s",datestamp);
+DATASET(testdata, 10, 1, diskunit, suser);
 Proc_err(INFO_OPT,"diskunit=%s",diskunit);
 Proc_err(INFO_OPT,"disk=%s",disk);
-GETCURDATA
+SETCURDATA
 VIEWDATA_SAMEWIN
+RPAR(test_parset, "all")
 
 sprintf(tmp_cmd, "ii");
 AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
@@ -259,24 +297,50 @@ if ( AUERR <0 )
 
 sprintf(tmp_cmd, "sx %i", test_pos);
 AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+sprintf(tmp_cmd,"wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", sxpress_ip);
+system(tmp_cmd);
 if ( AUERR <0 )
 {
+	XAU("parse_sexpress_web","")
 	sprintf(tmp_str, "INITIAL_TEST_SAMPLE_SX_%i_ERROR",test_pos);
 	XAU("whoopwhoop",tmp_str)
 } else {
     RPAR(test_parset, "all")
-    sprintf(tmp_cmd, "atma");
+	sleep(60);
+    sprintf(tmp_cmd, "atma storeWobb 700");
+	STOREPAR("RO",0)
     AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
     if ( AUERR <0 )
     {
 	   sprintf(tmp_str, "INITIAL_TEST_SAMPLE_ATMA_ERROR");
 	   XAU("whoopwhoop",tmp_str)
-	   STOPMSG("Janus stopped - initial ii error")
+	   STOPMSG("Janus stopped - initial atma error")
     }
+	sprintf(tmp_cmd, "rsh %s",shimset);
+    AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+	XCMD("lock CD3CN")
+	sprintf(tmp_str,"janus_topshim_watchdog_arran TOPSHIM_FAILED_%s_%i",tmp_fname,cpos);
+	XCMD(tmp_str);
+	if (AUERR<0)
+	{
+		XAU("whoopwhoop",tmp_str);
+	}
+	// keep first dataset with wobb curves in
+	IEXPNO;
+	XAU("hump_sino_test_b1_02","")
+	expno=20;
+	SETCURDATA
+	XAU("poise_13c_p1_b1_01","")
 
 }
+XAU("parse_sexpress_web","") //test sample is in, parse the sx logs
 
-
+// now move to junk dataset
+DATASET ( "junk", 10, 1, diskunit, suser)
+Proc_err(INFO_OPT,"diskunit=%s",diskunit);
+Proc_err(INFO_OPT,"disk=%s",disk);
+GETCURDATA
+VIEWDATA_SAMEWIN
 
 
 /*--------------------------------------------------------------*/
@@ -399,13 +463,20 @@ if ( strstr ( protocol, "POS60") != NULL )
 	cpos=60;
 }
 
+if ( strstr ( protocol, "POS59") != NULL )
+{
+	// found test sample string in protocol so set pos to 59
+	cpos=59;
+}
 
-
-/*remove comment for production */
 	sprintf( tmp_cmd, "sx %d",cpos);
-//	sprintf( sxcmd, "sendgui sx %d",cpos);
 	AUERR=CPR_exec(tmp_cmd, WAIT_TERM);
+    sprintf(tmp_cmd,"wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", sxpress_ip);
+	system(tmp_cmd);
 
+    /* initialse sample info string:*/
+    sprintf(sampleinfostring,"Problems occurred while running this sample:\n");
+    sampleproblem=0;
 
 	if ( AUERR <0 )
 
@@ -416,26 +487,31 @@ if ( strstr ( protocol, "POS60") != NULL )
 		fclose( flog );
 		sleep( 60 );
 		sprintf( sxcmd, "sx %d ",cpos);
+
 		AUERR=CPR_exec(sxcmd, WAIT_TERM);
-//remove comment around below for production not sure if this is needed, the above line should deal with it
-		/*SX( cpos );*/
+		sprintf(tmp_cmd,"wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", sxpress_ip);
+		system(tmp_cmd); //lets download the webpage with the samplejet status on
+
 	}
 	if ( AUERR <0 )
 	{
-	    sprintf(statusstr, "***Warning - could not find samples(%d)***",AUERR);
-  	    Show_status(statusstr );
-		fwarn = fopen( warnfile,"w" );
-		sprintf( hdwerr, "Could not find sample: %d\n", AUERR);
-		fputs( hdwerr, fwarn );
-		fclose( fwarn );
-		flog = fopen(logfile,"a+");
-		fputs( hdwerr, flog);
-		fclose( flog );
-		skipsample=1;
+	  sprintf(statusstr, "***Warning - could not find samples(%d)***",AUERR);
+  	  Show_status(statusstr );
+	  fwarn = fopen( warnfile,"w" );
+	  sprintf( hdwerr, "Could not find sample: %d\n", AUERR);
+	  fputs( hdwerr, fwarn );
+	  fclose( fwarn );
+	  flog = fopen(logfile,"a+");
+	  fputs( hdwerr, flog);
+	  fclose( flog );
+	  skipsample=1;
 // email us but don't quit in case it's not a real problem and is just skipping sample!!
-        sprintf(tmp_str, "INSERT_ERROR_%i_%s", cpos, tmp_fname);
-	    XAU("whoopwhoop",tmp_str)
+      sprintf(tmp_cmd,"wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", sxpress_ip);
+	  XAU("parse_sexpress_web","")
+      sprintf(tmp_str, "SX_INSERT_ERROR_%i_%s", cpos, tmp_fname);
+	  XAU("whoopwhoop",tmp_str)
 	}
+	 XAU("parse_sexpress_web","") //lets parse any samplexpress log as we have the sample in now.
 /*ok, we have put the sample in the magnet; now run through its exps*/
 	if (skipsample==0)
 	{
@@ -459,8 +535,13 @@ if ( strstr ( protocol, "POS60") != NULL )
 	
 		if ( AUERR <0 )
         {
+		  //Just set sampleproblem flag here 
+		   // If topshim fails , add the lock failure string but not otherwise-
+		   // If topshim succeeds it must have  been locked so false alarm
+		   
 	       sprintf(tmp_str, "FAILED_TO_LOCK_%s_%i_%s",solvent, cpos, tmp_fname);
-	       XAU("whoopwhoop",tmp_str)
+	      // XAU("whoopwhoop",tmp_str)
+		  sampleproblem=1;
         }
 	//	sprintf(tmp_cmd, "ROT");
 	//	AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
@@ -482,7 +563,29 @@ if ( strstr ( protocol, "POS60") != NULL )
 
 sprintf(tmp_str,"janus_topshim_watchdog TOPSHIM_FAILED_%s_%i",tmp_fname,cpos);
 XCMD(tmp_str);
-
+if (AUERR<0)
+{
+	if (sampleproblem==1)
+	{
+		 XAU("whoopwhoop",tmp_str);
+		sprintf(tmp_str,"\n Failed to lock: check sample is clear, sample filling is >40mm, solvent is deuterated\n \
+		Solvent is listed as %s, if this is not as expected there is probably a rogue character in the Sample ID such as a comma.\n \
+		In this case resubmit with correct SAmple ID- only letters, numbers, underscores, dashes and full stops allowed", solvent);
+		strcat(sampleinfostring,tmp_str);
+	}
+    strcat(sampleinfostring,"Failed to shim: check spectrum quality - lineshape may be bad. Check sample is clear, check sample filling is >40mm, check for precipitate at the bottom.\n");
+    sampleproblem=1;
+}
+else
+{
+	if (sampleproblem==1)
+	{
+		sprintf(tmp_str,"\n Sample failed to lock, but shimmed OK: check spectrum is OK and shfts are sensible.\n \
+		Solvent is listed as %s, if this is not as expected there is probably a rogue character in the Sample ID such as a comma.\n \
+		In this case if necessary resubmit with correct Sample ID- only letters, numbers, underscores, dashes and full stops allowed", solvent);
+		strcat(sampleinfostring,tmp_str);
+	}
+}
 //old way of calling topshim below
 //CPR_exec("janus_topshim_watchdog",WAIT_TERM);
 
@@ -516,12 +619,16 @@ XCMD(tmp_str);
 	{
 		// stop spinning
 		ROTOFF
-        sprintf(tmp_cmd,"atma");
+        sprintf(tmp_cmd,"atma storewobb 700");
 		AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 	    if ( AUERR <0 )
 		  {
 		     sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
 	       XAU("whoopwhoop",tmp_str)
+		   	sampleproblem=1;
+			strcat(sampleinfostring, "\n ATMA failed - does your sample have high ionic strength? \n Check \
+with NMR service team about whether medium or thick wall tubes are more appropriate for similar samples.");
+
 	       // STOPMSG(tmp_str)
 		  }
 		ROT // does "ro acqu"
@@ -592,15 +699,23 @@ XCMD(tmp_str);
 
 /*slight mod to XAUP command to allow it to finish before going on...*/
 			FETCHPAR ("AUNMP",&procau)
-/*find ou what processing mode we're in*/
-/*if we're not in mode 1, the external processing software is not running and we need to process*/
-			pornot = fopen (pornotfile,"r");
-			proc_or_not=get_proc_or_not_val(pornot);
-			if ((proc_or_not!=1)||(nexpt==10))
-			{
-			CPR_exec("service-def-proc",WAIT_TERM); //fix for poise xaup being wrong
-			//	XCMD("xaup")
-			}
+// if splitx_au we need to run it
+            if(strcmp(procau,"janus_splitx_au")==0)
+            {
+                CPR_exec(procau,WAIT_TERM);
+            }
+            else
+            {
+                /*find ou what processing mode we're in*/
+                /*if we're not in mode 1, the external processing software is not running and we need to process*/
+			    pornot = fopen (pornotfile,"r");
+			    proc_or_not=get_proc_or_not_val(pornot);
+			    if ((proc_or_not!=1)||(nexpt==10))
+			    {
+			        //CPR_exec("xaup",WAIT_TERM);
+				    XCMD("service-def-proc") //lets see if this fixes the poise automated programs XAUP(proc_1d) trying to print.
+			    }
+            }
 
 	/*if there's no email address in the comments file, set it to camnmr, useful for testing*/
      /*the comments variable is read from the prod file.*/
@@ -654,16 +769,56 @@ if (proc_or_not==1)
 	           /*PUT_SAMPLE_BACK*/
 	           /*remove comment on next line for production*/
 		      AUERR=CPR_exec("sx ej",WAIT_TERM);
+              sprintf(tmp_cmd,"wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", sxpress_ip);
+	          system(tmp_cmd); //lets download the webpage with the samplejet status on
+		     
 		      if ( AUERR <0 )
 		         {
-		      	 sprintf(tmp_cmd, "EJECT_ERROR_%i_%s", cpos, tmp_fname);
-	           XAU("whoopwhoop_sx",tmp_cmd)
-	           STOPMSG(tmp_cmd)
+	             XAU("parse_sexpress_web","")//lets parse the log 
+		      	 sprintf(tmp_cmd, "SX_EJECT_ERROR_%i_%s", cpos, tmp_fname);
+	             XAU("whoopwhoop",tmp_cmd)
+	             STOPMSG(tmp_cmd)
 		         }
-	           
-	        LastSample=TRUE;
+	          XAU("parse_sexpress_web","")//lets parse the log 
+	          LastSample=TRUE;
 		      sleep( delaytime );
 	        }
+
+/* Check for a pulsecal file in the root NAME directory, and if it's there check the P1 vs s P1*/
+sprintf(pulsecalfilename,"%s\\%s\\pulsecal",disk,name);
+if ((pulsecalfile = fopen(pulsecalfilename, "r")) != 0)
+{
+	
+	if( fgets(pulsecalcontent,128,pulsecalfile) !=NULL)
+    {
+        sscanf(pulsecalcontent,"%f %f", &p1, &statusp1);
+        if (p1/statusp1 > 1.5)
+        {
+            sampleproblem=1;
+            sprintf(pulsecalerror,"\n Measured proton pulse %.2fus is more than 50%% longer than the reference pulse length %.2fus - data quality may be compromised.\n Does your sample have high ionic strength?\n \
+Please talk to the NMR service team about whether medium or thick wall tubes are more suitable for similar samples. \n \n", p1, statusp1);
+            strcat(sampleinfostring,pulsecalerror);
+        }
+    }
+} 
+
+// write out info file in current dataset for janus purposes, if necessary
+if(sampleproblem==1)
+{
+    strcat(sampleinfostring,"\n Please contact the NMR service team in case of any questions! \n nmr@ch.cam.ac.uk");
+    strcpy(sampleinfofile,ACQUPATH("SampleProblems.txt"));
+    sampleinfo = fopen (sampleinfofile,"w");
+	if (sampleinfo == NULL)
+	{
+		Proc_err(INFO_OPT, "Can't open %s to write sample problem info", sampleinfofile);
+	} else
+	{
+		fputs(sampleinfostring,sampleinfo);
+		fclose(sampleinfo);
+	}
+
+}
+
 //janus-email needs the location of the defaults file to be passed to it
 sprintf(tmp_str,"janus-email %s",def_file);
 XCMD(tmp_str);

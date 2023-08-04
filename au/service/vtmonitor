@@ -17,7 +17,7 @@ if(isVTU < 0)
  {
 // only if fails twice in a row, it should exit the loop
  // call vtu_heater to check status
-sleep(120);
+sleep(20);
 /* see whether VT unit is on */
 if ( isVTU==2 )
 {

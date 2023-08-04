@@ -33,6 +33,7 @@ if (origheater<1)
 {
         //Houstone we have a problem, increment failure counter
         failure++;
+        Proc_err(DEF_ERR_OPT,"VT unit seems to be off or not communicating, please check /n If it's definitely on you can ignore this error!");
 }
 else
 {

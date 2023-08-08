@@ -1,8 +1,8 @@
 /* vtmonitor */
 /* AU program to monitor the VTU / BSVT status and pop up error and send email if it's turned off*/
-
+// Now only aborts if 2 successive chack failures!
  int origheater=1;
-
+int failure=0;
 /* whether a BSVT is present (2) or not       */
 
 int isVTU = LibAcqLVtuType();
@@ -13,8 +13,9 @@ if(isVTU < 0)
         Proc_err(DEF_ERR_OPT, "Error: %s", LibAcqGetErrMsg());
         ABORT
 }
- while (origheater==1)
+ while (failure<2)
  {
+// only if fails twice in a row, it should exit the loop
  // call vtu_heater to check status
 sleep(120);
 /* see whether VT unit is on */
@@ -28,6 +29,17 @@ else
 }
 
 origheater = AUERR;  /* 0 = off, 1=on, -1=error! */
+if (origheater<1)
+{
+        //Houstone we have a problem, increment failure counter
+        failure++;
+        Proc_err(DEF_ERR_OPT,"VT unit seems to be off or not communicating, please check /n If it's definitely on you can ignore this error!");
+}
+else
+{
+        // No problem this time so reset
+        failure=0;
+}
 
 
 }
@@ -36,6 +48,8 @@ origheater = AUERR;  /* 0 = off, 1=on, -1=error! */
 Proc_err(DEF_ERR_OPT,"WARNING: VTU not switched on! CHeck ASAP");
 XAU("whoopwhoop","Arran VTU failure!!")
 STOPMSG("WARNING: VTU not switched on! CHeck ASAP")
+
+
 
 QUIT
 

@@ -3,9 +3,11 @@
 /*MILESTONE*/
 /*READ DEFAULTS FILE to get correct locations for files and set variables accordingly - ACHIEVED*/
 /*RUNS*/
+// Aug 2023: version for emailing with sampleinfo file
 
 float   delaytime=1.0;
 char pdfname[1024]="";
+char sampleinfofile[1024]="";
 char samplename[1024]="";
 char snamepath[1024]="";
 char password[1024]="esbnrinuhltzukoi";
@@ -29,6 +31,7 @@ char pul[256]="",nuc1[20]="";
 char *file_data, *field;
 char err_message[PATH_MAX]="no message";
 int  pdfthere=0;
+int  sampleinfo=0;
 int cmdstatus;
 
 FILE *sname = NULL;
@@ -114,6 +117,11 @@ if( access( pdfname, R_OK ) == 0 ) // if there is a pdf there
 //	Proc_err(INFO_OPT, "pdf there...\n");
 	pdfthere=1;
 }
+strcpy(sampleinfofile,ACQUPATH("SampleProblems.txt"));
+if( access( sampleinfofile, R_OK ) == 0 ) // if there is a sampleinfo file there there 
+{	
+	sampleinfo=1; // set flag
+}
 
 //Proc_err(INFO_OPT, "fetching email address\n");
 
@@ -154,12 +162,27 @@ fclose( fbat);
 Show_status(cmd_str);
 system(batfile);
 
-if (pdfthere==1) { 
-	sprintf (cmd_str, "sendemail -f %s -t %s -u %s -m %s -a  %s.zip %s -s smtp.gmail.com:587 -o tls=yes -xu %s -xp %s", id, email,title, body, zip_name, pdfname, id, password);
+if (sampleinfo==1)
+{
+    if (pdfthere==1) { 
+	sprintf (cmd_str, "sendemail -f %s -t %s -u %s -m %s -a  %s.zip %s %s -s smtp.gmail.com:587 -o tls=yes -xu %s -xp %s", id, email,title, body, zip_name, pdfname, sampleinfofile, id, password);
+    }
+    else	{
+	sprintf (cmd_str, "sendemail -f %s -t %s -u %s -m %s -a %s.zip %s -s smtp.gmail.com:587 -o tls=yes -xu %s -xp %s", id, email,title, body, zip_name, sampleinfofile,id, password);
+    }
 }
-else	{
+else
+{
+    if (pdfthere==1) { 
+	sprintf (cmd_str, "sendemail -f %s -t %s -u %s -m %s -a  %s.zip %s  -s smtp.gmail.com:587 -o tls=yes -xu %s -xp %s", id, email,title, body, zip_name, pdfname, id, password);
+    }
+    else	{
 	sprintf (cmd_str, "sendemail -f %s -t %s -u %s -m %s -a %s.zip -s smtp.gmail.com:587 -o tls=yes -xu %s -xp %s", id, email,title, body, zip_name, id, password);
+    }
 }
+
+
+
 //XCMD("setdef ackn no")
 //XCMD("setdef stderr off")
 //XCMD("setdef stdout off")

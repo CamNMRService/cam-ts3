@@ -3,6 +3,7 @@
 /*MILESTONE*/
 /*READ DEFAULTS FILE to get correct locations for files and set variables accordingly - ACHIEVED*/
 /*RUNS*/
+// Aug 2023: version for emailing with sampleinfo file
 
 float   delaytime=1.0;
 char pdfname[1024]="";

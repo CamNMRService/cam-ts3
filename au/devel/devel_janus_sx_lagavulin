@@ -441,8 +441,7 @@ while ( finish != TRUE ) //THE MAIN LOOP
 	field = strtok( NULL, ",");
 	}
 
-	field = strtok( NULL, ",");
-	strcpy( comments, field);
+
 	flog = fopen(logfile,"a+");
 	lt=time(NULL);
 	sprintf(expttime, ctime(&lt));
@@ -586,7 +585,7 @@ if (AUERR<0)
 		 XAU("whoopwhoop",tmp_str);
 		sprintf(tmp_str,"\n Failed to lock: check sample is clear, sample filling is >40mm, solvent is deuterated\n \
 		Solvent is listed as %s, if this is not as expected there is probably a rogue character in the Sample ID such as a comma.\n \
-		In this case resubmit with correct SAmple ID- only letters, numbers, underscores, dashes and full stops allowed", solvent);
+		In this case resubmit with correct Sample ID- only letters, numbers, underscores, dashes and full stops allowed. \n \n", solvent);
 		strcat(sampleinfostring,tmp_str);
 	}
     strcat(sampleinfostring,"Failed to shim: check spectrum quality - lineshape may be bad. Check sample is clear, check sample filling is >40mm, check for precipitate at the bottom.\n");
@@ -815,7 +814,8 @@ if ((pulsecalfile = fopen(pulsecalfilename, "r")) != 0)
 Please talk to the NMR service team about whether medium or thick wall tubes are more suitable for similar samples. \n \n", p1, statusp1);
             strcat(sampleinfostring,pulsecalerror);
         }
-    }
+    } 
+fclose(pulsecalfile);
 } 
 
 // write out info file in current dataset for janus purposes, if necessary

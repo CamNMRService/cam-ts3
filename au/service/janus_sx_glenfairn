@@ -325,7 +325,7 @@ if(strcmp(cmd,"skiptest"))
 		sprintf(tmp_cmd, "rsh %s",shimset);
 		AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 		XCMD("lock CD3CN")
-		sprintf(tmp_str,"janus_topshim_watchdog_arran TOPSHIM_FAILED_%s_%i",tmp_fname,cpos);
+		sprintf(tmp_str,"janus_topshim_watchdog TOPSHIM_FAILED_%s_%i",tmp_fname,cpos);
 		XCMD(tmp_str);
 		if (AUERR<0)
 		{

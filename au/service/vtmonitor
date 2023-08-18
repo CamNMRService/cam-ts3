@@ -1,6 +1,7 @@
 /* vtmonitor */
 /* AU program to monitor the VTU / BSVT status and pop up error and send email if it's turned off*/
-// Now only aborts if 2 successive chack failures!
+// Now only aborts if 2 successive chack failures and it also fails to get restarted by "vtu_heater2 on"
+
  int origheater=1;
 int failure=0;
 /* whether a BSVT is present (2) or not       */
@@ -13,9 +14,9 @@ if(isVTU < 0)
         Proc_err(DEF_ERR_OPT, "Error: %s", LibAcqGetErrMsg());
         ABORT
 }
- while (failure<2)
- {
-// only if fails twice in a row, it should exit the loop
+ while (failure<3)
+{
+// only if fails twice in a row, it should try to restart the VT and if that fails exit the loop
  // call vtu_heater to check status
 sleep(120);
 /* see whether VT unit is on */
@@ -33,7 +34,7 @@ if (origheater<1)
 {
         //Houstone we have a problem, increment failure counter
         failure++;
-        Proc_err(DEF_ERR_OPT,"VT unit seems to be off or not communicating, please check /n If it's definitely on you can ignore this error!");
+        //Proc_err(DEF_ERR_OPT,"VT unit seems to be off or not communicating, please check /n If it's definitely on you can ignore this error!");
 }
 else
 {
@@ -41,7 +42,23 @@ else
         failure=0;
 }
 
+if(failure==2)
+{
+        // failed twice, try to turn VT on again...
+        Proc_err(DEF_ERR_OPT,"VT unit seems to be off or not communicating, attempting restart...");
+	XAU("vtu_heater2","on")
+	sleep(10);
+	XAU("vtu_heater2","check")
+	if (AUERR!=1) 
+	{
+	        failure++;
+	}
+        else
+        {
+                Proc_err(DEF_ERR_OPT,"VT has restarted OK - maybe wait for temperature to stabilise");
+        }
 
+}
 }
 
  // if we exited th while loop we are in error state, eitehr off or comms problem - send email and pop up error

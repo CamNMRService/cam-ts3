@@ -46,9 +46,20 @@ if(failure==2)
 {
         // failed twice, try to turn VT on again...
         Proc_err(DEF_ERR_OPT,"VT unit seems to be off or not communicating, attempting restart...");
-	XAU("vtu_heater2","on")
-	sleep(10);
-	XAU("vtu_heater2","check")
+
+        if ( isVTU==2 )
+        {
+                XAU("vtc_heater2", "bsvt 1")
+                sleep(10);
+	        XAU("vtc_heater2", "bsvt check")
+        }
+        else
+        {
+                XAU("vtu_heater2","on")
+	        sleep(10);
+	        XAU("vtu_heater2","check")
+        }
+	
 	if (AUERR!=1) 
 	{
 	        failure++;

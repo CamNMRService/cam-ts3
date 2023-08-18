@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------*/
-/* Title	: Program janus_sx_glenfairn			*/
+/* Title	: Program janus_sx_laphroiag			*/
 /*has specific parts for this instrument */
 /* WORK IN PROGRESS TO UPDATE TO TOPSPIN 3			*/
 /* Topspin 3 update done by djh in cambridge*/
@@ -91,11 +91,11 @@ Made string for holding info file text, long enough...
 Removed various debugging messages
 Now lock errors only do anythign if shim also fails
 Added note about solvent to SampleProblems file and warnign to check for strange characters
-And added pulse length check and associated message in SAmpleProblems*/
+And added pulse length check and associated message in SampleProblems*/
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 /*instrument dependent variables!!!!!!*/
-char def_file[255]="d:/chemist/defaults-csv.txt"; //janus software defaults
-char    sxpress_ip[16]="149.236.99.34";
+char def_file[255]="f:/chemist/defaults-csv.txt"; //janus software defaults
+char    sxpress_ip[16]="149.236.99.107";
 int test_pos = 60;
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
@@ -325,7 +325,8 @@ if(strcmp(cmd,"skiptest"))
 		sprintf(tmp_cmd, "rsh %s",shimset);
 		AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 		XCMD("lock CD3CN")
-		sprintf(tmp_str,"janus_topshim_watchdog_arran TOPSHIM_FAILED_%s_%i",tmp_fname,cpos); //we do the arran version here to do tuneaxyz
+		sprintf(tmp_str,"janus_topshim_watchdog_arran TOPSHIM_FAILED_%s_%i",tmp_fname,cpos);
+		XCMD(tmp_str);
 		if (AUERR<0)
 		{
 			XAU("whoopwhoop",tmp_str);

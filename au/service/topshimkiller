@@ -3,6 +3,7 @@
 // modified to use sendgui topshim stop as xcmd("topshim stop") doesn't seem to work.
 // Write file containing PISD, so topshim_watchdog can kill this program, otherwise if a samples 
 //takes <5mins this could still be running when next sample comes and kill it after not very long...
+// Changed to 3 mins
 
 char lockpath[PATH_MAX];
 FILE *lockfile;
@@ -27,7 +28,7 @@ if ( (pidfile = fopen(pidpath, "wt") )== NULL)
 fprintf(pidfile, "%d\n", pid);
 fclose(pidfile);
 
-sleep(300); //e.g. 5 minutes limit
+sleep(180); //e.g. 3 minutes limit
 
 if ( lockfile = access(lockpath,F_OK) == 0) // file found, stop topshim
 	{

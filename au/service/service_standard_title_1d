@@ -1,0 +1,73 @@
+
+char title_path[PATH_MAX],  titletextnew[2048]="NULL"; 
+char arg[256];
+char pulprog[256];
+char instrum[PATH_MAX];
+char dataset[PATH_MAX];
+char dataset_probe[PATH_MAX];
+char solvent[256];
+float aq,d_one,p_one;
+float rg,plw1, pldb1;
+double sfo_one,sw,sw_h;
+
+int ns,td;
+
+
+
+
+FILE *ftitle = NULL; 
+
+GETCURDATA
+
+if (i_argc == 3 ) { // if its 'a' append, otherwise overwrite
+    sprintf(arg,"%s",i_argv[2]); 
+}
+
+sprintf( title_path, "%s%s/%s/%i/pdata/1/title", disk, user, name, expno); 
+sprintf(titletextnew, "\n%s\n", name);
+
+if (strcmp(arg, "a") == 0)
+{
+   ftitle = fopen( title_path, "a");
+}
+else {
+    ftitle = fopen( title_path, "w");
+}
+
+FETCHPARS("INSTRUM", instrum)
+FETCHPARS("PULPROG", pulprog)
+FETCHPARS("D 1", &d_one)
+FETCHPARS("P 1", &p_one)
+FETCHPARS("SFO1", &sfo_one)
+FETCHPARS("RG",&rg)
+FETCHPARS("TD", &td)
+FETCHPARS("NS", &ns)
+FETCHPARS("SW", &sw)
+FETCHPARS("SW_h",&sw_h)
+FETCHPAR("PLW 1", &plw1)
+FETCHPAR("PLdB 1", &pldb1)
+FETCHPAR("SOLVENT", solvent)
+FETCHPARS("PROBHD", dataset_probe)
+
+
+aq = td/(2*sw*sfo_one);
+
+sprintf(titletextnew, "Dataset name=%s,expno=%i\n",name,expno);
+fputs( titletextnew, ftitle); /*add new text to it*/
+sprintf(titletextnew, "Solvent=%s\n",solvent);
+fputs( titletextnew, ftitle); /*add new text to it*/
+sprintf(titletextnew, "Instrument=%s,MHz=%.4f\nPulseprogram=%s,P1=%.2f,PL1(watts)=%.2f\n", instrum,sfo_one,pulprog,p_one,plw1);
+fputs( titletextnew, ftitle); /*add new text to it*/
+sprintf(titletextnew,"NS=%i,D1=%.2f,AQ=%.2f,RG=%.2f\n",ns,d_one,aq,rg);
+fputs( titletextnew, ftitle); /*add new text to it*/
+sprintf(titletextnew,"SW(ppm)=%.2f,SW(Hz)=%.2f\n",sw,sw_h);
+fputs( titletextnew, ftitle); /*add new text to it*/
+
+
+
+fclose( ftitle);
+
+
+QUIT
+
+

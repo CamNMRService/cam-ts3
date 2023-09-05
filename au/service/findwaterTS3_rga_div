@@ -30,6 +30,7 @@
 /*										and power level parameters								*/
 /* ptg 		20211022 Peak picking range confined to approximate O1 */
 /* ptg Autophase moved to teh beginning!!! */
+/* mods by djh to allow the rg to be scaled down using USERA5*/
 /****************************************************************/
 
 
@@ -48,6 +49,10 @@ float p1, pl1, pl9;
 float rg;
 double f1p, f2p;
 double bf;
+char div_str[256];
+float div=2.0;
+float default_div=2.0;
+
 GETCURDATA
 expnosave = expno;
 
@@ -192,7 +197,19 @@ if (rg>128)
 {
 	STOREPAR("RG",128.0);
 }
-rg=rg/2;
+FETCHPAR("USERA5",div_str);
+if (div_str[0] == '\0') //The string is NULL so default to 2
+{
+	div=default_div;
+}
+else{
+  div=atof(div_str);
+}
+if ( (div<2) || div>1024)
+{
+	div=default_div;
+}
+rg=rg/div;
 STOREPAR("RG",rg);
 ZG
 

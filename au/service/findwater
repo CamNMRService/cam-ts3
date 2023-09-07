@@ -1,0 +1,385 @@
+/****************************************************************/
+/*	Findwater		7.09.2023																			*/
+/****************************************************************/
+/*	Short Description :																					*/
+/*	AU program to automatically determine optimum presat 	*/
+/*	frequency for solvent suppression, e.g. on inverse probes 	*/		
+/*  where radiation damping is significant and picking the peak top */
+/*  gives a wrong result */
+/*  NEW MASTER VERSION COVERING TS3 and TS4, with lots of options settable in USERA1 */
+/****************************************************************/
+/*	Keywords :						*/
+/*	water suppression					*/
+/****************************************************************/
+/*	Description/Usage :					*/
+/*	AU program using residual signal after 360 degree pulse */
+/*  to optimise presaturation frequency in cases where radiation */
+/*  damping is significant. Uses pulsecal for 90 degree pulse */
+/*  length determination  */
+/*	Does rga and zg, but limits rg to maximum of 101 						*/ 
+/*  Run this from a dataset with pulprog set to the solvent  		*/
+/*  suppression sequence of your choice!												*/
+/*  Available USERA1 options :                                  */
+/****************************************************************/
+/*	Author(s) :						*/
+/*	Name		: Peter Gierth, Andrew Gibbs			*/
+/*	Organisation	: Bruker UK		*/
+/*	Email		: peter.gierth@bruker.co.uk	*/
+/****************************************************************/
+/*	Name		Date			Modification:			*/
+/*	ptg/agi 20080822	created						*/
+/*	ptg			20100528	Updated for topsin 3 PROCPATH() syntax    */
+/*										and power level parameters								*/
+/*  ptg			20150907	Sort out peak picking range to be just 		*/
+/*										around rough O1, and set power based on RG*/
+/*  ptg			20150913	Add o1calib option (call as "findwaterTS3 o1calib") */
+/*  ptg			20170622	TS4: Removed o1calib, tidied up other options: */
+/*  ptg     2021-03-02 Command line options o1calib and reducepresat */
+/*  ptg			2021-03-02 Debugging option - modify int debug=0; line */
+/*										to int debug=1; Outputs findwater.log file in dataset */ 
+/* ptg			2021-04-30 O1 value from pulsecal is set as starting value in */
+/*										case peak picking bit fails becaus the residual peak is too small*/
+/* ptg             2023-09-07 Rewrite all options to use userA1 settings*/
+/****************************************************************/
+
+
+float PSH, PSP, IPS, maxpsh, maxpsp, maxips, cnst1;
+char del[PATH_MAX], path[PATH_MAX], curp[PATH_MAX], locnuc[20];
+double sf, sfo1, o1, sfo1real, o1real;
+int noofscans, pscal_save;
+FILE *fptr;
+char pulprog[50];
+char logfile[PATH_MAX];
+int noofdummy;
+int digmod;
+char cmdsave[BUFSIZ];
+char solvent[100];
+char o1string[100];
+int expnosave;
+float p1, pl1, pl9, cnst9;
+int o1cal=0, reducepresat=0, tso=0, maxRG=0, reduceRG=0, nopcal=0, wvm=0, debug=0;
+float rg,rgorig, rffactor;
+double f1p, f2p;
+double bf;
+double peakFreqHz, peakFreqPPM, peakIntensity;
+int numPeaks, i;
+char USERA1Set[512];
+
+GETCURDATA
+
+// CHeck for settings in usera1 and command line:
+
+// read usera1 into string, compare this and cmd with the options
+FETCHPAR("USERA1",USERA1Set);
+
+//run bt_calibrate_o1:
+if ( (strstr(cmd, "o1cal") != 0) || (strstr(USERA1Set, "o1cal") !=0) )
+{
+	o1cal =1 ;
+}
+
+// Reduce presat power by cnst9 dB:
+if ((strstr(cmd, "reducepresat") != 0) || (strstr(USERA1Set, "reducepresat") != 0))
+{
+    reducepresat =1 ;
+}
+
+// Run TSO:
+if ((strstr(cmd, "tso") != 0) || (strstr(USERA1Set, "tso") != 0))
+{
+    tso =1 ;
+}
+
+// After RGA, reduce rg by a factor of the original set RG:
+if ((strstr(cmd, "reduceRG") != 0) || (strstr(USERA1Set, "reduceRG") != 0))
+{
+    reduceRG =1 ;
+}
+
+// After RGA, limit to original value:
+if ((strstr(cmd, "maxRG") != 0) || (strstr(USERA1Set, "maxRG") != 0))
+{
+    maxRG =1 ;
+}
+
+
+// Don't do pulsecal:
+if ((strstr(cmd, "nopcal") != 0) || (strstr(USERA1Set, "nopcal") != 0))
+{
+    nopcal =1 ;
+}
+
+// Execute wavemaker:
+if ((strstr(cmd, "wvm") != 0) || (strstr(USERA1Set, "wvm") != 0))
+{
+    wvm =1 ;
+}
+
+// Debug on:
+if ((strstr(cmd, "debug") != 0) || (strstr(USERA1Set, "debug") != 0))
+{
+    debug =1 ;
+}
+
+expnosave = expno;
+	
+strcpy (logfile,ACQUPATH("findwater.log"));
+fptr=fopen(logfile, "a");
+if(fptr==NULL)
+{
+	// if cann't write the logfile just carry on but don't try to write anything 
+	//more to logfile
+  Proc_err(DEF_ERR_OPT, "Cannot open log file for writing");
+  debug=0;
+}
+
+if (debug)
+{
+	fprintf(fptr, "Command line options: =%s  \n Usera1 options =%s", cmd, USERA1Set);
+}
+
+if(tso)
+{
+    XAU("tso","tunea plotall")
+    if (debug)
+    {
+        fprintf(fptr, "Topshim done with offset \n");
+    }
+}
+//autophase - probably a good option if new algorithm is available
+// Do this before anything else!!!
+
+sleep(3);
+AUTOPHASE
+sleep(3);
+
+FETCHPAR("RG", &rgorig)
+
+// run pulsecal to find 90 - also take rough o1 
+// nb can use modified pulsecal with PL correction if
+//necessary
+if(nopcal==0)
+{
+    XAU("pulsecal", "quiet save") 
+}
+else if (debug)
+{
+	//note pcal not done
+	fprintf(fptr, "Pulsecal not done \n");
+}
+
+
+FETCHPAR("P 1", &p1)
+FETCHPAR("PLdB 1", &pl1)
+FETCHPAR("LOCNUC", &locnuc);
+
+// open pulsecal dataset and take O1 and RG values
+
+expno=99999;
+SETCURDATA
+FETCHPAR("O1", &o1)
+FETCHPARS("RG", &rg)
+expno=99998;
+SETCURDATA
+
+if (debug)
+{
+	//note results of pulsecal etc
+	fprintf(fptr, "Pulsecal: p1=%f, pldb1=%f, o1=%lf, rg=%f \n", p1, pl1, o1, rg);
+}
+
+// setup proton dataset with found p1 and approx o1
+
+RPAR("PROTON", "all")
+STOREPAR("PULPROG", "zg")
+STOREPAR("O1", o1)
+STOREPAR("P 1", p1*4)
+STOREPAR("PLdB 1", pl1)
+STOREPAR("NS",1)
+STOREPAR("DS",0)
+STOREPAR("RG",1.0)
+
+// turn locnuc off iff needed
+
+if ( (strcmp( locnuc, "off" ) == 0 ))
+{
+	STOREPAR("LOCNUC", "off");
+}
+
+
+ZG
+
+// Convdta, and use back prediction/ negative lb
+// to emphasise sharp component. Process with magnitude
+// calculation and pick peak.
+
+CONVDTA(99997)
+expno=99997; 
+SETCURDATA
+
+STOREPAR("PSCAL",0)
+STOREPAR("NCOEF", 512)
+STOREPAR("ME_mod", 4) /* LP_bc */
+STOREPAR("TDoff", 4096)
+
+// For observe probes where broad component in 360 degree spectrum
+// is very significant, you can turn on large negative LB to
+// emphasise the sharp component further. 
+// Try reprocessing expno 99997 with negative LB 
+//  This might mess things up, but seems OK - provided 
+// no zero filling.....
+//STOREPAR("LB", -1.0)
+
+FETCHPARS("BF1", &bf);
+
+EF
+MC 
+f1p=(o1/bf)+0.1;
+f2p=(o1/bf)-0.1;
+
+STOREPAR("F1P", f1p)
+STOREPAR("F2P", f2p)
+STOREPAR("PC", 2.0)
+PP 
+
+if (debug)
+{
+	fprintf(fptr, "Peak picking: F1P=%lf, F2P=%lf \n", f1p, f2p);
+}
+ 
+// new style peak list reading... 
+ 
+numPeaks = readPeakList(PROCPATH(0));
+    maxpsh=o1; //to set start value to o1 from pulsecal in case peak picking fails
+    maxips=0.0;
+    for (i=0; i<numPeaks; i++)
+    {
+	peakIntensity = getPeakIntensity(i);
+	peakFreqHz = getPeakFreqHz(i);
+	peakFreqPPM = getPeakFreqPPM(i);
+	if (peakIntensity > maxips)
+	{
+	    maxips = peakIntensity;
+	    maxpsh = peakFreqHz;
+	    maxpsp = peakFreqPPM;
+	}
+    }
+    freePeakList();
+  
+  
+ if (debug)
+ {
+ 	// number of peaks and position of biggest peak
+ 	fprintf(fptr, "number of peaks found = %d, maxpsh=%f, maxpsp==%f \n", numPeaks, maxpsh, maxpsp);
+ }
+ 
+ 
+FETCHPARS("SOLVENT", solvent)
+
+
+
+expno=expnosave;
+SETCURDATA
+
+// update real dataset with pulsecal results
+
+sprintf(text, "sendgui getprosol 1H %f %f", p1, pl1);
+CPR_exec(text, WAIT_TERM);
+
+// calculate and store correct o1
+
+FETCHPARS("BF1",&sf)
+sfo1=sf + maxpsh * 1.0e-6;
+STOREPAR("SFO1",sfo1);
+
+// test results:
+FETCHPAR("SFO1",&sfo1real);
+FETCHPAR("O1", &o1real);
+
+if (debug)
+{
+	//log intended sfo1 and real sfo1 retrieved after setting
+	fprintf(fptr, "intended sfo1=%lf, sfo1 as set=%lf o1 as set = %lf \n", sfo1, sfo1real, o1real);
+}
+
+
+
+
+// read default PLdB9
+
+FETCHPAR("PLdB 9", &pl9);
+
+// Optional: reduce RF field by cnst9 dB (should be a positive number normally)
+
+if(reducepresat)
+{
+	FETCHPAR("CNST 9", &cnst9)
+	STOREPAR("PLdB 9", pl9+cnst9);
+	if (debug)
+	{ 
+			fprintf(fptr,"Reducepresat: cnst9=%f \n User power %f", cnst9, pl9+cnst9);
+	}
+}
+// if set, fine tune O1 with O1calib
+
+if(o1cal)
+{
+	sprintf(o1string, "bt_calibrate_o1 d1 10 d29 4 o1 %f stepSizeHz 0.2 rangeSizeHz 4 debug 0", maxpsh);
+	XCMD(o1string);
+	FETCHPAR("O1", &o1real);
+	if (debug)
+	{
+        fprintf(fptr, "o1calib string=%s \n", o1string);
+		fprintf(fptr, "o1 after o1calib=%lf \n", o1real);
+	}
+}
+
+
+
+
+// RGA, the optinal limit or scaling
+
+RGA
+if(maxRG)
+{
+    FETCHPAR("RG", &rg)
+    if(rg>rgorig)
+    {
+        STOREPAR("RG", rgorig)
+        if (debug)
+	    {
+            fprintf(fptr, "RG limited to =%f \n", rgorig);
+	    }
+    }
+}
+
+if(reduceRG)
+{
+    FETCHPAR("RG", &rg)
+    rg=rg/rgorig;
+    STOREPAR("RG", rg)
+    if (debug)
+	{
+        fprintf(fptr, "RG reduced by factor %f to %f \n", rgorig, rg);
+	}
+}
+
+if(wvm)
+{
+    XCMD("wvm -a")
+    sleep(5);
+    if (debug)
+	{
+        fprintf(fptr, "Wavemaker done \n");
+	}
+}
+
+fprintf(fptr,"### \n");
+fclose(fptr);
+
+
+XCMD("saveprofpars");
+ZG
+
+
+QUIT

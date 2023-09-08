@@ -1,0 +1,399 @@
+/***********************************************-*-C++-*-********/
+/*  bt_calibrate_o1                    11.10.2015               */
+/****************************************************************/
+/*  Short Description :                                         */
+/*  Calibrate O1 for H20 samples using on-the-fly frequency     */
+/*  adjustment during acquisition                               */
+/*  Derived from au program o1calib                             */
+/****************************************************************/
+/*  Keywords :                                                  */
+/*  calibration, O1, water suppression, on-the-fly adjustment   */
+/****************************************************************/
+/*  Description/Usage :                                         */
+/*                                                              */
+/*  This au-program calibrates O1 using an on-the-fly adjustment*/
+/*  mechanism for the frequency setting, i.e. the next frequency*/
+/*  is calculated and loaded immediately on the basis           */
+/*  of the previous scan.                                       */
+/*  This improves the speed of the adjustment procedure.        */
+/*  o1calib opens a new empty working data set,                 */
+/*  runs a real-time                                            */
+/*  acquisition, determines O1 and copies O1 back to the        */
+/*  original data set; after that, the working data set         */
+/*  is deleted.                                                 */
+/*  For calibration, the pulse program pp.hwt/o1calib is used;  */
+/*                                                              */
+/*  Requirements:                                               */
+/*        1) This program runs only with AVIII or newer         */
+/*        2) A cw power (plw9) has to be defined in prosol      */
+/*        3) A PROTON standard parameter set must be available  */
+/*        4) Topspin 3.0 or higher is required;                 */
+/*        5) The optimum O1 value has to be within a range of   */
+/*           +/- 5Hz around the defined O1 starting value,      */
+/*           otherwise the acquisition will abort with a        */
+/*           respective error message and O1 will not be set;   */
+/*         the default starting value for O1 is 4.7ppm but      */
+/*         it may also be set manually (see Advanced Mode)      */
+/*                                                              */
+/*  Advanced Mode:                                              */
+/*        This au-program runs with default values which may    */
+/*        nevertheless be adjusted by a skilled user; therefore */
+/*        some optional parameters can be defined when calling  */
+/*        this au-program:                                      */
+/*        o1calib [d1 <val>] [d29 <val>] [td <val>] [o1 <val>]  */
+/*                [stepSizeHz <val>] [rangeSizeHz <val>]        */
+/*                [debug <0|1>]                                 */
+/*        e.g. 'bt_calibrate_o1 d1 20 d29 0.5 o1 1412           */
+/*                      stepSizeHz 0.2 rangeSizeHz 4 debug 1'   */
+/*        The unit off all delays is [sec],                     */
+/*        the unit of o1 is [Hz].                               */
+/****************************************************************/
+/*     Author(s) :                                              */
+/*     Name            : Christof Johann                        */
+/*     Organisation    : Bruker BioSpin GmbH                    */
+/*     Email           : christof.johann@bruker.com             */
+/****************************************************************/
+/*     Name             Date        Modification:               */
+/*     chjo             090723      created                     */
+/*     hasc             141013      introduction of navigator   */
+/*                                  experiment                  */
+/*     agro             141013      modification of advanced    */
+/*                                  mode                        */
+/*     hasc             150706      pldb9 from initial data set */
+/*                                  from which calibrate_o1     */
+/*                                  is called                   */
+/*     dmat             111015      removed prosol checks       */
+/****************************************************************/
+/*
+$Id: bt_calibrate_o1,v 1.1 2016/05/17 09:55:30 wem Exp $
+*/
+
+AUERR = calibrate_o1(curdat);
+QUIT
+
+static void showSyntax(void);
+static int  overwriteDefaultParameters(int i_argc, char** i_argv,
+                                       double* d1, double* d29,
+                                       int* td, double* o1, double* stepSizeHz, double* rangeSizeHz, int* debug);
+static int  createCalibrationDataSet(const char* curdat,
+                                     double d1, double d29, double o1,
+                                     double o1p, int td, double cnst30, double pldb9, double de);
+static int  createNavigatorDataSet(const char* curdat,
+                                   double d1, double d29, double o1,
+                                   double o1p, double pldb1, double de);
+static void cleanUp(const char* curdat, int expnoOrig);
+
+
+int calibrate_o1(const char* curdat)
+{
+    /* default values for O1 calibration */
+
+    char          cmd_str[256];
+    double        d1          = 10.0;   /* [sec] */
+    double        d29         = 0.5;    /* [sec] */
+    double        o1p         = 4.699;  /* [ppm] default starting value */
+    double        o1          = 0.0;    /* [Hz] */
+    double        stepSizeHz  = 0.1;   /* [Hz] */
+    double        rangeSizeHz = 5;      /* [Hz] */
+    double        cnst30      = 0.0;
+    float         pldb1       = 1000.0;
+    float         pldb9       = 1000.0;
+    float         phc0        = 0.0;
+    float         de          = 6.5;
+    int           td          = 16;
+    int           expnoOrig   = expno;
+    int           debug       = 0;     /* 0 | 1 */
+
+    /********************************************************************/
+    if(is_ipso() == 0)
+    {
+        STOPMSG("Error: This program can only be used on AVIII systems or newer!");
+    }
+
+    if(overwriteDefaultParameters(i_argc, i_argv, &d1, &d29, &td, &o1, &stepSizeHz, &rangeSizeHz, &debug) < 0)
+    {
+        showSyntax();
+        return -1;
+    }
+
+    FETCHPAR("PLdB 1", &pldb1);
+    FETCHPAR("PLdB 9", &pldb9);
+    FETCHPAR("DE", &de);
+
+    /********************************************************************/
+    /***************** START: Navigator experiment **********************/
+    /********************************************************************/
+
+    if(createNavigatorDataSet(curdat, d1, d29, o1, o1p, pldb1, de) < 0)
+    {
+        cleanUp(curdat, expnoOrig);
+        STOPMSG("expno to save original data already exists!\nprocessing aborted");
+    }
+
+
+    /* now start the acquisition */
+
+    ZG
+    ERRORABORT
+    FP
+    ERRORABORT
+    APK0
+
+    /* retrieve optimized O1 value */
+
+    FETCHPAR("PHC0", &phc0);
+
+    cnst30 = -phc0;
+
+    if (debug == 0)
+	cleanUp(curdat, expnoOrig);
+
+
+    /* now write phc0 back to original data set */
+
+    DATASET(name, expnoOrig, procno, disk, user);
+
+    if (debug == 1)
+	Proc_err(ERROPT_AK_NO, "PHC0 value has been adjusted: %f", phc0);
+
+
+    /********************************************************************/
+    /******************* END: Navigator experiment **********************/
+    /********************************************************************/
+
+
+    /********************************************************************/
+    /************* START: block for optimization of O1 ******************/
+    /********************************************************************/
+
+
+    if(createCalibrationDataSet(curdat, d1, d29, o1, o1p, td, cnst30, pldb9, de) < 0)
+    {
+	cleanUp(curdat, expnoOrig);
+        STOPMSG("expno to save original data already exists!\nprocessing aborted");
+    }
+
+
+    /* now start the acquisition */
+
+
+    sprintf(cmd_str, "zg o1calib %f %f", stepSizeHz, rangeSizeHz);
+    XCMD(cmd_str)
+    ERRORABORT
+
+
+    /* retrieve optimized O1 value */
+
+    FETCHPAR("O1", &o1);
+
+    if (debug == 0)
+	cleanUp(curdat, expnoOrig);
+
+    /* now write O1 back to original data set */
+
+    DATASET(name, expnoOrig, procno, disk, user);
+
+    STOREPAR("O1", o1);
+
+    if (debug == 1)
+	Proc_err(ERROPT_AK_NO, "O1 value has been adjusted: %fHz", o1);
+
+    /********************************************************************/
+    /************* END: block for optimization of O1 ********************/
+    /********************************************************************/
+
+    Show_meta(SM_RAWP);
+    return 0;
+}
+
+
+
+/**********************************************************************/
+static void cleanUp(const char* curdat, int expnoOrig)
+{
+    /* delete test data set and make sure that we do
+       not delete the wrong one...*/
+
+    if (expno != expnoOrig)
+    {
+        int newexpno = expno;
+        /* step away before deleting current data set;
+           keep in mind that DATASET changes expno implicitly! :) */
+        DATASET(name, expnoOrig, procno, disk, user);
+        DELETEEXPNO(name, newexpno, disk, user);
+    }
+}
+/**********************************************************************/
+static void showSyntax(void)
+{
+    Proc_err(INFO_OPT,
+             "o1calib may be called with one or more of the following parameters:\n\n"
+             "o1calib [d1 <val>] [d29 <val>] [td <val>] [o1 <val>] [stepSizeHz <val>] [rangeSizeHz <val>] [debug <0|1>],\n\n"
+             "e.g. 'o1calib d1 20 d29 0.5'.\n"
+             "The unit off all delays is [sec], the unit of o1, stepSizeHz and rangeSizeHz is [Hz], debug can be 0 or 1.");
+}
+/**********************************************************************/
+static int overwriteDefaultParameters(int i_argc, char** i_argv, double* d1,
+				      double* d29, int* td, double* o1,
+				      double* stepSizeHz, double* rangeSizeHz, int* debug)
+{
+    int i = 0;
+
+    if((i_argc % 2) != 0)
+    {
+        Proc_err(DEF_ERR_OPT, "Inconsistent number of parameters!");
+        return -1;
+    }
+
+    for(i = 2; i < i_argc; i += 2)
+    {
+        double value = atof(i_argv[i+1]);
+
+        if(value < 0)
+        {
+            Proc_err(DEF_ERR_OPT, "invalid value for %s!", i_argv[i]);
+            return -1;
+        }
+
+        if(strncmp(i_argv[i], "d1", 2) == 0)
+        {
+            *d1 = value;
+        }
+        else if(strncmp(i_argv[i], "d29", 3) == 0)
+        {
+            *d29 = value;
+        }
+        else if(strncmp(i_argv[i], "td", 2) == 0)
+        {
+            *td = (int)(value);
+        }
+        else if(strncmp(i_argv[i], "o1", 2) == 0)
+        {
+            *o1 = value;
+        }
+	else if(strncmp(i_argv[i], "stepSizeHz", 10) == 0)
+        {
+            *stepSizeHz = value;
+        }
+	else if(strncmp(i_argv[i], "rangeSizeHz", 11) == 0)
+        {
+            *rangeSizeHz = value;
+        }
+	else if(strncmp(i_argv[i], "debug", 5) == 0)
+        {
+            *debug = (int)value;
+        }
+    }
+
+    return 0;
+
+}
+/**********************************************************************/
+static int createCalibrationDataSet(const char* curdat,
+				    double d1, double d29,
+				    double o1, double o1p, int td,
+				    double cnst30, double pldb9, double de)
+{
+    int i = 0;
+    int startExpno = expno + 10000;
+    int endExpno = startExpno + 50;
+
+    for(i = startExpno; i < endExpno; ++i)
+    {
+        if (access(NEWACQUPATH(i, 0), F_OK) != 0)
+        {
+            WRAPARAM(i);
+            ERRORABORT;
+            /* this sets expno implicitly... */
+            DATASET(name, i, procno, disk, user);
+            RPAR("PROTON", "all");
+            ERRORABORT;
+
+            STOREPAR("PULPROG", "o1calib");
+            STOREPAR("DIGMOD", 0);
+            STOREPAR("AQ_mod", 1);
+            STOREPAR("NS", 256000);
+            STOREPAR("DS", 0);
+            STOREPAR("D 1", d1);
+            STOREPAR("D 12", 1e-6);
+            STOREPAR("D 29", d29);
+            STOREPAR("TD", td);
+            STOREPAR("PLdB 9", pldb9);
+            STOREPAR("PHC0", 0.0);
+            STOREPAR("PHC1", 0.0);
+            STOREPAR("CNST 30", cnst30);
+            STOREPAR("DE", de);
+
+            if (fabs(o1) > 1e-3)
+            {
+                STOREPAR("O1", o1);
+            }
+            else
+            {
+                /* set the default value */
+                STOREPAR("O1P", o1p);
+            }
+
+            return 0;
+        }
+    }
+
+    Proc_err(DEF_ERR_OPT, "Error: Unable to find an empty expno!");
+
+    return -1;
+}
+
+
+/**********************************************************************/
+static int createNavigatorDataSet(const char* curdat,
+				  double d1, double d29,
+				  double o1, double o1p,
+				  double pldb1, double de)
+{
+    int i = 0;
+    int startExpno = expno + 20000;
+    int endExpno = startExpno + 50;
+
+    for(i = startExpno; i < endExpno; ++i)
+    {
+        if (access(NEWACQUPATH(i, 0), F_OK) != 0)
+        {
+            WRAPARAM(i);
+            ERRORABORT;
+            /* this sets expno implicitly... */
+            DATASET(name, i, procno, disk, user);
+            RPAR("PROTON", "all");
+            ERRORABORT;
+
+            STOREPAR("PULPROG", "o1calib_prep");
+            STOREPAR("DIGMOD", 0);
+            STOREPAR("AQ_mod", 1);
+            STOREPAR("NS", 1);
+            STOREPAR("DS", 0);
+            STOREPAR("D 1", 1.0);
+            STOREPAR("D 12", 1e-6);
+            STOREPAR("P 1", 0.5);
+            STOREPAR("PLdB 1", pldb1+24.0);
+            STOREPAR("TD", 256*1024);
+            STOREPAR("SI", 256*1024);
+            STOREPAR("CNST 30", 0.0);
+            STOREPAR("DE", de);
+
+            if (fabs(o1) > 1e-3)
+            {
+                STOREPAR("O1", o1);
+            }
+            else
+            {
+                /* set the default value */
+                STOREPAR("O1P", o1p);
+            }
+
+            return 0;
+        }
+    }
+
+    Proc_err(DEF_ERR_OPT, "Error: Unable to find an empty expno!");
+
+    return -1;
+}

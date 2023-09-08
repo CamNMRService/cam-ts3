@@ -40,6 +40,7 @@
 /* ptg			2021-04-30 O1 value from pulsecal is set as starting value in */
 /*										case peak picking bit fails becaus the residual peak is too small*/
 /* ptg             2023-09-07 Rewrite all options to use userA1 settings*/
+/* ptg 				2023-09-08 added setdef to inhibit trouble error messages from bt_calibrate_o1 and changed bt_calibrate_o1 settings*/
 /****************************************************************/
 
 
@@ -64,6 +65,9 @@ double bf;
 double peakFreqHz, peakFreqPPM, peakIntensity;
 int numPeaks, i;
 char USERA1Set[512];
+
+// prevet error message issues...
+XCMD("setdef ackn no");
 
 GETCURDATA
 
@@ -324,7 +328,7 @@ if(reducepresat)
 
 if(o1cal)
 {
-	sprintf(o1string, "bt_calibrate_o1 d1 10 d29 4 o1 %f stepSizeHz 0.2 rangeSizeHz 4 debug 0", maxpsh);
+	sprintf(o1string, "bt_calibrate_o1 d1 10 d29 2 o1 %f", maxpsh);
 	XCMD(o1string);
 	FETCHPAR("O1", &o1real);
 	if (debug)

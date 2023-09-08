@@ -167,7 +167,7 @@ STOREPAR("SFO1",sfo1);
 // test results:
 FETCHPAR("SFO1",&sfo1real);
 //Proc_err(DEF_ERR_OPT,"expno=%d, sf= %lf, maxpsh= %lf, sfo1=%lf, realsfo1=%lf", expno,sf,maxpsh,sfo1,sfo1real);
-sprintf(btargs, "d29 3 o1 %f", o1);
+sprintf(btargs, "d29 3 o1 %f", maxpsh);
 XAU("bt_calibrate_o1",btargs);
 
 FETCHPAR("SOLVENT", solvent)

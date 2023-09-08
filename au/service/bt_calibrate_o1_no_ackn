@@ -68,7 +68,9 @@
 $Id: bt_calibrate_o1,v 1.1 2016/05/17 09:55:30 wem Exp $
 */
 
+XCMD("setdef ackn no");
 AUERR = calibrate_o1(curdat);
+XCMD("setdef ackn ok");
 QUIT
 
 static void showSyntax(void);

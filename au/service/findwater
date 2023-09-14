@@ -58,7 +58,7 @@ char solvent[100];
 char o1string[100];
 int expnosave;
 float p1, pl1, pl9, cnst9;
-int o1cal=0, reducepresat=0, tso=0, maxRG=0, reduceRG=0, nopcal=0, wvm=0, debug=0;
+int o1cal=0, reducepresat=0, tso=0, maxRG=0, reduceRG=0, fixRG=0, nopcal=0, wvm=0, debug=0;
 float rg,rgorig, rffactor;
 double f1p, f2p;
 double bf;
@@ -106,6 +106,10 @@ if ((strstr(cmd, "maxRG") != 0) || (strstr(USERA1Set, "maxRG") != 0))
     maxRG =1 ;
 }
 
+if ((strstr(cmd, "fixRG") != 0) || (strstr(USERA1Set, "fixRG") != 0))
+{
+    fixRG =1 ;
+}
 
 // Don't do pulsecal:
 if ((strstr(cmd, "nopcal") != 0) || (strstr(USERA1Set, "nopcal") != 0))
@@ -366,6 +370,16 @@ if(reduceRG)
 	{
         fprintf(fptr, "RG reduced by factor %f to %f \n", rgorig, rg);
 	}
+}
+
+if(fixRG)
+{
+	  
+    STOREPAR("RG", rgorig)
+    if (debug)
+	  {
+        fprintf(fptr, "RG fixed to original value %f \n", rgorig, rg);
+	  }
 }
 
 if(wvm)

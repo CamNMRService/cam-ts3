@@ -324,7 +324,7 @@ if(reducepresat)
 
 if(o1cal)
 {
-	sprintf(o1string, "bt_calibrate_o1_no_ackn d1 10 d29 4 o1 %f stepSizeHz 0.2 rangeSizeHz 4 debug 0", maxpsh);
+	sprintf(o1string, "bt_calibrate_o1_no_ackn d1 10 d29 2 o1 %f debug 0", maxpsh);
 	XCMD(o1string);
 	FETCHPAR("O1", &o1real);
 	if (debug)

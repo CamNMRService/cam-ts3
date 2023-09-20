@@ -1,0 +1,424 @@
+/*****************************************************************/
+/*      nusPGSv3              2013.11.28 (Turkey day!)           */
+/*****************************************************************/
+/*      Short Description :   NUS Poisson Gap Sampler for        */
+/*			      Topspin 3.0+ v3.0                  */
+/*****************************************************************/
+/*      Keywords :                                               */
+/*****************************************************************/
+/*      Description/Usage :   Macro - just run nusPGSv3 and      */
+/*                            follow instructions                */
+/*****************************************************************/
+/*      Author(s) :                                              */
+/*      Name            : Scott Anthony Robson                   */
+/*      Organisation    : Harvard Medical School                 */
+/*      Email           : Scott_Robson@hms.harvard.edu           */
+/* Duncan Howe, Univ Cambridge UK - djh35@cam.ac.uk		*/
+/* Added a lot of mods...					*/
+/* now uses percentage sparsity to calculate schedule		 */
+/* saves parameters used to a file.				*/
+/* Takes command line options :-				*/
+/* djh-poisson default - uses some default values, eg 25% NUS	*/
+/* djh-poisson recalc - takes parameters saved in a file and 	*/
+/* re-does the calculation					*/
+/* Stores parmeters NusSeed, NusAmount and NusPoints 		*/
+/* into the datasets aquisition parameters			*/
+/* Makes the filename of the NUS list :- nusTIMEINUNIXSECONDS	*/
+/* This prevents over-writing in an iconnmr automation setting	*/
+/* Fixed an issue where if fnmode=QF and incorrect schedule is  */
+/* generated. So if fnmode=1 (QF) use TD, otherwise use 0.5*TD  */
+/* It appears to be bug free whilst I've been using it for 2Ds */
+/* No guarantees it won't ruin your experiment; blow up your   */
+/* spectrometer and summon an eldritch horror from a dungeon   */
+/* dimension. So my standard disclaimer. Only use if you are   */
+/* prepared to deal with an unknown amount of peril!           */
+/*                      :)                                     */
+
+
+/*****************************************************************/
+/*      Name            Date    Modification:                    */
+/*	SAR		131128  Added Shuffled schedule option   */
+/*      SAR             131128  Cleaning this code up            */
+/*				Macro name change to nusPGS      */
+/*      SAR             130915  Edits of code based on W Bermel  */
+/*                              nls2_setup4.be macro             */
+/*	DJH		170203  The above edits			*/
+/*****************************************************************/
+/*
+$Id: $
+*/
+#include <time.h>
+
+#define MAXDIM 8
+
+//DJH adding writing the arguments to a file.
+char infile[PATH_MAX], outfile[PATH_MAX], outfile2[PATH_MAX], argumentfile[PATH_MAX];
+char result[PATH_MAX];
+char input[PATH_MAX], path[PATH_MAX];
+char nuslist[PATH_MAX];
+char ct_inp[4][MAXDIM];
+char sparse[32];
+char time_in_seconds[64];
+
+
+char *cp, *ep;
+
+const char* args[4];
+
+double lw[MAXDIM], j_coup[MAXDIM];
+
+float swh_a, swh[MAXDIM];
+float tolerance,  working_tolerance;
+float def_tolerance=0.01;
+int parmode, counter, temp,fnmode;
+int td[MAXDIM], td_sparse, td_max, sinep , shuffle_flag, d_one, d_two, d_three;
+int seed=-1;
+int def_seed=54321;
+int def_sinep=2;
+float def_sparsity=25.0;
+float sparsity_pc=0.0;
+FILE *fpi, *fpo, *fpa;
+sparsity_pc=def_sparsity;
+
+
+//Get the current time in seconds for the nuslist filename
+long int tval[MAXDIM];
+sprintf(time_in_seconds,"%d",(int)time(NULL));
+Proc_err(INFO_OPT,"time_in_seconds is - %s",time_in_seconds);
+
+/***** get dataset *****/
+
+GETCURDATA
+
+
+FETCHPAR("PARMODE",&parmode)
+FETCHPAR1("FNMODE", &fnmode)
+
+if ( parmode > 3 )
+   STOPMSG("dimensionality higher than 4D currently not supported");
+
+if ( parmode == 0 )
+   STOPMSG("Directly acquired 1D spectra don't require NUS/NLS");
+
+Proc_err(INFO_OPT,"iargv 2 is=%s",i_argv[2]);
+Proc_err(INFO_OPT,"iargc is=%i",i_argc);   
+
+/***** initialize parameters *****/
+
+for ( counter = 1; counter <= parmode  ;counter++ )
+   {
+   tval[counter] = 0;
+
+   (void)strcpy(ct_inp[counter],"n");
+
+   lw[counter] = 1.0;
+
+   j_coup[counter] = 0.0;
+   }
+
+
+/*N15 mostly CT */
+/*PGS doesn't care much about CT so this may not be needed */
+(void)strcpy(ct_inp[parmode],"y");
+
+
+(void)strcpy(sparse,"y");
+
+
+/***** get parameters *****/
+
+for ( counter = 1; counter <= parmode  ;counter++ )
+   {
+   FETCHPARN(counter, "TD", &td[counter])
+   FETCHPARN(counter, "SWH", &swh[counter])
+   }
+
+FETCHPAR("SWH",&swh_a)
+
+//why is this here? it truncates the list...QF quirkiness?
+//td_max = td[1];
+//Generates twice as many points as Brukers automatic schedule
+//Change to :-
+td_max = td[1]/2; 
+for ( counter = 2; counter <= parmode  ;counter++ )
+   {
+   td_max *= td[counter]/2;
+   }
+
+Proc_err(INFO_OPT,"got to here1");
+/** setup some defaults and initial parameters **/
+if (i_argc == 3) //We have an agument on the command line
+{
+	Proc_err(INFO_OPT,"got to here2");
+	if (strstr(i_argv[2],"default") )
+	{
+	seed = def_seed;
+	sinep = def_sinep;
+	tolerance = def_tolerance;
+	Proc_err(INFO_OPT,"Using default values :-\n seed = %i \n Sine function = %i \n Tolerance = %f",seed,sinep,tolerance); 
+	}
+	
+	
+	if (strstr(i_argv[2],"recalc") )
+	{
+	(void)sprintf(argumentfile,"%s/nusPGSv3_args.out", ACQUPATH(0) );
+	fpa = fopen(argumentfile,"rt");
+	if ( fpa == NULL )
+		{
+		(void)Proc_err(INFO_OPT,"cannot open argument file:\n%s",argumentfile);
+		STOPMSG("cannot open argument file");
+		}
+	temp = fscanf(fpa,"%d,%d,%f,%f,%d", &seed, &sinep, &sparsity_pc, &tolerance, &shuffle_flag);
+	
+	if (temp !=5)
+		{
+		
+		STOPMSG("cannot read argument file correctly");
+		}
+	(void)fclose(fpa);
+	Proc_err(INFO_OPT,"opened argumentfile=%s, read %i arguments",argumentfile,temp);
+	}
+}
+
+
+Proc_err(INFO_OPT,"got to here3");
+
+/*We have no argument on command line, ask for values*/
+if (i_argc == 2) 
+	{
+
+		/** setup defaults **/
+		seed = def_seed;
+		sinep = def_sinep;
+		tolerance = def_tolerance;
+		td_sparse = td_max/def_sparsity;
+
+		/** get some user input regarding how they want to sample **/
+		(void)sprintf(text, "Random seed (0 means program selected)? \n");
+		GETINT(text, seed);
+		(void)sprintf(text, "Sine portion for sampling? (2 is probably good) \n");
+		GETINT(text, sinep);
+
+		/** ask what sparsity they do want **/
+		//DJH begin mod
+		for (;;)
+		{
+			(void)sprintf(text,"What percentage sparsity would you like? \n");
+			GETFLOAT(text, sparsity_pc);
+   
+			if ( sparsity_pc >= 0 && sparsity_pc <= 100 )
+				break;
+		}
+		/** Ask about tolerance **/
+		/** Potential failure here if combination of sparsity and tolerance input into poisson algorithm    **/
+		/** fail to find a schedule in a timely manner. If tolerance is too low but complexity of selection **/
+		/** too difficult there may need to be a timeout programmed into this macro at some stage           **/ 
+
+		(void)sprintf(text, "Tolerance for number of sampled points (%)? \n");
+		GETFLOAT(text, tolerance);
+
+
+		/** Currently the poisson program does not do shuffle output. This option should be implemented at  **/
+		/** some point and can be requested at tis point. Stay tuned for version 3.0                        **/
+		/** OK adding shuffle option now                                                                    **/
+		shuffle_flag = 0;
+		(void)sprintf(text, "Shuffle the schedule? (0 = no, 1 = yes)\n");
+		GETINT(text, shuffle_flag);
+	}
+
+/** check and execute poisson **/
+//DJH mods, changed poissionv3 to point to windows .exe file
+
+(void)sprintf(path,"%s/bin/poissonv3.exe", PathXWinNMRProg() );
+
+if (access(path, F_OK))
+   {
+   (void)sprintf(text, "file %s does not exist", path);
+   STOPMSG(text);
+   }
+
+(void)sprintf(input,"nusPGS_setup");
+
+(void)strcpy(path, ACQUPATH(""));
+
+(void)chdir(path);
+
+
+(void)sprintf(result,"%s.out", ACQUPATH(input) );
+
+
+(void)sprintf(path,"%s/bin/poissonv3.exe", PathXWinNMRProg() );
+
+/** Need to reverse some orders of the dimensions here. Not sure this is necessary but is a  **/
+/** kluge that works. Also guarantees that non-existant dimensions are given a 0 value which **/
+/** the poisson executable requires for sanity check.                                        **/
+
+if ( parmode ==3 ) {
+	d_one = td[3]/2;
+	d_two = td[2]/2;
+	d_three = td[1]/2;
+}
+
+if (parmode == 2 ) {
+	d_one = td[2]/2;
+	d_two = td[1]/2;
+	d_three = 0;
+}
+
+if ( parmode == 1 ) {
+	d_one = td[1]/2; 
+	//why is this div 2?
+	//d_one = td[1];
+	d_two = 0;
+	d_three = 0;
+}
+
+if (seed < 0 )
+   {
+   (void)sprintf(text,"Seed is %i. Somethings gone wrong...",seed);
+   STOPMSG(text);
+   }
+td_sparse=td_max/(100/sparsity_pc);
+working_tolerance = tolerance / 100;   
+if (fnmode==1)
+	{
+	d_one = d_one*2;
+	td_sparse = td_sparse*2;
+	Proc_err(INFO_OPT,"FnMode is QF=%i, setting d_one to %i and td_sparse to %i", fnmode,d_one, td_sparse);
+	}
+	
+/** Yallah Balla! **/
+
+(void)sprintf(text, "%s %i %i %i %i %f %i %i %i %i > %s", path, parmode, seed, sinep, td_sparse, working_tolerance, d_one, d_two, d_three, shuffle_flag, result);
+(void)system(text);
+Proc_err(INFO_OPT,"using :- %s", text);
+
+
+/** check result of poisson **/
+(void)sprintf(infile,"%s.out", ACQUPATH(input) );
+
+
+fpi = fopen(infile,"rt");
+
+if ( fpi == NULL )
+   {
+   (void)sprintf(text,"cannot open input file:\n%s",infile);
+   STOPMSG(text);
+   }
+
+/** check output files **/
+//Note by DJH, looks like Bruker doesn't let you make the nuslist name too long; 32 max chars
+//so :-
+//(void)sprintf(nuslist,"%s_exp_%d_nuslist", name,expno);
+//won't work....
+
+(void)sprintf(nuslist,"nus%s", time_in_seconds);
+
+(void)sprintf(outfile,"%s/stan/nmr/lists/vc/%s", PathXWinNMRExp(), nuslist);
+
+fpo = fopen(outfile,"wt");
+
+if ( fpo == NULL )
+   {
+   (void)sprintf(text,"cannot open output file:\n%s",outfile);
+   }
+
+
+/***** split points file *****/
+
+while( fgets(text, sizeof(text), fpi) != NULL )
+   {
+   cp = text;
+
+   while( isspace(*cp) )
+      {
+      cp++;
+      }
+
+   if ( *cp )
+      {
+      tval[1] = strtol(cp, &ep, 10);
+
+      if ( cp == ep )
+         {
+         (void)sprintf(path,"inconsistent file content for input file (first entry):\n%s",infile);
+         STOPMSG(path);
+         }
+
+
+      if ( parmode >= 2 )
+         {
+         cp = ep;
+
+         tval[2] = strtol(cp, &ep, 10);
+
+         if ( cp == ep )
+            {
+            (void)sprintf(path,"inconsistent file content for input file (second entry):\n%s",infile);
+            STOPMSG(path);
+            }
+	 }
+
+      if ( parmode >= 3 )
+         {
+         cp = ep;
+
+         tval[3] = strtol(cp, &ep, 10);
+
+         if ( cp == ep )
+            {
+            (void)sprintf(path,"inconsistent file content for input file (third entry):\n%s",infile);
+            STOPMSG(path);
+            }
+	 }
+
+
+      (void)fprintf(fpo,"%ld\t", tval[1]);
+
+      if ( parmode >= 2 )
+         (void)fprintf(fpo,"%ld\t", tval[2]);
+
+      if ( parmode >= 3 )
+         (void)fprintf(fpo,"%ld\t", tval[3]);
+
+      (void)fprintf(fpo,"\n");
+
+      }
+   }
+
+
+(void)fclose(fpi);
+(void)fclose(fpo);
+
+
+/***** store parameters *****/
+
+STOREPAR("NUSLIST", nuslist)
+//Mod by DJH to store NUSamount and seed used.
+STOREPAR("NusAMOUNT", sparsity_pc)
+STOREPAR("NusSEED", seed)
+//End mod
+
+
+STOREPAR("L 3", td_sparse*2 );
+
+if ( parmode >= 2 )
+   STOREPAR("L 13", 2 );
+
+if ( parmode >= 3 )
+   STOREPAR("L 23", 2 );
+//DJH to a text file in acqu directory
+
+(void)sprintf(argumentfile,"%s/nusPGSv3_args.out", ACQUPATH(0) );
+Proc_err(INFO_OPT,"argumentfile=%s",argumentfile);
+fpa = fopen(argumentfile,"wt");
+
+if ( fpa == NULL )
+   {
+   (void)Proc_err(INFO_OPT,"cannot open argument file:\n%s",argumentfile);
+   }
+fprintf(fpa,"%d,%d,%f,%f,%d", seed, sinep, sparsity_pc, tolerance, shuffle_flag);
+(void)fclose(fpa);
+Proc_err(INFO_OPT,"Poisson gap sampling schedule setup finished\n FnMode=%i\n Sparsity percent=%f\n Number of sparse points=%i\n NUS list name=%s",fnmode,sparsity_pc,td_sparse,nuslist);
+QUIT
+

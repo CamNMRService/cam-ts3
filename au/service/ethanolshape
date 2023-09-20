@@ -1,0 +1,8 @@
+char stcommand[512];
+float pulselength ;
+XCMD("st generate Rectangle 10000 filename=EtOHtemp");
+FETCHPAR("P 18", &pulselength);
+sprintf(stcommand, "st manipulate EtOHtemp offs b %f 2 0 1219.88", pulselength);
+XCMD(stcommand);
+ZG
+QUIT

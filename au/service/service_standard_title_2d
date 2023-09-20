@@ -6,6 +6,7 @@
 
 char one_d_title_au[PATH_MAX]="service_standard_title_1d";
 char title_path[PATH_MAX],  titletextnew[2048]="NULL"; 
+char nuc_one[8]="",nuc_two[8]="";
 char message[1024]="";
 char arg[256]="";
 char pulprog[256];
@@ -15,7 +16,7 @@ char dataset_probe[PATH_MAX];
 char solvent[256];
 float aq,d_one,p_one;
 float rg,plw1, pldb1;
-double sfo_one,sw,sw_h;
+double sfo_one, sfo_two,sw,sw_h;
 
 int ns,td,td1,td2,parmode;
 
@@ -29,6 +30,17 @@ FILE *ftitle = NULL;
 GETCURDATA
 
 
+if (i_argc == 3 ) { // if its 'a' append, otherwise overwrite
+    sprintf(arg,"%s",i_argv[2]); 
+}
+
+FETCHPAR("PARMODE",&parmode)
+if(parmode==0)
+{
+    sprintf(message,"1D data - running 1D title program%s",one_d_title_au);
+    XAU(one_d_title_au,arg)
+    STOPMSG(message)  ;
+}
 
 FETCHPARS("INSTRUM", instrum)
 FETCHPARS("PULPROG", pulprog)
@@ -40,26 +52,15 @@ FETCHPARS("TD", &td)
 FETCHPARS("NS", &ns)
 FETCHPARS("SW", &sw)
 FETCHPARS("SW_h",&sw_h)
+FETCHPARS("NUC1",nuc_one)
+FETCHPARS("NUC2",nuc_two)
 FETCHPAR("PLW 1", &plw1)
 FETCHPAR("PLdB 1", &pldb1)
 FETCHPAR("SOLVENT", solvent)
 FETCHPARS("PROBHD", dataset_probe)
-FETCHPAR("PARMODE",&parmode)
+
 
 aq = td/(2*sw*sfo_one);
-
-if (i_argc == 3 ) { // if its 'a' append, otherwise overwrite
-    sprintf(arg,"%s",i_argv[2]); 
-}
-
-if(parmode==0)
-{
-    sprintf(message,"1D data - running 1D title program%s",one_d_title_au);
-    XAU(one_d_title_au,arg)
-    STOPMSG(message)  ;
-}
-
-
 
 sprintf( title_path, "%s%s/%s/%i/pdata/1/title", disk, user, name, expno); 
 sprintf(titletextnew, "\n%s\n", name);
@@ -75,9 +76,11 @@ sprintf(titletextnew, "Dataset name=%s,expno=%i\n",name,expno);
 fputs( titletextnew, ftitle); /*add new text to it*/
 sprintf(titletextnew, "Solvent=%s\n",solvent);
 fputs( titletextnew, ftitle); /*add new text to it*/
-sprintf(titletextnew, "Instrument=%s,MHz=%.4f\nPulseprogram=%s,P1=%.2f,PL1(watts)=%.2f\n", instrum,sfo_one,pulprog,p_one,plw1);
+sprintf(titletextnew, "Instrument=%s,MHz=%.4f\nProbehead=%s\n", instrum,sfo_one,dataset_probe);
 fputs( titletextnew, ftitle); /*add new text to it*/
-sprintf(titletextnew,"NS=%i,D1=%.2f,AQ=%.2f,RG=%.2f\n",ns,d_one,aq,rg);
+sprintf(titletextnew, "Pulseprogram=%s,P1(us)=%.2f,PL1(watts)=%.2f\n",pulprog,p_one,plw1);
+fputs( titletextnew, ftitle); /*add new text to it*/
+sprintf(titletextnew,"NS=%i,D1=%.2f,AQ(s)=%.2f,RG=%.2f\n",ns,d_one,aq,rg);
 fputs( titletextnew, ftitle); /*add new text to it*/
 sprintf(titletextnew,"SW(ppm)=%.2f,SW(Hz)=%.2f\n",sw,sw_h);
 fputs( titletextnew, ftitle); /*add new text to it*/

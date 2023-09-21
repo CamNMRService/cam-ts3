@@ -1,0 +1,99 @@
+char def_file[255]="e:/chemist/defaults-csv.txt"; //janus software defaults
+float   delaytime=1.0;
+int     expt=1, curloop=1, cpos, specno, jexpt, jsolv, finish=FALSE,i=1;
+int     LastSample, FatalError=FALSE, nexpt, parmo, proderrcount, sthou;
+int     skipsample, pid, x, proc_or_not=0,sampleproblem=0;
+
+char    oi[80], juser[50], suser[40], in_data[1024], tmp_fname[1024];
+char    shimfile[80], acqufile[80];
+char    experiment[155], solvent[40], tunefile[40], sxfile[80];
+char    tmp_str[180], titlefile[80], titletext[80];
+char    exptfile[80], diskunit[40];
+char    prefix[40], shimset[40], defaultsfile[80], hdwerr[80];
+char    archpath[80], archive[20], jcmd_str[1024], outpath[1024];
+char    janusup[80], expttime[40], exptsfile[80], protocol[80];
+char    sxcmd[255], gradshim[20], comments[1024], command[1024], snostr[1024], tmp_cmd[256];
+char    statusstr[1024], awmfile[80],tmparchpath[1024],fidpath[1024],procau[1024];
+char	  proclist[1024],procinstruct[1024];
+char    reportdest[PATH_MAX];
+char    reportsource[PATH_MAX];
+char    sampleinfofile[PATH_MAX];
+char sampleinfostring[2048];// just make one string, and write to file at the end so that we aer in the dataset from which janus email runs
+char    pulsecalfilename[PATH_MAX];
+char pulsecalcontent[128];
+char pulsecalerror[256];
+FILE *pulsecalfile = NULL;
+float p1, statusp1;
+char   *env_name, *file_data, *field, *ed;
+FILE   *fprod = NULL, *facqu = NULL, *ferror = NULL, *fwarn = NULL;
+FILE   *fshim = NULL, *fwait = NULL, *ftitle = NULL, *fsx = NULL;
+FILE   *fexpt = NULL, *fprot = NULL, *flog = NULL, *fdef = NULL;
+FILE   *fjup = NULL, *fexpts = NULL, *pidfile = NULL, *fawm = NULL;
+FILE  *sname = NULL;
+FILE 	*fbat=NULL;
+FILE	*plist=NULL;
+FILE	*pornot=NULL;
+FILE    *sampleinfo=NULL;
+char  samplename[80], snamefile[255];
+time_t lt;
+struct tm *ltstruc;	  		/* structure with year, month etc. */
+char datestamp[256];
+char testdata[256];
+char test_parset[256] = "C13CPD";
+
+
+/*--------------------------------------------------------------*/
+/*--- Get defaults from the defaults file ----------------------*/
+strcpy( defaultsfile, def_file );
+fdef = fopen( defaultsfile, "r" );
+Proc_err ( INFO_OPT, "reading defaults");
+strcpy( defaultsfile, def_file );
+fdef = fopen( defaultsfile, "r" );
+Proc_err( INFO_OPT, "reading defaults");
+Proc_err(INFO_OPT,"file is not empty, so do something");
+rewind(fdef); //go to begining of file
+file_data = fgets(in_data, 1024, fdef); //read in file as a continuous string
+fclose(fdef); //close the file
+Proc_err(INFO_OPT,"parsing %s file",proclist);
+//file is open, read data
+field = strtok(in_data, ",");
+strcpy( prefix,field);
+Proc_err(INFO_OPT,"prefix is %s",prefix);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &diskunit);
+	Proc_err(INFO_OPT,"diskunit is %s",diskunit);
+field = strtok(NULL, ",");
+sscanf(field,"%s", &suser);
+	Proc_err(INFO_OPT,"suser is %s",suser);
+field = strtok(NULL,",");
+sscanf(field,"%s",&tunefile);
+	Proc_err(INFO_OPT,"tunefile is %s", tunefile);
+field = strtok(NULL,",");
+sscanf(field,"%s",&shimset);
+	Proc_err(INFO_OPT,"shimset is %s", shimset);
+field = strtok(NULL,",");
+sscanf(field,"%s",&archpath);
+	Proc_err(INFO_OPT,"archpath is %s", archpath);
+field = strtok(NULL,",");
+sscanf(field,"%s",&archive);
+	Proc_err(INFO_OPT,"archive is %s", archive);
+field = strtok(NULL,",");
+sscanf(field,"%s",&gradshim);
+	Proc_err(INFO_OPT,"gradshim is %s", gradshim);
+Proc_err(INFO_OPT,"parsed file");
+
+
+sprintf(diskunit,"%sdata\\%s\\nmr\\",diskunit,suser);
+lt=time(NULL);
+ltstruc = localtime(&lt);
+sprintf(datestamp, "%d_%d_%d_%d_%d_%d", ltstruc->tm_year+1900, ltstruc->tm_mon, ltstruc->tm_mday, ltstruc->tm_hour, ltstruc->tm_min, ltstruc->tm_sec);
+sprintf(testdata,"Systest_%s",datestamp);
+DATASET(testdata, 10, 1, diskunit, suser);
+Proc_err(INFO_OPT,"diskunit=%s",diskunit);
+Proc_err(INFO_OPT,"disk=%s",disk);
+SETCURDATA
+VIEWDATA_SAMEWIN
+RPAR(test_parset, "all")
+Proc_err(DEF_ERR_OPT,"data  = %s %s %d %d", disk, name, expno, procno);
+II
+QUIT

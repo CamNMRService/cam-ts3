@@ -15,16 +15,17 @@ char instrum[PATH_MAX];
 char dataset[PATH_MAX];
 char dataset_probe[PATH_MAX];
 char solvent[256];
-char nuc[MAXDIM][8];
+char nuc[8][MAXDIM];
 float aq,d_one;
 float p[MAXDIM];
 float plw[MAXDIM];
 float pldb[MAXDIM];
 float rg,plw1, pldb1;
+
 double sfo[MAXDIM];
 double sw[MAXDIM],sw_h[MAXDIM];
-double sw_temp,sw_h_temp;
-int counter=0;
+double sfo_temp,sw_temp,sw_h_temp;
+int i=0;
 int ns,td[MAXDIM],td1,td2,parmode;
 
 
@@ -53,12 +54,12 @@ FETCHPARS("INSTRUM", instrum)
 FETCHPARS("PULPROG", pulprog)
 FETCHPARS("D 1", &d_one)
 FETCHPARS("P 1", &p[0])
-FETCHPARS("SFO1", &sfo[0])
+FETCHPARS("SFO1", &sfo_temp)
 FETCHPARS("RG",&rg)
 FETCHPARS("TD", &td[0])
 FETCHPARS("NS", &ns)
-FETCHPARS("SW", &sw[0])
-FETCHPARS("SW_H",&sw_h[0])
+FETCHPARS("SW", &sw_temp)
+FETCHPARS("SW_H",&sw_h_temp)
 FETCHPARS("NUC1",nuc_one)
 FETCHPARS("NUC2",nuc_two)
 FETCHPAR("PLW 1", &plw1)
@@ -66,19 +67,28 @@ FETCHPAR("PLdB 1", &pldb1)
 FETCHPAR("SOLVENT", solvent)
 FETCHPARS("PROBHD", dataset_probe)
 
-for ( counter = 1; counter <= parmode+1  ;counter++ )
+for ( i = 1; i <= parmode+1;  i++ )
    {
-     FETCHPARNS(counter, "TD", &td[counter]) //td[0] from fetchparns is  a bogus number.
-     FETCHPARNS(counter, "SW_h", &sw_h_temp) //sw_h[counter] doesnt work - gives bogus figures.
-     sw_h[counter]=sw_h_temp;
-    // FETCHPARNS(i + 1, "SW_h", &swh[i]);
-     FETCHPARNS(counter, "NUC1", &nuc[counter]);
-      // Proc_err(DEF_ERR_OPT, "counter=%i,TD[%i]=%i,SW[%i]=%d", counter,counter,td[counter],counter,sw[counter]);
-     Proc_err(DEF_ERR_OPT, "counter=%i,TD[%i]=%i,SW[%i]=%d", counter,counter,td[counter],counter,sw[counter]);
-     // Proc_err(DEF_ERR_OPT, "counter=%i,TD[%i]=%i", counter,counter,td[counter]);
+    FETCHPARNS(i, "NUC1", &nuc[i]);
+    Proc_err(DEF_ERR_OPT, "i=%i,NUC%i=%s",i,i,nuc[i]);
+     FETCHPARNS(i, "TD", &td[i]) //td[0] from fetchparns is  a bogus number.
+     Proc_err(DEF_ERR_OPT,"TD[%i]=%i",i,td[i]);
+     FETCHPARNS(i, "SW_h", &sw_h[i]) //sw_h[i] doesnt work - gives bogus figures.
+     Proc_err(DEF_ERR_OPT,"sw_h[%i]=%d",i,sw_h[i]);
+     FETCHPARNS(i, "SW", &sw[i]) //sw_h[i] doesnt work - gives bogus figures.
+     Proc_err(DEF_ERR_OPT,"sw[%i]=%d",i,sw[i]);
+    // FETCHPARNS(i,"PLW", plw[i]);
+    // Proc_err(DEF_ERR_OPT,"plw[%i]=%d",i,plw[i]);
+     //FETCHPARNS(i,"PLdB 1", pldb[i]);
+    // Proc_err(DEF_ERR_OPT,"PLdB[%i]=%d",i,pldb[i]);
+    //FETCHPARNS(i,"P 1", p[i]);
+    // Proc_err(DEF_ERR_OPT,"P[%i]=%d",i,p[i]);
+      // Proc_err(DEF_ERR_OPT, "i=%i,TD[%i]=%i,SW[%i]=%d", i,i,td[i],i,sw[i]);
+   
+ 
    }
 
-aq = td[0]/(2*sw[0]*sfo[0]);
+aq = td[0]/(2*sw_temp*sfo_temp);
 
 sprintf( title_path, "%s%s/%s/%i/pdata/1/title", disk, user, name, expno); 
 sprintf(titletextnew, "\n%s\n", name);

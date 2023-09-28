@@ -543,6 +543,8 @@ if ( strstr ( protocol, "POS59") != NULL )
 	{
 		DATASET ( "junk", 10, 1, diskunit, suser)
 		GETCURDATA
+        RPAR("PROTONRO","all")
+        ATMAflag=1; // default behaviour
 		STOREPAR( "SOLVENT", solvent)
 		sprintf(tmp_cmd, "rsh %s",shimset);
         AUERR=CPR_exec(tmp_cmd,WAIT_TERM);

@@ -56,9 +56,11 @@ sprintf(titletextnew, "Dataset name=%s,expno=%i\n",name,expno);
 fputs( titletextnew, ftitle); /*add new text to it*/
 sprintf(titletextnew, "Solvent=%s\n",solvent);
 fputs( titletextnew, ftitle); /*add new text to it*/
-sprintf(titletextnew, "Instrument=%s,MHz=%.4f\nPulseprogram=%s,P1=%.2f,PL1(watts)=%.2f\n", instrum,sfo_one,pulprog,p_one,plw1);
+sprintf(titletextnew, "Instrument=%s,MHz=%.4f\nProbehead=%s\n", instrum,sfo_one,dataset_probe);
 fputs( titletextnew, ftitle); /*add new text to it*/
-sprintf(titletextnew,"NS=%i,D1=%.2f,AQ=%.2f,RG=%.2f\n",ns,d_one,aq,rg);
+sprintf(titletextnew, "Pulseprogram=%s,P1(us)=%.2f,PL1(watts)=%.2f\n",pulprog,p_one,plw1);
+fputs( titletextnew, ftitle); /*add new text to it*/
+sprintf(titletextnew,"NS=%i,D1(s)=%.2f,AQ(s)=%.2f,RG=%.2f\n",ns,d_one,aq,rg);
 fputs( titletextnew, ftitle); /*add new text to it*/
 sprintf(titletextnew,"SW(ppm)=%.2f,SW(Hz)=%.2f\n",sw,sw_h);
 fputs( titletextnew, ftitle); /*add new text to it*/

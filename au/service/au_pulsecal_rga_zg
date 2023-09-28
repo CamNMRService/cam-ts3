@@ -1,0 +1,61 @@
+/*** ^^A -*-C++-*- **********************************************/
+/*	au_zgonly_report		08.04.1998			*/
+/****************************************************************/
+/*	Short Description :					*/
+/*	General AU program for data acquisition.		*/
+/****************************************************************/
+/*	Keywords :						*/
+/*	zg, gradshim, gradient shimming				*/
+/****************************************************************/
+/*	Description/Usage :					*/
+/*	General AU program for data acquisition. No rga is	*/
+/*	done, only zg. This AU program is used by the gradient	*/
+/*	shimming interface 'gradshim'.				*/
+/****************************************************************/
+/*	Author(s) :						*/
+/*	Name		: Mike Engelhardt 			*/
+/*	Organisation	: Bruker Analytik			*/
+/*	Email		: michael.engelhardt@bruker.de		*/
+/****************************************************************/
+/*	Name		Date	Modification:			*/
+/*	eng		980408	created				*/
+// PTG added pulsecal and writing result to a logfile (done after ZG as only care about the pulsecal result for now)
+// Also write P1/S P1 into a file in NAME directory 
+/****************************************************************/
+/*
+$Id: au_zgonly,v 1.2 2000/07/12 11:39:40 gsc Exp $
+*/
+char solvent[128];
+float p1,statusp1;
+char results_content[128];
+char pulsecalcontent[128];
+char results_file_name[PATH_MAX];
+char pulsecalfilename[PATH_MAX];
+FILE *results_file = NULL;
+FILE *pulsecalfile = NULL;
+sprintf(results_file_name,"C:\\Bruker\\diskless\\prog\\logfiles\\pulsecallog");
+sprintf(pulsecalfilename,"%s\\%s\\pulsecal",disk,name);
+GETCURDATA
+XAU("pulsecal","quiet")
+RGA
+ZG
+FETCHPAR("P 1", &p1)
+FETCHPARS("P 1", &statusp1)
+FETCHPARS("SOLVENT",solvent)
+sprintf(results_content,"%s %s %f\n",name,solvent,p1);
+sprintf(pulsecalcontent,"%f %f",p1,statusp1);
+if ((pulsecalfile = fopen(pulsecalfilename, "a+")) == 0)
+{
+	
+} else {
+     fputs(pulsecalcontent, pulsecalfile);
+     fclose(pulsecalfile);
+}
+if ((results_file = fopen(results_file_name, "a+")) == 0)
+{
+	STOP
+} else {
+     fputs(results_content, results_file);
+     fclose(results_file);
+}
+QUIT

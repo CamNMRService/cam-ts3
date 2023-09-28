@@ -1,0 +1,123 @@
+
+/*service_standard_title_2d*/
+/*Create a standard title for the experiment*/
+/* Call with 'a' as a commandline option to append rather than overwrite*/
+
+#define MAXDIM 8
+
+char one_d_title_au[PATH_MAX]="service_standard_title_1d";
+char title_path[PATH_MAX],  titletextnew[2048]="NULL"; 
+char nuc_one[8]="",nuc_two[8]="";
+char message[1024]="";
+char arg[256]="";
+char pulprog[256];
+char instrum[PATH_MAX];
+char dataset[PATH_MAX];
+char dataset_probe[PATH_MAX];
+char solvent[256];
+char nuc[8][MAXDIM];
+float aq,d_one;
+float p[MAXDIM];
+float plw[MAXDIM];
+float pldb[MAXDIM];
+float rg,plw1, pldb1;
+
+double sfo[MAXDIM];
+double sw[MAXDIM],sw_h[MAXDIM];
+double sfo_temp,sw_temp,sw_h_temp;
+int i=0;
+int ns,td[MAXDIM],td1,td2,parmode;
+
+
+
+
+
+
+FILE *ftitle = NULL; 
+
+GETCURDATA
+
+
+if (i_argc == 3 ) { // if its 'a' append, otherwise overwrite
+    sprintf(arg,"%s",i_argv[2]); 
+}
+
+FETCHPAR("PARMODE",&parmode)
+if(parmode==0)
+{
+    sprintf(message,"1D data - running 1D title program%s",one_d_title_au);
+    XAU(one_d_title_au,arg)
+    STOPMSG(message)  ;
+}
+
+FETCHPARS("INSTRUM", instrum)
+FETCHPARS("PULPROG", pulprog)
+FETCHPARS("D 1", &d_one)
+FETCHPARS("P 1", &p[0])
+FETCHPARS("SFO1", &sfo_temp)
+FETCHPARS("RG",&rg)
+FETCHPARS("TD", &td[0])
+FETCHPARS("NS", &ns)
+FETCHPARS("SW", &sw_temp)
+FETCHPARS("SW_H",&sw_h_temp)
+FETCHPARS("NUC1",nuc_one)
+FETCHPARS("NUC2",nuc_two)
+FETCHPAR("PLW 1", &plw1)
+FETCHPAR("PLdB 1", &pldb1)
+FETCHPAR("SOLVENT", solvent)
+FETCHPARS("PROBHD", dataset_probe)
+
+for ( i = 1; i <= parmode+1;  i++ )
+   {
+    FETCHPARNS(i, "NUC1", &nuc[i]);
+    Proc_err(DEF_ERR_OPT, "i=%i,NUC%i=%s",i,i,nuc[i]);
+     FETCHPARNS(i, "TD", &td[i]) //td[0] from fetchparns is  a bogus number.
+     Proc_err(DEF_ERR_OPT,"TD[%i]=%i",i,td[i]);
+     FETCHPARNS(i, "SW_h", &sw_h[i]) //sw_h[i] doesnt work - gives bogus figures.
+     Proc_err(DEF_ERR_OPT,"sw_h[%i]=%d",i,sw_h[i]);
+     FETCHPARNS(i, "SW", &sw[i]) //sw_h[i] doesnt work - gives bogus figures.
+     Proc_err(DEF_ERR_OPT,"sw[%i]=%d",i,sw[i]);
+    // FETCHPARNS(i,"PLW", plw[i]);
+    // Proc_err(DEF_ERR_OPT,"plw[%i]=%d",i,plw[i]);
+     //FETCHPARNS(i,"PLdB 1", pldb[i]);
+    // Proc_err(DEF_ERR_OPT,"PLdB[%i]=%d",i,pldb[i]);
+    //FETCHPARNS(i,"P 1", p[i]);
+    // Proc_err(DEF_ERR_OPT,"P[%i]=%d",i,p[i]);
+      // Proc_err(DEF_ERR_OPT, "i=%i,TD[%i]=%i,SW[%i]=%d", i,i,td[i],i,sw[i]);
+   
+ 
+   }
+
+aq = td[0]/(2*sw_temp*sfo_temp);
+
+sprintf( title_path, "%s%s/%s/%i/pdata/1/title", disk, user, name, expno); 
+sprintf(titletextnew, "\n%s\n", name);
+
+if (strcmp(arg, "a") == 0)
+{
+   ftitle = fopen( title_path, "a");
+}
+else {
+    ftitle = fopen( title_path, "w");
+}
+sprintf(titletextnew, "Dataset name=%s,expno=%i\n",name,expno);
+fputs( titletextnew, ftitle); /*add new text to it*/
+sprintf(titletextnew, "Solvent=%s\n",solvent);
+fputs( titletextnew, ftitle); /*add new text to it*/
+sprintf(titletextnew, "Instrument=%s,MHz=%.4f\nProbehead=%s\n", instrum,sfo[0],dataset_probe);
+fputs( titletextnew, ftitle); /*add new text to it*/
+sprintf(titletextnew, "Pulseprogram=%s,P1(us)=%.2f,PL1(watts)=%.2f\n",pulprog,p[0],plw1);
+fputs( titletextnew, ftitle); /*add new text to it*/
+sprintf(titletextnew,"NS=%i,D1(s)=%.2f,AQ(s)=%.2f,RG=%.2f\n",ns,d_one,aq,rg);
+fputs( titletextnew, ftitle); /*add new text to it*/
+sprintf(titletextnew,"SW(ppm)=%.2f,SW(Hz)=%.2f\n",sw[0],sw_h[0]);
+fputs( titletextnew, ftitle); /*add new text to it*/
+
+
+
+fclose( ftitle);
+
+
+QUIT
+
+

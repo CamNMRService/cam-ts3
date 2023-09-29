@@ -645,6 +645,10 @@ else
 		strcat(sampleinfostring,tmp_str);
 	}
 }
+
+// add autoshim file
+TUNE(tunefile)
+
 //old way of calling topshim below
 //CPR_exec("janus_topshim_watchdog",WAIT_TERM);
 

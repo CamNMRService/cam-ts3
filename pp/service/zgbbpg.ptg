@@ -1,0 +1,72 @@
+;zgbbpg.ptg
+;avance-version (12/01/11)
+;1D sequence
+;broadband excitation using a shaped pulse
+;with power gated decoupling
+; see e.g. JMR 325(2021) 106928 
+;doi: 10.1016/j/jmr.2021.106928
+;
+;$CLASS=HighRes
+;$DIM=1D
+;$TYPE=
+;$SUBTYPE=
+;$COMMENT=
+ 
+prosol relations=<bb>
+
+#include <Avance.incl>
+#include <Delay.incl>
+"d11=30m"
+
+
+"DELTA=d1-100m"
+
+"acqt0=-cnst0"
+#   ifdef OPERA90
+"acqt0=-p54*0.2306"
+# endif 
+#   ifdef OPERA45
+"acqt0=-p54*0.2494"
+# endif
+#   ifdef OPERA30
+"acqt0=-p54*0.2497"
+# endif
+
+
+1 ze
+  d11 pl12:f2
+2 30m do:f2
+  10u pl13:f2
+  d11 cpd2:f2
+  DELTA
+  4u do:f2
+  10u pl12:f2
+  100m cpd2:f2
+  4u pl0:f1
+  p54:sp33:f1 ph1:r
+  go=2 ph31
+  30m do:f2 pl13:f2 mc #0 to 2 F0(zd)
+exit
+
+
+ph1=0 2 2 0 1 3 3 1
+ph31=0 2 2 0 1 3 3 1
+
+
+;pl0 : 0W
+;pl1 : f1 channel - power level for pulse (default)
+;pl12: f2 channel - power level for CPD/BB decoupling
+;pl13: f2 channel - power level for second CPD/BB decoupling
+;sp33: f1 channel - shaped pulse for broadband excitation
+;p54: f1 channel -  shaped pulse length for exciation
+;d1 : relaxation delay; 1-5 * T1
+;cnst21: chemical shift for selective pulse (offset, in ppm)
+;ns: 1 * n, total number of scans: NS * TD0
+;cpd2: decoupling according to sequence defined by cpdprg2
+;pcpd2: f2 channel - 90 degree pulse for decoupling sequence
+
+
+
+
+
+;$Id: selzg,v 1.13 2012/01/31 17:49:28 ber Exp $

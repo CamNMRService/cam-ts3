@@ -1,0 +1,479 @@
+; gns_noah3-BSDqf
+;modified by PTG to use magnitude mode DQF COSY
+; Also prosol compatible except ASAP pulse which are just left alone. Adiabatic inversion so should be fairly unaffected 
+;by pulse lenght changes
+
+;
+;Hard proton 180 replaced by bb refocusing pulse 
+;Power level setting correct
+; Prosol relations 
+; =========================================================================
+; set 'NBL' TopSpin parameter to 3
+;     [zgoptns: use -DNUS for nonuniform sampling: set vclist to HMBC list, vdlist for HSQC list, vplist for COSY list]
+;     [zgoptns: use -DPRESAT for presaturation during d1]
+; 13C HMBC
+;     [zgoptns: use -DLP3 for 'upgrade' to third-order LPJF]
+; 13C HSQC
+;     [zgoptns: use -DEDIT for multiplicity editing]
+; 1H DQF-COSY (QF)
+; =========================================================================
+
+;$CLASS=HighRes
+;$DIM=2D
+;$TYPE=
+;$SUBTYPE=
+;$COMMENT=
+
+;J. R. J. Yong, E. Kupce, T. D. W. Claridge
+;Anal. Chem. 2022, 94 (4), 2271-2278
+;Modular Pulse Program Generation for NMR Supersequences
+
+;E. Kupce, T. D. W. Claridge
+;Angew. Chem. Int. Ed. 2017, 56 (39), 11779-11783
+;NOAH: NMR Supersequences for Small Molecule Analysis and Structure Elucidation
+
+;E. Kupce, T. D. W. Claridge
+;Chem. Commun. 2018, 54 (52), 7139-7142
+;Molecular Structure from a Single NMR Supersequence
+
+#include <Avance.incl>
+#include <Grad.incl>
+#include <Delay.incl>
+
+prosol relations=<ptg>
+
+#ifdef NUS
+define list<loopcounter> hmbclist=<$VCLIST>
+define list<loopcounter> hsqclist=<$VDLIST>
+define list<loopcounter> cosylist=<$VPLIST>
+
+#endif /* NUS */
+
+define delay DC_HMBC_CFa
+define delay DC_HMBC_CFb
+define delay DC_HSQCa
+define delay DC_HSQCb
+define delay DC_HSQCc
+define delay DC_HSQCd
+define delay DC_HSQCe
+define delay DC_HSQCf
+define delay DC_LP2a
+define delay DC_LP2b
+define delay DC_LP3a
+define delay DC_LP3b
+define delay DC_LP3c
+define delay DC_ZZFa
+define delay DC_ZZFb
+define delay DH_DQFCOSYa
+"cnst41      = 2*sfo2/sfo1"                               ; gradient ratio
+"d0          = 3u"                                        ; 13C t1
+"d20				=3u"
+"d2          = 0.5s/cnst2"                                ; JCOMP
+"d4          = 0.25s/cnst2"                               ; 13C INEPT
+"d10         = 3u"                                        ; DQF-COSY t1
+"in0         = inf1/2"                                    ; 13C increment
+"in20         = inf1/2"                                    ; HSQC increment
+"in10        = 2*dw"                                      ; DQF-COSY increment
+"p2          = p1*2"                                      ; 1H hard 180
+"DC_HMBC_CFa = (0.5s/cnst13)-p16-d16-4u"
+"DC_HMBC_CFb = p16+d16+p2/2+d0-p3*2/PI+4u"
+"DC_HSQCa    = d4-p14/2"
+"DC_HSQCb    = d4+p14/2"
+"DC_HSQCc    = p16+d16+p50/2+d20-p3*2/PI+4u"
+"DC_HSQCd    = d2+p3+p2/2"
+"DC_HSQCe    = DC_HSQCc+p3-p2/2"
+"DC_HSQCf    = DC_HSQCb-p16-d16-p3-de+p1*2/PI-8u"
+"DC_LP2a     = 1s/(2*cnst6)-p16-d16"
+"DC_LP2b     = 1s/(2*cnst7)-p16-d16"
+"DC_LP3a     = 1s/(2*(cnst6+0.07*(cnst7-cnst6)))-p16-d16"
+"DC_LP3b     = 1s/(cnst7+cnst6)-p16-d16"
+"DC_LP3c     = 1s/(2*(cnst7-0.07*(cnst7-cnst6)))-p16-d16"
+"DC_ZZFa     = d4-p14/2"
+"DC_ZZFb     = d4+p14/2"
+"DH_DQFCOSYa = p16+d16+4u"
+define list<gradient> GC_HMBC_CF={cnst41}
+define list<gradient> GC_HSQC={cnst41}
+"l0      = td1/3"             ; TD1/NBL (i.e. TD1 for ordinary modules)
+"l1      = 0"                 ; Running counter for TD1 for ordinary modules (0 on first increment)
+"l2      = 0"                 ; Running counter for NS (1 on first scan)
+"l6      = d15/(larger(p45,1u)*20)"  ; Number of ASAP loops
+"acqt0   = 0"
+baseopt_echo
+
+1 ze
+2 30m
+3 5m
+4 50u UNBLKGRAD
+
+#ifdef NUS
+  "d0=(in0*hmbclist)+3u"
+  "d20=(in0*hsqclist)+3u"
+#endif /* NUS */
+#ifdef NUScosy
+"d10=(in10*cosylist)+3u" 
+#endif /* NUScosy */
+  1m iu2
+#ifdef ASAP
+  50u UNBLKGRAD
+  p16:gp0*0.4
+  d16
+  4u
+						;begin ASAP
+5 (p45:sp45 ph=0.0):f1
+  (p45:sp45 ph=150.0):f1
+  (p45:sp45 ph=60.0):f1
+  (p45:sp45 ph=150.0):f1
+  (p45:sp45 ph=0.0):f1
+  (p45:sp45 ph=0.0):f1
+  (p45:sp45 ph=150.0):f1
+  (p45:sp45 ph=60.0):f1
+  (p45:sp45 ph=150.0):f1
+  (p45:sp45 ph=0.0):f1
+  (p45:sp45 ph=180.0):f1
+  (p45:sp45 ph=330.0):f1
+  (p45:sp45 ph=240.0):f1
+  (p45:sp45 ph=330.0):f1
+  (p45:sp45 ph=180.0):f1
+  (p45:sp45 ph=180.0):f1
+  (p45:sp45 ph=330.0):f1
+  (p45:sp45 ph=240.0):f1
+  (p45:sp45 ph=330.0):f1
+  (p45:sp45 ph=180.0):f1
+  lo to 5 times l6
+						;end ASAP
+  p16:gp0*0.55
+  d16
+  4u BLKGRAD
+  4u pl1:f1
+#else
+  ; Cleanup
+  4u pl2:f2
+  (p3 ph0):f2
+  4u pl1:f1
+  p16:gp0
+  d16
+  (p1 ph0):f1
+  4u
+  p16:gp0*1.37
+  d16
+  4u BLKGRAD
+#endif /*ASAP*/
+#ifdef PRESAT
+  4u pl9:f1
+  2m st0
+  d1 cw:f1
+  4u do:f1
+  4u pl1:f1
+#else
+  d1 st0
+#endif /* PRESAT */
+  4u UNBLKGRAD
+
+
+  ; MODULE 1
+  ; 13C-1H HMBC
+
+  ; zz-filter
+#ifdef NOZZF
+  ; enable -DNOZZF acquisition flag to remove zz-filter
+  ; only do this if you are sure about what you are doing!
+  (p1 ph0):f1
+#else
+  ; zz-filter
+  (p1 ph0):f1
+  DC_ZZFa
+  (p14:sp3 ph0):f2
+  (p2 ph0):f1
+  DC_ZZFb
+  (p1 ph0):f1
+  DC_ZZFa
+  (p14:sp3 ph0):f2
+  (p2 ph0):f1
+  DC_ZZFb pl2:f2
+  (lalign (p1 ph0):f1 (p3 ph7):f2 )
+#endif
+
+  ; low-pass J-filter
+#ifdef LP3
+  DC_LP3a
+  p16:gp10*2.8
+  d16
+  (p3 ph7):f2
+  DC_LP3b
+  p16:gp10*-1.6
+  d16
+  (p3 ph7):f2
+  DC_LP3c
+  p16:gp10*-0.8
+  d16
+  (p3 ph7):f2
+  4u
+  p16:gp10*-0.4
+  d16
+#else
+  DC_LP2a
+  p16:gp10*-3
+  d16
+  (p3 ph7):f2
+  DC_LP2b
+  p16:gp10*2
+  d16
+  (p3 ph7):f2
+  4u
+  p16:gp10
+  d16
+#endif
+
+  ; nJ(CH) evolution
+  DC_HMBC_CFa
+  ; coherence transfer to 13C and t1
+  (p3 ph7):f2
+  DC_HMBC_CFb
+  (p14:sp3 ph0):f2
+  4u
+  p16:gp1
+  d16
+  d0
+  (p2 ph11):f1
+  d0
+  4u
+  p16:gp1
+  d16
+  (p14:sp3 ph0):f2
+  DC_HMBC_CFb pl2:f2
+  (p3 ph5):f2
+  (p2 ph0):f1
+  4u
+  p16:gp1*EA*GC_HMBC_CF
+  d16
+  4u
+  goscnp ph30
+
+  ; Cleanup
+  4u pl1:f1
+  4u pl2:f2
+  (p3 ph0):f2
+  4u
+  p16:gp0*1.77
+  d16
+  2m st
+
+
+  ; MODULE 2
+  ; 13C-1H HSQC
+
+  ; INEPT
+  (p1 ph0):f1
+  DC_HSQCa
+  (p14:sp3 ph0):f2
+  (p2 ph0):f1
+  DC_HSQCb pl2:f2
+  (p1 ph1):f1
+  (p3 ph5):f2
+  DC_HSQCc
+
+  ; t1 period
+#ifdef EDIT
+  (p31:sp18 ph0):f2
+#else
+  (p14:sp3 ph0):f2
+#endif /* EDIT */
+  4u
+  p16:gp4
+  d16
+  d20
+  (p50:sp50 ph11):f1
+  d20 pl1:f1
+  4u
+  p16:gp4
+  d16
+
+  ; multiplicity editing
+#ifdef EDIT
+  DC_HSQCd
+  (p31:sp18 ph0):f2
+  DC_HSQCe
+  (p2 ph1):f1
+  d2 pl2:f2
+#else
+  (p14:sp3 ph0):f2
+  DC_HSQCc pl2:f2
+#endif /* EDIT */
+
+  ; reverse INEPT
+  (p3 ph7):f2
+  (p1 ph0):f1
+  DC_HSQCa
+  (p14:sp3 ph0):f2
+  (p2 ph1):f1
+  4u
+  p16:gp4*EA*GC_HSQC
+  d16 pl2:f2
+  DC_HSQCf
+  (p3 ph0):f2
+  4u pl12:f2
+  goscnp ph30 cpd2:f2
+  50u do:f2
+
+  ; ASAP mixing
+if "d15 > 1m"
+{
+  50u
+  p16:gp0*0.4
+  d16
+  4u
+						;begin ASAP
+6 (p45:sp45 ph=0.0):f1
+  (p45:sp45 ph=150.0):f1
+  (p45:sp45 ph=60.0):f1
+  (p45:sp45 ph=150.0):f1
+  (p45:sp45 ph=0.0):f1
+  (p45:sp45 ph=0.0):f1
+  (p45:sp45 ph=150.0):f1
+  (p45:sp45 ph=60.0):f1
+  (p45:sp45 ph=150.0):f1
+  (p45:sp45 ph=0.0):f1
+  (p45:sp45 ph=180.0):f1
+  (p45:sp45 ph=330.0):f1
+  (p45:sp45 ph=240.0):f1
+  (p45:sp45 ph=330.0):f1
+  (p45:sp45 ph=180.0):f1
+  (p45:sp45 ph=180.0):f1
+  (p45:sp45 ph=330.0):f1
+  (p45:sp45 ph=240.0):f1
+  (p45:sp45 ph=330.0):f1
+  (p45:sp45 ph=180.0):f1
+  lo to 6 times l6
+						;end ASAP
+  4u pl1:f1
+}
+
+  ; Cleanup
+  4u pl1:f1
+  4u pl2:f2
+  (p3 ph0):f2
+  4u
+  p16:gp0*2.32
+  d16
+  2m st
+
+
+  ; MODULE 3
+  ; DQF-COSY  magn mode
+
+  (p1 ph16):f1
+  d10
+  p16:gp19*0.4
+  d16
+  (p1 ph0):f1
+  4u
+  p16:gp19*0.3
+  d16
+  (p1 ph0):f1
+  4u
+  p16:gp19
+  d16
+  go=2 ph26
+
+  ; incrementation on every pass
+  1m iu1
+  1m igrad EA
+#ifdef NUScosy
+  1m cosylist.inc
+#else
+  1m id10
+#endif /* NUS */
+  30m wr #0 if #0 zd
+
+  ; incrementation on every second pass
+if "l1 % 2 == 0" {
+  1m ip5*2
+  1m ip30*2
+#ifdef NUS
+  1m hmbclist.inc
+  1m hsqclist.inc
+#else
+  1m id0
+  1m id20
+
+#endif /* NUS */
+}
+  lo to 4 times l0
+
+end, 4u
+50u BLKGRAD
+exit
+
+ph0=0
+ph1=1
+ph5=0 2
+ph7=0 0 2 2
+ph11=0 0 0 0 2 2 2 2
+ph16=0 2
+ph26=0 2
+ph30=0 2 2 0
+
+;gpnam0: SMSQ10.100
+;gpnam1: SMSQ10.100
+;gpnam4: SMSQ10.100
+;gpnam10: SMSQ10.100
+;gpnam19: SMSQ10.100
+;gpz0: 29% (for purging)
+;gpz1: 40% (HMBC CTP)
+;gpz4: 35% (13C CTP)
+;gpz10: 2.5% (HMBC J-filter)
+;gpz19: 74% (1H CTP)
+
+;WaveMaker shaped pulses (use 'wvm -a' to generate)
+;sp3:wvm:wu180C13: cawurst-20(60 kHz, 0.5 ms; L2H)
+;sp18:wvm:wu180Jcomp: cawurst-40(280 ppm; Jcomp, L2H)
+;sp45:wvm:wuASAP: cawurst-2(30 ppm, 1.0 ms; Q=3)
+;cpd2:wvm:wudec: cawurst_d-20(220 ppm, 1.4 ms; L2H)
+
+;d0: 13C t1
+;d2: 1/2J(CH)
+;d4: 1/4J(CH)
+;d10: 1H t1
+;d16: delay for homospoil/gradient recovery [200 us]
+;d1: relaxation delay
+;d15: optional ASAP mixing time [40-60 ms] (use `wvm`)
+;cnst2: = 1J(CH)
+;cnst6: = minimum 1J(CH)
+;cnst7: = maximum 1J(CH)
+;cnst13: = nJ(CH) long-range
+;cnst41: gradient ratio (2*C/H)
+;cpd2: 13C decoupling according to sequence defined by cpdprg2
+;l0: TD1 / NBL, i.e. 'true TD1'
+;l1: running counter for true TD1 (0 on first increment)
+;l6: loop for ASAP mixing
+;p1: f1 channel -  90 degree high power pulse
+;p2: f1 channel - 180 degree high power pulse
+;p3: f2 channel -  90 degree high power pulse
+;p14: f2 channel - 180 degree inversion [500 us for Crp60,0.5,20.1]
+;p16: gradient pulse [1 ms]
+;p31: f2 channel - 180 degree inversion with J-compensation
+;p45: f1 channel -  180 degree CAWURST-2 pulse
+;p50: f1 channel -  180 degree refocusing pulse
+;pl1: f1 channel - power level for pulse (default)
+;pl2: f2 channel - power level for pulse (default)
+;pl9: f1 channel - power level for presaturation
+;pl12: f2 channel - power level for CPD/BB decoupling
+;sp3: 13C adiabatic inversion
+;sp18: 13C J-compensated refocusing
+;sp45: 1H CAWURST-2 pulse (180 degree)
+;sp50: 1H BB refocusing pulse
+;spnam3: Crp60,0.5,20.1 or WaveMaker
+;spnam18: Crp60_xfilt.2 or WaveMaker
+;spnam45: wuASAP (generate via WaveMaker)
+;spnam50: UR180_390u_BW20_20pcB1_phaseX_prosol.bruker
+;aq: acquisition time
+;ds: >= 16
+;FnMODE: echo-antiecho
+;NBL: number of blocks (NOAH modules)
+;ns: 1 * n
+
+; auprog: noah_hmbc:noah_hsqc:noah_clipcosy States
+; splitx_title: 13C HMBC:13C HSQC:DQF-COSY (States)
+; module identifiers: C_HMBC_CF C_HSQC H_DQFCOSY
+; pulse programme created by genesis-v2.3.0, https://nmr-genesis.co.uk
+; Fri Jun 16 2023 08:27:52 GMT+0100 (British Summer Time)

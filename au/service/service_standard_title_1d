@@ -1,3 +1,7 @@
+/*service_standard_title_1d*/
+
+/*Program to create a standard title file*/
+/*djh35 September 2023*/
 
 char title_path[PATH_MAX],  titletextnew[2048]="NULL"; 
 char arg[256];

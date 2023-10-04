@@ -15,7 +15,7 @@ char solvent[256];
 char nuc_one[8];
 float aq,d_one,p_one;
 float rg,plw1, pldb1;
-double sfo_one,sw,sw_h;
+double sfo_one,o1,o1p,sw,sw_h;
 
 int ns,td;
 
@@ -36,6 +36,8 @@ sprintf(titletextnew, "\n%s\n", name);
 if (strcmp(arg, "a") == 0)
 {
    ftitle = fopen( title_path, "a");
+   sprintf(titletextnew, "\n");
+   fputs( titletextnew, ftitle); /*add new text to it*/
 }
 else {
     ftitle = fopen( title_path, "w");
@@ -47,18 +49,20 @@ FETCHPARS("NUC1",nuc_one)
 FETCHPARS("D 1", &d_one)
 FETCHPARS("P 1", &p_one)
 FETCHPARS("SFO1", &sfo_one)
+FETCHPARS("O1", &o1)
 FETCHPARS("RG",&rg)
 FETCHPARS("TD", &td)
 FETCHPARS("NS", &ns)
 FETCHPARS("SW", &sw)
 FETCHPARS("SW_h",&sw_h)
-FETCHPAR("PLW 1", &plw1)
-FETCHPAR("PLdB 1", &pldb1)
-FETCHPAR("SOLVENT", solvent)
+FETCHPARS("PLW 1", &plw1)
+FETCHPARS("PLdB 1", &pldb1)
+FETCHPARS("SOLVENT", solvent)
 FETCHPARS("PROBHD", dataset_probe)
 
 
 aq = td/(2*sw*sfo_one);
+o1p = o1/sfo_one;
 
 sprintf(titletextnew, "Dataset name=%s,expno=%i\n",name,expno);
 fputs( titletextnew, ftitle); /*add new text to it*/
@@ -72,7 +76,7 @@ sprintf(titletextnew, "Nucleus=%s,P1(us)=%.2f,PL1(watts)=%.2f\n",nuc_one,pulprog
 fputs( titletextnew, ftitle); /*add new text to it*/
 sprintf(titletextnew,"NS=%i,D1(s)=%.2f,AQ(s)=%.2f,RG=%.2f\n",ns,d_one,aq,rg);
 fputs( titletextnew, ftitle); /*add new text to it*/
-sprintf(titletextnew,"SW(ppm)=%.2f,SW(Hz)=%.2f\n",sw,sw_h);
+sprintf(titletextnew,"SW(ppm)=%.2f,SW(Hz)=%.2f,O1(ppm)=%.2f\n",sw,sw_h,o1p);
 fputs( titletextnew, ftitle); /*add new text to it*/
 
 

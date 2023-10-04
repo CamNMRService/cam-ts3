@@ -3,6 +3,8 @@
 /*Program to create a standard title file*/
 /*djh35 September 2023*/
 
+/* Call with 'a' as a commandline option to append rather than overwrite*/
+
 char title_path[PATH_MAX],  titletextnew[2048]="NULL"; 
 char arg[256];
 char pulprog[256];
@@ -10,6 +12,7 @@ char instrum[PATH_MAX];
 char dataset[PATH_MAX];
 char dataset_probe[PATH_MAX];
 char solvent[256];
+char nuc_one[8];
 float aq,d_one,p_one;
 float rg,plw1, pldb1;
 double sfo_one,sw,sw_h;
@@ -40,6 +43,7 @@ else {
 
 FETCHPARS("INSTRUM", instrum)
 FETCHPARS("PULPROG", pulprog)
+FETCHPARS("NUC1",nuc_one)
 FETCHPARS("D 1", &d_one)
 FETCHPARS("P 1", &p_one)
 FETCHPARS("SFO1", &sfo_one)
@@ -62,7 +66,9 @@ sprintf(titletextnew, "Solvent=%s\n",solvent);
 fputs( titletextnew, ftitle); /*add new text to it*/
 sprintf(titletextnew, "Instrument=%s,MHz=%.4f\nProbehead=%s\n", instrum,sfo_one,dataset_probe);
 fputs( titletextnew, ftitle); /*add new text to it*/
-sprintf(titletextnew, "Pulseprogram=%s,P1(us)=%.2f,PL1(watts)=%.2f\n",pulprog,p_one,plw1);
+sprintf(titletextnew, "Pulseprogram=%s\n",pulprog);
+fputs( titletextnew, ftitle); /*add new text to it*/
+sprintf(titletextnew, "Nucleus=%s,P1(us)=%.2f,PL1(watts)=%.2f\n",nuc_one,pulprog,p_one,plw1);
 fputs( titletextnew, ftitle); /*add new text to it*/
 sprintf(titletextnew,"NS=%i,D1(s)=%.2f,AQ(s)=%.2f,RG=%.2f\n",ns,d_one,aq,rg);
 fputs( titletextnew, ftitle); /*add new text to it*/

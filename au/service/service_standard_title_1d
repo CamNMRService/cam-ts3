@@ -15,6 +15,7 @@ char solvent[256];
 char nuc_one[8];
 float aq,d_one,p_one;
 float rg,plw1, pldb1;
+float temp;
 double sfo_one,o1,o1p,sw,sw_h;
 
 int ns,td;
@@ -59,6 +60,7 @@ FETCHPARS("PLW 1", &plw1)
 FETCHPARS("PLdB 1", &pldb1)
 FETCHPARS("SOLVENT", solvent)
 FETCHPARS("PROBHD", dataset_probe)
+FETCHPARS("TE",&temp)
 
 
 aq = td/(2*sw*sfo_one);
@@ -72,11 +74,13 @@ sprintf(titletextnew, "Instrument=%s,MHz=%.4f\nProbehead=%s\n", instrum,sfo_one,
 fputs( titletextnew, ftitle); /*add new text to it*/
 sprintf(titletextnew, "Pulseprogram=%s\n",pulprog);
 fputs( titletextnew, ftitle); /*add new text to it*/
-sprintf(titletextnew, "Nucleus=%s,P1(us)=%.2f,PL1(watts)=%.2f\n",nuc_one,pulprog,p_one,plw1);
+sprintf(titletextnew, "Nucleus=%s,P1(us)=%.2f,PL1(watts)=%.2f\n",nuc_one,p_one,plw1);
 fputs( titletextnew, ftitle); /*add new text to it*/
 sprintf(titletextnew,"NS=%i,D1(s)=%.2f,AQ(s)=%.2f,RG=%.2f\n",ns,d_one,aq,rg);
 fputs( titletextnew, ftitle); /*add new text to it*/
 sprintf(titletextnew,"SW(ppm)=%.2f,SW(Hz)=%.2f,O1(ppm)=%.2f\n",sw,sw_h,o1p);
+fputs( titletextnew, ftitle); /*add new text to it*/
+sprintf(titletextnew,"Reported temperature=%.2f\n",temp);
 fputs( titletextnew, ftitle); /*add new text to it*/
 
 

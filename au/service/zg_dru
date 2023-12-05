@@ -1,0 +1,49 @@
+/* prog to run single scan with no RGA
+
+  a starting value of RG is used that hopefully will result in OK spectrum, but
+  if overflow is detected then succesively lower values are tried
+  Updated for AV Neo -rg 5.6 is fine
+  (checks hardware type and starts from 20.2 or 5.6 accordingly)
+*/
+
+#define RGVALS 3
+float rglist[RGVALS]={20.2, 5.6, 1.0};
+int rgpoint = 0;
+int overflow;
+
+GETCURDATA
+
+
+STOREPAR("NS", 1)
+STOREPAR("DS", 0) 
+STOREPAR("PULPROG", "zg")
+STOREPAR("D 1", 0.1)
+
+
+// check if this is a neo system, if so 
+// just start from rg 5.6 as this is enough for 95% signal on Neo
+
+switch(is_blade_system())
+    {
+    case 0:
+    		rgpoint=0;
+    		break;
+    case 1:
+    		// neo system, start from 5.6
+    		rgpoint=1;
+    		break;
+    default:
+    		rgpoint=0;
+    }
+
+
+do
+{
+STOREPAR ("RG", rglist[rgpoint])
+rgpoint = rgpoint+1;
+ZG_OVERWRITE
+ FETCHPARS("OVERFLW", &overflow)
+  STOREPAR("D 1", 20.0)
+} while (rgpoint < RGVALS && overflow);
+
+QUIT

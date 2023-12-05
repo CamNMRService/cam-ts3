@@ -1,0 +1,89 @@
+/*** ^^A -*-C++-*- **********************************************/
+/*      zg_2Hoffon      08.06.2006                              */
+/****************************************************************/
+/*      Short Description :                                     */
+/*      General AU program for data acquisition. The lock is    */
+/*      switched off before the acquisition is started.         */
+/****************************************************************/
+/*      Keywords :                                              */
+/*      zg, gradshim, gradient shimming                         */
+/****************************************************************/
+/*      Description/Usage :                                     */
+/*      General AU program for data acquisition. No rga is      */
+/*      done, only zg.                                          */
+/*      The experiment performs an acquisition non-locked and   */
+/*      with lock sweep off. Therefore the lock and sweep are   */
+/*      switched off before the experiment starts. Lock is      */
+/*      automatically switched on when the experiment is        */
+/*      finished (for odd expnos only).                         */
+/*      This AU program is used by the gradient shimming        */
+/*      interface 'gradshim'.                                   */
+/****************************************************************/
+/*      Author(s) :                                             */
+/*      Name            : Rainer Kerssebaum                     */
+/*	Organisation	: Bruker BioSpin GmbH			*/
+/*      Email           : Rainer.Kerssebaum@bruker.de           */
+/****************************************************************/
+/*      Name            Date    Modification:                   */
+/*      rke             990318  created                         */
+/*      cga             990723  added option for channels 3 & 4 */
+/*      rke             991006  added check for odd/even expnos */
+/*      rke             991119  corrected option for channels   */
+/*                              3 and 4, added channel 5        */
+/*      rke             010504  added lockpower handling        */
+/*      rke             030314  special parameters for CDCl3    */
+/*      gsc             060501  changes for relocking problem   */
+/*      rke             060608  lockpower reload                */
+/*      ecj             130301  for Fourier, uses AUTOLOCK to   */
+/*                              recapture lock                  */
+/*      PTG     2023_10_10 just for AV; always turn lock back on*/
+/****************************************************************/
+/*
+$Id: zg_2Hoffon,v 1.23.2.6 2014/04/25 14:59:58 wem Exp $
+*/
+
+
+#include <inc/bsms_program>    /* must be the first statement ****/
+
+char    nuc3[16], nuc4[16], nuc5[16];
+double  lockshift=0, lockpower=0, lockgain;
+float   lockpower_par;
+
+
+GET_LOCK_POWER(lockpower);
+
+STOREPAR("LOCNUC","off");
+
+
+/*  Switch off lock and lock sweep                              */
+LOCK_AND_SWEEP_OFF;
+
+SET_LOCK_POWER(-60.0);
+
+
+
+ZG;
+
+WAIT_CHECKLOCKSHIFT;
+
+
+
+
+/* restore preamplifier for BSMS */
+    DATASET("~TEMP",1,1,disk,user);
+    RPAR("PROTON","all");
+
+   
+	II;
+    
+
+
+/*  Switch on the lock                                          */
+
+SET_LOCK_POWER(lockpower);
+LOCK_ON_AFTER_HOLD; /* waits while LOCK PENDING */
+    
+  
+
+
+QUIT

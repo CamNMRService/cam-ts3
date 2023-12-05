@@ -24,7 +24,7 @@ float rg,plw1, pldb1;
 
 double sfo[MAXDIM];
 double sw[MAXDIM],sw_h[MAXDIM];
-double sfo_temp,sw_temp,sw_h_temp;
+double sfo_temp,sw_temp,sw_h_temp, temp;
 int i=0;
 int ns,td[MAXDIM],td1,td2,parmode;
 
@@ -74,11 +74,13 @@ for ( i = 1; i <= parmode+1;  i++ )
      FETCHPARNS(i, "TD", &td[i]) //td[0] from fetchparns is  a bogus number.
      Proc_err(DEF_ERR_OPT,"TD[%i]=%i",i,td[i]);
      FETCHPARNS(i, "SW_h", &sw_h[i]) //sw_h[i] doesnt work - gives bogus figures.
-     Proc_err(DEF_ERR_OPT,"sw_h[%i]=%d",i,sw_h[i]);
+     Proc_err(DEF_ERR_OPT,"sw_h[%i]=%d",i,*sw_h[i]);
      FETCHPARNS(i, "SW", &sw[i]) //sw_h[i] doesnt work - gives bogus figures.
-     Proc_err(DEF_ERR_OPT,"sw[%i]=%d",i,sw[i]);
-    // FETCHPARNS(i,"PLW", plw[i]);
-    // Proc_err(DEF_ERR_OPT,"plw[%i]=%d",i,plw[i]);
+     Proc_err(DEF_ERR_OPT,"sw[%i]=%d",i,*sw[i]);
+     FETCHPARNS(i,"PLW", &plw[i]);
+     FETCHPARNS(i,"PLW", &temp);
+     Proc_err(DEF_ERR_OPT,"plw[%i]=%d or %d",i,*plw[i],temp);
+
      //FETCHPARNS(i,"PLdB 1", pldb[i]);
     // Proc_err(DEF_ERR_OPT,"PLdB[%i]=%d",i,pldb[i]);
     //FETCHPARNS(i,"P 1", p[i]);

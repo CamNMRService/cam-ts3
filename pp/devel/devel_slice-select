@@ -1,0 +1,43 @@
+;zg-slice-selective
+
+#include <Avance.incl>
+#include <Grad.incl>
+
+"acqt0=-p1*2/3.1416"
+;set cnst20 for calculation purposes
+"cnst20=cnst19"
+
+1 ze
+2 	30m
+	d1
+	3u UNBLKGRAD
+	3u gron1
+	(p11:sp1 ph1):f1
+	3u groff
+	3u BLKGRAD
+	go=2 ph31
+	30m mc #0 to 2 F0(zd)
+exit
+
+ph1=0 2 2 0 1 3 3 1
+ph31=0 2 2 0 1 3 3 1
+
+;d1: relaxation delay
+;cnst19: slice width in Hz
+;sp1: f1 channel - shaped pulse power level for band-selective excitation
+;spnam2: shaped pulse for selective excitation
+
+;BEGIN WAVEMAKER
+;sp1:wvm:G4(cnst19 Hz)
+;END WAVEMAKER
+;;Experimental Description
+;;A gradient pulse  is applied to the sample and a shaped pulse is applied, at a frequency offset (SPOFFS1).
+;;The shaped pulse irradiates a bandwith (defined by cnst19) to select a range of frequencies.
+;;This produces a 'slice' along the z-axis of the sample.
+;;With GPZ1=50, cnst19=4000 at 400MHz, the sample can be imaged from spoffs1=-150,000 to +15,000 in 15,000 (approx 1mm) slices.
+
+
+
+
+
+		

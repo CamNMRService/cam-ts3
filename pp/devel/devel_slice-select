@@ -34,7 +34,7 @@ ph31=0 2 2 0 1 3 3 1
 ;;A gradient pulse  is applied to the sample and a shaped pulse is applied, at a frequency offset (SPOFFS1).
 ;;The shaped pulse irradiates a bandwith (defined by cnst19) to select a range of frequencies.
 ;;This produces a 'slice' along the z-axis of the sample.
-;;With GPZ1=50, cnst19=4000 at 400MHz, the sample can be imaged from spoffs1=-150,000 to +15,000 in 15,000 (approx 1mm) slices.
+;;With GPZ1=50, cnst19=8000 at 400MHz, the sample can be imaged from spoffs1=-150,000 to +15,000 in 15,000 (approx 1mm) slices.
 
 
 

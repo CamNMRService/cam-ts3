@@ -1,0 +1,70 @@
+/*devel_service_pp_explain*/
+
+
+GETCURDATA
+
+FILE *inputFile, *outputFile;
+char inputFileName[PATH_MAX] = "input.txt";  // Change this to the name of your input file
+char outputFileName[PATH_MAX] = "title.txt"; // Change this to the name of your output file
+char line[1024] = "";  // Adjust the size based on your needs
+char pulprog[256] = "not defined";
+int i=0;
+int linecount=0;
+
+Proc_err(INFO_OPT, "Got to here (outputFileName) %s", outputFileName);
+Proc_err(INFO_OPT, "Got to here  %s,%s,%s,%i", disk,user,name,expno);
+sprintf( outputFileName, "%s/%s/%i/pdata/1/title", disk, name, expno); 
+Proc_err(INFO_OPT, "Got to here (outputFileName) %s", outputFileName);
+FETCHPARS("PULPROG", pulprog)
+if (getParfileDirForRead(pulprog, PP_DIRS, inputFileName) < 0)
+	{
+	    Proc_err(DEF_ERR_OPT, "%s: %s", pulprog, inputFileName);
+	    ABORT
+	}
+Proc_err(INFO_OPT, "Got to here (inputFileName) %s", inputFileName);   
+// Open the input file in read mode
+if ((inputFile = fopen(inputFileName, "r")) == NULL) {
+   Proc_err(INFO_OPT,"Error opening input file");
+    return 1;
+}
+
+// Open the output file in append mode
+if ((outputFile = fopen(outputFileName, "a")) == NULL) {
+   Proc_err(INFO_OPT,"Error opening output file");
+    fclose(inputFile);
+    return 1;
+}
+
+// Read each line from the input file
+while (fgets(line, sizeof(line), inputFile) != NULL) {
+    // Check if the line starts with two semicolons
+    if (line[0] == ';' && line[1] == ';') {
+        linecount++;
+        if (linecount==1){
+           fprintf(outputFile, "\n");
+        }
+        
+        // Append the line to the output file
+        if(strlen(line)>2)
+        {
+           //Proc_err(INFO_OPT, "Got to here strlen(line) %i", strlen(line)); 
+           //Proc_err(INFO_OPT, "Got to here line[1] ");
+           for ( i = 2; i < strlen(line); i++)
+           {
+            //Proc_err(INFO_OPT, "Got to here line[i] %c", line[i]);
+            fprintf(outputFile, "%c", line[i]);
+           }
+           //fprintf(outputFile, "\n");
+        }
+        
+        //fprintf(outputFile, "%s", line);
+    }
+}
+
+// Close the files
+fclose(inputFile);
+fclose(outputFile);
+
+printf("Lines starting with two semicolons saved to %s\n", outputFileName);
+
+QUIT

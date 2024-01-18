@@ -1,0 +1,57 @@
+// Au to calculate signal loss in HSQC, as a function of imperfectly set J value and relaxation losses 
+// and of antiphase signal overlap in non-refocused experiment
+double T2=1.0;
+double Jact=145.0;
+double Jset=145.0;
+double S1;
+double S2;
+double S3;
+double S4;
+double linewidth=0.32;
+double fwhm;
+double lormax;
+double lor_J;
+double lorfact;
+#define PI 3.14159
+
+
+// get actual coupling constant and se coupling constant, plus T2 (give user an initial estimate from linewidth)
+GETDOUBLE("Actual J value/Hz", Jact);
+
+GETDOUBLE("Set J value/Hz", Jset)
+
+GETDOUBLE("linewidth for T2 estimation:", linewidth)
+T2=1/(PI*linewidth);
+GETDOUBLE("T2/s", T2)
+
+
+
+
+fwhm=1/(PI*T2); 
+
+GETDOUBLE("effective FWHM/Hz :", fwhm)
+lormax=2/(PI*fwhm);
+lor_J=(1/PI)*((0.5*fwhm)/((Jact*Jact)+(0.25*fwhm*fwhm)));
+lorfact=(lormax-lor_J)/lormax;
+
+
+
+// signal after first inept prop. to sin(Pi*J*t) * exp(-t/T2)
+// loss due to overlap of lorentians = lorfact (approximation, it's actually slightly less bad than this)
+// Nonrefocused experiments incur factr 2 penalty for lack of decoupling
+
+S1=0.5*sin(PI*Jact/(2*Jact))*(exp(-1/(T2*2*Jact)))*lorfact;
+S2=sin(PI*Jact/(2*Jact))*(exp(-1/(T2*2*Jact)))*sin(PI*Jact/(2*Jact))*(exp(-1/(T2*2*Jact)));
+S3=0.5*sin(PI*Jact/(2*Jset))*(exp(-1/(T2*2*Jset)))*lorfact;;
+S4=sin(PI*Jact/(2*Jset))*(exp(-1/(T2*2*Jset)))*sin(PI*Jact/(2*Jset))*(exp(-1/(T2*2*Jset)));
+
+
+
+
+Proc_err(DEF_ERR_OPT,"Signal intensity in non-refocused experiment, with Jset=Jact: \n %lf \n \n \
+Signal intensity in refocused experiment, with Jset=Jact: \n %lf \n \n \
+Signal intensity in non-refocused experiment, with given Jset: \n %lf \n \n \
+Signal intensity in refocused experiment, with given Jset: \n %lf \n \n %lf %lf %lf", S1, S2, S3, S4, fwhm, lor_J, lorfact);
+
+QUIT
+

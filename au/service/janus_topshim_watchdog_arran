@@ -17,7 +17,8 @@
 
 // Now doing tunea always
 
-//2024_01_31 added an ABORT in the last section if AUERR !0 - otherwise I think it gets reset
+//2024_01_31 removed the last if(AUERR) section - we now do all that stuff for all samples.
+//  AUERR should be -1 if topshim fails, so main janus AU will interpret the result correctly
 
 #include <time.h>
 time_t now_s, dtime_s;		  	/* seconds since 1970 */
@@ -132,58 +133,6 @@ if (pidfile = fopen(pidpath, "rt"))
 sprintf( command, "robocopy C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData /S C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData_%s",ts_major,ts_minor,ts_patch,ts_major,ts_minor,ts_patch,datestamp);
  //sprintf(command,"xcopy C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData_%s\\ /E /H \n", ts_major,ts_minor,ts_patch,ts_major,ts_minor,ts_patch,datestamp);
 system(command);
-
-
-Proc_err(DEF_ERR_OPT,"auerr=%d", AUERR);
-
-// check for failed execution
-if(AUERR)
-{
-// temp remove email stuff
-//	if (i_argc > 2 ) { //assume the argument is a message to send
-//       XAU("whoopwhoop",message);
-//	} else
-//	   {
-//	     sprintf(tmp_str, "TOPSHIM_FAILED");
-//	     XAU("whoopwhoop",tmp_str)
-//	   }
-
-
-   sleep(5);
-   // don't repeat topshim!!
-   // XCMD(tscommand)
-   #ifdef	HAS_WINDOWS_FEATURES
-  // sprintf(command,"ren C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData topshimData_%s", ts_major,ts_minor,ts_patch,datestamp);  
-  //xcopy just doesnt seem to run, not even in a bat file
-  //   sprintf(command,"xcopy C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData_%s\\ /E /H \n", ts_major,ts_minor,ts_patch,ts_major,ts_minor,ts_patch,datestamp);
-
-    // sprintf( command, "robocopy C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData /S C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData_%s ",ts_major,ts_minor,ts_patch,ts_major,ts_minor,ts_patch,datestamp);
-    sprintf( command, "robocopy C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData /S C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData_%s >NUL 2>NUL",ts_major,ts_minor,ts_patch,ts_major,ts_minor,ts_patch,datestamp);
-    /* code if you want to make a bat file to run the command
-       fbat = fopen(bat_cmd_path, "w");
-     fputs( command,fbat);
-     fclose(fbat);
-     Proc_err(DEF_ERR_OPT,bat_cmd_path,command);
-       // system(bat_cmd_path); //which is why we mess about with a bat file.
-   */  
-   XCMD("setdef stdout off"); // do we like spam?
-   XCMD("setdef stderr off");  
-   system(command);  //dunno why the system command is unreliable with xcopy
-   XCMD("setdef stdout on");  //yes we do...
-   XCMD("setdef stderr on");
-   #else 
-     sprintf(command,"mv /opt/topspin%i.%i.%i/data/topshimData /opt/topspin%i.%i.%i/data/topshimData_%s", ts_major,ts_minor,ts_patch,datestamp,ts_major,ts_minor,ts_patch);
-     system(command);   
-   #endif
-   
-  //report copying now automatic
-//  strcpy(reportdest, ACQUPATH("topshim_report.txt"));
-//  sprintf(reportsource, "%s/%s/topshim_report.txt", PathXWinNMRProg(), PathXWinNMRCurDir());
-//  dircp(reportsource, reportdest);
-Proc_err(DEF_ERR_OPT,"auerr=%d", AUERR);
-ABORT
-}
-
 
 
 QUIT

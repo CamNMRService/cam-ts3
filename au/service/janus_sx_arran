@@ -109,7 +109,7 @@ int     skipsample, pid, x, proc_or_not=0,sampleproblem=0;
 char    oi[80], juser[50], suser[40], in_data[1024], tmp_fname[1024];
 char    shimfile[80], acqufile[80];
 char    experiment[155], solvent[40], tunefile[40], sxfile[80];
-char    tmp_str[180], titlefile[80], titletext[80];
+char    tmp_str[1000], titlefile[80], titletext[80];
 char    exptfile[80], diskunit[40];
 char    prefix[40], shimset[40], defaultsfile[80], hdwerr[80];
 char    archpath[80], archive[20], jcmd_str[1024], outpath[1024];

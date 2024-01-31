@@ -19,6 +19,7 @@
 
 //2024_01_31 removed the last if(AUERR) section - we now do all that stuff for all samples.
 //  AUERR should be -1 if topshim fails, so main janus AU will interpret the result correctly
+// robocpy output directed to null
 
 #include <time.h>
 time_t now_s, dtime_s;		  	/* seconds since 1970 */

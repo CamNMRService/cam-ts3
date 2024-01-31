@@ -129,7 +129,7 @@ if (pidfile = fopen(pidpath, "rt"))
  
 //test 
 
-sprintf( command, "robocopy C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData /S C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData_%s",ts_major,ts_minor,ts_patch,ts_major,ts_minor,ts_patch,datestamp);
+sprintf( command, "robocopy C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData /S C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData_%s > nul",ts_major,ts_minor,ts_patch,ts_major,ts_minor,ts_patch,datestamp);
  //sprintf(command,"xcopy C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData_%s\\ /E /H \n", ts_major,ts_minor,ts_patch,ts_major,ts_minor,ts_patch,datestamp);
 system(command);
 

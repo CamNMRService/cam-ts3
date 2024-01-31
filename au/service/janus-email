@@ -142,7 +142,8 @@ sprintf(file_name, "%s-%s",samplename,name); //make up a file name with the V co
 sprintf( dest_name, "%s%s",archpath,file_name);
 Proc_err( INFO_OPT, "dest_name-%s",dest_name);	
 Proc_err( INFO_OPT, "filename-%s",file_name);
-sprintf( cmd_str, "robocopy %s%s\\%s /S %s",disk,user,name,dest_name);
+//sprintf( cmd_str, "robocopy %s%s\\%s /S %s",disk,user,name,dest_name);
+sprintf( cmd_str, "robocopy %s%s\\%s /S %s > nul",disk,user,name,dest_name);
 
 
 Proc_err(INFO_OPT, "cmd_str %s", cmd_str);
@@ -153,7 +154,8 @@ Show_status(cmd_str);
 system(batfile);
 
 sprintf(zip_name, "%s%s-%s",archpath,samplename,name);
-sprintf( cmd_str,"zip -r -9 %s.zip %s%s -x \*.reg \*1r \*1i \*2ii \*2ir \*2ri \*2rr",dest_name,archpath,file_name);
+//sprintf( cmd_str,"zip -r -9 %s.zip %s%s -x \*.reg \*1r \*1i \*2ii \*2ir \*2ri \*2rr",dest_name,archpath,file_name);
+sprintf( cmd_str,"zip -r -9 %s.zip %s%s -x \*.reg \*1r \*1i \*2ii \*2ir \*2ri \*2rr > nul",dest_name,archpath,file_name);
 //sprintf( cmd_str,"zip -r -9 %s.zip %s%s -x \*1r \*1i \*2ii \*2ir \*2ri \*2rr",dest_name,archpath,file_name);
 //sprintf( cmd_str,"zip -r -9 %s.zip %s -x \*1r \*1i \*2ii \*2ir \*2ri \*2rr",zip_name ,archpath);
 fbat = fopen(batfile, "w");

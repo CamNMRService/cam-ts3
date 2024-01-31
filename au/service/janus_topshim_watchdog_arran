@@ -17,6 +17,8 @@
 
 // Now doing tunea always
 
+//2024_01_31 added an ABORT in the last section if AUERR !0 - otherwise I think it gets reset
+
 #include <time.h>
 time_t now_s, dtime_s;		  	/* seconds since 1970 */
 struct tm *now;	  		/* structure with year, month etc. */
@@ -178,6 +180,8 @@ if(AUERR)
 //  strcpy(reportdest, ACQUPATH("topshim_report.txt"));
 //  sprintf(reportsource, "%s/%s/topshim_report.txt", PathXWinNMRProg(), PathXWinNMRCurDir());
 //  dircp(reportsource, reportdest);
+Proc_err(DEF_ERR_OPT,"auerr=%d", AUERR);
+ABORT
 }
 
 

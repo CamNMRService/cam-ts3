@@ -132,6 +132,7 @@ sprintf( command, "robocopy C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData /S C:
 system(command);
 
 
+Proc_err(DEF_ERR_OPT,"auerr=%d", AUERR);
 
 // check for failed execution
 if(AUERR)

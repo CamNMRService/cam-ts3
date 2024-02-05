@@ -643,7 +643,6 @@ else
 			/*--Get that data acquiring!----------------------*/
 			sprintf(statusstr,"Sample: %s, Expt: %s, solvent: %s",oi,experiment,solvent);
 			Show_status(statusstr );
-			Proc_err(INFO_OPT,"%s",statusstr);
 			sleep(delaytime); //do we need to sleep here?
 			DATASET ( tmp_fname, nexpt, 1, diskunit, suser)
 			GETCURDATA

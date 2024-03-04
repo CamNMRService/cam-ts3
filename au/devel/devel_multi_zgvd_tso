@@ -1,0 +1,168 @@
+/***********************************************-*-C++-*-********/
+/*	multi_zgvd 		27.11.2000			*/
+/****************************************************************/
+/*	Short Description :					*/
+/*	Performs multiple acquisitions on increasing expnos	*/
+/*	with delays that are read from a vdlist file.		*/
+/*	Alternatively, a fixed delay can be entered.		*/
+/****************************************************************/
+/*	Keywords :						*/
+/*	serial acquisitions, variable delay, VD, delayed acqu.	*/
+/****************************************************************/
+/*	Description/Usage :					*/
+/*	This AU program performs multiple acquisitions on	*/
+/*	increasing expnos in much the same way as multizg. If	*/
+/*	datasets do not yet exist, the current dataset and its	*/
+/*	parameters are copied. If the data sets already exist,	*/
+/*	then the experiments are executed as they are.		*/
+/*	But in addition to multizg, this AU program asks for a	*/
+/*	variable delay list and starts the next acquisition	*/
+/*	after the delay time has elapsed. Alternatively, the	*/
+/*	the user can enter a fixed delay, so that one and the	*/
+/*	same experiment can be carried out always after a	*/
+/*	certain	time has elapsed.				*/
+/*	The number of experiments is calculated from the number	*/
+/*	of delay values in the VDLIST. The user can ask	for a	*/
+/*	reduced number of experiments, though.			*/
+/*	The total experiment time is estimated and printed out.	*/
+/****************************************************************/
+/*	Author(s) :						*/
+/*	Name		: Rainer Kerssebaum, Mike Engelhardt	*/
+/*	Organisation	: Bruker BioSpin GmbH			*/
+/*	Email		: rainer.kerssebaum@bruker.de		*/
+/*			: michael.engelhardt@bruker.de		*/
+/****************************************************************/
+/*	Name		Date	Modification:			*/
+/*	rke, eng	001127	derived from multi_zgvt		*/
+/*	wem		080905	ZG_OVERWRITE			*/
+/****************************************************************/
+
+
+// TSO version - calls TSO in between experiments
+
+/* 
+$Id: multi_zgvd,v 1.7 2008/09/05 07:52:41 wem Exp $
+*/
+
+AUERR = multi_zgvd(curdat);
+QUITMSG("--- multi_zgvd finished ---")
+
+#include <inc/exptUtil>
+
+int multi_zgvd(const char* curdat)
+{
+  char vdlistname[PATH_MAX], vdlistpath[PATH_MAX], line[PATH_MAX];
+  char deltype[32];
+  int actdel[512], fixeddel = 0;
+  int startExpno, numdel;
+  int ret, i1, expTime;
+  FILE* fptr1;
+
+  startExpno = expno;
+  (void) strcpy (deltype,"f");
+  GETSTRING("Use fixed (f) or variable (v) delay:",deltype)
+  if ( (deltype[0] == 'f') || (deltype[0] == 'F') )
+  {
+    i1 = 10;
+    fixeddel = 600;
+    GETINT("Enter fixed delay (in seconds):",fixeddel)
+    GETINT("Enter number of experiments :",i1)
+  }
+  else
+  {
+    (void) strcpy (vdlistname,"vdlist1");
+    GETSTRING("Enter name of vdlist :",vdlistname)
+    if (getParfileDirForRead(vdlistname, VD_DIRS, vdlistpath) < 0)
+    {
+      Proc_err(DEF_ERR_OPT, "VD list file %s: %s\n"
+			    "Please use 'edlist vd' to check for valid files.",
+			    vdlistname, vdlistpath);
+      ABORT
+    }
+
+    if ( (fptr1 = fopen (vdlistpath,"r")) == NULL )
+    {
+      Proc_err(DEF_ERR_OPT, "Could not open VD list file\n%s\n"
+			    "Please use 'edlist vd' to check for valid files.",
+			    vdlistpath);
+      ABORT
+    }
+
+    /* Read first delay value, then scan for total no. of delay values. */
+
+    if ( fgets (line,sizeof(line),fptr1) == NULL )
+    {
+      Proc_err(DEF_ERR_OPT, "No VD list entry found.\n"
+			    "Please check the VD list file\n%s\n"
+			    "with 'edlist vd %s'.", vdlistpath, vdlistname);
+      (void) fclose (fptr1);
+      ABORT
+    }
+
+    if ( (ret = sscanf (line,"%d",&actdel[0])) != 1 )
+    {
+      Proc_err(DEF_ERR_OPT, "--- delay list has no valid entries ---");
+      (void) fclose (fptr1);
+      ABORT
+    }
+
+    numdel = 1;
+
+    /* Check for more delay values */
+
+    while ( fgets (line,sizeof(line),fptr1) != NULL )
+    {
+      if ( (ret = sscanf (line,"%d",&actdel[numdel])) != 1 )
+        break;
+      numdel++;
+    }
+
+    (void) fclose (fptr1);
+
+    do
+    {
+      i1 = numdel;
+      GETINT("Enter number of experiments :",i1)
+    }
+    while ( (i1 > numdel) || (i1 == 0) );
+  }
+
+  numdel = i1;
+  expTime = 0;
+  TIMES(i1)
+    SETCURDATA
+    if ( (deltype[0] == 'f') || (deltype[0] == 'F') )
+      expTime += CalcExpTime() + fixeddel;
+    else
+      expTime += CalcExpTime() + actdel[loopcount1];
+    IEXPNO
+  END
+  DEXPNO
+  PrintExpTime(expTime, i1);
+
+  expno = startExpno;
+  SETCURDATA
+  TIMES(i1)
+    XAU("tso","selwid=0.5")
+    ZG_OVERWRITE
+    if ( (deltype[0] == 'f') || (deltype[0] == 'F') )
+    {
+      (void)sprintf(line, "next experiment (# %d)\n"
+			  "will be started after a delay of %d sec",
+			  loopcount1+1, fixeddel);
+      Show_status(line);
+      sleep(fixeddel);
+    }
+    else
+    {
+      (void)sprintf(line, "next experiment (# %d)\n"
+			  "will be started after a delay of %d sec",
+			  loopcount1+1, actdel[loopcount1]);
+      Show_status(line);
+      sleep(actdel[loopcount1]);
+    }
+    IEXPNO
+  END
+
+  return 0;
+}

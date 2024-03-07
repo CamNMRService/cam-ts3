@@ -1,0 +1,7 @@
+500MHz Bruker Avance III - Glenfairn
+HSQC
+janus-hsqc.bbf
+ns=2, 256 increments
+expt = 10m 15s
+Phase sensitive using Echo/Antiecho-TPPI gradient selection,with decoupling during acquisition,using trim pulses in inept transfer
+With multiplicity editing during selection step

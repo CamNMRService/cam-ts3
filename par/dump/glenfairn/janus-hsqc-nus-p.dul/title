@@ -1,0 +1,7 @@
+500MHz Bruker Avance III - Glenfairn
+HSQC
+janus-hsqc-nus-p.dul
+ns=2, 1024 increments, (NOT with 25% poisson gap sampling as of 17/03/2021)
+expt = 10m 17s
+Phase sensitive using Echo/Antiecho-TPPI gradient selection,with decoupling during acquisition,using trim pulses in inept transfer
+With multiplicity editing during selection step

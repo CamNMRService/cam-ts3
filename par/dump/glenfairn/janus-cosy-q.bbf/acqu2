@@ -1,0 +1,23 @@
+##TITLE= Parameter file, TopSpin 3.6.4
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 2	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= nmrsu
+$$ 2022-06-06 12:04:18.602 +0100  chemist@Glenfairn
+$$ C:/Bruker/TopSpin3.6.4/exp/stan/nmr/par/user/janus-cosy-q.bbf/acqu2
+$$ process C:\Bruker\TopSpin3.6.4\prog\mod\expinstall.exe
+##$ACQT0= 0
+##$BF1= 500.214
+##$FnMODE= 1
+##$NUC1= <1H>
+##$NusJSP= 0
+##$NusT2= 1
+##$NusTD= 0
+##$O1= 3001.284
+##$ProjAngle= 0
+##$SFO1= 500.217001284
+##$SW= 12.9813790351755
+##$SW_h= 6493.50649350649
+##$TD= 256
+##END=

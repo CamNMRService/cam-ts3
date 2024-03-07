@@ -1,0 +1,16 @@
+##TITLE= Parameter file, TopSpin 3.6.4
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= chemist
+$$ 2023-03-28 12:47:42.263 +0100  chemist@Glenfairn
+$$ C:/Bruker/TopSpin3.6.4/exp/stan/nmr/par/user/system-test-p31-pul/outd
+$$ process C:\Bruker\TopSpin3.6.4\prog\mod\edparproc.exe
+##$CURPLOT= <>
+##$CURPRIN= <$>
+##$DFORMAT= <normdp>
+##$LAYOUT= <+/1D_BB.xwp>
+##$LFORMAT= <normlp>
+##$PFORMAT= <normpl>
+##END=

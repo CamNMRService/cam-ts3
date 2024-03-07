@@ -1,0 +1,7 @@
+500MHz Bruker Avance III - Glenfairn
+BBF-H Probe
+janus-19f-vl.bbf
+ns=1024
+expt=1h 2m
+With broadband 45 degree pulse and proton decoupling
+ref. to trifluorotoluene in CDCl3 at 63.72ppm

@@ -1,0 +1,16 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= Alex Plajer
+$$ 2018-02-12 14:14:07.175 +0000  Alex Plajer@glengrant
+$$ C:/Bruker/TopSpin3.2/exp/stan/nmr/par/user/31P-hoesy-test/outd
+$$ process C:\Bruker\TopSpin3.2\prog\mod\edparproc.exe
+##$CURPLOT= <PDF reDirect v2>
+##$CURPRIN= <$PDF reDirect v2>
+##$DFORMAT= <normdp>
+##$LAYOUT= <+/2D_hom.xwp>
+##$LFORMAT= <normlp>
+##$PFORMAT= <normpl>
+##END=

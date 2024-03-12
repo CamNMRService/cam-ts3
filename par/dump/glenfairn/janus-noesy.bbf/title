@@ -1,0 +1,7 @@
+500MHz Bruker Avance III - Glenfairn
+NOESY
+Phase sensitive, with gradient pulses in mixing time, using purge pulses before d1
+janus-noesy.bbf
+D8=mixing time=0.6s
+NS=4, 512 increments
+1hr 40mins

@@ -1,0 +1,4 @@
+T1 measurement with single scan per recovery delay
+Accurate for T1 up to at least 10s
+With broadband inversion pulse for perfect inversion and gradient pulse to remove need for phase cycling
+Acquire with command "xaua" to do fast rga

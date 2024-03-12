@@ -1,0 +1,6 @@
+Higher quality DOSY experiment
+Adjust P30 as required to achieve ~ factor of 10 attenuation
+Proces with
+xf2; diff_apk2d 0; abs2
+
+Analyse menu-> dynamics-> prepare for dynamics center; select method Diffusion, fit function g

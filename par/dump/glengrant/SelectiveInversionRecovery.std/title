@@ -1,0 +1,4 @@
+Selective inversion recovery
+Set CNST50 to the chemical shift of the peak to invert, in PPM
+Set CNST52 to less than the distance to the next nearest peak to avoid disturbing that
+Set CNST51 to a scaling factor dependent on the pulse used: 0.666 for IBURP2.100, ? for Isnob2.100

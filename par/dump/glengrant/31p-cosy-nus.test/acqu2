@@ -1,0 +1,22 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= Angela Grommet
+$$ 2015-06-26 16:01:41.111 +0100  Angela Grommet@glengrant
+$$ C:/Bruker/TopSpin3.2/exp/stan/nmr/par/user/31p-cosy-nus.test/acqu2
+$$ process C:\Bruker\TopSpin3.2\prog\mod\edparproc.exe
+##$ACQT0= 0
+##$BF1= 202.484671
+##$FnMODE= 1
+##$NUC1= <31P>
+##$NusJSP= 0
+##$NusT2= 1
+##$NusTD= 0
+##$O1= 0
+##$SFO1= 202.484671
+##$SW= 99.5695
+##$SW_h= 20161.2974491345
+##$TD= 1024
+##END=

@@ -1,0 +1,24 @@
+##TITLE= Parameter file, TopSpin 3.6.4
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 7	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= Simon Williams
+$$ 2023-10-27 11:03:00.726 +0100  ak2425@glengrant
+$$ C:\Bruker\TopSpin3.6.4\exp\stan\nmr\par\user/temperature-slide/acqu2
+$$ process C:\Bruker\TopSpin3.6.4\prog\mod\edparproc.exe
+##$ACQT0= 0
+##$BF1= 500.2
+##$FnILOOP= 0
+##$FnMODE= 0
+##$NUC1= <1H>
+##$NusJSP= 0
+##$NusT2= 1
+##$NusTD= 0
+##$O1= 3496.46900002654
+##$ProjAngle= 0
+##$SFO1= 500.203496469
+##$SW= 9.99595530264755
+##$SW_h= 5000
+##$TD= 360
+##END=

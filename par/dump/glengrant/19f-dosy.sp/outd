@@ -1,0 +1,16 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= Seb Pike
+$$ 2019-07-31 11:14:54.504 +0100  Seb Pike@glengrant
+$$ C:/Bruker/TopSpin3.2/exp/stan/nmr/par/user/19f-dosy.sp/outd
+$$ process C:\Bruker\TopSpin3.2\prog\mod\edparproc.exe
+##$CURPLOT= <B19>
+##$CURPRIN= <$PDF reDirect v2>
+##$DFORMAT= <normdp>
+##$LAYOUT= <+/A3layouts/BBFO500proton.xwp>
+##$LFORMAT= <normlp>
+##$PFORMAT= <normpl>
+##END=

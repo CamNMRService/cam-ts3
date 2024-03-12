@@ -1,0 +1,6 @@
+500MHz Bruker Avance III - Glenfairn
+BBF-H Probe
+janus-1h-quickest.bbf
+pulprog=zg
+d1=10,ds=0,ns=1
+expt=15s

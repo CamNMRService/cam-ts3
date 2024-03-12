@@ -1,0 +1,28 @@
+##TITLE= Parameter file, TopSpin 3.6.4
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 5	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= nmas3
+$$ 2022-08-16 14:16:45.212 +0100  nmas3@glengrant
+$$ C:\Bruker\TopSpin3.6.4\exp\stan\nmr\par\user/ROESY_EASY.std/clevels
+$$ process C:\Bruker\TopSpin3.6.4\prog\mod\edparproc.exe
+##$LEVELS= (0..255)
+-2660463.3710592 -1478035.206144 -821130.67008 -456183.7056 -253435.392
+-140797.44 -78220.8 -43456 43456 78220.8 140797.44 253435.392 456183.7056
+821130.67008 1478035.206144 2660463.3710592 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+##$LEVSIGN= 3
+##$MAXLEV= 8
+##$METHOD= 0
+##$NEGBASE= -43456
+##$NEGINCR= 1.8
+##$POSBASE= 43456
+##$POSINCR= 1.8
+##END=

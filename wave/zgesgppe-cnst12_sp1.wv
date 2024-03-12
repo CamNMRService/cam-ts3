@@ -1,10 +1,10 @@
-##TITLE= square180, 3.0000ms, 0.001256 W
+##TITLE= square180, 3.0000ms, 0.000836 W
 ##JCAMP-DX= 5.00 Bruker JCAMP library 
 ##DATA TYPE= Shape Data 
 ##ORIGIN= Bruker BioSpin GmbH 
 ##OWNER= <WaveMaker> 
-##DATE= Jun 13 2022 
-##TIME= 14:23:56 
+##DATE= Nov 10 2023 
+##TIME= 13:12:49 
 ##$SHAPE_PARAMETERS= Type: square180
 ##MINX= 100.000000 
 ##MAXX= 100.000000 

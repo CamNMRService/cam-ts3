@@ -1,0 +1,22 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 4	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= donna.baldisseri
+$$ 2019-06-11 11:51:03.677 +0100  djh35@glengrant
+$$ C:/Bruker/TopSpin3.2/exp/stan/nmr/par/user/SCREEN_19F_T2/acqu2
+$$ process C:\Bruker\TopSpin3.2\prog\mod\expinstall.exe
+##$ACQT0= 0
+##$BF1= 500.2
+##$FnMODE= 1
+##$NUC1= <1H>
+##$NusJSP= 0
+##$NusT2= 1
+##$NusTD= 0
+##$O1= 3285.00000000531
+##$SFO1= 500.203285
+##$SW= 9.99669715385314
+##$SW_h= 5000.38075550749
+##$TD= 2
+##END=

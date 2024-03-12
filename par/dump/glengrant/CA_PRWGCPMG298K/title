@@ -1,0 +1,5 @@
+Standard 1H 500MHz
+Presat + Watergate Suppression + CPMG
+pl9=50dB, gpz1=33%, gpnam1=smsq10.100
+d20=1ms, L1=100 (100ms total T2 relaxation)
+expt = 2min 10s

@@ -1,0 +1,9 @@
+Dataset name=test,expno=12
+Solvent=CDCl3
+Instrument=glenfairn,MHz=500.2180
+Probehead=Z113652_0045 (PA BBO 500S2 BBF-H-D-05 Z PLUS SP)
+Pulseprogram=zg30
+Nucleus=1H,P1(us)=12.00,PL1(watts)=13.00
+NS=16,D1(s)=1.00,AQ(s)=5.48,RG=14.20
+SW(ppm)=23.91,SW(Hz)=11961.72,O1(ppm)=8.00
+Reported temperature=298.00

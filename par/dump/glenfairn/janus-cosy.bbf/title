@@ -1,0 +1,6 @@
+500MHz Bruker Avance III - Glenfairn
+BBF-H Probe
+janus-cosy.bbf
+DQFCOSY :- using gradient pulses for selection; with multiple quantum filter according to gradient ratio
+2 scans, 256 increments
+21m 35s

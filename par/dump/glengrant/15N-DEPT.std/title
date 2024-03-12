@@ -1,0 +1,2 @@
+15N-DEPT45 500MHz smart probe
+set CNST2 to J (H-N); 1-bond 90Hz; 2-bond 10Hz; 3-bond 5Hz

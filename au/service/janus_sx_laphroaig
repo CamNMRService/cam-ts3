@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------*/
-/* Title	: Program janus_sx_laphroiag			*/
+/* Title	: Program janus_sx_laphroaig			*/
 /*has specific parts for this instrument */
 /* WORK IN PROGRESS TO UPDATE TO TOPSPIN 3			*/
 /* Topspin 3 update done by djh in cambridge*/
@@ -107,7 +107,7 @@ int     skipsample, pid, x, proc_or_not=0,sampleproblem=0;
 char    oi[80], juser[50], suser[40], in_data[1024], tmp_fname[1024];
 char    shimfile[80], acqufile[80];
 char    experiment[155], solvent[40], tunefile[40], sxfile[80];
-char    tmp_str[180], titlefile[80], titletext[80];
+char    tmp_str[2000], titlefile[80], titletext[80];
 char    exptfile[80], diskunit[40];
 char    prefix[40], shimset[40], defaultsfile[80], hdwerr[80];
 char    archpath[80], archive[20], jcmd_str[1024], outpath[1024];
@@ -845,7 +845,7 @@ XCMD("setdef ackn no");
 #ifdef	HAS_WINDOWS_FEATURES
 		
 // sprintf(tmp_cmd,"robocopy C:\\Bruker\\TopSpin3.6.4\\data\\topshimData /S %s\\topshimData_%s_%d", ACQUPATH(0),name, expno);  
-    sprintf( tmp_cmd, "7za a  %s\\topshimData_%s_%i.zip C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData\\",ACQUPATH(0),name,expno,ts_major,ts_minor,ts_patch);
+    sprintf( tmp_cmd, "7za a  %s\\topshimData_%s_%i.zip C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData\\ > nul",ACQUPATH(0),name,expno,ts_major,ts_minor,ts_patch);
 	
 #else 
     sprintf(tmp_cmd,"cp -rp /opt/topspin3.6.4/data/topshimData %s/topshimData_%s_%d", AQCUPATH(0),name, expno);

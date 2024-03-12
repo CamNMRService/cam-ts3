@@ -1,0 +1,16 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 2	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= mm2237
+$$ 2020-09-24 13:26:33.070 +0100  mm2237@glengrant
+$$ C:\Bruker\TopSpin3.2\exp\stan\nmr\par\user/35cl.er/outd
+$$ process C:\Bruker\TopSpin3.2\prog\mod\edparproc.exe
+##$CURPLOT= <PDF reDirect v2>
+##$CURPRIN= <$PDF reDirect v2>
+##$DFORMAT= <normdp>
+##$LAYOUT= <+/35Cl.xwp>
+##$LFORMAT= <normlp>
+##$PFORMAT= <normpl>
+##END=

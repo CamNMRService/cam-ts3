@@ -1,0 +1,21 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 7	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= Seb Pike
+$$ 2019-07-31 11:10:14.140 +0100  Seb Pike@glengrant
+$$ F:/data/SP-group/nmr/SDP_C44_polymer_DiFB_31july/14/pdata/1/dosy
+$$ process C:\Bruker\TopSpin3.2\prog\au\bin\setdiffparm.exe
+##$DISPmax= -8
+##$DISPmin= -10
+##$Gamma= 4257.7
+##$Gdist= 99.9000000059605
+##$Glen= 2.5
+##$Ndata= 4
+##$Nexp= 1
+##$Npars= 7
+##$Nvar= 2
+##$Scale= 1
+##$Xlist= <difflist>
+##END=

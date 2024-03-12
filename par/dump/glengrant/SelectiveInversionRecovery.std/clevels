@@ -1,0 +1,28 @@
+##TITLE= Parameter file, TopSpin 3.6.4
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= ayamab2
+$$ 2024-02-02 12:16:43.434 +0000  ayamab2@glengrant
+$$ C:\Bruker\TopSpin3.6.4\exp\stan\nmr\par\user/SelectiveInversionRecovery.std/clevels
+$$ process C:\Bruker\TopSpin3.6.4\prog\mod\edparproc.exe
+##$LEVELS= (0..255)
+-81515.662217045 -45286.4790094695 -25159.1550052608 -13977.308336256 -7765.17129792
+-4313.9840544 -2396.657808 -1331.47656 1331.47656 2396.657808 4313.9840544
+7765.17129792 13977.308336256 25159.1550052608 45286.4790094695 81515.662217045
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+##$LEVSIGN= 3
+##$MAXLEV= 8
+##$METHOD= 0
+##$NEGBASE= -1331.47656
+##$NEGINCR= 1.8
+##$POSBASE= 1331.47656
+##$POSINCR= 1.8
+##END=

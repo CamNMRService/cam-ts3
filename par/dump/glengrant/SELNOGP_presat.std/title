@@ -1,0 +1,6 @@
+Selective 1D NOESY with additional shaped pulse presaturation
+FIrst run the solvent suppressed 1D experiment using Acquire->More->Setup selective 1D experiments
+Do getprosol to set the pulse parameters for the 90 degree pulse and selective excitation
+Then in this current dataset set SPNAM6=supress, and copy SPW6 (left hand column) from the solvent suppressed 1D experiment.
+Set CNST21 to the frequency of the desired peak in PPM
+rga;zg

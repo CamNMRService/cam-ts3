@@ -1,0 +1,16 @@
+##TITLE= Parameter file, TopSpin 3.6.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= chemist
+$$ 2021-07-08 08:11:11.719 +0100  chemist@Glenfairn
+$$ C:/Bruker/TopSpin3.6.2/exp/stan/nmr/par/user/janus-cpg-1h.bbf/outd
+$$ process C:\Bruker\TopSpin3.6.2\prog\mod\edparproc.exe
+##$CURPLOT= <>
+##$CURPRIN= <$>
+##$DFORMAT= <normdp>
+##$LAYOUT= <+/1D_H.xwp>
+##$LFORMAT= <normlp>
+##$PFORMAT= <normpl>
+##END=

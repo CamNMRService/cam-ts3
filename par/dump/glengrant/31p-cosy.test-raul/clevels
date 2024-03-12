@@ -1,0 +1,27 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= raul garcia
+$$ 2015-09-21 12:58:24.408 +0100  raul garcia@glengrant
+$$ C:\Bruker\TopSpin3.2\exp\stan\nmr\par\user/31p-cosy.test-raul/clevels
+$$ process C:\Bruker\TopSpin3.2\prog\mod\edparproc.exe
+##$LEVELS= (0..255)
+336810.9375 512273.184100538 779142.794757086 1185038.59554503 1802386.5232164
+2741342.9328671 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0
+##$LEVSIGN= 1
+##$MAXLEV= 6
+##$METHOD= 0
+##$NEGBASE= -336810.9375
+##$NEGINCR= 1.52095174789429
+##$POSBASE= 336810.9375
+##$POSINCR= 1.52095174789429
+##END=

@@ -1,0 +1,21 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 7	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= Jon Swain
+$$ 2017-12-21 12:03:40.356 +0000  Jon Swain@glengrant
+$$ F:/data/CH/nmr/JS vernier/7/pdata/1/dosy
+$$ process C:\Bruker\TopSpin3.2\prog\au\bin\setdiffparm.exe
+##$DISPmax= -8
+##$DISPmin= -10
+##$Gamma= 4257.7
+##$Gdist= 99.9000000059605
+##$Glen= 2.20000004768372
+##$Ndata= 16
+##$Nexp= 1
+##$Npars= 7
+##$Nvar= 2
+##$Scale= 1
+##$Xlist= <difflist>
+##END=

@@ -1,0 +1,73 @@
+// AU prog to output peaks for DP5
+// Peak pick 1D proton and carbon spectra appropriately
+// OPen the carbon spectrum, and run this AU prog
+// It will ask for the expno of the proton spectrum, and will generate 
+// file with the carbon shifts first followed by proton
+
+int numPeaks, numPeaks2, i;
+const char* dp5peaks;
+    FILE *fp;
+    double  peakFreqPPM;
+int protonexpno=10;
+
+GETINT("Expno of proton data?", protonexpno)
+//read carbon peaklist from current expno    
+
+numPeaks = readPeakList(PROCPATH(0));
+
+   dp5peaks = PROCPATH("dp5peaks");
+    if ((fp = fopen(dp5peaks, "wt")) == 0)
+    {
+	Proc_err(DEF_ERR_OPT, "%s\n%s", "Cannot open file for writing:", dp5peaks);
+	ABORT;
+    }
+
+// print first value with no comma
+
+peakFreqPPM    = getPeakFreqPPM(0);
+		fprintf(fp,"%lf \(any\)", peakFreqPPM);
+
+// print the rest of values with a comma before each
+
+for (i=1; i<numPeaks; i++)
+{
+    peakFreqPPM    = getPeakFreqPPM(i);
+		fprintf(fp,",%lf \(any\)", peakFreqPPM);
+
+}
+
+//add a newline and blank line
+
+fprintf(fp, "\n");
+fprintf(fp, "\n");
+
+
+// need to free peak list so can read another one!
+freePeakList();
+
+// switch to proton
+DATASET(name, protonexpno, procno, disk, user);
+
+
+
+// read proton peaklist
+
+numPeaks2 = readPeakList(PROCPATH(0));
+
+// print first value with no comma
+
+peakFreqPPM    = getPeakFreqPPM(0);
+		fprintf(fp,"%lf \(any\)", peakFreqPPM);
+
+// print the rest of values with a comma before each
+
+for (i=1; i<numPeaks2; i++)
+{
+    peakFreqPPM    = getPeakFreqPPM(i);
+		fprintf(fp,",%lf \(any\)", peakFreqPPM);
+
+}
+
+//close output file
+fclose(fp);
+QUIT

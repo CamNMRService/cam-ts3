@@ -1,0 +1,16 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= Peter Grice
+$$ 2013-11-19 14:44:26.563 +0000  Peter Grice@glengrant
+$$ C:\Bruker\TopSpin3.2\exp\stan\nmr\par\user/71Ga.std all/outd
+$$ process C:\Bruker\TopSpin3.2\prog\mod\edparproc.exe
+##$CURPLOT= <PDF reDirect v2>
+##$CURPRIN= <$PDF reDirect v2>
+##$DFORMAT= <normdp>
+##$LAYOUT= <+/layouts.A3/BBFO500phosphorous.xwp>
+##$LFORMAT= <normlp>
+##$PFORMAT= <normpl>
+##END=

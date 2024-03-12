@@ -1,0 +1,16 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 2	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= nmrsu
+$$ 2021-11-24 15:13:48.657 +0000  zl415@glengrant
+$$ C:\Bruker\TopSpin3.2\exp\stan\nmr\par\user/Pureshift_srt.std/outd
+$$ process C:\Bruker\TopSpin3.2\prog\mod\edparproc.exe
+##$CURPLOT= <>
+##$CURPRIN= <$hplj4500n>
+##$DFORMAT= <normdp>
+##$LAYOUT= <+/layouts.npt/NPT_1H_sensitivity.xwp>
+##$LFORMAT= <normlp>
+##$PFORMAT= <normpl>
+##END=

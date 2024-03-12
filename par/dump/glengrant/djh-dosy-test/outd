@@ -1,0 +1,16 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 2	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= Administrator
+$$ 2014-07-29 12:44:04.880 +0100  Administrator@glengrant
+$$ C:\Bruker\TopSpin3.2\exp\stan\nmr\par\user/djh-dosy-test/outd
+$$ process C:\Bruker\TopSpin3.2\prog\mod\edparproc.exe
+##$CURPLOT= <B19>
+##$CURPRIN= <$PDF reDirect v2>
+##$DFORMAT= <normdp>
+##$LAYOUT= <+/A3layouts/BBFO500proton.xwp>
+##$LFORMAT= <normlp>
+##$PFORMAT= <normpl>
+##END=

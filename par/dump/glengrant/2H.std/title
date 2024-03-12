@@ -1,0 +1,3 @@
+Standard 2H BBFO Smart Probe
+Acquire with "xaua" rather than zg, to turn the lock off and back on again after acquisition
+do not tune the probe; no need for RGA

@@ -1,0 +1,16 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 19	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= Administrator
+$$ 2018-06-12 16:26:54.196 +0100  Administrator@glengrant
+$$ C:\Bruker\TopSpin3.2\exp\stan\nmr\par\user/wetdc-isooctane.smc/outd
+$$ process C:\Bruker\TopSpin3.2\prog\mod\edparproc.exe
+##$CURPLOT= <PDF reDirect v2>
+##$CURPRIN= <$PDF reDirect v2>
+##$DFORMAT= <normdp>
+##$LAYOUT= <+/layouts.LC/1H-sup.xwp>
+##$LFORMAT= <normlp>
+##$PFORMAT= <normpl>
+##END=

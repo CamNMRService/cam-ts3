@@ -1,0 +1,28 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 2	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= Peter Grice
+$$ 2017-02-17 16:41:37.245 +0000  Administrator@glengrant
+$$ C:\Bruker\TopSpin3.2\exp\stan\nmr\par\user/19F-COSY-test/clevels
+$$ process C:\Bruker\TopSpin3.2\prog\mod\edparproc.exe
+##$LEVELS= (0..255)
+-4865190.1502976 -2702883.416832 -1501601.89824 -834223.2768 -463457.376
+-257476.32 -143042.4 -79468 79468 143042.4 257476.32 463457.376 834223.2768
+1501601.89824 2702883.416832 4865190.1502976 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0
+##$LEVSIGN= 3
+##$MAXLEV= 8
+##$METHOD= 0
+##$NEGBASE= -79468
+##$NEGINCR= 1.8
+##$POSBASE= 79468
+##$POSINCR= 1.8
+##END=

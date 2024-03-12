@@ -1,0 +1,16 @@
+##TITLE= Parameter file, TopSpin 3.6.4
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 5	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= Peter Grice
+$$ 2022-03-31 17:21:58.404 +0100  rl635@glengrant
+$$ C:\Bruker\TopSpin3.6.4\exp\stan\nmr\par\user/cosy.std/outd
+$$ process C:\Bruker\TopSpin3.6.4\prog\mod\edparproc.exe
+##$CURPLOT= <B19>
+##$CURPRIN= <$PDF reDirect v2>
+##$DFORMAT= <normdp>
+##$LAYOUT= <+/layouts.A3/BBFO500cosy.xwp>
+##$LFORMAT= <normlp>
+##$PFORMAT= <normpl>
+##END=

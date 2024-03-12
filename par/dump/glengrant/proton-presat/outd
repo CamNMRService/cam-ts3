@@ -1,0 +1,16 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 3	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= Guanglu Wu
+$$ 2016-05-10 15:13:45.197 +0100  Guanglu Wu@glengrant
+$$ C:\Bruker\TopSpin3.2\exp\stan\nmr\par\user/proton-presat/outd
+$$ process C:\Bruker\TopSpin3.2\prog\mod\edparproc.exe
+##$CURPLOT= <B19>
+##$CURPRIN= <$PDF reDirect v2>
+##$DFORMAT= <normdp>
+##$LAYOUT= <+/A3layouts/BBFO500proton.xwp>
+##$LFORMAT= <normlp>
+##$PFORMAT= <normpl>
+##END=

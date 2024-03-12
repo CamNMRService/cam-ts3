@@ -1,0 +1,3 @@
+O17 with ringdown suppression. Useable bandwidth ~200ppm - set O1P close to peak. More than one spectrum
+may be required if a large range of shifts.
+Set L4 to make total number of scans 2*NS*L4 - spectrum automatically transferred to disk every 2*NS scans

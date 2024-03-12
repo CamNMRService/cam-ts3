@@ -1,0 +1,22 @@
+##TITLE= Parameter file, TopSpin 3.6.4
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 2	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= Administrator
+$$ 2022-03-09 12:32:36.737 +0000  lt459@glengrant
+$$ C:/Bruker/TopSpin3.6.4/exp/stan/nmr/par/user/1h-11b-hsqc.test/acqu2
+$$ process C:\Bruker\TopSpin3.6.4\prog\mod\expinstall.exe
+##$ACQT0= 0
+##$BF1= 160.484038
+##$FnMODE= 6
+##$NUC1= <11B>
+##$NusJSP= 0
+##$NusT2= 1
+##$NusTD= 0
+##$O1= 3209.628
+##$SFO1= 160.487247628
+##$SW= 61.9278860699071
+##$SW_h= 9938.63598677975
+##$TD= 128
+##END=

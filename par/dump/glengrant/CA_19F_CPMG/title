@@ -1,0 +1,4 @@
+Standard 19F-1H-coupled 500MHz "Smart" Probe, Ref to CFCl3 = 0.0ppm
+1H SPY, NS=64, d1=5s, expt = 9mins,
+pulprog=zg_19FCPMG
+D20=10ms, L1=1, CPMG delay = 10ms

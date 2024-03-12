@@ -1,0 +1,16 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= co402
+$$ 2021-02-19 10:38:24.703 +0000  co402@glengrant
+$$ C:\Bruker\TopSpin3.2\exp\stan\nmr\par\user/ec-dec-suppress-13c-de .cpg/outd
+$$ process C:\Bruker\TopSpin3.2\prog\mod\edparproc.exe
+##$CURPLOT= <PDF reDirect v2>
+##$CURPRIN= <$PDF reDirect v2>
+##$DFORMAT= <normdp>
+##$LAYOUT= <+/layouts.LC/1H-sup.xwp>
+##$LFORMAT= <normlp>
+##$PFORMAT= <normpl>
+##END=

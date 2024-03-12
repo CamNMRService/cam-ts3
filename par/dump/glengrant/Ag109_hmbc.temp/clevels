@@ -1,0 +1,28 @@
+##TITLE= Parameter file, TopSpin 3.6.4
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= ptg20
+$$ 2023-12-20 15:27:40.197 +0000  ptg20@glengrant
+$$ C:/Bruker/TopSpin3.6.4/exp/stan/nmr/par/user/Ag109_hmbc.temp/clevels
+$$ process C:\Bruker\TopSpin3.6.4\prog\mod\edparproc.exe
+##$LEVELS= (0..255)
+-271565.5006944 -150869.722608 -83816.51256 -46564.7292 -25869.294 -14371.83
+-7984.35 -4435.75 4435.75 7984.35 14371.83 25869.294 46564.7292 83816.51256
+150869.722608 271565.5006944 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0
+##$LEVSIGN= 3
+##$MAXLEV= 8
+##$METHOD= 0
+##$NEGBASE= -4435.75
+##$NEGINCR= 1.8
+##$POSBASE= 4435.75
+##$POSINCR= 1.8
+##END=

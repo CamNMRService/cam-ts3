@@ -1,0 +1,28 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= Administrator
+$$ 2018-05-18 08:58:51.067 +0100  Administrator@glengrant
+$$ C:/Bruker/TopSpin3.2/exp/stan/nmr/par/user/dosy-temp/clevels
+$$ process C:\Bruker\TopSpin3.2\prog\mod\edparproc.exe
+##$LEVELS= (0..255)
+-326527.5540672 -181404.196704 -100780.10928 -55988.9496 -31104.972 -17280.54
+-9600.3 -5333.5 5333.5 9600.3 17280.54 31104.972 55988.9496 100780.10928
+181404.196704 326527.5540672 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0
+##$LEVSIGN= 3
+##$MAXLEV= 8
+##$METHOD= 0
+##$NEGBASE= -5333.5
+##$NEGINCR= 1.8
+##$POSBASE= 5333.5
+##$POSINCR= 1.8
+##END=

@@ -1,0 +1,22 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= Peter Grice
+$$ 2014-08-11 14:26:02.754 +0100  Peter Grice@glengrant
+$$ C:\Bruker\TopSpin3.2\exp\stan\nmr\par\user/29Si-1H correlation 202hz/acqu2
+$$ process C:\Bruker\TopSpin3.2\prog\mod\edparproc.exe
+##$ACQT0= 0
+##$BF1= 99.375669
+##$FnMODE= 6
+##$NUC1= <13C>
+##$NusJSP= 0
+##$NusT2= 1
+##$NusTD= 0
+##$O1= -298.127007
+##$SFO1= 99.375370872993
+##$SW= 100.011058099115
+##$SW_h= 9938.63599
+##$TD= 368
+##END=

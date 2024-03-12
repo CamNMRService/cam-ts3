@@ -1,0 +1,16 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= od265
+$$ 2019-01-10 15:54:46.674 +0000  od265@glengrant
+$$ C:\Bruker\TopSpin3.2\exp\stan\nmr\par\user/CA_19F_CPMG/outd
+$$ process C:\Bruker\TopSpin3.2\prog\mod\edparproc.exe
+##$CURPLOT= <PDF reDirect v2>
+##$CURPRIN= <$PDF reDirect v2>
+##$DFORMAT= <normdp>
+##$LAYOUT= <+/layouts.ATP/1D.xwp>
+##$LFORMAT= <normlp>
+##$PFORMAT= <normpl>
+##END=

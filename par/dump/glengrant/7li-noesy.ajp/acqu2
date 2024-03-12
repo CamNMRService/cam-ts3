@@ -1,0 +1,22 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 2	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= Andrew Peel
+$$ 2018-07-17 16:31:28.311 +0100  Andrew Peel@glengrant
+$$ C:\Bruker\TopSpin3.2\exp\stan\nmr\par\user/7li-noesy.ajp/acqu2
+$$ process C:\Bruker\TopSpin3.2\prog\mod\edparproc.exe
+##$ACQT0= 0
+##$BF1= 194.396713
+##$FnMODE= 5
+##$NUC1= <7Li>
+##$NusJSP= 0
+##$NusT2= 1
+##$NusTD= 0
+##$O1= -770.368000019062
+##$SFO1= 194.395942632
+##$SW= 29.052
+##$SW_h= 14531.7528104354
+##$TD= 256
+##END=

@@ -1,0 +1,6 @@
+Standard NOESY 500MHz "Smart" Probe
+process with:
+
+proc_2dhom noplot
+
+for automated phase correction

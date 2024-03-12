@@ -1,0 +1,8 @@
+- ACCEPTANCE - System: AV500   OrderNo.: GH003613    Customer: Cambridge Uni Chemistry Dept   Engineer: bdm  
+P/N Console: H031280B/3052   Shim system: BOSS III   original dataset: 113652_0177sna 2 1
+Probe: 5 mm PABBO BB/19F-1H/D Z-GRD Z113652/0177    Sample depth:22   Gas: nitrogen 
+Sensitivity test for 13C (ASTM);  Sample: ASTM in C6D6  (P/N: Z10163)
+
+Sino= 323:1  ( signal= 140 - 120 ppm   noise= 114.00 - 74.00 ppm [40 ppm]   noise range= 52 ppm )
+P1= 10usec   PLW1= 79W   
+

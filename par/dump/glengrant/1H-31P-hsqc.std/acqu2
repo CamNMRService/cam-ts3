@@ -1,0 +1,22 @@
+##TITLE= Parameter file, TopSpin 3.6.4
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 4	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= Dawei Zhang
+$$ 2022-03-09 12:32:36.689 +0000  lt459@glengrant
+$$ C:/Bruker/TopSpin3.6.4/exp/stan/nmr/par/user/1H-31P-hsqc.std/acqu2
+$$ process C:\Bruker\TopSpin3.6.4\prog\mod\expinstall.exe
+##$ACQT0= 0
+##$BF1= 202.484671
+##$FnMODE= 6
+##$NUC1= <31P>
+##$NusJSP= 0
+##$NusT2= 1
+##$NusTD= 0
+##$O1= -2429.316
+##$SFO1= 202.482241684
+##$SW= 24.5392806509969
+##$SW_h= 4968.76855552666
+##$TD= 368
+##END=

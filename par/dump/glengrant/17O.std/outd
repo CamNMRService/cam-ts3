@@ -1,0 +1,16 @@
+##TITLE= Parameter file, TopSpin 3.6.4
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 5	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= Administrator
+$$ 2022-06-27 17:28:31.404 +0100  ptg20@glengrant
+$$ C:\Bruker\TopSpin3.6.4\exp\stan\nmr\par\user/17O.std/outd
+$$ process C:\Bruker\TopSpin3.6.4\prog\mod\edparproc.exe
+##$CURPLOT= <B19>
+##$CURPRIN= <$PDF reDirect v2>
+##$DFORMAT= <normdp>
+##$LAYOUT= <+/A3layouts/BBFO500proton.xwp>
+##$LFORMAT= <normlp>
+##$PFORMAT= <normpl>
+##END=

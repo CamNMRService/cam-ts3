@@ -1,0 +1,5 @@
+DIPSI TOCSY with Zero-quantum suppresion
+With gp19 water suppresion
+Type xaua to find water peak and calibrate pulses.
+Set cnst20 in ased to set distance to next water suppresion null in ppm.
+500MHz "Smart" Probe

@@ -1,0 +1,4 @@
+Standard 19F-1H HMBC 500MHz "Smart" Probe
+set cnst13 to approx coupling constant e.g. 12Hz
+Set O2P in centre of desired 19F range - 140ppm is about maximum usable value for SW(F1) currently , 
+expect about 50% signal loss at the edge of that range.

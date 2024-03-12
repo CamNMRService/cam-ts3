@@ -1,0 +1,22 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= raul garcia
+$$ 2016-03-09 11:43:22.613 +0000  raul garcia@glengrant
+$$ C:\Bruker\TopSpin3.2\exp\stan\nmr\par\user/7Li-1H-hosy-high-res/acqu2
+$$ process C:\Bruker\TopSpin3.2\prog\mod\edparproc.exe
+##$ACQT0= 0
+##$BF1= 194.396713
+##$FnMODE= 1
+##$NUC1= <7Li>
+##$NusJSP= 0
+##$NusT2= 1
+##$NusTD= 0
+##$O1= 388.793426
+##$SFO1= 194.397101793426
+##$SW= 2
+##$SW_h= 388.794203586852
+##$TD= 128
+##END=

@@ -1,0 +1,12 @@
+Standard 1H 500MHz "Smart" Probe
+zgesgppe-cnst12
+parameter set - sb-es-wvm.std
+water suppression using excitation sculpting with gradients using perfect echo
+Modified pulse program to use cnst12 to define suppression pulse length.
+Make cnst12 larger for tighter suppression. Note longer values may lead to J-modulation artefacts in peaks.
+USE wvm -a TO CALCULATE SUPPRESSION PULSE if running manually.
+
+(R.W. Adams, C.M. Holroyd, J.A. Aguilar, M. Nilsson & G.A. Morris, Chem. Commun. 49, 358-360 (2013))
+RG=32
+SWH=12019.23=24PPM
+Aquired with automated au program in parameter set.

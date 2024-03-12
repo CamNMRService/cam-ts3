@@ -1,0 +1,20 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 11	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= jaya
+$$ 2014-11-04 17:33:41.710 +0000  jaya@florence
+$$ F:\data\jrn\nmr/GJ-I-254-dosy/5/pdata/1/t1par
+$$ process C:\Bruker\TopSpin3.2\prog\au\bin\setdiffparm.exe
+##$BIGDEL= 99.9
+##$COMPNO= 1
+##$FCTTYPE= 10
+##$GAMM= 4257.7
+##$GUESSES= (0..23)
+1 1e-009 1 1 1 1 1 1 1 1 1 1 0.1 1e-010 1 1 1 1 1 1 1 1 1 1
+##$LISTTYP= <difflist>
+##$LITDEL= 1.8
+##$NUMPNTS= 16
+##$NUMTERM= 2
+##END=

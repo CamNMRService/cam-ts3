@@ -1,0 +1,3 @@
+Standard 1H 400MHz BBFO "Smart" probe
+slice-selective NMR
+set cnst19 accord to width to irradiate, run wvm -a to calculate shape pulse. Check power levels and durations are ok.

@@ -1,0 +1,22 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= root
+$$ 2013-10-31 10:02:37.959 +0000  root@florence
+$$ C:/Bruker/TopSpin3.2/exp/stan/nmr/par/user/hmbc.std/acqu2
+$$ process C:\Bruker\TopSpin3.2\prog\mod\edparproc.exe
+##$ACQT0= 0
+##$BF1= 100.612769
+##$FnMODE= 6
+##$NUC1= <13C>
+##$NusJSP= 0
+##$NusT2= 1
+##$NusTD= 0
+##$O1= 11067.4045899941
+##$SFO1= 100.62383640459
+##$SW= 234.995300516943
+##$SW_h= 23646.1286750643
+##$TD= 360
+##END=

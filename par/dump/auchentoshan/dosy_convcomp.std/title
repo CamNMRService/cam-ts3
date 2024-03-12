@@ -1,0 +1,6 @@
+Standard 1H 400MHz BBFO "Smart" probe
+DOSY 2D sequence for diffusion measurement using double stimulated echo for convection compensation and LED
+D20=0.1s
+P30=900us
+gas flow=535 l/h
+gradient strength calibrated by diffusion coeffiecent of 1& H2O in D2O = 1.91e-09 m2/s

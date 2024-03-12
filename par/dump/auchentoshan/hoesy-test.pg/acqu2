@@ -1,0 +1,22 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 2	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= Peter Grice
+$$ 2015-08-24 15:23:28.666 +0100  Peter Grice@florence
+$$ C:\Bruker\TopSpin3.2\exp\stan\nmr\par\user/hoesy-test.pg/acqu2
+$$ process C:\Bruker\TopSpin3.2\prog\mod\edparproc.exe
+##$ACQT0= 0
+##$BF1= 376.498366
+##$FnMODE= 1
+##$NUC1= <19F>
+##$NusJSP= 0
+##$NusT2= 1
+##$NusTD= 0
+##$O1= -41414.82
+##$SFO1= 376.45695118
+##$SW= 53.144456417366
+##$SW_h= 20006.600035
+##$TD= 256
+##END=

@@ -1,0 +1,3 @@
+Presaturation experiment for paramgnetic samples
+Measure solvent frequency from unsuppressed 1D - use the "set rf from cursor" lightning bolt button , click on the peak, and copy the value.
+In the suppression dataset set that value as o2.

@@ -1,0 +1,8 @@
+- ACCEPTANCE - System: AVIIIHD400   OrderNo.: GH003713    Customer: Cambridge University   Engineer: Simpson/Meadows  
+P/N Console: H03128OB/1296   Shim system: BOSS III   original dataset: 116098_0228snfh 2 1
+Probe: 5 mm PABBO BB/19F-1H/D Z-GRD Z116098/0228    Sample depth:22   Gas: air 
+Decoupling experiment 19F observe, 1H CPD-decoupling;  Sample: 0,05% TFT in CDCl3  (P/N: Z10234)
+
+Sino= 620:1  ( signal= -61 - -65 ppm   noise= -59.08 - -60.08 ppm [1 ppm]   noise range= 4.5 ppm )
+P1= 14usec   PLW1= 27.6W   PCPD2= 90usec   PLW12= 0.19068W   
+

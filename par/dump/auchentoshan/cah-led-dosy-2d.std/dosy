@@ -1,0 +1,21 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 7	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= yudi ding
+$$ 2015-06-23 15:09:10.088 +0100  yudi ding@florence
+$$ F:/data/cah/nmr/YD_2015_06_23_D35/5/pdata/1/dosy
+$$ process C:\Bruker\TopSpin3.2\prog\au\bin\setdiffparm.exe
+##$DISPmax= -8
+##$DISPmin= -10
+##$Gamma= 4257.7
+##$Gdist= 99.9000000059605
+##$Glen= 1.5
+##$Ndata= 22
+##$Nexp= 1
+##$Npars= 7
+##$Nvar= 2
+##$Scale= 1
+##$Xlist= <difflist>
+##END=

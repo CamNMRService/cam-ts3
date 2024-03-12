@@ -1,0 +1,2 @@
+1H spectrum with multiple solvent suppression
+Set L30 to number of peaks to suppress - not that peaks closer than about 150Hz cannot be separately suppressed without changing some parameters

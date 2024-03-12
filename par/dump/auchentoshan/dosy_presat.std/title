@@ -1,0 +1,10 @@
+Standard 1H 400MHz BBFO "Smart" probe
+DOSY 2D sequence for diffusion measurement using stimulated echo and LED with presaturation
+D20=0.1s
+P30=900us
+gas flow=535l/h
+Set o1 based om normal presat experiment
+use: 
+getprosol 1H <p1> pldb1>
+
+where <p1> and <pldb1> are the vzlues from reference suppressed proton

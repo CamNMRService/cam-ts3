@@ -1,0 +1,4 @@
+23Na T1 measurement using inversion recovery
+D1+AQ should be >5x T1
+Parameters here are suitable for T2 of at least 50ms (will give factor of e attenuation for T2=50ms
+In dynamics center fit using "T2" (automatic if using analyse->dynamics->prepare for dynamics center)

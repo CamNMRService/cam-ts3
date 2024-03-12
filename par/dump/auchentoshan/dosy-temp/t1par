@@ -1,0 +1,46 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 12	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= Administrator
+$$ 2017-09-21 15:20:10.542 +0100  Administrator@florence
+$$ F:/data/service/nmr/smc-ea-triamtercene-0-07/13/pdata/1/t1par
+$$ process C:\Bruker\TopSpin3.2\prog\au\bin\setdiffparm.exe
+##$BIGDEL= 74.9
+##$CALCDN= no
+##$COMPNO= 1
+##$CONV= 1e-005
+##$CURSOR= 0
+##$DRIFT= 5
+##$EDGUESS= 0
+##$EDPARM= 0
+##$FCTTYPE= 10
+##$FIDNUMB= 0
+##$FITT1T2= 0
+##$FITTYPE= 0
+##$GAMM= 4257.7
+##$GRADIEN= 1
+##$GUESSES= (0..23)
+1 1e-009 1 1 1 1 1 1 1 1 1 1 0.1 1e-010 1 1 1 1 1 1 1 1 1 1
+##$INC= 1
+##$INTRNG= 1
+##$LISTINC= 0.001
+##$LISTTYP= <difflist>
+##$LITDEL= 2.2
+##$MAXPNTS= 12
+##$NUMPNTS= 16
+##$NUMTERM= 2
+##$PARM= (0..11)
+0 0 0 0 0 0 0 0 0 0 0 0
+##$PDTYP= <pd>
+##$REGIONS= 2
+##$SHOWINT= yes
+##$SHOWPP= yes
+##$SHOWTXT= 1
+##$START= 1
+##$X_END= 0
+##$X_START= 0
+##$Y_END= 0
+##$Y_START= 0
+##END=

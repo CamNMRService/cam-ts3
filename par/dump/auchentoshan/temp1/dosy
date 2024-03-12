@@ -1,0 +1,21 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 21	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= Hugh Ryan
+$$ 2019-06-11 12:07:56.791 +0100  djh35@florence
+$$ F:\data\service\nmr/oas-ya-tpp-cb-n-pec-peg/12/pdata/1/dosy
+$$ process C:\Bruker\TopSpin3.2\prog\au\bin\setdiffparm.exe
+##$DISPmax= -8
+##$DISPmin= -10
+##$Gamma= 4257.7
+##$Gdist= 199.90000000596
+##$Glen= 4
+##$Ndata= 16
+##$Nexp= 1
+##$Npars= 7
+##$Nvar= 2
+##$Scale= 1
+##$Xlist= <difflist>
+##END=

@@ -1,0 +1,8 @@
+Proton T1 measurement using inversion recovery with 1 scan per recovery delay
+With broadband inversion pulse for perfect inversion and gradient pulse to remove need for phase cycling
+With set D1 and vdlist, should be accurate for T1 up to ~10s.If necessary increase D1 and set TD(f1) to 8
+to increase the maximum used recovery delay to 100s
+Use getprosol to set pulses!
+ns can be increased if S:N is not good enough but otherwise no need to use more than ns =1
+
+For processing with dynamics center, select method "T1" and function "inversion recovery"

@@ -1,0 +1,5 @@
+1H spectrum with WET mult. solvent suppr. and 13C dec. during WET & AQ
+Execture getpprosol to set pulse powers correctly
+Set L30 to number of peaks to suppress; default is 2
+Automated setup and acquisition with "xaua", for subsequent experiments do iexpno then zg
+Reprocess with efp after it's done to undo the automatic LC processing

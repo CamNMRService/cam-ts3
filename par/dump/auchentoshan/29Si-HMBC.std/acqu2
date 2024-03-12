@@ -1,0 +1,24 @@
+##TITLE= Parameter file, TopSpin 3.6.4
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= ptg20
+$$ 2023-12-12 13:45:04.747 +0000  ptg20@auchentoshan
+$$ C:/Bruker/TopSpin3.6.4/exp/stan/nmr/par/user/29Si-HMBC.std/acqu2
+$$ process C:\Bruker\TopSpin3.6.4\prog\mod\edparproc.exe
+##$ACQT0= 0
+##$BF1= 79.494575
+##$FnILOOP= 0
+##$FnMODE= 1
+##$NUC1= <29Si>
+##$NusJSP= 0
+##$NusT2= 1
+##$NusTD= 0
+##$O1= -7949.4575
+##$ProjAngle= 0
+##$SFO1= 79.4866255425
+##$SW= 600.0600060006
+##$SW_h= 47696.745
+##$TD= 360
+##END=

@@ -1,0 +1,7 @@
+Standard 1H 400MHz BBFO "Smart" probe
+DOSY 2D sequence for diffusion measurement using stimulated echo and LED
+D20=0.1s
+P30=900us
+gas flow=400l/h
+diffusion coeffiecent = 1.88e-09 m2/s
+(expected 1.88)

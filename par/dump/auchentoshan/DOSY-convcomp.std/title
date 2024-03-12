@@ -1,0 +1,9 @@
+Standard 1H 400MHz BBFO "Smart" probe
+DOSY 2D sequence WITH CONVECTION COMPENSATION
+for diffusion measurement using stimulated echo and LED
+with modified sequence for reduced lineshape distortions
+D20=0.1s
+P30=1000us - set as required up to max 1500us
+gas flow=535l/h
+
+Use first gradient amplitude =11  - otherwise artefacts in forst data point are likely

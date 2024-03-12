@@ -1,0 +1,6 @@
+Standard 1H 400MHz BBFO "Smart" probe
+DOSY 2D sequence for diffusion measurement using stimulated echo and LED
+with compensated sequence for reduced lineshape distortions
+D20=0.1s
+P30=1000us - set as required up to max 2500us
+gas flow=535l/h

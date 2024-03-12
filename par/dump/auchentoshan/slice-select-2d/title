@@ -1,0 +1,3 @@
+Standard 1H 400MHz BBFO "Smart" probe
+Psuedo 2d data-set to put slice-selective results into. Forms part of slice-select-au program.
+Uses magnitude mode. You can get a phased result by running the slice-proc-au program.

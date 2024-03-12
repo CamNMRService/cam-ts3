@@ -1,0 +1,4 @@
+23Na T1 measurement using inversion recovery
+D1+AQ should be >5x T1
+Parameters here are suitable for T1 of at least 110ms
+In dynamics center fit using "inversion recovery with partial inversion" (automatic if using analyse->dynamics->prepare for dynamics center)

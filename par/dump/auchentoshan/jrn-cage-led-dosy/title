@@ -1,0 +1,4 @@
+Led-dosy
+d20=0.1s
+p30=1100us
+(little delta = 2x P30, max p30 is 1500 I think)

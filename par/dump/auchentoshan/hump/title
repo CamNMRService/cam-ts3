@@ -1,0 +1,8 @@
+- ACCEPTANCE - System: AVIIIHD400   OrderNo.: GH003713    Customer: Cambridge University   Engineer: Simpson/Meadows
+P/N Console: H03128OB/1296   Shim system: BOSS III
+Probe: 5 mm PABBO BB/19F-1H/D Z-GRD Z116098/0228    Sample depth:22   Gas: air
+Lineshape test for 1H with rotation;  Sample: 1% CHCl3 in Acetone-d6  (P/N: Z10248)
+                           Hump:
+                           at 0.11%: between 3219.7 and 3212.4 Hz = 7.3 Hz
+                           at 0.55%: between 3216.9 and 3214.2 Hz = 2.7 Hz
+                           at 50%: Half width at 3215.5 Hz = 0.21 Hz

@@ -1,0 +1,46 @@
+##TITLE= Parameter file, TopSpin 3.6.4
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= ptg20
+$$ 2022-11-15 18:28:02.530 +0000  ptg20@auchentoshan
+$$ C:\Bruker\TopSpin3.6.4\exp\stan\nmr\par\user/Proton_quant_test/eretic
+$$ process C:\Bruker\TopSpin3.6.4\prog\mod\edparproc.exe
+##$CAL= 1
+##$CALACQUDATE= <>
+##$CALDATE= <>
+##$ECONC= 9.33
+##$ECONCU= <mmol/l>
+##$ECORR= 1
+##$EINT= 1335019.28398438
+##$ELW= 1
+##$EPOS= 0
+##$ESCAL= 1
+##$EUNIT= <>
+##$INTSCL= 1
+##$NS= 1
+##$P1= 11.1
+##$PP= <zg>
+##$PROBHD= <>
+##$QUANTACQUDATE= <>
+##$QUANTDATE= <>
+##$RECONC= 9.33
+##$RECONCU= <mmol/l>
+##$REFSPEC= <F:/data/service/nmr/Quant_test_EB_sampleE/10>
+##$REINT= 1335019.28398438
+##$REINTERR= 12266.7356593881
+##$RELW= 1
+##$RENSPIN= 5
+##$REPOS= 0
+##$REREG= <2.855329/2.477147 1.452558/1.017148>
+##$REUNIT= <>
+##$RG= 63.47
+##$RORIGIN= <F:/data/service/nmr/Quant_test_EB_sampleE/10/pdata/1>
+##$RPROBHD= <Z116098_0228 (PA BBO 400S1 BBF-H-D-05 Z SP)>
+##$SI= 65536
+##$SW= 20.0254193154209
+##$TE= 298.0052
+##$scaledByNS= no
+##$scaledByRG= no
+##END=

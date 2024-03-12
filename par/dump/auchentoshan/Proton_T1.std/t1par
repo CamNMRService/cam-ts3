@@ -1,0 +1,46 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 52	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= nmrsu
+$$ 2021-10-21 17:09:27.790 +0100  nmrsu@auchentoshan
+$$ F:/data/ptg/nmr/Convection_test_298K_TMB_CDCl3/2/pdata/1/t1par
+$$ process C:\Bruker\TopSpin3.2\prog\mod\dataserver.exe
+##$BIGDEL= 100
+##$CALCDN= yes
+##$COMPNO= 1
+##$CONV= 1e-005
+##$CURSOR= 3
+##$DRIFT= 5
+##$EDGUESS= 0
+##$EDPARM= 0
+##$FCTTYPE= 1
+##$FIDNUMB= 7
+##$FITT1T2= 0
+##$FITTYPE= 0
+##$GAMM= 10000
+##$GRADIEN= 1
+##$GUESSES= (0..23)
+1 1 1 1 1 1 1 1 1 1 1 1 0.1 0.1 0.1 1 1 1 1 1 1 1 1 1
+##$INC= 1
+##$INTRNG= 1
+##$LISTINC= 0.001
+##$LISTTYP= <vdlist>
+##$LITDEL= 10
+##$MAXPNTS= 7
+##$NUMPNTS= 7
+##$NUMTERM= 3
+##$PARM= (0..11)
+1.00350475256933 0.998567112475515 2.01456868234918 0 0 0 0 0 0 0 0 0
+##$PDTYP= <pd>
+##$REGIONS= 3
+##$SHOWINT= yes
+##$SHOWPP= yes
+##$SHOWTXT= 2
+##$START= 1
+##$X_END= 33
+##$X_START= 0.002
+##$Y_END= 2.971079e+008
+##$Y_START= -2.971079e+008
+##END=

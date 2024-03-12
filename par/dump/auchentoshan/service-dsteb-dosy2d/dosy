@@ -1,0 +1,21 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 7	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= Administrator
+$$ 2014-06-27 09:10:02.436 +0100  Administrator@florence
+$$ F:/data/service/nmr/gradient-calib/14/pdata/1/dosy
+$$ process C:\Bruker\TopSpin3.2\prog\au\bin\setdiffparm.exe
+##$DISPmax= -8
+##$DISPmin= -10
+##$Gamma= 4257.7
+##$Gdist= 98.0666667024295
+##$Glen= 1
+##$Ndata= 16
+##$Nexp= 1
+##$Npars= 7
+##$Nvar= 2
+##$Scale= 1
+##$Xlist= <difflist>
+##END=

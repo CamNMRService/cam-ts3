@@ -1,0 +1,4 @@
+Water suppression using excitation sculpting with gradients
+janus-1h-es-kd.std
+NS=128, D1=1s, AQ=3.29s
+10 mins

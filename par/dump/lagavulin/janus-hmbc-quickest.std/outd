@@ -1,0 +1,16 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= nmrsu
+$$ 2020-08-13 15:49:22.074 +0100  nmrsu@lagavulin
+$$ C:/Bruker/TopSpin3.2/exp/stan/nmr/par/user/janus-hmbc-quickest.std/outd
+$$ process C:\Bruker\TopSpin3.2\prog\mod\edparproc.exe
+##$CURPLOT= <PDF reDirect v2>
+##$CURPRIN= <$PDF reDirect v2>
+##$DFORMAT= <normdp>
+##$LAYOUT= <+/janus-hmbc.xwp>
+##$LFORMAT= <normlp>
+##$PFORMAT= <normpl>
+##END=

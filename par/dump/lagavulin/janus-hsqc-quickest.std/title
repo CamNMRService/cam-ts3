@@ -1,0 +1,4 @@
+janus-hsqc-quickest.std
+echo/antiecho  edited adiabatic HSQC
+NS=2, 256 increments with 25% poisson gap NUS schedule
+expt=2m 11s

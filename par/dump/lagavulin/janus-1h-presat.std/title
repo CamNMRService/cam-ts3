@@ -1,0 +1,9 @@
+Dataset name=temp,expno=11
+Solvent=THF
+Instrument=lagavulin,MHz=400.0332
+Probehead=Z108618_0686 (PA BBO 400S1 BBF-H-D-05 Z)
+Pulseprogram=zg30
+Nucleus=1H,P1(us)=12.50,PL1(watts)=15.00
+NS=1,D1(s)=1.00,AQ(s)=3.29,RG=97.44
+SW(ppm)=24.93,SW(Hz)=9973.40,O1(ppm)=8.00
+Reported temperature=298.00

@@ -1,0 +1,10 @@
+- ACCEPTANCE - System: AV400   OrderNo.: GH003913    Customer: Chemistry Dept, Cambridge Uni   Engineer: bdm
+P/N Console: Z133003/00237   Shim system: BOSS I
+Probe: 5 mm PABBO BB/19F-1H/D Z-GRD Z108618/0686    Sample depth:20   Gas: air
+Lineshape test for 1H without rotation (additional test);  Sample: 1% CHCl3 in Acetone-d6  (P/N: Z10248)
+                          Hump:
+                           at 0.11%: between 3219.0 and 3208.3 Hz = 10.7 Hz
+                           at 0.55%: between 3216.3 and 3211.8 Hz = 4.5 Hz
+                           at 50%: Half width at 3214.1 Hz = 0.50 Hz
+
+Note, probably with a different magnet/probe install SF01 was wrong.

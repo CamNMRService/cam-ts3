@@ -1,0 +1,4 @@
+janus-udeft-quickest.std
+UDEFT - Must be run after being in the magnet for 4ish minutes.
+D1=4, AQ=0.36s (do not change), D20=1 (see above), NS=16
+expt=1min 45s

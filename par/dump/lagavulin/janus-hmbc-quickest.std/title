@@ -1,0 +1,5 @@
+janus-hmbc-quickest.std
+Impact-HMBC
+D1=0.25, ns=2, 360 increments
+40% NUS poisson-gap schedule
+4m 10s

@@ -1,0 +1,6 @@
+Dataset name=alfa400-31537,expno=10
+Solvent=TFA_H
+Instrument=lagavulin,MHz=400.0332
+Pulseprogram=zg30,P1=12.50,PL1(watts)=15.00
+NS=32,D1=1.00,AQ=3.29,RG=29.97
+SW(ppm)=24.93,SW(Hz)=9973.40

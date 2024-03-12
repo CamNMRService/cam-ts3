@@ -1,0 +1,5 @@
+700 MHz AVIII tXO cryoprobe
+Water suppression using excitation sculpting with gradients using perfect echo
+Using wavemaker to calculate supprerssion pulse of cnst12 duration
+Cnst12=3000us
+Use wvm -a to calculate pulse

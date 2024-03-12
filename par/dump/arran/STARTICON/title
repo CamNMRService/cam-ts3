@@ -1,0 +1,6 @@
+700Mhz Avance III
+DQFCOSY :- using gradient pulses for selection; with multiple quantum filter according to gradient ratio
+purge pulses to shorten recycle time
+janus-cosy.txo
+1 scan, 512 increments, 35% NUS
+5m

@@ -1,0 +1,24 @@
+##TITLE= Parameter file, TopSpin 3.6.5
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= chemist
+$$ 2023-08-17 09:12:47.625 +0100  chemist@arran
+$$ C:\Bruker\TopSpin3.6.5\exp\stan\nmr\par\user/DOSY_D2O.txo/acqu2
+$$ process C:\Bruker\TopSpin3.6.5\prog\mod\edparproc.exe
+##$ACQT0= 0
+##$BF1= 700.2
+##$FnILOOP= 0
+##$FnMODE= 1
+##$NUC1= <1H>
+##$NusJSP= 0
+##$NusT2= 1
+##$NusTD= 0
+##$O1= 3290.94
+##$ProjAngle= 0
+##$SFO1= 700.20329094
+##$SW= 10.0010971257321
+##$SW_h= 7002.80112044819
+##$TD= 16
+##END=

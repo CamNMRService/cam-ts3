@@ -1,0 +1,4 @@
+15N HSQC
+700MHz Bruker Avance III, TXO cryoprobe
+Low power adiabatic decoupling covers about 250ppm bandwidth only and may give large sidebands
+If necessary repeat with e.g. o2p=250ppm

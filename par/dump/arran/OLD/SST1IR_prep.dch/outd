@@ -1,0 +1,16 @@
+##TITLE= Parameter file, TopSpin 3.6.4
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= nmrservice
+$$ 2022-04-29 01:14:41.394 +0100  nmrservice@aberlour
+$$ C:/Bruker/TopSpin3.6.4/exp/stan/nmr/par/user/SST1IR_prep.dch/outd
+$$ process C:\Bruker\TopSpin3.6.4\prog\mod\edparproc.exe
+##$CURPLOT= <>
+##$CURPRIN= <$>
+##$DFORMAT= <normdp>
+##$LAYOUT= <+/1D_H.xwp>
+##$LFORMAT= <normlp>
+##$PFORMAT= <normpl>
+##END=

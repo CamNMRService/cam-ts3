@@ -80,7 +80,7 @@ if ((pulsecalfile=fopen(pulsecalfilename, "r")) != NULL)
 		sscanf(result,"%f %f", &protonpulse, &statusprotonpulse); 
 		
 		// Sanity check the results
-		if( 5.0 < protonpulse && protonpulse < 25 && 5.0 < statusprotonpulse && statusprotonpulse < 25)
+		if( 5.0 < protonpulse && protonpulse < 28 && 5.0 < statusprotonpulse && statusprotonpulse < 25)
 		{
 			// we found integers in a vaguely sensible range, continue
 			

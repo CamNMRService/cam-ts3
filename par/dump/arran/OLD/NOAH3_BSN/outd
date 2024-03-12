@@ -1,0 +1,16 @@
+##TITLE= Parameter file, TopSpin 3.6.1
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 6	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= nmr-user
+$$ 2019-05-30 17:49:55.198 +0100  CHEM\NMR-user@Cuttlefish-CRL
+$$ C:\Bruker\TopSpin3.6.1\exp\stan\nmr\par\user/NOAH3_BSN/outd
+$$ process C:\Bruker\TopSpin3.6.1\prog\mod\edparproc.exe
+##$CURPLOT= <A4>
+##$CURPRIN= <$1#1#0#1#1#1#1#1#0#-1#-1#1#-1>
+##$DFORMAT= <normdp>
+##$LAYOUT= <+/2D_inv.xwp>
+##$LFORMAT= <normlp>
+##$PFORMAT= <normpl>
+##END=

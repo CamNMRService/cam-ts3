@@ -1,0 +1,16 @@
+##TITLE= Parameter file, TopSpin 3.6.0
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 3	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= root
+$$ 2019-02-27 15:39:25.753 +0000  root@arran
+$$ C:\Bruker\TopSpin3.6.0\exp\stan\nmr\par\user/noesy-presat.txo/outd
+$$ process C:\Bruker\TopSpin3.6.0\prog\mod\edparproc.exe
+##$CURPLOT= <>
+##$CURPRIN= <$>
+##$DFORMAT= <normdp>
+##$LAYOUT= <+/2D_hom.xwp>
+##$LFORMAT= <normlp>
+##$PFORMAT= <normpl>
+##END=

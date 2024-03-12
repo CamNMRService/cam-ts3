@@ -1,0 +1,23 @@
+##TITLE= Parameter file, TopSpin 3.6.5
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 3	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= root
+$$ 2023-01-25 14:25:07.504 +0000  chemist@arran
+$$ C:/Bruker/TopSpin3.6.5/exp/stan/nmr/par/user/15n-cigar-hmbc.test/acqu2
+$$ process C:\Bruker\TopSpin3.6.5\prog\mod\expinstall.exe
+##$ACQT0= 0
+##$BF1= 70.950649824
+##$FnMODE= 1
+##$NUC1= <15N>
+##$NusJSP= 0
+##$NusT2= 1
+##$NusTD= 0
+##$O1= 21285.195
+##$ProjAngle= 0
+##$SFO1= 70.971935019
+##$SW= 50
+##$SW_h= 3548.59675095
+##$TD= 128
+##END=

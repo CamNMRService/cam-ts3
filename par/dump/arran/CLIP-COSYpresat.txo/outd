@@ -1,0 +1,16 @@
+##TITLE= Parameter file, TopSpin 3.6.5
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= chemist
+$$ 2023-03-24 15:37:59.372 +0000  chemist@arran
+$$ C:/Bruker/TopSpin3.6.5/exp/stan/nmr/par/user/CLIP-COSYpresat.txo/outd
+$$ process C:\Bruker\TopSpin3.6.5\prog\mod\edparproc.exe
+##$CURPLOT= <HP LaserJet P2050 Series PCL6>
+##$CURPRIN= <$HP LaserJet P2050 Series PCL6>
+##$DFORMAT= <normdp>
+##$LAYOUT= <+/1D_H.xwp>
+##$LFORMAT= <normlp>
+##$PFORMAT= <normpl>
+##END=

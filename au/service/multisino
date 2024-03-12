@@ -1,0 +1,75 @@
+/*** ^^A -*-C++-*- **********************************************/
+/*	multi_sinocal		15.08.1990			*/
+/****************************************************************/
+/*	Short Description :					*/
+/*	This AU program performs multiple "efp" followed by sinocal on increasing	*/
+/*	expnos. Result stored in sino.txt in original dataset							*/
+/****************************************************************/
+/*	Keywords :						*/
+/*	multiple efp sinocal						*/
+/****************************************************************/
+/*	Description/Usage :					*/
+/*	This AU program performs multiple "efp" on increasing	*/
+/*	expnos.							*/
+/****************************************************************/
+/*	Author(s) :						*/
+/*	Name		: Rainer Kerssebaum			*/
+/*	Organisation	: Bruker Analytik			*/
+/*	Email		: rainer.kerssebaum@bruker.de		*/
+/****************************************************************/
+/*	Name		Date	Modification:			*/
+/*	rke		900815	created				*/
+/****************************************************************/
+/*
+$Id: multiefp,v 1.5 2000/07/12 11:39:49 gsc Exp $
+*/
+
+#include <lib/util.h>
+
+int first, max;
+char string[80];
+char sinoresult[256], rgval[256], sinocommand[256],newline[256];
+float sino, rg, sigleft, sigright, nleft, nright, width;
+FILE *fpnt2;
+
+GETCURDATA
+
+first = expno;
+GETINT ("Enter first expno to process : ",first)
+max = 10;
+GETINT ("Enter number of expnos : ",max)
+GETFLOAT ("sigleft : ",sigleft)
+GETFLOAT ("sigright : ",sigright)
+GETFLOAT ("noiseleft : ",nleft)
+GETFLOAT ("noiseright : ",nright) 
+GETFLOAT ("noise width : ",width)
+sprintf (sinocommand, "sendgui sinocal %f %f %f %f %f", sigleft, sigright, nleft, nright, width);
+WPAR("tmpmefp","proc")
+expno = first; 
+(void) sprintf (sinoresult,"%s/multisino.txt",PROCPATH(0));
+fpnt2=fopen(sinoresult, "wt");
+if(fpnt2==NULL)
+{
+  Proc_err(DEF_ERR_OPT, "No sino result file :\n%s",
+							 sinoresult);
+  ABORT
+}
+
+TIMES(max)
+  RPAR("tmpmefp","proc")
+  EFP
+  XCMD(sinocommand);
+  FETCHPARS("SINO", &sino)
+  FETCHPARS("RG", &rg)
+  sprintf (rgval, " %f %f", rg, sino);
+strcat (rgval,"\n");
+fputs (rgval, fpnt2);
+  IEXPNO
+END
+DEXPNO
+fclose (fpnt2);
+/* delete remaining files */
+
+DELPAR("tmpmefp")
+
+QUITMSG("--- multiefp finished ---")

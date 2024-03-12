@@ -1,0 +1,16 @@
+##TITLE= Parameter file, TopSpin 3.6.0
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= chemist
+$$ 2021-09-29 15:26:09.478 +0100  chemist@arran
+$$ C:/Bruker/TopSpin3.6.0/exp/stan/nmr/par/user/13c-acetan/outd
+$$ process C:\Bruker\TopSpin3.6.0\prog\mod\edparproc.exe
+##$CURPLOT= <>
+##$CURPRIN= <$>
+##$DFORMAT= <normdp>
+##$LAYOUT= <+/1D_X.xwp>
+##$LFORMAT= <normlp>
+##$PFORMAT= <normpl>
+##END=

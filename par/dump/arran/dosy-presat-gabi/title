@@ -1,0 +1,8 @@
+700MHz Bruker Avance II+
+;ledbpgppr2s
+;avance-version (12/01/11)
+;2D sequence for diffusion measurement using stimulated 
+;   echo and LED
+;using bipolar gradient pulses for diffusion
+;using 2 spoil gradients
+;with presaturation during relaxation delay

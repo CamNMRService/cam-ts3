@@ -1,0 +1,4 @@
+NOAH-3 BSR: HMBC + me-HSQC + ROESY (ad)
+WaveMaker supported version with adiabatic off-resonance spinlock
+2-step low-pass HMBC filter, J-compensation and optional multiplicity 
+editing  in HSQC

@@ -1,0 +1,4 @@
+700MHz Bruker Avance III, TXO cryoprobe
+janus-13c-64.txo
+ns=64
+expt = 5m

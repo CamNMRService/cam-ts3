@@ -1,0 +1,28 @@
+##TITLE= Parameter file, TopSpin 3.6.1
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 13	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= nmr-user
+$$ 2019-05-30 17:49:19.896 +0100  CHEM\NMR-user@Cuttlefish-CRL
+$$ C:\Bruker\TopSpin3.6.1\exp\stan\nmr\par\user/NOAH3_BST/clevels
+$$ process C:\Bruker\TopSpin3.6.1\prog\mod\edparproc.exe
+##$LEVELS= (0..255)
+-402044.8950144 -223358.275008 -124087.93056 -68937.7392 -38298.744 -21277.08
+-11820.6 -6567 6567 11820.6 21277.08 38298.744 68937.7392 124087.93056
+223358.275008 402044.8950144 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0
+##$LEVSIGN= 3
+##$MAXLEV= 8
+##$METHOD= 0
+##$NEGBASE= -6567
+##$NEGINCR= 1.8
+##$POSBASE= 6567
+##$POSINCR= 1.8
+##END=

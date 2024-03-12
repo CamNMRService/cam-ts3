@@ -1,0 +1,6 @@
+700MHz Bruker Avance 700 III, TXO cryoprobe
+HSQC
+janus-hsqc-nus.txo
+ns=2, 1024 increments at 20% non-uniform sampling
+expt = 6m50s
+Multiplicity edited

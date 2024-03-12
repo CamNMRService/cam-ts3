@@ -1,0 +1,6 @@
+NMR TEST ACCEPTANCE *** System: AV III (700.20 MHz) *** TopSpin 3.6.0
+Probe: Z143300_0001 CP TXO 700S4 C/N-H-D-05 Z ET *** Sample Depth: 21 mm
+Sample: 40% Dioxane in Benzene-D6 (ASTM) (Z10163)
+13C sensitivity (NPT_13C_sensitivity, spin rate 20 Hz)
+
+SINO (40.0 ppm) [achieved/rated]: Signal (127.63 ppm), Noise (120.33 to 80.33 ppm) [3098.3 >= 1900.0]   <pass>

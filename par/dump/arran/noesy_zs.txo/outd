@@ -1,0 +1,16 @@
+##TITLE= Parameter file, TopSpin 3.6.5
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= nmrsu
+$$ 2023-02-26 08:40:00.130 +0000  nmrsu@arran
+$$ C:/Bruker/TopSpin3.6.5/exp/stan/nmr/par/user/noesy_zs.txo/outd
+$$ process C:\Bruker\TopSpin3.6.5\prog\mod\edparproc.exe
+##$CURPLOT= <>
+##$CURPRIN= <$>
+##$DFORMAT= <normdp>
+##$LAYOUT= <+/service-noesy.xwp>
+##$LFORMAT= <normlp>
+##$PFORMAT= <normpl>
+##END=

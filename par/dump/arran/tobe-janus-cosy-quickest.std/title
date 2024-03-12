@@ -1,0 +1,8 @@
+DQF-COSY
+400Mhz Bruker Avance Neo Prodigy BBO Probe
+janus-cosy-quickest.std
+with purge pulses for repetition time = 1.2s
+ns=2
+TDF1=256
+NUS=37.5%
+expt=4:07min:secs

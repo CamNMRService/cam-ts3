@@ -1,0 +1,8 @@
+NMR TEST ACCEPTANCE *** System: AV III (700.20 MHz) *** TopSpin 3.6.0
+Probe: Z143300_0001 CP TXO 700S4 C/N-H-D-05 Z ET *** Sample Depth: 21 mm
+Sample: 0.3% Chloroform in Acetone-D6 (Z10701)
+1H lineshape without sample rotation (NPT_1H_lineshape_nrot, spin rate 0 Hz)
+
+Line width [achieved/rated]: at 0.11% of signal height [10.9 Hz <= 16.0 Hz]   <pass>
+Line width [achieved/rated]: at 0.55% of signal height [4.8 Hz <= 8.0 Hz]   <pass>
+Line width [achieved/rated]: at 50% of signal height [0.58 Hz <= 0.80 Hz]   <pass>

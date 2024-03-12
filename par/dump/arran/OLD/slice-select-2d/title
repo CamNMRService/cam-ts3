@@ -1,0 +1,12 @@
+Water lineshape
+Read in installation shims.
+pulprog=zg
+ds=0
+ns=1
+p1=1
+rg=0.25
+spinning
+topshim ordmax=8
+Z	-286
+Z2	+2344
+Z3	+358

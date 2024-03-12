@@ -1,0 +1,27 @@
+##TITLE= Parameter file, TopSpin 3.6.0
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= root
+$$ 2020-01-27 12:28:37.839 +0000  root@arran
+$$ C:/Bruker/TopSpin3.6.0/exp/stan/nmr/par/user/dosy-presat-gabi/clevels
+$$ process C:\Bruker\TopSpin3.6.0\prog\mod\edparproc.exe
+##$LEVELS= (0..255)
+-160156.7603712 -88975.977984 -49431.09888 -27461.7216 -15256.512 -8475.84
+-4708.8 -2616 2616 4708.8 8475.84 15256.512 27461.7216 49431.09888 88975.977984
+160156.7603712 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+##$LEVSIGN= 3
+##$MAXLEV= 8
+##$METHOD= 0
+##$NEGBASE= -2616
+##$NEGINCR= 1.8
+##$POSBASE= 2616
+##$POSINCR= 1.8
+##END=

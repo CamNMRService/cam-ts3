@@ -1,0 +1,9 @@
+700MHz Bruker Avance III, TXO cryoprobe
+NOAH-3 (BSC) - HMBC + HSQC + COSY
+optional multiplicity editing via zgoptns
+1 scan 200 complex points
+expt 6 minutes
+
+This is a NOAH dataset with 3 experiments in 1.
+See experiment number 121 onwards for the extracted data which can be processed as indicated in the title.
+For details of the NOAH experiments see references at https://nmr-genesis.co.uk

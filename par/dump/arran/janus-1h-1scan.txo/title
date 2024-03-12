@@ -1,0 +1,5 @@
+700MHz Bruker Avance III
+TXO cryoprobe
+janus-1h-1scan.txo
+ns=1
+expt=10s

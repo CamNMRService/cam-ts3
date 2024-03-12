@@ -1,0 +1,6 @@
+700MHz Bruker Avance II+
+RT Dual probe
+janus-1h-quickest.dul
+pulprog=zg
+d1=10,ds=0,ns=1
+expt=41s

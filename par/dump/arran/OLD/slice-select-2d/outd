@@ -1,0 +1,16 @@
+##TITLE= Parameter file, TopSpin 3.6.0
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= root
+$$ 2018-12-05 10:32:20.681 +0000  root@arran
+$$ C:/Bruker/TopSpin3.6.0/exp/stan/nmr/par/user/slice-select-2d/outd
+$$ process C:\Bruker\TopSpin3.6.0\prog\mod\edparproc.exe
+##$CURPLOT= <hplj4500n>
+##$CURPRIN= <$hplj4500n>
+##$DFORMAT= <normdp>
+##$LAYOUT= <+/layouts.npt/NPT_1H_watersuppression_recflow.xwp>
+##$LFORMAT= <normlp>
+##$PFORMAT= <normpl>
+##END=

@@ -1,0 +1,2 @@
+Proton for temperature setting, according to TE
+Will set temp to TE, wait for equilibration, atma and shim, then run proton. Temperature is not reset afterwards so need to add an experiment at 298K at the end.

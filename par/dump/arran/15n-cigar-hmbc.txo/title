@@ -1,0 +1,6 @@
+wpar700MHz Bruker Avance II+
+CIGAR-HMBC 1H-15N
+(note, decoupling is used during aquisition)
+J-scale factor=5
+min J=1
+max J=10

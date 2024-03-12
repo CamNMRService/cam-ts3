@@ -1,0 +1,6 @@
+700MHz Bruker Avance III
+Proton T2 measurement using TRUE
+;https://doi.org/10.1039/D1SC03391C
+
+Set gpz0 to cover the region of interest and o1p in centre of region
+1% COVERS ABOUT 3KhZ

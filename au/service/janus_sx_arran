@@ -96,7 +96,7 @@ Added systest at begonning - currently hump/sino, plus carbon pulse cal/sino
 
 Added option to skip systest etc - call with "janus_sx_arran skiptest"
 Then it will skip the 2 min delay, the systems tests, and the initial ii
-and just crack on with the experiments 
+and just crack on with the experiments . Also "skipcarbon" to skip just the carbonn test but do the rest
 
 */
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
@@ -348,9 +348,12 @@ if(strcmp(cmd,"skiptest"))
 		// keep first dataset with wobb curves in
 		IEXPNO;
 		XAU("hump_sino_test_b1_02","")
-		expno=20;
-		SETCURDATA
-		XAU("poise_13c_p1_b1_01","")
+		if(strcmp(cmd,"skipcarbon"))
+		{
+			expno=20;
+			SETCURDATA
+			XAU("poise_13c_p1_b1_01","")
+		}
 
 	}
 

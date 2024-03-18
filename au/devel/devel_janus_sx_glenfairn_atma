@@ -97,8 +97,9 @@ And added pulse length check and associated message in SAmpleProblems*/
 // Devel version with new atma handling
 //
 
-// Looks for 31P or 19F in protoncol - if there does suitable ATMA on junk dataset
+// Looks for 31P or 19F or 11B or 13C in protocol - if there does suitable ATMA on junk dataset
 // and sets atma flag to 0
+// NB if we want a multinuclear composite experiment need lowercase 
 // If atma flag is 1 it's done on every experiment otherwise it does "anma nowin selectnuc" for safety
 // which costs only a couple of seconds hopefully...
 
@@ -589,6 +590,11 @@ if ( strstr ( protocol, "POS59") != NULL )
         else if ( strstr ( protocol, "13C") != NULL )
         {
             RPAR("C13CPD", "all")
+            ATMAflag=0;
+        }
+		else if ( strstr ( protocol, "11B") != NULL )
+        {
+            RPAR("janus-11b.bbf", "all") // need this to get 1H to tune
             ATMAflag=0;
         }
         if (ATMAflag==0)

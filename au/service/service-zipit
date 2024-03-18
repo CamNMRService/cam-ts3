@@ -1,0 +1,148 @@
+/*service-zipit - based on service-email		*/
+/*Aim is to put the program defaults into a file, and read that			*/
+/*This file must be called ed.txt and be in c:/windows			   	*/
+/*contains email@here.there.com,sekritpasswordy,c:/log-directory/, d:/zips-directory/ */
+
+/*    camnmrservice@gmail.com,ONETIMEAPP-PASSWORD-CREATE-ON-GOOGLE,c:/auto-email-log/,d:/zips/   */
+
+/*Uses 7za.exe command line version from z-zip.org, placed into C:/windows	*/
+/*Relies on the robocopy command being in windows				*/
+/*uses the output of service-pdfit						*/
+/*Takes a command line option of a zip password and verbose 			*/
+
+#include <stdio.h>
+#include <inc/sysutil>
+
+
+/*THIS MUST BE SET**************************************************/
+
+char defaultsfile[PATH_MAX]="c:/windows/ed.txt";
+char body[1023]="DO NOT REPLY. Any problems please email nmr-at-ch.cam.ac.uk.";
+
+/******************************************************************/
+
+char in_data[PATH_MAX];
+char user_id[255];
+char password[255];
+char log_dir[255];
+char zip_dir[PATH_MAX];
+char *file_data,*field;
+char orig_au[255],proc_au[255];
+char email[255];
+char status1[127]="emailing";
+char zip_cmd_str[2048]="\n";
+char email_cmd_str[2048]="\n";
+char zip_password[1023]="unset";
+
+char batfile[PATH_MAX],batcmd[127]="top-copy.bat";
+char zip_name[PATH_MAX]="unset";
+char pdfname[PATH_MAX]="unset";
+char pul[255],nuc1[7];
+char directory[PATH_MAX];
+char emailedlist[PATH_MAX] = "unset";
+char status_string[127]="working";
+char temp_str[PATH_MAX]="temp string";
+char data_File[PATH_MAX];
+int finish=0;
+int suffix=1;
+int ch;
+int cmdstatus,orig_expno,i_limit=999,i_exp=1,pdfthere=0,i;
+int verbose=0;
+int zip_password_present=0;
+
+FILE *plist = NULL;
+FILE *fdef = NULL;
+FILE *fbat = NULL;
+FILE *statusprint = NULL;
+
+
+/*--- Get defaults from the defaults file ----------------------*/
+fdef = fopen( defaultsfile, "r" );
+rewind(fdef); //go to begining of file
+file_data = fgets(in_data, 1023, fdef); //read in file as a continuous string
+fclose(fdef); //close the file
+//file is open, read data
+field = strtok(in_data, ",");
+strcpy( user_id,field);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &password);
+field = strtok(NULL, ",");
+sscanf(field,"%s", &log_dir);
+field = strtok(NULL, ",");
+sscanf(field,"%s", &zip_dir);
+
+/*what command line options do we have...*/
+/*How about just one option...is it verbose? If so, no zip password.*/
+if (i_argc == 3 ) {
+	strcpy(zip_password,i_argv[2]); //lets just assume first argument is a password.
+	if (strstr(zip_password,"help") ) //...unless its not.
+	{
+		Proc_err(INFO_OPT, "auto-email takes the following arguments :-  \n zip_password, verbose and help. \n  The first argument can be any of these, password has to be the first. \n You can combine zip_password and verbose.");
+		exit(1);
+	}
+	
+	if (strstr(zip_password,"verbose") )
+	{
+		verbose=1;
+		zip_password_present=0;
+		sprintf(zip_password, "unset"); //ok it is is verbose so unset it and no zip_password_present
+	}
+	else
+	{
+		zip_password_present=1;
+		strcpy(temp_str," The zip password is :- ");
+		strcat(body,temp_str);
+		strcat(body,zip_password);
+		
+	}
+}
+/* How about a zip password is present and verbose*/
+if (i_argc > 3) {
+	strcpy(zip_password,i_argv[2]);
+	zip_password_present=1; //we'll set it to verbose, whatever the other arguments are
+	verbose=1;
+}
+/*Catch if we've been called by xaup. PS Dont use xaup as a password*/
+
+if (strstr(zip_password,"xau") )
+	{
+		zip_password_present=0;
+		sprintf(zip_password, "NONE"); //ok it is is verbose so unset it and no zip_password_present
+	}
+
+sprintf(emailedlist,"%s/emailed-list.txt",log_dir);
+//Need to do following to get detials from experiment
+GETCURDATA
+FETCHPAR("PULPROG", &pul)
+FETCHPAR("NUC1",nuc1)
+
+
+
+/*make up a batfile with commands to zip up the data, then run the batch file*/
+sprintf( zip_cmd_str, "robocopy  %s%s\\%s /S %s%s",disk,user,name,zip_dir,name);
+sprintf( batfile, "%s\\%s", log_dir,batcmd);
+fbat = fopen(batfile, "w");
+fputs( zip_cmd_str, fbat);
+fclose( fbat);
+//now write a RETURN onto the batfile
+sprintf(zip_cmd_str,"\r\n");
+fbat = fopen(batfile, "a");
+fputs( zip_cmd_str, fbat);
+fclose( fbat);
+sprintf( zip_name, "%s\%s.zip", zip_dir ,name);
+//now make the command to zip the file using z7a, with password if type as command option
+if (zip_password_present == 1){
+	sprintf( zip_cmd_str, "7za a  %s %s%s -r -x!1r -x!1i -x!2rr -x!2ir -x!2ri -x!2ii -p%s",zip_name, zip_dir,name,zip_password);
+	}
+else
+	{ sprintf( zip_cmd_str, "7za a  %s %s%s -r -x!1r -x!1i -x!2rr -x!2ir -x!2ri -x!2ii",zip_name, zip_dir,name);
+	}
+
+fbat = fopen(batfile, "a");
+fputs( zip_cmd_str, fbat);
+fclose( fbat);
+//made the bat file, now run it.
+system(batfile);
+//Ok, made the zip file, now to email it using sendemail
+
+QUIT

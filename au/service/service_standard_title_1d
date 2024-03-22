@@ -5,6 +5,9 @@
 
 /* Call with 'a' as a commandline option to append rather than overwrite*/
 
+#include <time.h>
+
+
 char title_path[PATH_MAX],  titletextnew[2048]="NULL"; 
 char arg[256];
 char pulprog[256];
@@ -13,14 +16,15 @@ char dataset[PATH_MAX];
 char dataset_probe[PATH_MAX];
 char solvent[256];
 char nuc_one[8];
+char str_date[256];
 float aq,d_one,p_one;
 float rg,plw1, pldb1;
 float temp;
 double sfo_one,o1,o1p,sw,sw_h;
 
 int ns,td;
-
-
+int date;
+time_t conv_date;
 
 
 FILE *ftitle = NULL; 
@@ -61,11 +65,17 @@ FETCHPARS("PLdB 1", &pldb1)
 FETCHPARS("SOLVENT", solvent)
 FETCHPARS("PROBHD", dataset_probe)
 FETCHPARS("TE",&temp)
+FETCHPARS("DATE",&date)
 
-
+conv_date=date;
 aq = td/(2*sw*sfo_one);
 o1p = o1/sfo_one;
 
+    time_t unix_time;
+    struct tm *tm_info;
+    tm_info = localtime(&conv_date);
+    sprintf( str_date, "%02d-%02d-%02d - %02d:%02d:%02d\n",tm_info->tm_year + 1900, tm_info->tm_mon + 1, tm_info->tm_mday,  tm_info->tm_hour, tm_info->tm_min, tm_info->tm_sec );
+  
 sprintf(titletextnew, "Dataset name=%s,expno=%i\n",name,expno);
 fputs( titletextnew, ftitle); /*add new text to it*/
 sprintf(titletextnew, "Solvent=%s\n",solvent);
@@ -82,12 +92,14 @@ sprintf(titletextnew,"SW(ppm)=%.2f,SW(Hz)=%.2f,O1(ppm)=%.2f\n",sw,sw_h,o1p);
 fputs( titletextnew, ftitle); /*add new text to it*/
 sprintf(titletextnew,"Reported temperature=%.2f\n",temp);
 fputs( titletextnew, ftitle); /*add new text to it*/
-
-
-
+//sprintf(titletextnew,"Unix Date - %i\n",date);
+//fputs( titletextnew, ftitle); /*add new text to it*/
+sprintf(titletextnew,"%s\n",str_date);
+fputs( titletextnew, ftitle); /*add new text to it*/
 fclose( ftitle);
 
 
 QUIT
+
 
 

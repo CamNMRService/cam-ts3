@@ -1,0 +1,183 @@
+#*******************************************************************
+#
+# $Source: /sc/CvsTree/sc/gen/src/prg/lists/prosol/pulseassign/default,v $
+#
+# Copyright (c) 2009
+# Bruker BioSpin GmbH
+# D-76287 Rheinstetten, Germany
+#
+# All Rights Reserved
+#
+#
+# $Id: default,v 1.6.2.6 2017/06/02 12:45:36 wem Exp $
+#
+#*******************************************************************
+#
+#avance-version (17/06/02)
+Version=3.001;
+#
+#pulses
+#
+P[0]=PW90;1				#  90 deg pulse F1
+P[1]=PW90;1				#  90 deg pulse F1
+P[2]=PW90*2;1				# 180 deg pulse F1
+P[3]=PW90;2				#  90 deg pulse F2
+P[4]=PW90*2;2				# 180 deg pulse F2
+P[5]=SQPW[1]*0.66;1			#  60 deg pulse F1, TOCSY
+P[6]=SQPW[7];1				#  90 deg pulse F1, asap using hetero-T numbers as these are maybe sensible??
+P[7]=SQPW[1]*2;1			# 180 deg pulse F1, TOCSY
+P[8]=SHPW[7];1                          #  90 deg selective F1, WET
+P[9]=SQPW[1];2				#  90 deg pulse F2, TOCSY
+P[10]=SQPW[1]*2;2			# 180 deg pulse F2, TOCSY
+P[11]=SHPW[0];1				#  90 deg selective F1
+P[12]=SHPW[1];1				# 180 deg selective F1
+P[13]=SHPW[5];1				# 180 deg refocussing, adiabatic
+P[14]=SHPW[4];2				# 180 deg inversion, adiabatic
+#P[15]=                                 # cw pulse F1, ROESY from dataset
+#
+P[18]=SHPW[4];1				# off-resonance presat F1
+#
+P[21]=PW90;3				#  90 deg pulse F3
+P[22]=PW90*2;3				# 180 deg pulse F3
+P[23]=PW90;4				#  90 deg pulse F4
+P[24]=SHPW[5];2				# 180 deg refocussing, adiabatic
+P[25]=SQPW[11]*2;1			# 180 deg pulse, Shaka ROESY
+P[26]=SHPW[4];1				# 180 deg inversion F1, adiabatic
+P[27]=PW90;1				#  90 deg pulse F1, WATERGATE
+#
+P[29]=SHPW[5];1                         # flip back pulse
+#
+P[31]=SHPW[19];2                        # 180 deg adiabatic, F2, 13C x-filter
+P[32]=SHPW[18];1                        # 180 deg adiabatic, F1, z-spoil
+#P[33]=SHPW[];1                         #  90 deg, F1, hadamard
+#P[34]=SHPW[];1                         # 180 deg, F1, hadamard
+#P[35]=SHPW[];2                         #  90 deg, F2, hadamard
+P[36]=SHPW[1];2                         # 180 deg, F2, C selective (hadamard)
+#P[37]=SHPW[];3                         #  90 deg, F3, hadamard
+#P[38]=SHPW[];3                         # 180 deg, F3, hadamard
+P[39]=SHPW[14];2                        # 180 deg, F2, Bip
+P[40]=SHPW[5]*2;1                       # 180 deg sel. F1, 1H (exc. scul)
+#P[41]=                                 # adiabatic ramp, F1
+#P[42]=SHPW[];1                         # STD saturation pulse
+P[43]=SHPW[3];2                         # 180 deg, F2, bandsel. 13C
+P[44]=SHPW[15];1                        # 180 deg, F1, broadband
+#
+P[46]=SHPW[1];1				# 180 deg selective F1
+P[47]=SHPW[25];1			# 180 deg selective F1 ZS
+P[48]=SHPW[26];1			# 180 deg selective F1 ZS, instant
+#P[49]=SHPW[28];1			# psyche
+P[50]=SHPW[1];1				# 180 deg selective F1 II
+#P[51]=					# sharc
+#
+P[56]=SHPW[12];3                        # 180 deg, F3, broadband
+#P[57]=SHPW[13];3			# 180 deg, F3, 15N adiabatic
+P[58]=SHPW[4];3				# 180 deg inversion, adiabatic
+#
+P[62]=SHPW[12];3                        # 180 deg adiabatic decoupling, F2, 13C
+P[63]=SHPW[12];2                        # 180 deg adiabatic decoupling, F2, 13C
+#
+#decoupling pulses
+#
+PCPD[1]=SQPW[0];1			# 90 deg pulse F1, dec.
+PCPD[2]=SQPW[0];2			# 90 deg pulse F2, dec.
+PCPD[3]=SQPW[0];3			# 90 deg pulse F3, dec.
+PCPD[4]=SQPW[0];4                       # 90 deg pulse F4, 2H, dec.
+#
+#power levels
+#
+PLW[1]=PL90;1				# high power, F1
+PLW[2]=PL90;2				# high power, F2
+PLW[3]=PL90;3				# high power, F3
+PLW[4]=PL90;4				# high power, F4
+#
+PLW[9]=SQPL[3];1			# presat power, F1
+PLW[10]=SQPL[7];1			# asap power, F1 - using hetero-T numbers as these are maybe sensible??
+PLW[11]=SQPL[2];1			# ROESY power, F1
+PLW[12]=SQPL[0];2			# dec. power, F2
+PLW[13]=SQPL[4];2			# dec. power 2, F2
+PLW[14]=SQPL[13];2			# low power cw, F2 (NOE-diff)
+PLW[15]=SQPL[1];2			# TOCSY power, F2
+PLW[16]=SQPL[0];3			# dec. power, F3
+PLW[17]=SQPL[0];4                       # dec. power, F4, 2H
+PLW[18]=PL90;1				# WATERGATE power, F1
+PLW[19]=SQPL[0];1			# dec. power, F1
+#
+PLW[21]=SQPL[3];2			# low power cw (lc)
+#
+PLW[23]=SQPL[1];3			# TOCSY power, F3
+PLW[24]=SQPL[14];2			# HD decoupling, F2
+PLW[25]=SHPL[20];2			# Eretic, F2
+PLW[26]=SQPL[5];2                       # low power cpd
+PLW[27]=SQPL[11];1			# Shaka Spinlock
+#
+PLW[29]=SQPL[1];1			# TOCSY power, STD SL filter, F1
+#
+PLW[30]=SQPL[0];2			# dec. power, F2, 13C (=pl12)
+PLW[31]=SQPL[6];2			# dec. power, F2, 13C, cw bilev
+PLW[32]=SQPL[12];1			# presat power low, F1
+PLW[33]=SQPL[4];3			# dec. power 2, F3
+#
+PLW[36]=SQPL[6];3                       # dec. power, F3, 15N, cw bilev
+#
+#shapes
+#
+SH[1]=SH[0];1				#  90 deg selective F1
+SH[2]=SH[1];1				# 180 deg selective F1
+SH[3]=SH[4];2				# adiabatic 180 deg, F2, inversion
+SH[4]=SH[14];2				# 180 deg Bip, F2, inversion
+SH[5]=SH[5];1				# adiabatic 180 deg, F1, refocussing
+SH[6]=SH[4];1				# off-resonance presat F1
+SPW[6]=SQPL[3];1			# presat power, F1
+SH[7]=SH[5];2				# adiabatic 180 deg, F2, refocussing
+SH[8]=SH[4];1				# adiabatic 180 deg, F1, inversion
+#SH[9]=SH[];1                           # saturation pulse STD
+SH[10]=SH[5];1                          # flip-back pulse, F1, 1H (es)
+SH[11]=SH[5];1                          # flip-back pulse, F1, H
+#SH[12]=                                # adiabatic ramp roesyad
+#SH[13]=                                # adiabatic ramp roesyad
+SH[14]=SH[13];2				# adiab. bilev dec., F2, 13C
+#SH[15]=                                # eretic
+SH[15]=SH[12];3				# adiab. dec., F2, 13C
+#SH[16]=                                # adiabatic ramp roesyad
+#SH[17]=                                # adiabatic ramp roesyad
+SH[18]=SH[19];2                         # adiab. 180 deg, F2, 13C, x-filter
+SH[19]=SH[7];1                          #  90 deg, F1, wet
+SPW[19]=SHPL[7]*0.817;1
+SH[20]=SH[7];1                          #  90 deg, F1, wet
+SPW[20]=SHPL[7]*1.270;1
+SH[21]=SH[7];1                          #  90 deg, F1, wet
+SPW[21]=SHPL[7]*0.593;1
+SH[22]=SH[7];1                          #  90 deg, F1, wet
+SPW[22]=SHPL[7]*3.198;1
+#SH[23]=SH[];1                          #  90 deg, F1, hadamard
+#SH[24]=SH[];1                          # 180 deg, F1, hadamard
+#SH[25]=SH[];2                          #  90 deg, F2, hadamard
+SH[26]=SH[1];2                          # 180 deg, F2, C selective (hadamard)
+#SH[27]=SH[];3                          #  90 deg, F3, hadamard
+#SH[28]=SH[];3                          # 180 deg, F3, hadamard
+SH[29]=SH[18];1                         # adiabatic 180 deg, F1, z-spoil
+SH[30]=SH[15];1                         # 180 deg, F1, 1H broadband
+SH[31]=SH[12];2				# adiab. dec., F2, 13C
+SH[32]=SH[3];2				# 180 deg, F2, bandsel. 13C
+#
+SH[34]=SH[25];1				# 180 deg selective F1, ZS
+SH[35]=SH[1];1				# 180 deg selective F1
+SH[36]=SH[26];1				# 180 deg selective F1, ZS instant
+#SH[37]=SH[28];1			# psyche
+#SH[38]=SH[13];3			# 180 deg, F3, 15N adiabatic
+SH[39]=SH[12];3                         # 180 deg, F3, 15N broadband
+SH[40]=SH[1];1				# 180 deg selective F1 II
+SH[41]=SH[4];1                          # Squa shape for cw spinlock (temporary)
+SH[42]=SH[4];3				# adiabatic 180 deg, F2, inversion
+#
+#
+#global
+#
+DE=DE;1
+D[16]=D_grad;1				#
+P[16]=P_grad1;1				#
+P[17]=P_mlev;1				#
+P[19]=P_grad2;1				#
+P[20]=P_mlev;2				#
+P[28]=P_hsqc;1				#
+#

@@ -1,3 +1,7 @@
+#to enable exectuing powershell scripts:
+# Open powershell as administrator, and run:
+# set-executionpolicy remotesigned
+
 # set this as appropriate
 $FolderPath = "C:\Users\chemist\SXpresslog"
 

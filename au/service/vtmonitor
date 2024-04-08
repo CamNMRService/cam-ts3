@@ -11,7 +11,7 @@ int isVTU = LibAcqLVtuType();
 // Abort if failure to determine type
 if(isVTU < 0)
 {
-        Proc_err(DEF_ERR_OPT, "Error: %s", LibAcqGetErrMsg());
+        Proc_err(INFO_OPT, "Error: %s", LibAcqGetErrMsg());
         ABORT
 }
  while (failure<3)
@@ -45,7 +45,7 @@ else
 if(failure==2)
 {
         // failed twice, try to turn VT on again...
-        Proc_err(DEF_ERR_OPT,"VT unit seems to be off or not communicating, attempting restart...");
+        Proc_err(INFO_OPT,"VT unit seems to be off or not communicating, attempting restart...");
 
         if ( isVTU==2 )
         {
@@ -66,14 +66,14 @@ if(failure==2)
 	}
         else
         {
-                Proc_err(DEF_ERR_OPT,"VT has restarted OK - maybe wait for temperature to stabilise");
+                Proc_err(INFO_OPT,"VT has restarted OK - maybe wait for temperature to stabilise");
         }
 
 }
 }
 
  // if we exited th while loop we are in error state, eitehr off or comms problem - send email and pop up error
-Proc_err(DEF_ERR_OPT,"WARNING: VTU not switched on! CHeck ASAP");
+Proc_err(INFO_OPT,"WARNING: VTU not switched on! CHeck ASAP");
 XAU("whoopwhoop","Arran VTU failure!!")
 STOPMSG("WARNING: VTU not switched on! CHeck ASAP")
 

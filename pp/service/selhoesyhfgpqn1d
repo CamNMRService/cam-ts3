@@ -1,0 +1,134 @@
+;selhoesyfhgpqn1d
+;avance-version (07/04/04)
+;1D heteronuclear 19F-1H NOESY
+
+;
+;C. Yu & G. Levy, J. Am. Chem. Soc. 106, 6533 (1984)
+;
+;$CLASS=HighRes
+;$DIM=1D
+;$TYPE=
+;$SUBTYPE=
+;$COMMENT=
+
+;Tim C 1H observe 19F-1H HOESY
+;Fluorine selective, with gradient spin echo prior
+;to first pair of simultaneous 90 degrree pulses
+;no 19F CPD during 1H observe
+;with grad purge BPP
+;with ZQ cancellation after mixing time
+
+;Sequence written for shared 1H/19F transmitter with QNP switch
+
+;Peter.gierth@bruker.com
+;Modified to add calculations of shaped pulse length and power based on bandwidth 
+;of CNST55 (ppm)
+;SPW26 is checked against PLW2 at run time - if the shaped pulse power is higher the sequence aborts
+
+#include <Avance.incl>
+#include <Delay.incl>
+#include <Grad.incl>
+
+
+"p2=p1*2"
+"p4=p3*2"
+"d11=30m"
+"d12=20u"
+
+#   ifdef CALC_SP
+"p35=(bwfac25/(cnst55*bf2))*1000000"
+"spw25=plw2/((p35*90.0)/(p3*totrot25))*((p35*90.0)/(p3*totrot25))*(integfac25*integfac25)"
+"spoal26=0.5"
+#   endif /*CALC_SP*/
+
+
+"TAU1=d8*0.5-p16-d16-53u"
+"TAU2=d8*0.5-p16-d16-d12-p3*2-53u"
+"acqt0=-p1*2/3.14159"
+
+"cnst60=spw25"
+"cnst60=cnst60"
+"cnst61=plw2"
+"cnst61=cnst61"
+
+1 ze
+  1m
+  if "cnst60<cnst61" goto Passaq
+  2u 
+  print "Selective pulse power exceeds hard pulse!"
+  goto HaltAcqu
+  Passaq, 1m
+  d11 QNP_X
+2 30m
+  d12 SWITO_F
+  d1 pl2:f2
+  (p3 ph1):f2
+  p16:gp1
+  d16 pl0:f2
+  (p35:sp25 ph3):f2
+   p16:gp1
+  d16 pl2:f2
+  (p3 ph2):f2
+  d12 SWITO_H
+  (p1 ph1):f1			
+  50u UNBLKGRAD		
+  TAU1
+  p16:gp2
+  d16
+  3u
+  (p2 ph1):f1
+  d12 SWITO_F
+  (p4 ph1):f2
+  3u
+  p16:gp2*-1
+  d16
+  50u BLKGRAD
+  TAU2
+  (p3 ph5):f2
+  (p3 ph6):f2
+  d12 SWITO_H
+  (p1 ph4):f1
+  go=2 ph31
+  30m mc #0 to 2 F0(zd)
+HaltAcqu, 1m
+exit
+
+
+ph1=0
+ph2=0 2
+ph3=1
+ph4=0 0 0 0 1 1 1 1 2 2 2 2 3 3 3 3
+ph5=0
+ph6=0 0 2 2
+ph31=0 2 0 2 1 3 1 3 2 0 2 0 3 1 3 1
+
+
+;pl1 : f1 channel - power level for pulse (default)
+;pl2 : f2 channel - power level for pulse (default)
+;pl12: f2 channel - power level for CPD/BB decoupling
+;p1 : f1 channel -  90 degree high power pulse
+;p2 : f1 channel - 180 degree high power pulse
+;p3 : f2 channel -  90 degree high power pulse
+;p4 : f2 channel - 180 degree high power pulse 
+;p16: homospoil/gradient pulse
+;d1 : relaxation delay; 1-5 * T1
+;d8 : mixing time
+;d12: delay for power switching                      [20 usec]
+;d16: delay for homospoil/gradient recovery
+;NS: 16 * n
+;DS: 16
+
+
+;use gradient ratio:    gp 2
+;                                  40 
+
+;for z-only gradients, using gp2 for consistency with selective version :
+;gpz1: 15%
+;gpz2: 40%
+
+
+;use gradient files:   
+;gpnam1: SMSQ10.100
+;gpnam2: SMSQ10.100
+
+;$Id: hoesyph,v 1.6 2007/04/11 13:34:30 ber Exp $

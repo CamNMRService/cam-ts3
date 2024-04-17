@@ -1,0 +1,33 @@
+//phaseslices2
+// AU program to phase individual slices of a pseudo-2D spectrum using APK0
+// Preserves sign - checks whether APK0 on each row changes the phase by more than 
+// Obv works on processed data so need to run again if you redo XF2
+
+int size, s_procno, nprocno;
+float phase0_orig, phase0_new;
+
+GETCURDATA
+
+s_procno = procno;
+nprocno=1000;
+
+FETCHPAR1S("SI", &size)
+for (i1 = 1; i1 <= size; i1++)
+{
+RSR(i1,nprocno)
+DATASET(name,expno,nprocno,disk,user);
+FETCHPARS("PHC0", &phase0_orig)
+APK0;
+FETCHPARS("PHC0", &phase0_new)
+if(abs(phase0_new-phase0_orig)>90.0)
+{
+STOREPAR("PHC0", 180.0)
+STOREPAR("PHC1", 0.0)
+PK
+}
+nprocno+=1;
+WSR(i1,s_procno,expno,name,user,disk)
+DATASET(name,expno,s_procno,disk,user);
+}
+
+QUIT

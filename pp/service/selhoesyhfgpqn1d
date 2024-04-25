@@ -3,8 +3,14 @@
 ;1D heteronuclear 19F-1H NOESY
 
 ;
-;C. Yu & G. Levy, J. Am. Chem. Soc. 106, 6533 (1984)
+;C. Yu & G. Levy, J. Am. Chem. Soc. 106, 6533 (1984) (original HOESY)
 ;
+; This 1D sequence:
+: Conformational Analysis of Fluorinated Pyrrolidines Using 19F–1H Scalar Couplings and Heteronuclear NOEs
+; Combettes, L.E., Clausen-Thue, P., King, M.A., Odell, B., Thompson, A.L., Gouverneur, V. and Claridge, T.D.W. (2012), 
+; Conformational Analysis of Fluorinated Pyrrolidines Using 19F–1H Scalar Couplings and Heteronuclear NOEs. 
+; Chem. Eur. J., 18: 13133-13141. 
+; https://doi.org/10.1002/chem.201201577
 ;$CLASS=HighRes
 ;$DIM=1D
 ;$TYPE=

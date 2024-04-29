@@ -1,0 +1,16 @@
+##TITLE= Parameter file, TopSpin 3.6.5
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= ptg20
+$$ 2024-04-29 14:21:14.502 +0100  ptg20@DESKTOP-3IJF6FR
+$$ C:\Bruker\cam-ts3\par\devel/janus-11Bbssp.std/outd
+$$ process C:\Bruker\TopSpin3.6.5\prog\mod\edparproc.exe
+##$CURPLOT= <b18>
+##$CURPRIN= <$PDF reDirect v2>
+##$DFORMAT= <normdp>
+##$LAYOUT= <+/1D_X.xwp>
+##$LFORMAT= <normlp>
+##$PFORMAT= <normpl>
+##END=

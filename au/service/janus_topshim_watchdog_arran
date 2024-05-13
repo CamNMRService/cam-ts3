@@ -107,7 +107,7 @@ sprintf(tscommand,"topshim plotall convcomp %s", topshim_option);
 // tuneaxz should be ok for CDCl3 now? Not really but hard to investigate...
 // Do TSO if it's H2O/D2O or whatever
 FETCHPAR("SOLVENT", solvent);
-if(str(solvent, "D2O"))
+if(strstr(solvent, "D2O"))
 {
 	sprintf(tscommand,"topshim plotall convcomp tuneaxyz %s", topshim_option);
 	XCMD(tscommand);

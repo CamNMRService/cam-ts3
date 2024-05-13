@@ -21,6 +21,8 @@
 //  AUERR should be -1 if topshim fails, so main janus AU will interpret the result correctly
 // robocpy output directed to null
 
+// 13/5/2024 added TSO for samples whose solvent name contains D2O (strictly capitals, so use d2o for solvents where d2o is not supposed to be the lock peak)
+
 #include <time.h>
 time_t now_s, dtime_s;		  	/* seconds since 1970 */
 struct tm *now;	  		/* structure with year, month etc. */
@@ -112,7 +114,7 @@ if(str(solvent, "D2O"))
 }
 else
 {
-	XAU(tso,"");
+	XAU("tso","");
 }
 
 

@@ -41,6 +41,7 @@
 /*										case peak picking bit fails becaus the residual peak is too small*/
 /* ptg             2023-09-07 Rewrite all options to use userA1 settings*/
 /* ptg 				2023-09-08 added setdef to inhibit trouble error messages from bt_calibrate_o1 and changed bt_calibrate_o1 settings*/
+/* ptg 			2024-05-15 replace AUTOPHASE with loopadj_fallback to take care of cases where user selects a fully deuterated solvent but it's only partly deuterated*/
 /****************************************************************/
 
 

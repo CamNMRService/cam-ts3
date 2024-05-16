@@ -1,0 +1,97 @@
+;hmbcgpndqf
+;avance-version (12/01/11)
+;HMBC
+;2D H-1/X correlation via heteronuclear zero and double quantum
+;   coherence
+;optimized on long range couplings
+;no decoupling during acquisition
+;using gradient pulses for selection
+;Using shaped 90 degree pulses on f2 channel
+;$CLASS=HighRes
+;$DIM=2D
+;$TYPE=
+;$SUBTYPE=
+;$COMMENT=
+
+
+#include <Avance.incl>
+#include <Grad.incl>
+  
+prosol relations=<triple_na>
+"p2=p1*2"
+"d6=1s/(cnst13*2)"
+
+
+"d0=3u"
+
+"in0=inf1/2"
+
+
+1 ze 
+2 d1 
+3 p1 ph1
+  d6
+  (p13:sp2 ph3):f2
+  d0
+  50u UNBLKGRAD
+  p16:gp1
+  d16
+  p2 ph2
+  50u
+  p16:gp2
+  d16
+  d0
+  (p13:sp2 ph4):f2
+  4u
+  p16:gp3
+  d16
+  4u BLKGRAD
+  go=2 ph31
+  d1 mc #0 to 2 F1QF(caldel(d0, +in0))
+exit 
+  
+
+ph1=0 
+ph2=0 0 2 2
+ph3=0 2
+ph4=0 0 0 0 2 2 2 2
+ph31=0 2 0 2 2 0 2 0
+
+
+;pl1 : f1 channel - power level for pulse (default)
+;pl2 : f2 channel - power level for pulse (default)
+;p1 : f1 channel -  90 degree high power pulse
+;p2 : f1 channel - 180 degree high power pulse
+;p13 : f2 channel -  90 degree shaped pulse
+;p16: homospoil/gradient pulse
+;sp2: f2 channel - shaped pulse 90 degree
+;d0 : incremented delay (2D)                  [3 usec]
+;d1 : relaxation delay; 1-5 * T1
+;d6 : delay for evolution of long range couplings
+;d16: delay for homospoil/gradient recovery
+;cnst13: = J(XH) long range
+;inf1: 1/SW(X) = 2 * DW(X)
+;in0: 1/(2 * SW(X)) = DW(X)
+;nd0: 2
+;ns: 2 * n
+;ds: 16
+;td1: number of experiments
+;FnMODE: QF
+
+;use gradient ratio:	gp 1 : gp 2 : gp 3
+;			  50 :   30 : 40.1   for C-13
+;			  70 :   30 : 50.1   for N-15
+
+;for z-only gradients:
+;gpz1: 50% for C-13, 70% for N-15
+;gpz2: 30%
+;gpz3: 40.1% for C-13, 50.1% for N-15
+
+;use gradient files:   
+;gpnam1: SMSQ10.100
+;gpnam2: SMSQ10.100
+;gpnam3: SMSQ10.100
+
+
+
+;$Id: hmbcgpndqf,v 1.6 2012/01/31 17:49:23 ber Exp $

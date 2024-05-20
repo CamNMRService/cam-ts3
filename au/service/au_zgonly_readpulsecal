@@ -46,6 +46,9 @@
 // Now also set the hard pulses after doing getprosol x y
 // Values are set within the if statements for carbon job or not carbon job
 
+//PTG 20_05_2024: read instrum from pulsecal file, as it's a status parameter so you can't read from a 
+// dataset where no acquisition has been done...
+
 char pulsecalfilename[PATH_MAX];
 FILE *pulsecalfile = NULL;
 char instrum[128], result[255];
@@ -69,7 +72,7 @@ GETPROSOL
 // and read instrument name for seting the relative scaling of carbon pulse
 FETCHPAR("NUC1", nuc1)
 FETCHPAR("NUC2", nuc2)
-FETCHPARS("INSTRUM", instrum)
+
 
 
 // is a pulsecal file present? If so we open it, otherwise we skip all this 
@@ -80,7 +83,7 @@ if ((pulsecalfile=fopen(pulsecalfilename, "r")) != NULL)
 	{
 		// If we read something from the file crack on else abort
 		
-		sscanf(result,"%f %f", &protonpulse, &statusprotonpulse); 
+		sscanf(result,"%f %f %s", &protonpulse, &statusprotonpulse, &instrum); 
 		if(dummy)
 {
 	Proc_err(DEF_ERR_OPT,"pulsecal file: %f %f", protonpulse, statusprotonpulse);

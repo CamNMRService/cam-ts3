@@ -11,7 +11,7 @@
 /*--------------------------------------------------------------*/
 /* Description	:						*/
 /*		  Controls Bruker sample changer for XWin-NMR 	*/
-/*		  with JCH PC control program.			*/
+/*		  with JCH PC cntrol program.			*/
 /*								*/
 /* External module : None.					*/
 /* Internal module : None.					*/
@@ -106,7 +106,7 @@ int     expt=1, curloop=1, cpos, specno, jexpt, jsolv, finish=FALSE,i=1;
 int     LastSample, FatalError=FALSE, nexpt, parmo, proderrcount, sthou;
 int     skipsample, pid, x, proc_or_not=0,sampleproblem=0;
 
-char    oi[80], juser[50], suser[40], in_data[1024], tmp_fname[944],samplename[1024];
+char    oi[80], juser[50], suser[40], in_data[1024], tmp_fname[80],samplename[80],filename[1024];
 char    shimfile[80], acqufile[80];
 char    experiment[155], solvent[40], tunefile[40], sxfile[80];
 char    tmp_str[3000], titlefile[80], titletext[80];
@@ -139,7 +139,7 @@ FILE	*plist=NULL;
 FILE	*pornot=NULL;
 FILE    *sampleinfo=NULL;
 
-char  samplename[80], snamefile[255];
+char   snamefile[255];
 
 
 /*--- Assign filenames for signalling etc.----------------------*/
@@ -399,7 +399,7 @@ while ( finish != TRUE ) //THE MAIN LOOP
 	}
 	proderrcount=0;
 /*Now parse the prod file into the various variables*/
-
+Proc_err ( INFO_OPT, "got to line 403");
 	field = strtok( in_data, "," );
 	sscanf( field, "%d", &cpos );
 
@@ -427,16 +427,19 @@ while ( finish != TRUE ) //THE MAIN LOOP
 	field = strtok( NULL, ",");
 	}
 //Now parse oi to replace non-alhanumerics to create a samplename for the file
+Proc_err ( INFO_OPT, "got to line 429");
 
 	sprintf( samplename, "%s", oi );
-    *ptr = samplename;
-    while (*ptr) {
-        if (!isalnum(*ptr)) {
-            *ptr = '_';
-        }
-        ptr++;
-    }
-	sprint( filename,"%s_%s",samplename,tmp_fname);
+  for (i=0;samplename[i] !='\0'; i++)
+  {
+  	if(!isalnum(samplename[i]) ){
+  		samplename[i] = '_'; //replace rogue characters
+  	}
+  }
+
+    
+ Proc_err ( INFO_OPT, "got to line 438");
+	sprintf( filename,"%s_%s",samplename,tmp_fname);
 ////}
 
 
@@ -451,12 +454,12 @@ while ( finish != TRUE ) //THE MAIN LOOP
 	/*CHECK*/
 /* DJH MOD Heres a good place to check whether the data already exists; ie, the submission software has crashed and hasn't incremented the V/Z no.*/
 /*remove comment block for production	*/
-sprintf( fidpath, "%s%s/%s/%d/fid", disk, user, samplename, expno );
+sprintf( fidpath, "%s%s/%s/%d/fid", disk, user, filename, expno );
 
 if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 {
 	Proc_err ( INFO_OPT,"%s",fidpath);
-	sprintf(tmp_str, "OVERWRITE_FID_ERROR_%i_%s", cpos,sample_name);
+	sprintf(tmp_str, "OVERWRITE_FID_ERROR_%i_%s", cpos,filename);
 	XAU("whoopwhoop",tmp_str)
 //	XAU("whoopwhoop",cmd)
 	exit(1);
@@ -688,8 +691,8 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 			fputs ( titletext, ftitle );
 			fclose ( ftitle );
 
-   			sprintf(snamefile,PROCPATH("samplename"));
-   	 		sname=fopen(snamefile,"w");
+   		sprintf(snamefile,PROCPATH("samplename"));
+   	 	sname=fopen(snamefile,"w");
 			fprintf(sname, "%s", samplename);
 			fclose(sname);
 			STOREPAR("USERP2", samplename);
@@ -704,15 +707,7 @@ with NMR service team about whether medium or thick wall tubes are more appropri
             }
             else
             {
-                /*find ou what processing mode we're in*/
-                /*if we're not in mode 1, the external processing software is not running and we need to process*/
-			    pornot = fopen (pornotfile,"r");
-			    proc_or_not=get_proc_or_not_val(pornot);
-			    if ((proc_or_not!=1)||(nexpt==10))
-			    {
-			        //CPR_exec("xaup",WAIT_TERM);
-				    XCMD("service-def-proc") //lets see if this fixes the poise automated programs XAUP(proc_1d) trying to print.
-			    }
+//maybe put other processing options in here
             }
 
 	/*if there's no email address in the comments file, set it to camnmr, useful for testing*/
@@ -800,7 +795,8 @@ if(sampleproblem==1)
 }
 
 //janus-email needs the location of the defaults file to be passed to it
-sprintf(tmp_str,"janus-email %s",def_file);
+//sprintf(tmp_str,"janus-email %s",def_file);
+sprintf(tmp_str,"service-email %s",def_file);
 XCMD(tmp_str);
 
 //CPR_exec("janus-email",WAIT_TERM);

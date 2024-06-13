@@ -1,0 +1,212 @@
+/*janus-email*/
+/*needs to be called with the location of the defaults file*/
+/*MILESTONE*/
+/*READ DEFAULTS FILE to get correct locations for files and set variables accordingly - ACHIEVED*/
+/*RUNS*/
+// Aug 2023: version for emailing with sampleinfo file
+
+float   delaytime=1.0;
+char pdfname[1024]="";
+char sampleinfofile[1024]="";
+char samplename[1024]="";
+char snamepath[1024]="";
+char password[1024]="esbnrinuhltzukoi";
+char email[1024]="";
+char title[1024]="";
+char body[1024]="DO NOT REPLY";
+char message[1024]="";
+char id[1024]="camnmrservice@gmail.com";
+char batfile[1024]="";
+char subdir[1024]="";
+char cmd_str[1024]="";
+char status1[1024]="emailing";
+char status2[1024]="done";
+char dest_name[1024]="";
+char emailedlist[1024] = "";
+char status_string[1024]="working";
+char zip_name[1024]="";
+char file_name[1024]="";
+char in_data[1024]="";
+char pul[256]="",nuc1[20]="";
+char *file_data, *field;
+char err_message[PATH_MAX]="no message";
+int  pdfthere=0;
+int  sampleinfo=0;
+int cmdstatus;
+
+FILE *sname = NULL;
+FILE *fbat = NULL;
+FILE *statusprint = NULL;
+FILE *fdef = NULL;
+
+char def_file[255]="f:/chemist/defaults-csv.txt";
+char defaultsfile[80];
+char prefix[40],diskunit[40],suser[40],tunefile[40];
+char archpath[80],archive[20],gradshim[20],shimset[40];
+/*this should stop you having to click ok to go onwards...*/
+/* remove comment for production
+XCMD("setdef ackn no")
+XCMD("setdef stderr off")
+XCMD("setdef stdout off")
+*/
+
+if (i_argc !=3){
+	sprintf(err_message,"This au program needs to be called with an argument that is the location of the defaults file eg %s",def_file);
+	Proc_err( INFO_OPT, "%s",err_message);
+	STOPMSG(err_message);	
+}
+
+if (i_argc == 3 ) { //assume the argument is a location of the defaults file
+    sprintf(def_file,"%s",i_argv[2]); 
+}
+
+
+
+strcpy( defaultsfile, def_file );
+fdef = fopen( defaultsfile, "r" );
+Proc_err ( INFO_OPT, "reading defaults");
+rewind(fdef); //go to begining of file
+file_data = fgets(in_data, 1024, fdef); //read in file as a continuous string
+fclose(fdef); //close the file
+//file is open, read data
+field = strtok(in_data, ",");
+strcpy( prefix,field);
+Proc_err(INFO_OPT,"prefix is %s",prefix);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &diskunit);
+	Proc_err(INFO_OPT,"diskunit is %s",diskunit);
+field = strtok(NULL, ",");
+sscanf(field,"%s", &suser);
+	Proc_err(INFO_OPT,"suser is %s",suser);
+field = strtok(NULL,",");
+sscanf(field,"%s",&tunefile);
+	Proc_err(INFO_OPT,"tunefile is %s", tunefile);
+field = strtok(NULL,",");
+sscanf(field,"%s",&shimset);
+	Proc_err(INFO_OPT,"shimset is %s", shimset);
+field = strtok(NULL,",");
+sscanf(field,"%s",&archpath);
+	Proc_err(INFO_OPT,"archpath is %s", archpath);
+field = strtok(NULL,",");
+sscanf(field,"%s",&archive);
+	Proc_err(INFO_OPT,"archive is %s", archive);
+field = strtok(NULL,",");
+sscanf(field,"%s",&gradshim);
+	Proc_err(INFO_OPT,"gradshim is %s", gradshim);
+Proc_err(INFO_OPT,"parsed file");
+
+GETCURDATA
+
+FETCHPAR("USERP2", samplename) //this was set by janus_sx to be what the user typed
+FETCHPAR("USERP2", title)
+FETCHPAR("PULPROG", &pul)
+FETCHPAR("NUC1",nuc1)
+//Proc_err(INFO_OPT, "at the start\n");
+
+sprintf(snamepath, "%s%s/%s/%d/pdata/%d/samplename", disk, user, name, expno, procno);
+sprintf(pdfname, "%s%s/%s/%d/pdata/%d/%s-%s-%s.pdf", disk, user, name, expno, procno, name,nuc1,pul );
+//sprintf( pdfname, "%s%s/%s/%d/pdata/%d/%s-%s.pdf", disk, user, name, expno, procno, samplename,name );
+sprintf( batfile, "%s%s\\top-copy.bat", diskunit,suser);
+sprintf( emailedlist, "%s%s\\emailed_spectra.txt",diskunit,suser);
+/*print to a file in the data set*/
+
+//Proc_err(INFO_OPT, "pdfname\n");
+
+if( access( pdfname, R_OK ) == 0 ) // if there is a pdf there 
+{	
+//	Proc_err(INFO_OPT, "pdf there...\n");
+	pdfthere=1;
+}
+strcpy(sampleinfofile,ACQUPATH("SampleProblems.txt"));
+if( access( sampleinfofile, R_OK ) == 0 ) // if there is a sampleinfo file there there 
+{	
+	sampleinfo=1; // set flag
+}
+
+//Proc_err(INFO_OPT, "fetching email address\n");
+
+/*Email pdf & zip off*/
+FETCHPAR("USERP1",email)
+/*email[strlen(email)-1]=NULL;*/
+STOREPAR("USERP3", status1)
+if (strchr(email,'@') == NULL)
+{
+	Proc_err(INFO_OPT, "No email address found");
+	ABORT
+}
+
+/*start making zip file*/
+
+strcpy( subdir, name); //name is the AU set filename we were called from
+sprintf(file_name, "%s-%s",samplename,name); //make up a file name with the V code-student st name
+sprintf( dest_name, "%s%s",archpath,file_name);
+Proc_err( INFO_OPT, "dest_name-%s",dest_name);	
+Proc_err( INFO_OPT, "filename-%s",file_name);
+//sprintf( cmd_str, "robocopy %s%s\\%s /S %s",disk,user,name,dest_name);
+sprintf( cmd_str, "robocopy %s%s\\%s /S %s > nul",disk,user,name,dest_name);
+
+
+Proc_err(INFO_OPT, "cmd_str %s", cmd_str);
+fbat = fopen(batfile, "w");
+fputs( cmd_str, fbat);
+fclose( fbat);
+Show_status(cmd_str);
+system(batfile);
+
+sprintf(zip_name, "%s%s-%s",archpath,samplename,name);
+//sprintf( cmd_str,"zip -r -9 %s.zip %s%s -x \*.reg \*1r \*1i \*2ii \*2ir \*2ri \*2rr",dest_name,archpath,file_name);
+sprintf( cmd_str,"zip -r -9 %s.zip %s%s -x \*.reg \*1r \*1i \*2ii \*2ir \*2ri \*2rr > nul",dest_name,archpath,file_name);
+//sprintf( cmd_str,"zip -r -9 %s.zip %s%s -x \*1r \*1i \*2ii \*2ir \*2ri \*2rr",dest_name,archpath,file_name);
+//sprintf( cmd_str,"zip -r -9 %s.zip %s -x \*1r \*1i \*2ii \*2ir \*2ri \*2rr",zip_name ,archpath);
+fbat = fopen(batfile, "w");
+fputs( cmd_str, fbat);
+fclose( fbat);
+Show_status(cmd_str);
+system(batfile);
+
+if (sampleinfo==1)
+{
+    if (pdfthere==1) { 
+	sprintf (cmd_str, "sendemail -f %s -t %s -u %s -m %s -a  %s.zip %s %s -s smtp.gmail.com:587 -o tls=yes -xu %s -xp %s", id, email,title, body, zip_name, pdfname, sampleinfofile, id, password);
+    }
+    else	{
+	sprintf (cmd_str, "sendemail -f %s -t %s -u %s -m %s -a %s.zip %s -s smtp.gmail.com:587 -o tls=yes -xu %s -xp %s", id, email,title, body, zip_name, sampleinfofile,id, password);
+    }
+}
+else
+{
+    if (pdfthere==1) { 
+	sprintf (cmd_str, "sendemail -f %s -t %s -u %s -m %s -a  %s.zip %s  -s smtp.gmail.com:587 -o tls=yes -xu %s -xp %s", id, email,title, body, zip_name, pdfname, id, password);
+    }
+    else	{
+	sprintf (cmd_str, "sendemail -f %s -t %s -u %s -m %s -a %s.zip -s smtp.gmail.com:587 -o tls=yes -xu %s -xp %s", id, email,title, body, zip_name, id, password);
+    }
+}
+
+
+
+//XCMD("setdef ackn no")
+//XCMD("setdef stderr off")
+//XCMD("setdef stdout off")
+//sprintf (cmd_str, "sendemail -f %s -t %s -u %s -m %s -a %s %s.zip -s smtp.gmail.com:587 -o tls=yes -xu %s -xp %s", id, email, title, body, pdfname, archpath, id, password);
+fbat = fopen(batfile, "w");
+fputs( cmd_str, fbat);
+fclose( fbat);
+Show_status(cmd_str);
+system(batfile);
+STOREPAR("USERP4", status2)
+
+/*append the email address sent to and filename to a statusfile*/
+statusprint = fopen(emailedlist, "a");
+static const char *CurrentTime(void)
+{
+    time_t clock;
+    (void) time(&clock);
+    return ctime(&clock);
+}
+sprintf(status_string, "%s,%s,%s,%s\r\n", email,samplename,name,CurrentTime());
+fputs( status_string, statusprint);
+fclose(statusprint);
+
+QUIT
+

@@ -685,11 +685,13 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 			fputs( tmp_str, fjup);
 			fclose( fjup );
 			/*CHECK*/
-			sprintf( titlefile, "%s%s/%s/%d/pdata/1/title", diskunit, user,tmp_fname, nexpt );
+			sprintf( titlefile, "%s%s/%s/%d/pdata/1/title", diskunit, user,filename, nexpt );
 			ftitle = fopen( titlefile, "a" ); //open in append mode to add to any existing title
-			sprintf( titletext, "%s\n%s\n%s\n%s\n%s\nPosition: %d\n%s", tmp_fname, oi, juser, experiment, solvent, cpos, comments );
+			//sprintf( titletext, "%s\n%s\n%s\n%s\n%s\nPosition: %d\n%s", tmp_fname, oi, juser, experiment, solvent, cpos, comments );
+			sprintf( titletext, "%s\n%s\nPosition: %d\n%s", juser, experiment, cpos, comments );
 			fputs ( titletext, ftitle );
 			fclose ( ftitle );
+			XAUA(service_standard_title_1d,"a")
 
    		sprintf(snamefile,PROCPATH("samplename"));
    	 	sname=fopen(snamefile,"w");

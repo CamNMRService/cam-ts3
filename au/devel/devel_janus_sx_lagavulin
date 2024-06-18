@@ -438,11 +438,8 @@ Proc_err ( INFO_OPT, "got to line 429");
   }
 
     
- Proc_err ( INFO_OPT, "got to line 438");
+  Proc_err ( INFO_OPT, "got to line 438");
 	sprintf( filename,"%s_%s",samplename,tmp_fname);
-////}
-
-
 
 	flog = fopen(logfile,"a+");
 	lt=time(NULL);
@@ -627,6 +624,7 @@ else
 			GETCURDATA
 			RPAR( experiment, "all" )
 			GETCURDATA
+	  	VIEWDATA_SAMEWIN
 			STOREPAR( "SOLVENT", solvent )
 			GETPROSOL //needed since paracon!
 
@@ -709,7 +707,18 @@ with NMR service team about whether medium or thick wall tubes are more appropri
             }
             else
             {
-//maybe put other processing options in here
+               if((nexpt==10)){
+               Proc_err ( INFO_OPT, "got to line 710");
+               GETCURDATA
+	             VIEWDATA_SAMEWIN
+               sprintf(procau,"service-def-proc");
+               CPR_exec(procau,WAIT_TERM);
+            }
+            	 else{
+               	//if we are not in experiemnt 10, do the below
+               	// ...nuffin.
+               }
+            
             }
 
 	/*if there's no email address in the comments file, set it to camnmr, useful for testing*/
@@ -798,7 +807,7 @@ if(sampleproblem==1)
 
 //janus-email needs the location of the defaults file to be passed to it
 //sprintf(tmp_str,"janus-email %s",def_file);
-sprintf(tmp_str,"service-email %s",def_file);
+strcat(tmp_str,"service-email");
 XCMD(tmp_str);
 
 //CPR_exec("janus-email",WAIT_TERM);

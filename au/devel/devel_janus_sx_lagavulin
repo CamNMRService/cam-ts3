@@ -807,8 +807,10 @@ if(sampleproblem==1)
 
 //janus-email needs the location of the defaults file to be passed to it
 //sprintf(tmp_str,"janus-email %s",def_file);
-strcat(tmp_str,"service-email");
-XCMD(tmp_str);
+GETCURDATA
+VIEWDATA_SAMEWIN
+sprintf(tmp_str,"service-email");
+XAU(tmp_str,"");
 
 //CPR_exec("janus-email",WAIT_TERM);
 XCMD("setdef ackn no");

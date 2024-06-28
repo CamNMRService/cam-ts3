@@ -1,0 +1,70 @@
+
+/******* -*-C++-*- **********************************************/
+/*  au_dosy_pr.ptg         29.04.2013                                  */
+/****************************************************************/
+/*  Short Description :                                         */
+/*  AU program for acquisition of DOSY data in automation.      */
+/****************************************************************/
+/*  Keywords :                                                  */
+/*  DOSY, automation, acquisition                               */
+/****************************************************************/
+/*  Description/Usage :                                         */
+/*  AU program for acquisition of DOSY data in automation.      */
+/*  rga is executed, then acquisition is started.               */
+/****************************************************************/
+/*  Author(s) :                                                 */
+/*  Name            : Rainer Kerssebaum                         */
+/*  Organisation    : Bruker BioSpin GmbH                       */
+/*  Email           : rainer.kerssebaum@bruker-biospin.de       */
+/****************************************************************/
+/*  Name    Date    Modification:                               */
+/*  rke     030819  created                                     */
+/*  rke     130429  modified to bypass spooler                  */
+// PTG: presat version; fetches o1 and p1 from presat dataset 
+/****************************************************************/
+/*
+$Id: au_dosy,v 1.2 2013/05/10 09:25:19 wem Exp $
+*/
+
+int     td1;
+char    disk_sav[PATH_MAX], name_sav[PATH_MAX];
+int     expno_sav = expno, procno_sav = procno, procno2_sav, tmp_procno;
+float p1;
+double o1, sf, sfo1;
+// copy details or main dataset
+
+GETCURDATA2
+
+strcpy(disk_sav,disk);
+strcpy(name_sav,name);
+
+if (access(ACQUPATH2("fid"), F_OK))
+{
+    Proc_err(ERROPT_AK_NO,"Reference spectrum does not exist, continuing with default params.");
+}
+else
+{
+	//move to ref dataset and read o1 and p1
+    DATASET(name2,expno2,procno2,disk2,user2)
+    FETCHPARS("P 1", &p1)
+    FETCHPARS("O1", &o1)
+   DATASET(name_sav,expno_sav,procno_sav,disk_sav,user)
+   // storepars bit has to be in the else
+   STOREPAR("P 1", p1)
+   FETCHPARS("BF1",&sf)
+sfo1=sf + o1 * 1.0e-6;
+STOREPAR("SFO1",sfo1);
+   
+}
+
+
+FETCHPAR1("TD", &td1)
+// set lock.2 to avoid lineshape distortions - autophase not perfect
+XMAC("lock.2")
+AUTOPHASE 
+sleep(5);
+AUTOPHASE
+//This is for aqueous samples so 5% OK
+sprintf(text, "dosy 5 98 %d l y y y", td1);
+XCMD(text)
+QUIT

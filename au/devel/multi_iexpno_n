@@ -1,0 +1,26 @@
+/*multi_iexpno_n*/
+/*Program to create multiple experiments, increasing by n expno*/
+/*multi_iexpno_n*/
+
+GETCURDATA
+int i=10;
+int n=2;
+int x=0;
+char command[256];
+
+GETINT("Enter number of experiments :",i);
+GETINT("Increment expno by what value of n?",n);
+
+x=expno;
+
+TIMES(i)
+
+ x=x+n;
+ sprintf(command,"iexpno %i",x);
+ XCMD(command);
+ SETCURDATA;
+ GETCURDATA;
+
+END
+
+QUIT

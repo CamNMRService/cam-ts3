@@ -1,0 +1,104 @@
+/*** ^^A -*-C++-*- **********************************************/
+/*	multizg			18.05.2000			*/
+/****************************************************************/
+/*	Short Description :					*/
+/*	Performs multiple acquisitions on increasing expnos.	*/
+/****************************************************************/
+/*	Keywords :						*/
+/*	serial acquisitions					*/
+/****************************************************************/
+/*	Description/Usage :					*/
+/*	This AU program performs multiple acquisitions on	*/
+/*	increasing expnos. If datasets do not yet exist, the	*/
+/*	current dataset and its parameters are copied. If the	*/
+/*	data sets already exist, then the experiments are	*/
+/*	executed as they are.					*/
+/*	The total experiment time is estimated and printed out.	*/
+/*	The number of experiments to be performed can be	*/
+/*	specified on the command line :				*/
+/*		xau multizg <no of experiments>			*/
+/****************************************************************/
+/*	Author(s) :						*/
+/*	Name		: Rainer Kerssebaum			*/
+/*	Organisation	: Bruker BioSpin GmbH			*/
+/*	Email		: rainer.kerssebaum@bruker.de		*/
+/****************************************************************/
+/*	Name		Date	Modification:			*/
+/*	rke		941207	created				*/
+/*	eng		000327  switch ZGSAFETY off if on	*/
+/*	eng		000518	PathSystemTemp instead of /tmp	*/
+/*	wem		080904	ZG_OVERWRITE			*/
+/****************************************************************/
+/*
+$Id: multizg,v 1.14 2009/04/02 13:05:43 wem Exp $
+*/
+
+AUERR = local_au(curdat);
+QUITMSG("--- multizg finished ---")
+
+#include <inc/exptUtil>
+
+static char stopau[PATH_MAX];
+
+
+static int multizg(const char* curdat)
+{
+  char statusline[128];
+  FILE* fp;
+  int expTime = 0;
+  int i1 = 0;
+  int startExpno = expno;
+  char cmd[256]="tmp";
+
+  if (i_argc > 2)
+    i1 = atoi(i_argv[2]);
+
+  if (i1 == 0)
+  {
+    i1 = 10;
+    GETINT("Enter number of experiments :",i1)
+  }
+
+  sprintf(stopau, "%s/%s/%s",
+	  PathXWinNMRProg(), PathXWinNMRCurDir(), "poptaustop.acq");
+  fp = fopen(stopau, "w");
+  if (fp)
+    fclose(fp);
+				/* now perform the experiments  */
+  TIMES(i1)
+    SETCURDATA
+    expTime += CalcExpTime() + 2;
+    IEXPNO
+  END
+  DEXPNO
+  PrintExpTime(expTime, i1);
+
+  expno = startExpno;
+  SETCURDATA
+  TIMES(i1)
+    if (fp  &&  access(stopau, F_OK))
+      return 0;
+    sprintf(statusline,"running experiment # %d",loopcount1+1);
+    Show_status(statusline);
+    sleep(2);
+    sprintf(cmd,"atma");
+    XCMD(cmd);
+    sprintf(cmd,"topshim convcomp");
+    XCMD(cmd);
+    ZG_OVERWRITE
+    IEXPNO
+  END
+  DEXPNO
+
+  return 0;
+}
+
+int local_au(const char* curdat)
+{
+  int ret = multizg(curdat);
+
+  if (stopau[0])
+    unlink(stopau);
+
+  return ret;
+}

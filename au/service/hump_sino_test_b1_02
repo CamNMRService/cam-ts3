@@ -14,6 +14,7 @@ b1_01 - Nov 22 - Make NOT verbose mode  not pop error box up that can stall auto
 B1_02 -  April 2023 - moved half width spec to defaults file and writing of shim files if spec passed
          July 2023 - added topshim before acq - kept same verion number for simplicity
                   and humpcal-djh which has MAXI set to 100000 due to bug
+         Aug 2024 - remove the ABORT in case of failed humpcal, to avoid complete crash of automation. It will just not write out hump info in this case
 */
 
 #include <stdio.h>
@@ -372,7 +373,7 @@ strcpy(hump_file_path, PROCPATH("humpcal.txt"));
 if ( ( hump_file = fopen (hump_file_path, "r") ) == NULL)
 {
 	Proc_err(INFO_OPT, "Could not open file %s Maybe Humpcal failed?", hump_file_path);
-	ABORT
+	//ABORT - Don';'t do this as it crashes the automation! ("xau failed - maybe check ipso")
 }
 else{
    fscanf(hump_file, "%f", &hs_h_obs_float);

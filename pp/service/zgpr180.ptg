@@ -1,0 +1,77 @@
+;zggppr180.ptg
+;avance-version (09/04/17)
+;1D sequence with f1 presaturation
+;  
+;with 180 degree BIP inversion pulse in alternate scans for faraway water suppression
+
+
+;Pre-sat180, a Simple and Effective Method for Residual Water Suppression
+; Mo and Rafferty, JMR 190(1) pp1-6 (2008)
+
+;$CLASS=HighRes
+;$DIM=1D
+;$TYPE=
+;$SUBTYPE=
+;$COMMENT=
+
+
+#include <Avance.incl>
+#include <Grad.incl>
+
+
+"d12=20u"
+
+
+"acqt0=-p1*2/3.1416"
+
+
+1 ze
+2 30m
+  4u
+  d12 pl9:f1
+  d1 cw:f1 ph29
+  4u do:f1
+  0.1u iu1
+  4u pl0:f1
+  if "l1%2==0" goto 3
+  (p44:sp30 ph2):f1
+3 0.1u pl1:f1 
+  p1 ph1
+  go=2 ph31
+  30m mc #0 to 2 F0(zd)
+exit
+
+
+ph1=0 2 2 0 1 3 3 1
+ph2=0
+ph29=0
+ph31=0 0 2 2 1 1 3 3
+
+
+;pl1 : f1 channel - power level for pulse (default)
+;pl9 : f1 channel - power level for presaturation
+;p1 : f1 channel -  90 degree high power pulse
+;p16: homospoil/gradient pulse
+;d1 : relaxation delay; 1-5 * T1
+;d12: delay for power switching                      [20 usec]
+;d16: delay for homospoil/gradient recovery
+;NS: 1 * n, total number of scans: NS * TD0
+
+
+;use gradient ratio:    gp 1
+;                         50
+
+;for z-only gradients:
+;gpz1: 50%
+
+;use gradient files:   
+;gpnam1: SMSQ10.100
+
+                                      ;preprocessor-flags-start
+;FLAG_BLK: for BLKGRAD before d1 rather than go
+;             option -DFLAG_BLK: (eda: ZGOPTNS)
+;altgrad: for alternatig gradient sign between scans
+;						option -Daltgrad
+                                          ;preprocessor-flags-end
+
+;$Id: zggppr,v 1.6 2009/07/02 16:40:47 ber Exp $

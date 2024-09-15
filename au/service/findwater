@@ -159,7 +159,7 @@ if(tso)
 // Do this before anything else!!!
 
 sleep(3);
-AUTOPHASE
+XAU("loopadj_fallback","")
 sleep(3);
 
 FETCHPAR("RG", &rgorig)

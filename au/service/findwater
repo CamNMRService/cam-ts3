@@ -295,9 +295,9 @@ SETCURDATA
 sprintf(text, "sendgui getprosol 1H %f %f", p1, pl1);
 CPR_exec(text, WAIT_TERM);
 
-// calculate and store correct o1
+// calculate and store correct o1 -  Use foreground BF1 as reference frequency rather than status
 
-FETCHPARS("BF1",&sf)
+FETCHPAR("BF1",&sf)
 sfo1=sf + maxpsh * 1.0e-6;
 STOREPAR("SFO1",sfo1);
 

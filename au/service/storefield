@@ -1,0 +1,68 @@
+//storefield
+// Store BSMS field value to  a file , assuming not vey different from old value
+// This is for arran, TS3.6.5 / L-TX/L-RX
+// The stored value will be the field value for CDCL3
+// susceptibility correction handled by "setfield"
+
+
+#include <inc/bsms_program>    /* must be the first statement ****/
+
+int lockfield,putlockfield;
+int fieldcorr=0;
+
+char path[PATH_MAX];
+char solvent[128];
+FILE*   fptr;
+
+/ build path to file, in "conf" for convenience
+        sprintf(path, "%s/fieldvalue",PathXWinNMRConf());
+
+// read current field:
+GETBSMSVAL(BSN_FIELD, currlockfield);
+// only do anythign if lots of conditions are met...
+if(strcmp(cmd,"")!=0)
+{
+    if(strcmp(cmd,"CDCl3")==0)
+    {
+	   
+
+        //open for reading
+        if ((fptr = fopen(path, "r")) != 0 )
+        {
+    	    if (fscanf(fptr, "%d ",&oldfield) == 1)
+            {
+                fclose(fptr);
+                if (abs(currlockfield-oldfield)<20)
+                {
+                    if ((fptr = fopen(path, "w")) != 0 )
+                    {
+                        fprintf(fptr,"%d", currlockfield)
+                        fclose(fptr);
+                    }
+                }
+            }
+        }
+    }
+
+    
+}
+
+
+
+// build path to file, in "conf" for convenience
+sprintf(path, "%s/fieldvalue",PathXWinNMRConf());
+
+//open for reading
+if ((fptr = fopen(path, "r")) != 0 )
+{
+	if (fscanf(fptr, "%d ",&lockfield) == 1)
+	
+	{
+    	//set field value 
+        //Proc_err(DEF_ERR_OPT,"lockfield=%d, fieldcorr=%d", lockfield, fieldcorr);
+        putlockfield=lockfield+fieldcorr;
+        PUTBSMSVAL(BSN_FIELD, putlockfield);
+
+	}
+}
+QUIT

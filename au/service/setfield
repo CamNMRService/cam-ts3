@@ -1,0 +1,47 @@
+//setfield
+// read BMSM field value from a file and set it, so that lock is starting from a well understood value
+// This is for arran, TS3.6.5 / L-TX/L-RX
+// The stored value will be the field value for CDCL3, the set value the (corrected)
+// value for current solvent if known
+
+
+#include <inc/bsms_program>    /* must be the first statement ****/
+
+int lockfield,putlockfield;
+int fieldcorr=0;
+
+char path[PATH_MAX];
+char solvent[128];
+FILE*   fptr;
+
+
+// get susceptibility correction - read solvent from "cmd" ie argument passed to au program
+// if no arg then susc corr assument to be zero, likewise for unknown solvents
+// Could add more solvents than meod - should only need to be set for multi-peak solvents
+
+if(strcmp(cmd,"")!=0)
+{
+    if(strcmp(cmd,"MeOD")==0)
+    {
+	    fieldcorr=78;
+    }
+}
+
+
+// build path to file, in "conf" for convenience
+sprintf(path, "%s/fieldvalue",PathXWinNMRConf());
+
+//open for reading
+if ((fptr = fopen(path, "r")) != 0 )
+{
+	if (fscanf(fptr, "%d ",&lockfield) == 1)
+	
+	{
+    	//set field value 
+        //Proc_err(DEF_ERR_OPT,"lockfield=%d, fieldcorr=%d", lockfield, fieldcorr);
+        putlockfield=lockfield+fieldcorr;
+        PUTBSMSVAL(BSN_FIELD, putlockfield);
+
+	}
+}
+QUIT

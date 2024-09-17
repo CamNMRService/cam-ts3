@@ -7,7 +7,7 @@
 
 #include <inc/bsms_program>    /* must be the first statement ****/
 
-int lockfield,putlockfield;
+int oldfield,currlockfield;
 int fieldcorr=0;
 
 char path[PATH_MAX];

@@ -36,7 +36,7 @@ if(strcmp(cmd,"")!=0)
                 {
                     if ((fptr = fopen(path, "w")) != 0 )
                     {
-                        fprintf(fptr,"%d", currlockfield)
+                        fprintf(fptr,"%d", currlockfield);
                         fclose(fptr);
                     }
                 }

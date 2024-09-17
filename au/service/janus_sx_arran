@@ -81,6 +81,7 @@
 //djh 2023/06/14 make it handle the (reserved) pPOS 59 - can be used to run special service experiments
 // PTG incorporate SAmpleProblems stuff from laphroiag version 
 // For NOAH expets check aunmp and if it's splitx_au tehn run it cont_ex
+// PTG 17_09_2024 added setfield/storefield commaands either side of lock, to solve MeOD problems
 /****************************************/
 /*
 Production version
@@ -551,6 +552,9 @@ sampleproblem=0;
 	       XAU("whoopwhoop",tmp_str)
         }
 		sprintf(tmp_cmd, "lock %s",solvent);
+		
+		// read the field value from file and set
+		XAU("setfield",solvent)
 	    
 		AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
 		if ( AUERR <0 )
@@ -569,6 +573,11 @@ sampleproblem=0;
             sampleproblem=1;
 
         }
+		else
+		{
+			// store the current field value - only if it did lock ok
+			XAU("storefield",solvent)
+		}
 
 		// move atma to here for Arran (only), as we clearly only need to tune once!!
 		// and better to have before topshim. NB junk/10/1 must be a proton/carbon dataset

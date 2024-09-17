@@ -14,7 +14,7 @@ char path[PATH_MAX];
 char solvent[128];
 FILE*   fptr;
 
-/ build path to file, in "conf" for convenience
+// build path to file, in "conf" for convenience
         sprintf(path, "%s/fieldvalue",PathXWinNMRConf());
 
 // read current field:

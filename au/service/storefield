@@ -47,22 +47,4 @@ if(strcmp(cmd,"")!=0)
     
 }
 
-
-
-// build path to file, in "conf" for convenience
-sprintf(path, "%s/fieldvalue",PathXWinNMRConf());
-
-//open for reading
-if ((fptr = fopen(path, "r")) != 0 )
-{
-	if (fscanf(fptr, "%d ",&lockfield) == 1)
-	
-	{
-    	//set field value 
-        //Proc_err(DEF_ERR_OPT,"lockfield=%d, fieldcorr=%d", lockfield, fieldcorr);
-        putlockfield=lockfield+fieldcorr;
-        PUTBSMSVAL(BSN_FIELD, putlockfield);
-
-	}
-}
 QUIT

@@ -14,8 +14,13 @@
 ;$TYPE=
 ;$SUBTYPE=
 ;$COMMENT=
-;mod by djh35 to use wavemaker and cnst12 for the supprseion calculation
-;usage - set cnst12 and type wvm -a
+;;The perfect echo reduces the artefacts from 1H-1H coupling.
+;;Modified by djh35 to use wavemaker and cnst12 for the suppresion calculation, based on P1.
+;;Usage - set cnst12 and type wvm -a before running the experiment.
+;;cnst12=2000us is the default, which gives a wide supression range.
+;;Higher values give a narrower suppression, but increased likelihood of artefacts
+;;due to JHH coupling, and/or relaxation.
+
 
 
 ;prosol relations=<es>

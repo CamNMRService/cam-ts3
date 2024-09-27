@@ -39,7 +39,7 @@
 
 #   endif /*CALC_SP*/
 
-"acqt0=-2u"
+"acqt0=0"
 "d42=p42"
 "d43=p43"
 
@@ -86,7 +86,7 @@
   d16 groff
   p16:gp1
   d16
-  10u gron0
+  12u gron0
   p43:sp12:f1 ph2:r
   10u 
   1u groff

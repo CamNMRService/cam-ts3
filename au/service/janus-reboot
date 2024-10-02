@@ -17,7 +17,6 @@ int s_to_reboot=300;
 int num_warnings=10;
 /*******************************************************************/
 char buffer[1023];  // Assuming the first line won't exceed 1024 characters
-char search_str[] = "janus_sx";
 char system_command[PATH_MAX]="";
 int time_left=s_to_reboot;
 int loop;
@@ -52,7 +51,7 @@ system(system_command);
                 file_exists=0; //file doesnt contain janus, so assume its bogus
             }
         } else {
-           Proc_err(DEF_ERR_OPT,"Failed to read the first line from %s.\n", filename);
+           Proc_err(DEF_ERR_OPT,"Failed to read the first line from %s.\n", check_janus_filename);
            file_exists=0; //gone wrong
         }
     }

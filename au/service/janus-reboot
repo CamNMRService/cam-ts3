@@ -9,7 +9,7 @@
 /*THESE MUST BE SET**************************************************/
 
 char batfile_path[PATH_MAX]="c:\\bruker\\cam-ts3\\os_scripts";
-char batfile[PATH_MAX]="msdos_reboot.bat";
+char batfile[PATH_MAX]="janus_spect_reboot.bat";
 char check_janus_bat[PATH_MAX]="janus_check.bat";
 char check_janus_filename[PATH_MAX]="e:\\chemist\\janus_running.txt";
 char search_str[] = "janus_sx"; //to search first line for

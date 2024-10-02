@@ -1,0 +1,86 @@
+/*halt the current experiment and reboot using a dos script						*/
+/*djh35 jan 2023*/
+/*NOT FINISHED WIP**/
+
+#include <stdio.h>
+#include <inc/sysutil>
+
+
+/*THESE MUST BE SET**************************************************/
+
+char batfile_path[PATH_MAX]="c:\\bruker\\cam-ts3\\os_scripts";
+char batfile[PATH_MAX]="msdos_reboot.bat";
+char check_janus_bat[PATH_MAX]="janus_check.bat";
+char check_janus_filename[PATH_MAX]="e:\\chemist\\janus_running.txt";
+char search_str[] = "janus_sx"; //to search first line for
+int s_to_reboot=300;
+int num_warnings=10;
+/*******************************************************************/
+char buffer[1023];  // Assuming the first line won't exceed 1024 characters
+char search_str[] = "janus_sx";
+char system_command[PATH_MAX]="";
+int time_left=s_to_reboot;
+int loop;
+int file_exists=0;
+
+FILE *fbat = NULL;
+FILE *check_janus_file = NULL;
+
+//First check if janus is running - if it is, quit - this script could have been called via a cron job in topspin
+sprintf(system_command,"%s\\%s",batfile_path,check_janus_bat);
+Proc_err(DEF_ERR_OPT,"System_command is - %s", system_command);
+system(system_command);
+//ok, if janus is running a file called check_janus_filename
+//check the fille is there, if it isn't, quit.
+    if ((check_janus_file = fopen(check_janus_filename, "r")) == NULL) {
+        Proc_err(DEF_ERR_OPT,"File %s does not exist.\n", check_janus_filename);
+        file_exists=0;
+    }
+    else
+    {
+        // could just leave it here with file_exists=1;
+        // but lets open it, and read the first line into a buffer. 
+        // might come in handy one day
+        file_exists=1; //well it does exists, but does it contain janus_sx?
+        if (fgets(buffer, sizeof(buffer), check_janus_file) != NULL) {
+        // Check if the string "janus_sx" is in the first line
+            if (strstr(buffer, search_str) != NULL) {
+                Proc_err(DEF_ERR_OPT,"The string \"%s\" is present in the first line.\n", search_str);
+                file_exists=1;
+            } else {
+                Proc_err(DEF_ERR_OPT,"The string \"%s\" is not present in the first line.\n", search_str);
+                file_exists=0; //file doesnt contain janus, so assume its bogus
+            }
+        } else {
+           Proc_err(DEF_ERR_OPT,"Failed to read the first line from %s.\n", filename);
+           file_exists=0; //gone wrong
+        }
+    }
+
+if (file_exists==1)
+{
+    STOPMSG("Janus is running already")
+}
+//dont really need an else here
+
+sprintf(system_command,"%s\\%s",batfile_path,batfile);
+
+Proc_err(INFO_OPT, "The system will reboot into automation mode in %i seconds",s_to_reboot);
+
+for ( loop = 1; loop < num_warnings; loop++)
+{
+   sleep(s_to_reboot/num_warnings);
+   time_left=time_left-(s_to_reboot/num_warnings);
+   Proc_err(INFO_OPT, "The system will start rebooting into automation mode in %i seconds",time_left);
+}
+
+XCMD("sendgui acqu")
+GETCURDATA
+SETCURDATA
+XCMD("halt")
+//Uncomment below to call a reboot script
+//Proc_err(DEF_ERR_OPT,"System_command is - %s", system_command);
+system(system_command);
+
+
+QUIT

@@ -25,6 +25,10 @@ int file_exists=0;
 FILE *fbat = NULL;
 FILE *check_janus_file = NULL;
 
+XCMD("setdef ackn no");
+XCMD("setdef stdout on");
+XCMD("setdef stderr on");
+
 //First check if janus is running - if it is, quit - this script could have been called via a cron job in topspin
 sprintf(system_command,"%s\\%s",batfile_path,check_janus_bat);
 Proc_err(DEF_ERR_OPT,"System_command is - %s", system_command);

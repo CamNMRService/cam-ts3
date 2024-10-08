@@ -1,10 +1,19 @@
+<<<<<<< HEAD
 ##TITLE= sm_chirp, 30.0000ms, 0.086471 W
+=======
+##TITLE= sm_chirp, 30.0000ms, 0.059284 W
+>>>>>>> 6721466d5fa2463cafef2a1c3a51e9588faaa511
 ##JCAMP-DX= 5.00 Bruker JCAMP library 
 ##DATA TYPE= Shape Data 
 ##ORIGIN= Bruker BioSpin GmbH 
 ##OWNER= <WaveMaker> 
+<<<<<<< HEAD
 ##DATE= Nov 10 2023 
 ##TIME= 13:12:49 
+=======
+##DATE= Jun 13 2022 
+##TIME= 14:23:56 
+>>>>>>> 6721466d5fa2463cafef2a1c3a51e9588faaa511
 ##$SHAPE_PARAMETERS= Type: sm_chirp
 ##MINX= 0.000000 
 ##MAXX= 100.000000 

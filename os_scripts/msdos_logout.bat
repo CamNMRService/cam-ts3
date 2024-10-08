@@ -1,0 +1,3 @@
+
+shutdown /l
+exit

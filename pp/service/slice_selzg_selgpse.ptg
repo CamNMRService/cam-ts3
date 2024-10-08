@@ -1,0 +1,140 @@
+;slice_selzg_selgpse.ptg
+;slice-selective experiment using selective 90 with gradient
+;plus seelctive 180 with gradient and additional flanking gradients
+
+; selectivity given by frequency bandwidth of pulse and gradient strength
+; e.g. if max gradient strength =53.5G/cm  and  gpz0 = 1%
+; then Gamma=4257.7 Hz/G 
+; gives 2277.9Hz bandwidth = 1cm slice
+;
+; increasing gpz0 decreases slice thickness for a given pulse bandwidth.
+; N.B. gpz0 should be large w.r.t shift range to be excited to avoid shift-dependent
+; slice position
+; 
+;If using the CALC_SP option, CNST49 can be set to <1 to account 
+; for the difference between the 3dB bandwidth of the shape, and the total active bandwidth
+; (including the transitionh region). This factor should be ?? for G4 pulse and ?? for EBurp2
+;
+;If using the CALC_SLICE option, CNST51 is the offset of the slice centre, in mm,
+; and CNST52 is slice width in mm
+
+#include <Avance.incl>
+#include <Grad.incl>
+
+#   ifdef CALC_SLICE
+
+"cnst55=cnst54*cnst52*cnst53*cnst63/10"
+
+"cnst56=cnst54*cnst51*cnst53*cnst63/10"
+"spoffs9=cnst56"
+"spoffs12=cnst56"
+#   endif /*CALC_SLICE*/
+
+#   ifdef CALC_SP
+"p42=(1000000*bwfac9/(cnst55/cnst49))"
+"spw9=plw1/((p42*90.0)/(p1*totrot9))*((p42*90.0)/(p1*totrot9))*(integfac9*integfac9)"
+"spoal9=1"
+"p43=(1000000*bwfac12/(cnst55/cnst49))"
+"spw12=plw1/((p43*90.0)/(p1*totrot12))*((p43*90.0)/(p1*totrot12))*(integfac12*integfac12)"
+
+#   endif /*CALC_SP*/
+
+"acqt0=0"
+"d42=p42"
+"d43=p43"
+
+;convert powers to numbers for power sanity checking
+
+"cnst60=spw9"
+"cnst60=cnst60"
+"cnst61=plw1"
+"cnst61=cnst61"
+"cnst62=spw12"
+"cnst62=cnst62"
+"p16=300u"
+
+1 ze
+  1m 
+  if "cnst60<cnst61" goto Passaq
+  2u 
+  print "Selective pulse power exceeds hard pulse!"
+  goto HaltAcqu
+  Passaq, 1m
+  if "cnst62<cnst61" goto Passaq2
+  2u 
+  print "Selective pulse power exceeds hard pulse!"
+  goto HaltAcqu
+  Passaq2, 1m
+  
+2 30m 
+  4u BLKGRAD
+  20u  
+  d1
+  50u UNBLKGRAD
+  10u gron0*-1
+  d42
+  d43
+  25u
+  10u groff
+  p16:gp1*-1
+  d16
+  p16:gp1*-1
+  d16
+ 4u pl0:f1
+  10u gron0
+  p42:sp9:f1 ph1:r
+  d16 groff
+  p16:gp1
+  d16
+  12u gron0
+  p43:sp12:f1 ph2:r
+  10u 
+  1u groff
+  d16
+  p16:gp1
+  d16
+  1u
+;  1u BLKGRAD
+  go=2 ph31
+  30m mc #0 to 2 F0(zd)
+  4u BLKGRAD
+HaltAcqu, 1m
+exit
+
+ph1=0 0 3 3 2 2 1 1
+ph2=1 3
+ph31=0 0 1 1 2 2 3 3
+
+
+
+
+;p42: f1 channel - 90 degree selective pulse [us]
+;sp9: f1 channel - shaped pulse power level for selective excitation 
+;spnam9: shaped pulse for selective excitation                        
+;p43:f1 channel - 180 degree selective pulse [us]
+;sp12: f1 channel - shaped pulse power level for selective refocusing
+;spnam12: shaped pulse for selective refocusing                       
+;d1 : relaxation delay 
+;d16: delay for homospoil/gradient recovery
+;cnst49: Ratio between 3dB bandwidth and slice bandwidth 
+;cnst51: slice offset [mm] 
+;cnst52: Slice thickness [mm]
+;cnst53: Gamma (Hz/G, =4257.7)
+;cnst54: Probe maximum gradient strength [G/cm @10A, e.g. 50]
+;cnst55: selective pulse bandwidth [Hz]
+;cnst56: dummy value for spoffs9
+;cnst63: gradient strength gpz0 on scale of 0-1 ie 0.5 for 50%
+;NS: 1 * n
+;DS: 0
+;GPZ0 : slice selection gradient [0-100%]
+
+                                         ;preprocessor-flags-start
+;CALC_SP: to calculate shape length and power from bandwidth start with 
+;             option -DCALC_SP (eda: ZGOPTNS)
+;CALC_SLICE: to calculate shape bandwidth and spoffs from slice thickness and position 
+;							etc start with option -DCALC_SLICE (eda: ZGOPTNS)
+                                          ;preprocessor-flags-end
+
+
+
+

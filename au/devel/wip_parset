@@ -3,6 +3,11 @@
 
 #define MAX_LINE_LENGTH 256
 
+AUERR = local_au(curdat);
+QUIT
+
+int local_au(const char* curdat)
+{
 char suffix[7] = ".ref";
 
 int ts_major = GetTsVersionMajor();
@@ -82,8 +87,8 @@ while (fgets(line, sizeof(line), par_set_file))
 // Close the file
 fclose(par_set_file);
 
-QUIT
-
+return 0;//end of main procedure
+}
 
 // Function to check if par_set ends with suffix
 int ends_with(const char *parset, const char *suffix) {

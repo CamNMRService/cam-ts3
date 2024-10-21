@@ -65,6 +65,7 @@ while (fgets(line, sizeof(line), par_set_file))
       sprintf(err_str,"going to run cmd - %s", cmd_str_b);
       Proc_err(DEF_ERR_OPT,"%s", err_str);
       XCMD(cmd_str_b)
+
       sprintf(cmd_str_c,"wpar %s-%s all",parset,instrum_name);
       sprintf(err_str,"going to run cmd - %s", cmd_str_c);
       Proc_err(DEF_ERR_OPT,"%s", err_str);
@@ -80,3 +81,14 @@ fclose(par_set_file);
 QUIT
 
 
+// Function to remove suffix from the end of parset
+void remove_suffix(char *parset, const char *suffix) {
+    size_t par_len = strlen(parset);
+    size_t suffix_len = strlen(suffix);
+
+    // Check if par_set ends with suffix
+    if (par_len >= suffix_len && strcmp(par_set + par_len - suffix_len, suffix) == 0) {
+        // If so, truncate the string to remove the suffix
+        parset[par_len - suffix_len] = '\0';
+    }
+}

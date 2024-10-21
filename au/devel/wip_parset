@@ -63,7 +63,7 @@ while (fgets(line, sizeof(line), par_set_file))
       sprintf(err_str,"going to run cmd - %s", cmd_str_a);
       Proc_err(DEF_ERR_OPT,"%s", err_str);
       XCMD(cmd_str_a)
-      parset[strlen(parset) - strlen(suffix)] = '\0'; //now remove trailing suffix
+      parset[strlen(parset) -1 - strlen(suffix)] = '\0'; //now remove trailing suffix
    } else if (inside_parset) 
    {
       // Read subsequent lines into cmd until another "##" is found

@@ -72,7 +72,7 @@ while (fgets(line, sizeof(line), par_set_file))
    {
       // Read subsequent lines into cmd until another "##" is found
       strncpy(temp_str, line, MAX_LINE_LENGTH - 1);
-      if (strlen(temp_str>0)) //so not an empty line
+      if (strlen(temp_str)>0)//so not an empty line
       {
          temp_str[strcspn(temp_str, "\n")] = '\0'; // Remove newline character at the end
          sprintf(cmd_str_b,"sendgui %s",temp_str);

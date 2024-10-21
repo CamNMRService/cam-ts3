@@ -105,7 +105,7 @@ int ends_with(const char *parset, const char *suffix) {
 }
 
 // Function to remove the suffix from par_set if it exists
-char* remove_suffix(char *parset, const char *suffix) {
+remove_suffix(char *parset, const char *suffix) {
     if (ends_with(parset, suffix)) {
         parset[strlen(parset) - strlen(suffix)] = '\0';
     }

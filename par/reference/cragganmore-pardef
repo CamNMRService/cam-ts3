@@ -1,3 +1,5 @@
 ##proton.ref
-ns 8
+sendgui ns 8
+sendgui o1p 5
+sendgui sw 30
 service_standard_title_1d

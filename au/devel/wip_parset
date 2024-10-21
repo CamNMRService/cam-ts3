@@ -3,7 +3,8 @@
 
 #define MAX_LINE_LENGTH 256
 
-char suffix[7] = ".ref";
+//char suffix[7] = ".ref";
+ const char *suffix = ".ref";
 int ts_major = GetTsVersionMajor();
 int ts_minor = GetTsVersionMinor();
 int ts_patch = GetTsVersionPl();
@@ -83,7 +84,7 @@ QUIT
 
 
 // Function to remove suffix from the end of parset
-void remove_suffix(char *parset, char *suffix) {
+void remove_suffix(char *parset, const char *suffix) {
     size_t par_len = strlen(parset);
     size_t suffix_len = strlen(suffix);
 

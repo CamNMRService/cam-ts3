@@ -62,7 +62,7 @@ while (fgets(line, sizeof(line), par_set_file))
       // Remove newline character at the end
       parset[strcspn(parset, "\n")] = '\0';
       //printf("Parset found: %s\n", parset);
-      sprintf(cmd_str_a,"rpar %s all",parset);
+      sprintf(cmd_str_a,"sendgui rpar %s all",parset);
       sprintf(err_str,"going to run cmd - %s", cmd_str_a);
       Proc_err(DEF_ERR_OPT,"%s", err_str);
       XCMD(cmd_str_a)
@@ -71,13 +71,14 @@ while (fgets(line, sizeof(line), par_set_file))
    {
       // Read subsequent lines into cmd until another "##" is found
       strncpy(cmd_str_b, line, MAX_LINE_LENGTH - 1);
+      sprintf(cmd_str_b,"sendgui %s",cmd_str_b);
       // Remove newline character at the end
       cmd_str_b[strcspn(cmd_str_b, "\n")] = '\0';
       sprintf(err_str,"going to run cmd - %s", cmd_str_b);
       Proc_err(DEF_ERR_OPT,"%s", err_str);
       XCMD(cmd_str_b)
 
-      sprintf(cmd_str_c,"wpar %s-%s all",parset,instrum_name);
+      sprintf(cmd_str_c,"sendgui wpar %s-%s all",parset,instrum_name);
       sprintf(err_str,"going to run cmd - %s", cmd_str_c);
       Proc_err(DEF_ERR_OPT,"%s", err_str);
       XCMD(cmd_str_c)

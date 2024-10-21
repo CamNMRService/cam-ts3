@@ -2,7 +2,8 @@
 //sketching out a parameter set definer/copyier
 
 #define MAX_LINE_LENGTH 256
-
+GETCURDATA
+SETCURDATA
 AUERR = local_au(curdat);
 QUIT
 
@@ -27,6 +28,8 @@ char cmd_str_b[MAX_LINE_LENGTH]=""; //command to issue to change a parameter etc
 char cmd_str_c[MAX_LINE_LENGTH]=""; //command to write the parameter set
 
 FILE *par_set_file;
+GETCURDATA
+SETCURDATA
 FETCHPARS("INSTRUM", instrum_name)
 
 

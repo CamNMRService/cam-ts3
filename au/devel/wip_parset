@@ -72,9 +72,7 @@ while (fgets(line, sizeof(line), par_set_file))
       sprintf(err_str,"going to run cmd - %s", cmd_str_b);
       Proc_err(DEF_ERR_OPT,"%s", err_str);
       XCMD(cmd_str_b)
-     
-      remove_suffix(parset, suffix);
-
+      parset[strlen(parset) - strlen(suffix)] = '\0';
       sprintf(cmd_str_c,"wpar %s-%s all",parset,instrum_name);
       sprintf(err_str,"going to run cmd - %s", cmd_str_c);
       Proc_err(DEF_ERR_OPT,"%s", err_str);
@@ -90,23 +88,3 @@ fclose(par_set_file);
 return 0;//end of main procedure
 }
 
-// Function to check if par_set ends with suffix
-int ends_with(const char *parset, const char *suffix) {
-    size_t par_set_len = strlen(parset);
-    size_t suffix_len = strlen(suffix);
-    
-    // Check if par_set is shorter than suffix, can't have suffix
-    if (suffix_len > par_set_len) {
-        return 0;
-    }
-
-    // Compare the end of par_set with suffix
-    return strcmp(parset + par_set_len - suffix_len, suffix) == 0;
-}
-
-// Function to remove the suffix from par_set if it exists
-void remove_suffix(char *parset, char *suffix) {
-    if (ends_with(parset, suffix)) {
-        parset[strlen(parset) - strlen(suffix)] = '\0';
-    }
-}

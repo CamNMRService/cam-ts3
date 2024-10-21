@@ -1,10 +1,14 @@
+!! lines starting with !! are comments
+!! lines starting with ## detail the reference parameter set to be read in
+!! all other lines are commands executed with XCMD(cmd)
 ##proton.ref
 sendgui ns 8
 sendgui o1p 5
 sendgui sw 30
-service_standard_title_1d
+sendgui service_standard_title_1d
 ##carbon.ref
 sendgui ns 256
 sendgui o1p 125
 sendgui sw 280
-!! double exclamation marks are comments
+sendgui service_standard_title_1d
+

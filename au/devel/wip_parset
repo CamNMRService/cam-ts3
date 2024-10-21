@@ -26,7 +26,7 @@ FETCHPARS("INSTRUM", instrum_name)
 #ifdef HAS_WINDOWS_FEATURES
    sprintf(inst_user_par_loc,"C:\\Bruker\\topspin%i.%i.%i\\exp\\stan\\nmr\\par\\user\\",ts_major,ts_minor,ts_patch);
    sprintf(git_par_loc,"C:\\Bruker\\cam_ts%i\\au\\service\\par\\",ts_major);
-   sprintf(spect_par_set_file_loc,"C:\\Bruker\\cam_ts%i\\par\\reference\\%s-pardef",ts_major,instrum_name);
+   sprintf(spect_par_set_file_loc,"C:\\Bruker\\cam-ts%i\\par\\reference\\%s-pardef",ts_major,instrum_name);
 #else //Not actually checked this on linux... We have no linux xpectrometers
  		
 #endif

@@ -3,6 +3,7 @@
 
 #define MAX_LINE_LENGTH 256
 
+char suffix[7] = ".ref";
 int ts_major = GetTsVersionMajor();
 int ts_minor = GetTsVersionMinor();
 int ts_patch = GetTsVersionPl();
@@ -65,7 +66,7 @@ while (fgets(line, sizeof(line), par_set_file))
       sprintf(err_str,"going to run cmd - %s", cmd_str_b);
       Proc_err(DEF_ERR_OPT,"%s", err_str);
       XCMD(cmd_str_b)
-
+      remove_suffix(parset, suffix);
       sprintf(cmd_str_c,"wpar %s-%s all",parset,instrum_name);
       sprintf(err_str,"going to run cmd - %s", cmd_str_c);
       Proc_err(DEF_ERR_OPT,"%s", err_str);

@@ -83,7 +83,7 @@ QUIT
 
 
 // Function to remove suffix from the end of parset
-void remove_suffix(char *parset, const char *suffix) {
+void remove_suffix(char *parset, char *suffix) {
     size_t par_len = strlen(parset);
     size_t suffix_len = strlen(suffix);
 

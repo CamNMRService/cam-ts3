@@ -34,7 +34,7 @@ FETCHPARS("INSTRUM", instrum_name)
 // Open the file
 par_set_file = fopen(spect_par_set_file_loc, "r");
 if (par_set_file == NULL) {
-  sprintf(err_str,"Could not open spect_par_set_file_loc%s", spect_par_set_file_loc);
+  sprintf(err_str,"Could not open spect_par_set_file_loc - %s", spect_par_set_file_loc);
   Proc_err(DEF_ERR_OPT,"%s", err_str);
   STOPMSG(err_str)
 }
@@ -53,6 +53,8 @@ while (fgets(line, sizeof(line), par_set_file))
       parset[strcspn(parset, "\n")] = '\0';
       //printf("Parset found: %s\n", parset);
       sprintf(cmd_str_a,"rpar %s all",parset);
+      sprintf(err_str,"going to run cmd - %s", cmd_str_a);
+      Proc_err(DEF_ERR_OPT,"%s", err_str);
       XCMD(cmd_str_a)
    } else if (inside_parset) 
    {
@@ -60,9 +62,12 @@ while (fgets(line, sizeof(line), par_set_file))
       strncpy(cmd_str_b, line, MAX_LINE_LENGTH - 1);
       // Remove newline character at the end
       cmd_str_b[strcspn(cmd_str_b, "\n")] = '\0';
-      //printf("Command: %s\n", cmd_str_b);
+      sprintf(err_str,"going to run cmd - %s", cmd_str_b);
+      Proc_err(DEF_ERR_OPT,"%s", err_str);
       XCMD(cmd_str_b)
       sprintf(cmd_str_c,"wpar %s-%s all",parset,instrum_name);
+      sprintf(err_str,"going to run cmd - %s", cmd_str_c);
+      Proc_err(DEF_ERR_OPT,"%s", err_str);
       XCMD(cmd_str_c)
 
    }

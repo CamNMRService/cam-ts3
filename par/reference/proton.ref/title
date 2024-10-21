@@ -1,0 +1,13 @@
+Dataset name=dfj-xc310-13079-o-c,expno=10
+Solvent=CDCl3
+Instrument=cragganmore,MHz=400.1413
+Probehead=Z8400_0264 (PH QNP 400S1 F/P/C-H-D-05 Z)
+Pulseprogram=zg30
+Nucleus=1H,P1(us)=10.00,PL1(watts)=16.80
+NS=34,D1(s)=2.00,AQ(s)=2.94,RG=456.00
+SW(ppm)=27.89,SW(Hz)=11160.71,O1(ppm)=3.35
+Reported temperature=298.00
+2024-10-18 - 17:12:24
+
+
+dfj-xc310-13079-o-c

@@ -70,21 +70,24 @@ while (fgets(line, sizeof(line), par_set_file))
       parset[strlen(parset) -1 - strlen(suffix)] = '\0'; //now remove trailing suffix
    } else if (inside_parset) 
    {
-      // Read subsequent lines into cmd until another "##" is found
-      strncpy(temp_str, line, MAX_LINE_LENGTH - 1);
-      if (strlen(temp_str)>1)//so not an empty line
+      if (strncmp(line, "!!", 2) == 0) //lines beginning with !! are comments
       {
-         temp_str[strcspn(temp_str, "\n")] = '\0'; // Remove newline character at the end
-         sprintf(cmd_str_b,"%s",temp_str); //not sure whats best. Maybe have sendgui in pardef file
-         //sprintf(cmd_str_b,"sendgui %s",temp_str);
-         sprintf(err_str,"going to run cmd - %s", cmd_str_b);
-         Proc_err(DEF_ERR_OPT,"%s", err_str);
-         XCMD(cmd_str_b)
+         // Read subsequent lines into cmd until another "##" is found
+         strncpy(temp_str, line, MAX_LINE_LENGTH - 1);
+         if (strlen(temp_str)>1)//so not an empty line
+         {
+            temp_str[strcspn(temp_str, "\n")] = '\0'; // Remove newline character at the end
+            sprintf(cmd_str_b,"%s",temp_str); //not sure whats best. Maybe have sendgui in pardef file
+            //sprintf(cmd_str_b,"sendgui %s",temp_str);
+            sprintf(err_str,"going to run cmd - %s", cmd_str_b);
+            Proc_err(DEF_ERR_OPT,"%s", err_str);
+            XCMD(cmd_str_b)
 
-         sprintf(cmd_str_c,"wpar %s-%s all",parset,instrum_name);
-         sprintf(err_str,"going to run cmd - %s", cmd_str_c);
-         Proc_err(DEF_ERR_OPT,"%s", err_str);
-         XCMD(cmd_str_c)
+            sprintf(cmd_str_c,"wpar %s-%s all",parset,instrum_name);
+            sprintf(err_str,"going to run cmd - %s", cmd_str_c);
+            Proc_err(DEF_ERR_OPT,"%s", err_str);
+            XCMD(cmd_str_c)
+         }
       }
 
    }

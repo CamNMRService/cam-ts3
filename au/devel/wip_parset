@@ -1,0 +1,77 @@
+
+//sketching out a parameter set definer/copyier
+
+#define MAX_LINE_LENGTH 256
+
+int ts_major = GetTsVersionMajor();
+int ts_minor = GetTsVersionMinor();
+int ts_patch = GetTsVersionPl();
+int inside_parset = 0;  // Flag to indicate we're inside a parset section
+
+char instrum_name[MAX_LINE_LENGTH]="spect";
+char inst_user_par_loc[PATH_MAX]="";
+char git_par_loc[PATH_MAX]="";
+char parset[MAX_LINE_LENGTH]="";
+char line[MAX_LINE_LENGTH];
+char spect_par_set_file_loc[PATH_MAX]="";
+char err_str[MAX_LINE_LENGTH]="no error";
+char cmd_str_a[MAX_LINE_LENGTH]=""; //command to read the parset
+char cmd_str_b[MAX_LINE_LENGTH]=""; //command to issue to change a parameter etc
+char cmd_str_c[MAX_LINE_LENGTH]=""; //command to write the parameter set
+
+FILE *par_set_file;
+FETCHPARS("INSTRUM", instrum_name)
+
+
+#ifdef HAS_WINDOWS_FEATURES
+   sprintf(inst_user_par_loc,"C:\\Bruker\\topspin%i.%i.%i\\exp\\stan\\nmr\\par\\user\\",ts_major,ts_minor,ts_patch);
+   sprintf(git_par_loc,"C:\\Bruker\\cam_ts%i\\au\\service\\par\\",ts_major);
+   sprintf(spect_par_set_file_loc,"C:\\Bruker\\cam_ts%i\\par\\reference\\%s-pardef",ts_major,instrum_name);
+#else //Not actually checked this on linux... We have no linux xpectrometers
+ 		
+#endif
+
+// Open the file
+par_set_file = fopen(spect_par_set_file_loc, "r");
+if (par_set_file == NULL) {
+  sprintf(err_str,"Could not open spect_par_set_file_loc%s", spect_par_set_file_loc);
+  Proc_err(DEF_ERR_OPT,"%s", err_str);
+  STOPMSG(err_str)
+}
+
+// Loop through the file line by line
+while (fgets(line, sizeof(line), par_set_file)) 
+{
+   // Check if the line starts with "##"
+   if (strncmp(line, "##", 2) == 0) 
+   {
+      // If we find a line starting with "##", it's the start of a new parset
+      inside_parset = 1;
+      // Remove the "##" and any leading/trailing spaces, store in parset
+      strncpy(parset, line + 2, MAX_LINE_LENGTH - 1);
+      // Remove newline character at the end
+      parset[strcspn(parset, "\n")] = '\0';
+      //printf("Parset found: %s\n", parset);
+      sprintf(cmd_str_a,"rpar %s all",parset);
+      XCMD(cmd_str_a)
+   } else if (inside_parset) 
+   {
+      // Read subsequent lines into cmd until another "##" is found
+      strncpy(cmd_str_b, line, MAX_LINE_LENGTH - 1);
+      // Remove newline character at the end
+      cmd_str_b[strcspn(cmd_str_b, "\n")] = '\0';
+      //printf("Command: %s\n", cmd_str_b);
+      XCMD(cmd_str_b)
+      sprintf(cmd_str_c,"wpar %s-%s all",parset,instrum_name);
+      XCMD(cmd_str_c)
+
+   }
+}//end of while loop
+
+    
+// Close the file
+fclose(par_set_file);
+
+QUIT
+
+

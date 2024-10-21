@@ -9,7 +9,7 @@ QUIT
 
 int local_au(const char* curdat)
 {
-char suffix[7] = ".ref";
+
 
 int ts_major = GetTsVersionMajor();
 int ts_minor = GetTsVersionMinor();
@@ -17,18 +17,20 @@ int ts_patch = GetTsVersionPl();
 int inside_parset = 0;  // Flag to indicate we're inside a parset section
 
 char instrum_name[MAX_LINE_LENGTH]="spect";
-char inst_user_par_loc[PATH_MAX]="";
-char git_par_loc[PATH_MAX]="";
-char parset[MAX_LINE_LENGTH]="";
-char line[MAX_LINE_LENGTH];
-char spect_par_set_file_loc[PATH_MAX]="";
+char inst_user_par_loc[PATH_MAX]=""; //location of default topspin par/user folder
+char git_par_loc[PATH_MAX]=""; //location of git service parameter sets
+char parset[MAX_LINE_LENGTH]=""; //name of (reference) parameter set to read in
+char suffix[7] = ".ref"; //suffix of the (reference)
+char pardef_file_loc[PATH_MAX]=""; //location of pardef file containing names of parameter sets and commands
+char line[MAX_LINE_LENGTH]; //store line from pardef file
+
 char err_str[MAX_LINE_LENGTH]="no error";
 char temp_str[MAX_LINE_LENGTH]="";
 char cmd_str_a[MAX_LINE_LENGTH]=""; //command to read the parset
 char cmd_str_b[MAX_LINE_LENGTH]=""; //command to issue to change a parameter etc
 char cmd_str_c[MAX_LINE_LENGTH]=""; //command to write the parameter set
 
-FILE *par_set_file;
+FILE *pardef_file;
 GETCURDATA
 SETCURDATA
 FETCHPARS("INSTRUM", instrum_name)
@@ -37,21 +39,21 @@ FETCHPARS("INSTRUM", instrum_name)
 #ifdef HAS_WINDOWS_FEATURES
    sprintf(inst_user_par_loc,"C:\\Bruker\\topspin%i.%i.%i\\exp\\stan\\nmr\\par\\user\\",ts_major,ts_minor,ts_patch);
    sprintf(git_par_loc,"C:\\Bruker\\cam_ts%i\\au\\service\\par\\",ts_major);
-   sprintf(spect_par_set_file_loc,"C:\\Bruker\\cam-ts%i\\par\\reference\\%s-pardef",ts_major,instrum_name);
+   sprintf(pardef_file_loc,"C:\\Bruker\\cam-ts%i\\par\\reference\\%s-pardef",ts_major,instrum_name);
 #else //Not actually checked this on linux... We have no linux xpectrometers
  		
 #endif
 
 // Open the file
-par_set_file = fopen(spect_par_set_file_loc, "r");
-if (par_set_file == NULL) {
-  sprintf(err_str,"Could not open spect_par_set_file_loc - %s", spect_par_set_file_loc);
+pardef_file = fopen(pardef_file_loc, "r");
+if (pardef_file == NULL) {
+  sprintf(err_str,"Could not open pardef_file_loc - %s", pardef_file_loc);
   Proc_err(DEF_ERR_OPT,"%s", err_str);
   STOPMSG(err_str)
 }
 
 // Loop through the file line by line
-while (fgets(line, sizeof(line), par_set_file)) 
+while (fgets(line, sizeof(line), pardef_file)) 
 {
    // Check if the line starts with "##"
    if (strncmp(line, "##", 2) == 0) 
@@ -95,7 +97,7 @@ while (fgets(line, sizeof(line), par_set_file))
 
     
 // Close the file
-fclose(par_set_file);
+fclose(pardef_file);
 
 return 0;//end of main procedure
 }

@@ -87,7 +87,7 @@ void remove_suffix(char *parset, const char *suffix) {
     size_t suffix_len = strlen(suffix);
 
     // Check if par_set ends with suffix
-    if (par_len >= suffix_len && strcmp(par_set + par_len - suffix_len, suffix) == 0) {
+    if (par_len >= suffix_len && strcmp(parset + par_len - suffix_len, suffix) == 0) {
         // If so, truncate the string to remove the suffix
         parset[par_len - suffix_len] = '\0';
     }

@@ -23,6 +23,7 @@ char parset[MAX_LINE_LENGTH]="";
 char line[MAX_LINE_LENGTH];
 char spect_par_set_file_loc[PATH_MAX]="";
 char err_str[MAX_LINE_LENGTH]="no error";
+char temp_str[MAX_LINE_LENGTH]="";
 char cmd_str_a[MAX_LINE_LENGTH]=""; //command to read the parset
 char cmd_str_b[MAX_LINE_LENGTH]=""; //command to issue to change a parameter etc
 char cmd_str_c[MAX_LINE_LENGTH]=""; //command to write the parameter set
@@ -70,18 +71,20 @@ while (fgets(line, sizeof(line), par_set_file))
    } else if (inside_parset) 
    {
       // Read subsequent lines into cmd until another "##" is found
-      strncpy(cmd_str_b, line, MAX_LINE_LENGTH - 1);
-      sprintf(cmd_str_b,"sendgui %s",cmd_str_b);
-      // Remove newline character at the end
-      cmd_str_b[strcspn(cmd_str_b, "\n")] = '\0';
-      sprintf(err_str,"going to run cmd - %s", cmd_str_b);
-      Proc_err(DEF_ERR_OPT,"%s", err_str);
-      XCMD(cmd_str_b)
+      strncpy(temp_str, line, MAX_LINE_LENGTH - 1);
+      if (strlen(temp_str>0)) //so not an empty line
+      {
+         temp_str[strcspn(temp_str, "\n")] = '\0'; // Remove newline character at the end
+         sprintf(cmd_str_b,"sendgui %s",temp_str);
+         sprintf(err_str,"going to run cmd - %s", cmd_str_b);
+         Proc_err(DEF_ERR_OPT,"%s", err_str);
+         XCMD(cmd_str_b)
 
-      sprintf(cmd_str_c,"sendgui wpar %s-%s all",parset,instrum_name);
-      sprintf(err_str,"going to run cmd - %s", cmd_str_c);
-      Proc_err(DEF_ERR_OPT,"%s", err_str);
-      XCMD(cmd_str_c)
+         sprintf(cmd_str_c,"sendgui wpar %s-%s all",parset,instrum_name);
+         sprintf(err_str,"going to run cmd - %s", cmd_str_c);
+         Proc_err(DEF_ERR_OPT,"%s", err_str);
+         XCMD(cmd_str_c)
+      }
 
    }
 }//end of while loop

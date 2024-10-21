@@ -70,7 +70,7 @@ while (fgets(line, sizeof(line), par_set_file))
       parset[strlen(parset) -1 - strlen(suffix)] = '\0'; //now remove trailing suffix
    } else if (inside_parset) 
    {
-      if (strncmp(line, "!!", 2) == 0) //lines beginning with !! are comments
+      if (strncmp(line, "!!", 2) != 0) //lines beginning with !! are comments
       {
          // Read subsequent lines into cmd until another "##" is found
          strncpy(temp_str, line, MAX_LINE_LENGTH - 1);

@@ -1,0 +1,34 @@
+/*** ^^A -*-C++-*- **********************************************/
+/*	au_rga_zg_rotoff_topshim djh 24-10		08.04.1998			*/
+/****************************************************************/
+/*	Short Description :					*/
+/*	General AU program for data acquisition.		*/
+/****************************************************************/
+/*	Keywords :						*/
+/*	zg, gradshim, gradient shimming				*/
+/****************************************************************/
+/*	Description/Usage :					*/
+/*	General AU program for data acquisition. No rga is	*/
+/*	done, only zg. This AU program is used by the gradient	*/
+/*	shimming interface 'gradshim'.				*/
+/****************************************************************/
+/*	Author(s) :						*/
+/*	Name		: Mike Engelhardt 			*/
+/*	Organisation	: Bruker Analytik			*/
+/*	Email		: michael.engelhardt@bruker.de		*/
+/****************************************************************/
+/*	Name		Date	Modification:			*/
+/*	eng		980408	created				*/
+/****************************************************************/
+/*
+$Id: au_zgonly,v 1.2 2000/07/12 11:39:40 gsc Exp $
+/*Lets have a topshim*/
+char tscommand[255]="";
+char ts_opt[31]=" ";
+ROTOFF
+GETCURDATA
+sprintf(tscommand,"topshim plotall convcomp %s", ts_opt);
+XCMD(tscommand);
+RGA
+ZG
+QUIT

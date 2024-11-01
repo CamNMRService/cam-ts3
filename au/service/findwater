@@ -42,6 +42,7 @@
 /* ptg             2023-09-07 Rewrite all options to use userA1 settings*/
 /* ptg 				2023-09-08 added setdef to inhibit trouble error messages from bt_calibrate_o1 and changed bt_calibrate_o1 settings*/
 /* ptg 			2024-05-15 replace AUTOPHASE with loopadj_fallback to take care of cases where user selects a fully deuterated solvent but it's only partly deuterated*/
+/* ptg 2024-11-1 proper handling of fixRG, ie no rga done!! */
 /****************************************************************/
 
 
@@ -343,12 +344,36 @@ if(o1cal)
 	}
 }
 
-
+// wvm obviously needs to be before RGA!!
+if(wvm)
+{
+    XCMD("wvm -a")
+    sleep(5);
+    if (debug)
+	{
+        fprintf(fptr, "Wavemaker done \n");
+	}
+}
 
 
 // RGA, the optinal limit or scaling
-
-RGA
+// only do if fixRG not set
+if(fixRG)
+{
+    if (debug)
+	  {
+        fprintf(fptr, "RG fixed to original value %f \n", rgorig, rg);
+	  }
+}
+else
+{
+	RGA 
+	FETCHPAR("RG", &rg)
+  if (debug)
+	  {
+        fprintf(fptr, "RGA was done, orig value %f , new value %f \n", rgorig, rg);
+	  }
+}
 if(maxRG)
 {
     FETCHPAR("RG", &rg)
@@ -373,25 +398,8 @@ if(reduceRG)
 	}
 }
 
-if(fixRG)
-{
-	  
-    STOREPAR("RG", rgorig)
-    if (debug)
-	  {
-        fprintf(fptr, "RG fixed to original value %f \n", rgorig, rg);
-	  }
-}
 
-if(wvm)
-{
-    XCMD("wvm -a")
-    sleep(5);
-    if (debug)
-	{
-        fprintf(fptr, "Wavemaker done \n");
-	}
-}
+
 
 fprintf(fptr,"### \n");
 fclose(fptr);

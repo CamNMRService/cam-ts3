@@ -9,10 +9,12 @@ sendgui XAU setaq
 sendgui d1 1.5
 sendgui XAU setaq
 ##j-13c.ref
-ns 256
+sendgui ns 256
 sendgui XAU setaq
 ##j-d135.ref
-ns 128
+sendgui ns 128
+sendgui XAU setaq
+##j-2h.ref
 sendgui XAU setaq
 
 

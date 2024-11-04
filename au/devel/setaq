@@ -1,0 +1,50 @@
+// setaq
+// Take the AQ value in a parameter set that may have originated at a different spectrometer frequency, and 
+// work out what it should be at the current spectrometer frequency
+// setdiffparm has some useful code...
+// At the moment this needs to be run manually on every new experiment after what is currently wip_parset is run...
+
+double refbf1, curbf1; // refbf1 is the value in original parset, curbf1 comes from nuclei.all
+char fulinst[PATH_MAX];
+char inputline[120];
+char nucleus[10], nuc1[10];
+FILE *fp;            /* file pointer to nuclei file */
+float newaq, oldaq;
+  
+FETCHPAR("NUC1",nuc1);  // read the current direct dimension nucleus
+FETCHPAR("BF1", &refbf1)
+
+
+fulinst[0] = 0;
+GetInstrPathTo("nuclei",fulinst,sizeof(fulinst));
+
+if ((fp = fopen(fulinst, "r")) == NULL)
+{
+    Proc_err(DEF_ERR_OPT, "%s:\n%s",
+        "Could not open file for reading", fulinst);
+    ABORT
+}
+
+while (fgets(inputline, sizeof(inputline), fp))
+{
+    if (inputline[0] != '#')
+    {
+      double freq = -2.0;
+
+      nucleus[0] = 0;
+      sscanf(inputline, "%s%*s%*s%*f%*s%lf", nucleus, &freq);
+
+      if (strcmp(nucleus, nuc1) == 0)
+      {
+        curbf1=freq;
+      }
+    }
+}
+FETCHPAR("AQ", &oldaq);
+newaq=oldaq*curbf1/refbf1;
+Proc_err(DEF_ERR_OPT,"refbf1=%lf, curbf1=%lf, oldaq=%lf, newaq=%lf", refbf1, curbf1, oldaq, newaq);  
+fclose(fp);
+FETCHPAR("AQ", &oldaq);
+newaq=oldaq*curbf1/refbf1;
+STOREPAR("AQ", newaq)
+QUIT

@@ -1,0 +1,18 @@
+!! lines starting with !! are comments
+!! lines starting with ## detail the reference parameter set to be read in
+!! all other lines are commands executed with XCMD(cmd)
+!! NB SW (P) and O1P will nbot be changed by paracon, so don;t need to set those
+##j-1h.ref
+sendgui ns 16
+sendgui XAU setaq
+##j-NOAH-BSC.ref
+sendgui d1 1.5
+sendgui XAU setaq
+##j-13c.ref
+ns 256
+sendgui XAU setaq
+##j-d135.ref
+ns 128
+sendgui XAU setaq
+
+

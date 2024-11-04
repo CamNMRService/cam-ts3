@@ -1,3 +1,4 @@
 ##proton.ref
-ns 8
+sendgui ns 8
 service_standard_title_1d
+sendgui aq 3.6690304

@@ -1,11 +1,11 @@
 ##TITLE= Parameter file, TopSpin 3.6.5
 ##JCAMPDX= 5.0
 ##DATATYPE= Parameter Values
-##NPOINTS= 3	$$ modification sequence number
+##NPOINTS= 2	$$ modification sequence number
 ##ORIGIN= Bruker BioSpin GmbH
 ##OWNER= ptg20
-$$ 2024-11-11 14:07:39.376 +0000  ptg20@DESKTOP-3IJF6FR
-$$ C:\Bruker\cam-ts3\par\reference/j-1h.ref/acqu
+$$ 2024-11-11 14:12:33.341 +0000  ptg20@DESKTOP-3IJF6FR
+$$ C:\Bruker\cam-ts3\par\reference/j-1h-1scan.ref/acqu
 $$ process C:\Bruker\TopSpin3.6.5\prog\mod\edparproc.exe
 ##$ACQT0= 0
 ##$AMP= (0..31)
@@ -16,7 +16,7 @@ $$ process C:\Bruker\TopSpin3.6.5\prog\mod\edparproc.exe
 ##$ANAVPT= 1
 ##$AQSEQ= 0
 ##$AQ_mod= 3
-##$AUNM= <au_rga_zg_pulsecaltest>
+##$AUNM= <zg_dru>
 ##$AUTOPOS= <>
 ##$BF1= 500.214
 ##$BF2= 500.214
@@ -141,7 +141,7 @@ $$ process C:\Bruker\TopSpin3.6.5\prog\mod\edparproc.exe
 ##$NC= 0
 ##$NLOGCH= 3
 ##$NOVFLW= 0
-##$NS= 16
+##$NS= 1
 ##$NUC1= <1H>
 ##$NUC2= <off>
 ##$NUC3= <off>
@@ -207,7 +207,7 @@ $$ process C:\Bruker\TopSpin3.6.5\prog\mod\edparproc.exe
 ##$PROBHD= <>
 ##$PROBINPUTS= (0..15)
 <> <> <> <> <> <> <> <> <> <> <> <> <> <> <> <>
-##$PULPROG= <zg30>
+##$PULPROG= <zg>
 ##$PW= 0
 ##$PYNM= <>
 ##$ProjAngle= 0

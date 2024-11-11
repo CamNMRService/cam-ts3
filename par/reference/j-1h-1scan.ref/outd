@@ -1,11 +1,11 @@
 ##TITLE= Parameter file, TopSpin 3.6.5
 ##JCAMPDX= 5.0
 ##DATATYPE= Parameter Values
-##NPOINTS= 3	$$ modification sequence number
+##NPOINTS= 2	$$ modification sequence number
 ##ORIGIN= Bruker BioSpin GmbH
 ##OWNER= ptg20
-$$ 2024-11-11 14:07:39.378 +0000  ptg20@DESKTOP-3IJF6FR
-$$ C:\Bruker\cam-ts3\par\reference/j-1h.ref/outd
+$$ 2024-11-11 14:12:33.343 +0000  ptg20@DESKTOP-3IJF6FR
+$$ C:\Bruker\cam-ts3\par\reference/j-1h-1scan.ref/outd
 $$ process C:\Bruker\TopSpin3.6.5\prog\mod\edparproc.exe
 ##$CURPLOT= <>
 ##$CURPRIN= <$>

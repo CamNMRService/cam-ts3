@@ -3,4 +3,4 @@ IF EXIST %file% (
   ECHO %file% is existing
   DEL %file%
 ) 
-C:\Bruker\TopSpin3.6.5\topspin -s janus_sx_arran
+C:\Bruker\TopSpin3.7.0\topspin -s janus_sx_arran

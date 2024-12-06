@@ -1,0 +1,39 @@
+!! lines starting with !! are comments
+!! lines starting with ## detail the reference parameter set to be read in
+!! all other lines are commands executed with XCMD(cmd)
+!! NB SW (P) and O1P will nbot be changed by paracon, so don;t need to set those
+!! 11/11/2024 set defaults for normal, long and quick proton, carbon, dept
+
+##j-1h.ref
+!! NB 40 ppm SW to cover more use cases
+sendgui ns 16
+sendgui XAU setaq
+##j-NOAH-BSC.ref
+sendgui d1 1.5
+sendgui XAU setaq
+##j-13c.ref
+sendgui ns 200
+sendgui XAU setaq
+##j-d135.ref
+sendgui ns 128
+sendgui XAU setaq
+##j-d135-q.ref
+sendgui ns 32
+sendgui XAU setaq
+##j-d135-l.ref
+sendgui ns 360
+sendgui XAU setaq
+##j-2h.ref
+sendgui XAU setaq
+##j-13c-l.ref
+!! for the long overnight carbon
+sendgui ns 400
+sendgui XAU setaq
+##j-13c-q.ref
+!! for the short daytime pcd
+sendgui ns 40
+sendgui XAU setaq
+##j-1h-1scan.ref
+!! NB 40 ppm SW to cover more use cases
+!! this is the quick quant experiment. No pulsecal for now
+sendgui XAU setaq

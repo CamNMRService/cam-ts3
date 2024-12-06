@@ -840,6 +840,7 @@ Please talk to the NMR service team about whether medium or thick wall tubes are
             strcat(sampleinfostring,pulsecalerror);
         }
     }
+    fclose(pulsecalfile);
 } 
 
 // write out info file in current dataset for janus purposes, if necessary

@@ -1,0 +1,24 @@
+##TITLE= Parameter file, TopSpin 3.6.5
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= ptg20
+$$ 2024-11-04 17:33:48.559 +0000  ptg20@DESKTOP-3IJF6FR
+$$ C:\Bruker\cam-ts3\par\reference/j-NOAH-BSC.ref/acqu2
+$$ process C:\Bruker\TopSpin3.6.5\prog\mod\edparproc.exe
+##$ACQT0= 0
+##$BF1= 125.778910343
+##$FnILOOP= 0
+##$FnMODE= 6
+##$NUC1= <13C>
+##$NusJSP= 0
+##$NusT2= 1
+##$NusTD= 0
+##$O1= 11320.102
+##$ProjAngle= 0
+##$SFO1= 125.790230445
+##$SW= 250.002499775015
+##$SW_h= 31447.8720585252
+##$TD= 768
+##END=

@@ -1,0 +1,59 @@
+/***********************************************************************************/
+/*Processes a psuedo 2d result generated with the slice-set-au program */
+/*Takes apart the 2d, phases the rows, and reassembles them into         */
+/*procno 20000. This removes the phase twist associated with the         */
+/*Z-gradient. See - Diffusion ordered nuclear magnetic resonance         */
+/*spectroscopy: principles and applications - C.S. Johnson Jr                */
+/*https://doi.org/10.1016/S0079-6565(99)00003-5                                 */
+/*Standard disclaimer - It appears to work, but run at your own risk!    */
+/*I make no claims it won't erase your data, blow up your computer     */
+/*or summon an eldritch horror from some dungeon dimension             */
+/*djh35@cam.ac.uk, 2017/07/10 - version 4						*/
+
+int td;
+int dest_exp=10000;
+int dest_2d_proc=20000;
+int orig_expno=0;
+int loop=0;
+char logfile[PATH_MAX];
+FILE *ftitle = NULL;
+
+GETCURDATA
+FETCHPAR1S("TD",&td)
+orig_expno=expno;
+loop=0;
+dest_exp=dest_exp+(expno*100);
+
+WRP(dest_2d_proc)
+
+TIMES(td)
+	loop ++;
+	RSER(loop,loop+dest_exp-1,1)
+END
+
+loop=0;
+TIMES(td)
+	loop ++;
+	//RSER(loop,(loop-1)+dest_exp,1)
+	DATASET(name,loop+(dest_exp-1),1,disk,user)
+	SETCURDATA
+	GETCURDATA
+	VIEWDATA_SAMEWIN
+	STOREPAR("PH_mod",1)
+	EFP
+	APK
+	APKS
+	APK
+	ABS
+	WSR(loop,dest_2d_proc, orig_expno, name, user, disk)
+END
+
+DATASET(name,orig_expno,dest_2d_proc,disk,user)
+SETCURDATA
+GETCURDATA
+VIEWDATA_SAMEWIN
+STOREPARN(2,"PH_mod",1)
+
+
+QUIT
+

@@ -37,3 +37,13 @@ sendgui XAU setaq
 !! NB 40 ppm SW to cover more use cases
 !! this is the quick quant experiment. No pulsecal for now
 sendgui XAU setaq
+##Proton-T1.ref
+!! Singel scan proton T1 measurement with gradient
+!! Only setaq required
+sendgui XAU setaq
+##19F-T1.ref
+!! Singel scan proton T1 measurement with gradient
+!! NO SETAQ - do not want to increase TD
+!! can shrink SW here as limited by bandwidth of inversion pulsecal
+!! NB required crp100,0.5,20.1 for 19F, obs in prosol
+sendgui sw 150

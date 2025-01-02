@@ -1,11 +1,11 @@
 ##TITLE= Parameter file, TopSpin 3.6.4
 ##JCAMPDX= 5.0
 ##DATATYPE= Parameter Values
-##NPOINTS= 4	$$ modification sequence number
+##NPOINTS= 2	$$ modification sequence number
 ##ORIGIN= Bruker BioSpin GmbH
 ##OWNER= chemist
-$$ 2025-01-02 16:30:05.834 +0000  chemist@Glenfairn
-$$ C:\Bruker\cam-ts3\par\reference/j-19F-bb-cpd.ref/clevels
+$$ 2025-01-02 16:44:50.693 +0000  chemist@Glenfairn
+$$ C:\Bruker\cam-ts3\par\reference/j-31P-bb-cpd.ref/clevels
 $$ process C:\Bruker\TopSpin3.6.4\prog\mod\edparproc.exe
 ##$LEVELS= (0..255)
 1395.74 -1395.74 1647.46 -1647.46 1944.57 -1944.57 2295.26 -2295.26 2709.2

@@ -51,6 +51,6 @@ sendgui sw 150
 !!1d HOESY, selective on 19F vian CNST55
 sendgui XAU setaq
 ##j-19F-bb-cpd.ref
-!!1d 19F with BB excitation, currently OPERA45
+!!1d 19F with BB excitation, currently OPERA45, nb needs bb prosol relations file
 sendgui XAU setaq
 

@@ -6,9 +6,9 @@
 ;C. Yu & G. Levy, J. Am. Chem. Soc. 106, 6533 (1984) (original HOESY)
 ;
 ; This 1D sequence:
-; Conformational Analysis of Fluorinated Pyrrolidines Using 19Fâ€“1H Scalar Couplings and Heteronuclear NOEs
+; Conformational Analysis of Fluorinated Pyrrolidines Using 19Fâ1H Scalar Couplings and Heteronuclear NOEs
 ; Combettes, L.E., Clausen-Thue, P., King, M.A., Odell, B., Thompson, A.L., Gouverneur, V. and Claridge, T.D.W. (2012), 
-; Conformational Analysis of Fluorinated Pyrrolidines Using 19Fâ€“1H Scalar Couplings and Heteronuclear NOEs. 
+; Conformational Analysis of Fluorinated Pyrrolidines Using 19Fâ1H Scalar Couplings and Heteronuclear NOEs. 
 ; Chem. Eur. J., 18: 13133-13141. 
 ; https://doi.org/10.1002/chem.201201577
 ;$CLASS=HighRes
@@ -66,6 +66,7 @@
   Passaq, 1m
   d11 QNP_X
 2 30m
+  50u UNBLKGRAD	
   d12 SWITO_F
   d1 pl2:f2
   (p3 ph1):f2
@@ -77,7 +78,7 @@
   (p3 ph2):f2
   d12 SWITO_H
   (p1 ph1):f1			
-  50u UNBLKGRAD		
+  50u 		
   TAU1
   p16:gp2
   d16

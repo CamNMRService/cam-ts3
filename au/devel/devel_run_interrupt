@@ -89,7 +89,7 @@ char tmp_str[1024]="";
        sprintf(tmp_str,"sendgui %s",field2);    
        AUERR=CPR_exec(tmp_str,WAIT_TERM); 
     }   
-    loop++
+    loop++;
     } //end of while loop
     fclose(interrupt_file);
 	//now we should delete the file

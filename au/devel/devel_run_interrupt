@@ -73,7 +73,8 @@ char tmp_str[1024]="";
             token = strtok(NULL, ",");
         }
     sleep(number);
-    if (strcmp(field3,"dataset")) //if 3rd field has dataset, create a dataset
+   // if (strcmp(field3,"dataset")) //if 3rd field has dataset, create a dataset
+    if (strncmp(field3, "dataset", 7) == 0)
     {
        lt=time(NULL);
 	   ltstruc = localtime(&lt);

@@ -1,0 +1,67 @@
+/*create_dataset*/
+/*Program to create a new dataset*/
+/*needs to be called with command line option of new dataset name*/
+/*djh35 Jan 25*/
+
+#include <time.h>
+
+char suser[256] = "systest"; //actually ignored my recent (>2?) topspin
+
+
+char test_parset[256] = "C13CPD";
+int overwrite_error = 0; //set to not zero if it looks likes we are going to use an existing dataset
+time_t lt;
+struct tm *ltstruc;	  		/* structure with year, month etc. */
+char datestamp[256]="";
+char new_dataset[PATH_MAX]="";
+char acqu_path[PATH_MAX]="";
+
+
+//Just in case of any funny business, create junk dataset to avoid overwrites
+  DATASET ( "junk", 10, 1, disk, suser)
+  GETCURDATA
+  VIEWDATA_SAMEWIN
+
+//usefull to have the time to construct a new dataset and avoid overwrites
+
+ lt=time(NULL);
+ltstruc = localtime(&lt);
+sprintf(datestamp, "_%d_%d_%d_%d_%d_%d", ltstruc->tm_year+1900, ltstruc->tm_mon, ltstruc->tm_mday, ltstruc->tm_hour, ltstruc->tm_min, ltstruc->tm_sec);
+  
+//either called without an argument, or with
+if (i_argc < 3) {
+  GETSTRING("Usage - must be called with dataset name. Input dataset name to be created", new_dataset )
+}
+else {
+   sprintf(new_dataset,"%s",i_argv[2]);
+}
+
+//create the new dataset
+  DATASET(new_dataset, 10, 1, disk, suser);
+	SETCURDATA	
+	GETCURDATA		
+	VIEWDATA_SAMEWIN
+
+//But might we be overwriting data, if called unattended, or being unattentive?
+//Can check for an acqu file, thats always there in a valid dataset
+  sprintf( acqu_path, "%s%s/%s/%d/acqu", disk, user, new_dataset, 10 );
+
+  
+	//now create the new dataset
+  if( (access( acqu_path, R_OK ) == 0) )  // if theres data there
+  {
+      overwrite_error=1;
+    	Proc_err ( INFO_OPT,"ACQU present %s",acqu_path);
+      Proc_err { INFO_OPT,"Appending date//time to - %s",new_dataset};
+      strcat(new_dataset,datestamp); 
+	    DATASET(new_dataset, 10, 1, disk, suser);
+	    SETCURDATA	
+	    GETCURDATA		
+	    VIEWDATA_SAMEWIN
+  }//end of checking for fid
+ 
+   Proc_err ( INFO_OPT, "dataset name created - %s \n disk - %s\n user - %s\n",new_dataset,disk, suser);
+
+   AUERR=overwrite_error;
+
+QUIT

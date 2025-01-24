@@ -15,7 +15,7 @@ XCMD("dpl1");
 
 while (finish==0)
 {
-	sprintf( pdfname, "%s/%s-%s-%s-%d.pdf",PROCPATH(0),name, pul, nuc1, suffix);
+	sprintf( pdfname, "%s/%s-%i-%s-%s-%d.pdf",PROCPATH(0),name, expno,pul, nuc1, suffix);
 	
 	//sprintf( pdfname, "%s%s/pdfs/%s-%s-%s-%d.pdf",disk, user, name, pul, nuc1, suffix);
 //sprintf( pdfname, "%s/%s-%d.pdf",PROCPATH(0),name,suffix);

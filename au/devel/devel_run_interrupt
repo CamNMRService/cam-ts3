@@ -1,0 +1,112 @@
+/***** New code Jan 2025 ****/
+/*To test parsing or interupt.csv does what its supposed to*/
+
+char interrupt_file_path[PATH_MAX]="e:\\chemist\\interrupt.csv";//location of interrupt file, if it exist, contains a list of commands
+char tmp_str[1024]="";
+									
+	FILE *interrupt_file;
+    char line[1024];
+    char field2[256]="";
+    char field3[256]="";
+   
+    char dataset_name[PATHMAX]="";
+
+
+    time_t lt;
+    struct tm *ltstruc;	  		/* structure with year, month etc. */
+    char datestamp[256]="";
+    int number;
+    int loop=1;
+    char *token;
+	// Try to open the file
+    interrupt_file = fopen(interrupt_file_path, "r");
+	//if file exists, do stuff.
+    if (interrupt_file != NULL) {
+    //first create a new dataset - we may rename this.
+       lt=time(NULL);
+	   ltstruc = localtime(&lt);
+	   sprintf(datestamp, "%d_%d_%d_%d_%d_%d", ltstruc->tm_year+1900, ltstruc->tm_mon, ltstruc->tm_mday, ltstruc->tm_hour, ltstruc->tm_min, ltstruc->tm_sec);
+	   sprintf(dataset_name,"interrupt_%s",datestamp);
+	   DATASET(dataset_name, 10, 1, disk, user);
+       SETCURDATA
+       GETCURDATA
+	   VIEWDATA_SAMEWIN
+    // now Read file line by line
+    while (fgets(line, sizeof(line), interrupt_file)) {
+        // Skip comments
+        if (strncmp(line, "!!", 2) == 0) {
+            continue; //exit out of while loop
+        }
+        
+        // Remove newline if present
+        line[strcspn(line, "\n")] = 0;
+        
+        // Initialize field count
+        int field_count = 0;
+        
+        // Get first token
+        token = strtok(line, ",");
+        
+        // Process all tokens
+        while (token != NULL && field_count < 3) {
+            // Remove leading/trailing whitespace
+            while (*token == ' ') token++;
+            char *end = token + strlen(token) - 1;
+            while (end > token && *end == ' ') end--;
+            *(end + 1) = 0;
+            
+            // Process based on field number
+            switch (field_count) {
+                case 0:
+                    number = atoi(token);
+                    break;
+                case 1:
+                    strncpy(field2, token, 255);
+                    field2[255] = '\0';
+                    break;
+                case 2:
+                    strncpy(field3, token, 255);
+                    field3[255] = '\0';
+                    break;
+            }
+            field_count++;
+            token = strtok(NULL, ",");
+        }
+    sleep(number);
+    if (strcmp(field3,"dataset")) //if 3rd field has dataset, create a dataset
+    {
+       lt=time(NULL);
+	   ltstruc = localtime(&lt);
+	   sprintf(datestamp, "_%d_%d_%d_%d_%d_%d", ltstruc->tm_year+1900, ltstruc->tm_mon, ltstruc->tm_mday, ltstruc->tm_hour, ltstruc->tm_min, ltstruc->tm_sec);
+       sprintf(dataset_name,"%s",datestamp)
+       //XAU(devel_create_test_dataset,field3)
+       DATASET(dataset_name, 10, 1, disk, user);
+       SETCURDATA
+       GETCURDATA
+	   VIEWDATA_SAMEWIN
+    }
+    else { 
+       sprintf(tmp_str,"sendgui %s",field2);    
+       AUERR=CPR_exec(tmp_str,WAIT_TERM); 
+    }   
+    loop++
+    } //end of while loop
+    fclose(interrupt_file);
+	//now we should delete the file
+		//sprintf( tmp_str, "del %s", interrupt_file_path );
+		//system( tmp_str );
+	/*	sprintf( tmp_str, "del %s", interrupt_file_path );
+		fbat = fopen(batcmd, "w");
+		fputs( tmp_str,fbat);
+		fclose(fbat);
+		system(batcmd);
+		*/
+	}	
+    else{
+      // printf("Error: Could not open %s\n",interrupt_file_path);
+       
+    }
+Proc_err (DEF_ERR_OPT,"ran all those commands in %s",interrupt_file_path);
+	
+QUIT
+											

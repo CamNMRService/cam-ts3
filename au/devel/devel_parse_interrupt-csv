@@ -1,0 +1,85 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+/*  contents of interupt.csv
+!! This is a comment line
+!!First field is a number - for pausing janus, second field is a command to run, third first is as optional argument to pass 
+1,Field 2 content,Field 3 content
+2000,Only two fields
+!! Another comment to ignore
+3,Three,Fields
+
+*/
+
+
+int main() {
+    FILE *file;
+    char line[1024];
+    char field2[256];
+    char field3[256];
+    int number;
+    char *token;
+    
+    // Try to open the file
+    file = fopen("interrupt.csv", "r");
+    if (file == NULL) {
+        printf("Error: Could not open interrupt.csv\n");
+        return 1;
+    }
+    
+    // Read file line by line
+    while (fgets(line, sizeof(line), file)) {
+        // Skip comments
+        if (strncmp(line, "!!", 2) == 0) {
+            continue;
+        }
+        
+        // Remove newline if present
+        line[strcspn(line, "\n")] = 0;
+        
+        // Initialize field count
+        int field_count = 0;
+        
+        // Get first token
+        token = strtok(line, ",");
+        
+        // Process all tokens
+        while (token != NULL && field_count < 3) {
+            // Remove leading/trailing whitespace
+            while (*token == ' ') token++;
+            char *end = token + strlen(token) - 1;
+            while (end > token && *end == ' ') end--;
+            *(end + 1) = 0;
+            
+            // Process based on field number
+            switch (field_count) {
+                case 0:
+                    number = atoi(token);
+                    break;
+                case 1:
+                    strncpy(field2, token, 255);
+                    field2[255] = '\0';
+                    break;
+                case 2:
+                    strncpy(field3, token, 255);
+                    field3[255] = '\0';
+                    break;
+            }
+            field_count++;
+            token = strtok(NULL, ",");
+        }
+        
+        // Print parsed data
+        printf("Number: %d\n", number);
+        if (field_count > 1) {
+            printf("Field 2: %s\n", field2);
+        }
+        if (field_count > 2) {
+            printf("Field 3: %s\n", field3);
+        }
+        printf("-------------------\n");
+    }
+    
+    fclose(file);
+    return 0;
+}

@@ -1,0 +1,73 @@
+if(strcmp(cmd,"skiptest"))
+{
+	// not called with skiptest arg so do the tests
+	// now make systest dataset
+
+	lt=time(NULL);
+	ltstruc = localtime(&lt);
+	sprintf(datestamp, "%d_%d_%d_%d_%d_%d", ltstruc->tm_year+1900, ltstruc->tm_mon, ltstruc->tm_mday, ltstruc->tm_hour, ltstruc->tm_min, ltstruc->tm_sec);
+	sprintf(testdata,"Systest_%s",datestamp);
+	DATASET(testdata, 10, 1, diskunit, suser);
+	Proc_err(INFO_OPT,"diskunit=%s",diskunit);
+	Proc_err(INFO_OPT,"disk=%s",disk);
+	SETCURDATA
+	VIEWDATA_SAMEWIN
+	RPAR(test_parset, "all")
+
+	sprintf(tmp_cmd, "ii");
+	AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+	if ( AUERR <0 )
+	{
+		sprintf(tmp_str, "INITIAL_II_ERROR");
+		XAU("whoopwhoop",tmp_str)
+		STOPMSG("Janus stopped - initial ii error")
+	}
+
+	sprintf(tmp_cmd, "sx %i", test_pos);
+	AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+	system(wget_cmd);
+	if ( AUERR <0 )
+	{
+		XAU("parse_sexpress_web","")
+		sprintf(tmp_str, "INITIAL_TEST_SAMPLE_SX_%i_ERROR",test_pos);
+		XAU("whoopwhoop",tmp_str)
+	} else {
+		RPAR(test_parset, "all")
+		sleep(60);
+		sprintf(tmp_cmd, "atma storeWobb 700");
+		STOREPAR("RO",0)
+		AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+		if ( AUERR <0 )
+		{
+		sprintf(tmp_str, "INITIAL_TEST_SAMPLE_ATMA_ERROR");
+		XAU("whoopwhoop",tmp_str)
+		STOPMSG("Janus stopped - initial atma error")
+		}
+		sprintf(tmp_cmd, "rsh %s",shimset);
+		AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+		XCMD("lock CD3CN")
+		sprintf(tmp_str,"janus_topshim_watchdog TOPSHIM_FAILED_%s_%i",tmp_fname,cpos);
+		XCMD(tmp_str);
+		if (AUERR<0)
+		{
+			XAU("whoopwhoop",tmp_str);
+		}
+		// keep first dataset with wobb curves in
+		IEXPNO;
+		XAU("hump_sino_test_b1_02","")
+		expno=20;
+		SETCURDATA
+		XAU("poise_13c_p1_b1_01","")
+
+	}
+    XAU("parse_samplejet_web","") //test sample is in, parse the sx logs
+	//XAU("parse_sexpress_web","") //test sample is in, parse the sx logs
+
+	// now move to junk dataset
+	DATASET ( "junk", 10, 1, diskunit, suser)
+	Proc_err(INFO_OPT,"diskunit=%s",diskunit);
+	Proc_err(INFO_OPT,"disk=%s",disk);
+	GETCURDATA
+	VIEWDATA_SAMEWIN
+
+}

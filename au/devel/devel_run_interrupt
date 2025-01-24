@@ -84,6 +84,7 @@ char tmp_str[1024]="";
        SETCURDATA
        GETCURDATA
 	   VIEWDATA_SAMEWIN
+       sprintf(field3,"done field3");
     }
     else { 
        sprintf(tmp_str,"sendgui %s",field2);    

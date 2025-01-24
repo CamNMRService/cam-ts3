@@ -28,7 +28,7 @@ char tmp_str[1024]="";
 	   sprintf(datestamp, "%d_%d_%d_%d_%d_%d", ltstruc->tm_year+1900, ltstruc->tm_mon, ltstruc->tm_mday, ltstruc->tm_hour, ltstruc->tm_min, ltstruc->tm_sec);
 	   sprintf(dataset_name,"interrupt_%s",datestamp);
 	   //DATASET(dataset_name, 10, 1, disk, user);
-       DATASET(junk, 10, 1, disk, user); //we'll do junk though
+       DATASET("junk", 10, 1, disk, user); //we'll do junk though
        SETCURDATA
        GETCURDATA
 	   VIEWDATA_SAMEWIN

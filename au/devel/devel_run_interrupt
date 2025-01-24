@@ -9,7 +9,7 @@ char tmp_str[1024]="";
     char field2[256]="";
     char field3[256]="";
    
-    char dataset_name[PATHMAX]="";
+    char dataset_name[PATH_MAX]="";
 
 
     time_t lt;

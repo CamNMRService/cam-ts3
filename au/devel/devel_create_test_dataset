@@ -36,11 +36,6 @@ else {
    sprintf(new_dataset,"%s",i_argv[2]);
 }
 
-//create the new dataset
-  DATASET(new_dataset, 10, 1, disk, suser);
-	SETCURDATA	
-	GETCURDATA		
-	VIEWDATA_SAMEWIN
 
 //But might we be overwriting data, if called unattended, or being unattentive?
 //Can check for an acqu file, thats always there in a valid dataset
@@ -48,7 +43,7 @@ else {
 
   
 	//now create the new dataset
-  if( (access( acqu_path, R_OK ) == 0) )  // if theres data there
+  if( (access( acqu_path, R_OK ) == 0) )  // if theres data there append date/time
   {
       overwrite_error=1;
     	Proc_err ( INFO_OPT,"ACQU present %s",acqu_path);
@@ -59,6 +54,13 @@ else {
 	    GETCURDATA		
 	    VIEWDATA_SAMEWIN
   }//end of checking for fid
+  else{
+    //create the new dataset
+    DATASET(new_dataset, 10, 1, disk, suser);
+	  SETCURDATA	
+	  GETCURDATA		
+	  VIEWDATA_SAMEWIN
+  }
  
    Proc_err ( INFO_OPT, "dataset name created - %s \n disk - %s\n user - %s\n",new_dataset,disk, suser);
 

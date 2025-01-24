@@ -79,7 +79,8 @@ char tmp_str[1024]="";
        lt=time(NULL);
 	   ltstruc = localtime(&lt);
 	   sprintf(datestamp, "_%d_%d_%d_%d_%d_%d", ltstruc->tm_year+1900, ltstruc->tm_mon, ltstruc->tm_mday, ltstruc->tm_hour, ltstruc->tm_min, ltstruc->tm_sec);
-       sprintf(dataset_name,"%s",datestamp);
+       sprintf(dataset_name,"%s",field2)
+       strcat(dataset_name,datestamp); 
        XAU("devel_create_test_dataset",dataset_name);
        DATASET(dataset_name, 10, 1, disk, user);
        SETCURDATA

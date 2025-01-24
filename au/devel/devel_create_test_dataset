@@ -52,7 +52,7 @@ else {
   {
       overwrite_error=1;
     	Proc_err ( INFO_OPT,"ACQU present %s",acqu_path);
-      Proc_err { INFO_OPT,"Appending date//time to - %s",new_dataset};
+      Proc_err ( INFO_OPT,"Appending date//time to - %s",new_dataset);
       strcat(new_dataset,datestamp); 
 	    DATASET(new_dataset, 10, 1, disk, suser);
 	    SETCURDATA	

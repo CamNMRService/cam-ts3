@@ -24,23 +24,40 @@
 10,zg
 */
 
+/* Just cannot get it to increment the experiment number with iexpno, re 11*/
+/*so lets try making a macro and running that!*/
+
+char macro_name[32]="auto_interrupt";
 char interrupt_file_path[PATH_MAX]="d:\\chemist\\interrupt.csv";//location of interrupt file, if it exist, contains a list of commands
+char macro_file_path[PATH_MAX]="";
+
 char cmd_str[1024]="";
-									
-	FILE *interrupt_file;
-    char line[1024];
-    char field2[256]="";
-    char field3[256]="";
+
+FILE *interrupt_file;
+FILE *macro_file;
+FILE *pardef_file;
+
+char line[1024];
+char field2[256]="";
+char field3[256]="";
    
-    char dataset_name[PATH_MAX]="";
+char dataset_name[PATH_MAX]=""; 
 
 
-    time_t lt;
-    struct tm *ltstruc;	  		/* structure with year, month etc. */
-    char datestamp[256]="";
-    int number;
-    int loop=1;
-    char *token;
+
+time_t lt;
+struct tm *ltstruc;	  		/* structure with year, month etc. */
+char datestamp[256]="";
+int number;
+int loop=1;
+
+int ts_major = GetTsVersionMajor();
+int ts_minor = GetTsVersionMinor();
+int ts_patch = GetTsVersionPl();
+
+char *token; 
+ 
+sprintf(macro_file_path,"C:\\Bruker\\topspin%i.%i.%i\\exp\\stan\\nmr\\lists\\mac\\user\\%s",ts_major,ts_minor,ts_patch,macro_name);
 	// Try to open the file
     interrupt_file = fopen(interrupt_file_path, "r");
 	//if file exists, do stuff.
@@ -55,7 +72,7 @@ char cmd_str[1024]="";
        SETCURDATA
        GETCURDATA
 	   VIEWDATA_SAMEWIN
-	   	sprintf(cmd_str,"sendgui ");  //lets initialise the command string - we'll try and compose a big string to run all at once
+	  // 	sprintf(cmd_str,"sendgui ");  //lets initialise the command string - we'll try and compose a big string to run all at once
     // now Read file line by line
     while (fgets(line, sizeof(line), interrupt_file)) {
         // Skip comments
@@ -114,16 +131,21 @@ char cmd_str[1024]="";
        sprintf(field3,"done field3"); //wipe filed3, might perpetuate a loop otherwise of creating a new dataset
     }
     else { 
-       //sprintf(tmp_str,"%s",field2); 
-       strcat(cmd_str,field2);  
+    	 macro_file=fopen(macro_file_path,"a");
+       
+       //strcat(cmd_str,field2);  
        Proc_err (DEF_ERR_OPT,"cmd_str is - %s",cmd_str);
+       sprintf(cmd_str,"%s\n",field2); 
+       fputs(cmd_str,macro_file);
        //sprintf(cmd_str,"sendgui %s",field2);   
        //AUERR=CPR_exec(cmd_str,WAIT_TERM); 
+       fclose(macro_file);
     }   
     loop++;
     } //end of while loop
    // lets run that long command
-    AUERR=CPR_exec(cmd_str,WAIT_TERM); 
+   XMAC(macro_name);
+   // AUERR=CPR_exec(cmd_str,WAIT_TERM); 
     fclose(interrupt_file);
 	//now we should delete the file
 		//sprintf( tmp_str, "del %s", interrupt_file_path );

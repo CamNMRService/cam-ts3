@@ -92,6 +92,19 @@ Removed various debugging messages
 Now lock errors only do anythign if shim also fails
 Added note about solvent to SampleProblems file and warnign to check for strange characters
 And added pulse length check and associated message in SAmpleProblems*/
+
+
+//  version with new atma handling now main version
+//
+
+// Looks for 31P or 19F or 11B or 13C in protocol - if there does suitable ATMA on junk dataset
+// and sets atma flag to 0
+// NB if we want a multinuclear composite experiment need lowercase 
+// If atma flag is 1 it's done on every experiment otherwise it does "atma nowin selectnuc" for safety
+// which costs only a couple of seconds hopefully...
+// Also checks for 2H or 2h in parameterset name, and skips atma accordingly
+
+
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 /*instrument dependent variables!!!!!!*/
 char def_file[255]="d:/chemist/defaults-csv.txt"; //janus software defaults
@@ -103,6 +116,7 @@ float   delaytime=1.0;
 int     expt=1, curloop=1, cpos, specno, jexpt, jsolv, finish=FALSE,i=1;
 int     LastSample, FatalError=FALSE, nexpt, parmo, proderrcount, sthou;
 int     skipsample, pid, x, proc_or_not=0,sampleproblem=0;
+int     ATMAflag=1; // defaul;t is to always tune
 
 char    oi[80], juser[50], suser[40], in_data[1024], tmp_fname[1024];
 char    shimfile[80], acqufile[80];
@@ -531,6 +545,8 @@ if ( strstr ( protocol, "POS59") != NULL )
 	{
 		DATASET ( "junk", 10, 1, diskunit, suser)
 		GETCURDATA
+        RPAR("PROTONRO","all")
+        ATMAflag=1; // default behaviour
 		STOREPAR( "SOLVENT", solvent)
 		sprintf(tmp_cmd, "rsh %s",shimset);
         AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
@@ -557,9 +573,45 @@ if ( strstr ( protocol, "POS59") != NULL )
 	      // XAU("whoopwhoop",tmp_str)
 		  sampleproblem=1;
         }
-	//	sprintf(tmp_cmd, "ROT");
-	//	AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
-	ROT
+	    //	sprintf(tmp_cmd, "ROT");
+	    //	AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
+
+        // new test atma handling:
+
+        if ( strstr ( protocol, "19F") != NULL )
+        {
+            RPAR("F19CPD", "all")
+            ATMAflag=0;
+        }
+        else if ( strstr ( protocol, "31P") != NULL )
+        {
+            RPAR("P31CPD", "all")
+            ATMAflag=0;
+        }
+        else if ( strstr ( protocol, "13C") != NULL )
+        {
+            RPAR("C13CPD", "all")
+            ATMAflag=0;
+        }
+		else if ( strstr ( protocol, "11B") != NULL )
+        {
+            RPAR("janus-11b.bbf", "all") // need this to get 1H to tune
+            ATMAflag=0;
+        }
+        if (ATMAflag==0)
+        {
+            ATMA
+            if ( AUERR <0 )
+		    {
+		         sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
+	            XAU("whoopwhoop",tmp_str)
+		   	    sampleproblem=1;
+			    strcat(sampleinfostring, "\n ATMA failed - does your sample have high ionic strength? \n Check \
+with NMR service team about whether medium or thick wall tubes are more appropriate for similar samples. \n");
+		    }
+        }
+
+	    ROT
 		if ( AUERR <0 )
         {
 	       sprintf(tmp_str, "ROT_FAILED_%i_%s", cpos, tmp_fname);
@@ -600,6 +652,10 @@ else
 		strcat(sampleinfostring,tmp_str);
 	}
 }
+
+// add autoshim file
+TUNE(tunefile)
+
 //old way of calling topshim below
 //CPR_exec("janus_topshim_watchdog",WAIT_TERM);
 
@@ -629,14 +685,18 @@ else
 
 	
     
-	if ( strstr ( experiment, "janus-1h") == NULL ) //strstr returns a pointer if a match
+	if ( (strstr ( experiment, "janus-1h") == NULL) && (ATMAflag==1) ) //strstr returns a pointer if a match
 	{
 		// stop spinning
 		ROTOFF
         sprintf(tmp_cmd,"atma storewobb 700");
-		AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
-	    if ( AUERR <0 )
-		  {
+    	if ( (strstr ( experiment, "2h") == NULL) && (strstr ( experiment, "2H") == NULL))
+		{
+				// no 2H or 2h in experiment name so do atma
+				AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+		}
+	 	if ( AUERR <0 )
+		{
 		     sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
 	       XAU("whoopwhoop",tmp_str)
 		   	sampleproblem=1;
@@ -644,9 +704,13 @@ else
 with NMR service team about whether medium or thick wall tubes are more appropriate for similar samples.");
 
 	       // STOPMSG(tmp_str)
-		  }
+		}
 		ROT // does "ro acqu"
 	}
+    else
+    { 
+        XCMD("atma nowin selectnuc")
+    }
 	
 	//Add a space to title here in 'w' mode to erase any guff
 	sprintf( titlefile, "%s%s/%s/%d/pdata/1/title", diskunit, user,tmp_fname, nexpt );

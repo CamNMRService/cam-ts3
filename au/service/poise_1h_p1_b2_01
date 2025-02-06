@@ -532,8 +532,10 @@ if (verbose == 1) {
 	   Proc_err(DEF_ERR_OPT, " P1 has deviated by %f percent. \n P1_init=%f \n p1_opt=%f", deviation,p1_init/4,p1_opt);
 }
 
-if (deviation >= max_deviation) {
+if ( (fabs(deviation)) >= max_deviation){
   //do something
+  sprintf(tmp_str,"P1_OUT_OF_SPEC_%s_%s_DEV_%1.f_REF_P1_%2.f_P1_OBS_%2.f",instrum_name,nuc,deviation,p1_init,p1_opt);
+  XAU("whoopwhoop",tmp_str)
 }
 
 //Check how much sino has differed from spec
@@ -544,7 +546,7 @@ if (verbose == 1) {
 }
 
 if ( (fabs(deviation)) >= max_deviation){
-   sprintf(tmp_str,"OUT_OF_SPEC_%s_%s_DEV_%1.f_REF_SINO_%1.f_SINO_%1.f",instrum_name,nuc,deviation,sino_spec_float,final_sino_result);
+   sprintf(tmp_str,"SINO_OUT_OF_SPEC_%s_%s_DEV_%1.f_REF_SINO_%1.f_SINO_%1.f",instrum_name,nuc,deviation,sino_spec_float,final_sino_result);
    XAU("whoopwhoop",tmp_str)
 }
 

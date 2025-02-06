@@ -4,6 +4,7 @@
         "hump_sino_test_b1_0": "c",
         "poise_1h_p1_b1_01": "c",
         "serv_projref": "c",
-        "devel_janus_sx_lagavulin": "c"
+        "devel_janus_sx_lagavulin": "c",
+        "hump_sino_test_b2_01": "cpp"
     }
 }

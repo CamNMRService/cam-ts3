@@ -1,6 +1,5 @@
-#########
-#run with powershell.exe -noprofile -executionpolicy bypass -file .\manage_janus.ps1
 # Parameters for the script
+#run with powershell.exe -noprofile -executionpolicy bypass -WindowStyle Normal -file C:\nmrkiosk\manage_janus.ps1
 param(
     [string]$TargetIP = "192.168.200.9",  # Default to arran change as needed
     [int]$WaitTimeSeconds = 30,      # Wait time between connection attempts
@@ -45,8 +44,16 @@ function Stop-JanusProcess {
     }
 }
 
+# Get the full path and directory of Janus
+$JanusFullPath = Convert-Path $JanusPath -ErrorAction SilentlyContinue
+if (-not $JanusFullPath) {
+    $JanusFullPath = $JanusPath
+}
+$JanusDirectory = Split-Path -Parent $JanusFullPath
+
 Write-Host "$(Get-TimeStamp) Script started. Monitoring network connection to $TargetIP"
-Write-Host "$(Get-TimeStamp) Checking for Janus executable at: $JanusPath"
+Write-Host "$(Get-TimeStamp) Janus executable path: $JanusFullPath"
+Write-Host "$(Get-TimeStamp) Working directory set to: $JanusDirectory"
 Write-Host "$(Get-TimeStamp) Network check interval set to: $WaitTimeSeconds seconds"
 Write-Host "-----------------------------------------------------------"
 
@@ -66,13 +73,19 @@ while ($true) {
         if (-not $janusProcess) {
             Write-Host "$(Get-TimeStamp) Janus is not running - attempting to start..."
             try {
-                Start-Process $JanusPath
+                $startInfo = New-Object System.Diagnostics.ProcessStartInfo
+                $startInfo.FileName = $JanusFullPath
+                $startInfo.WorkingDirectory = $JanusDirectory
+                
+                Write-Host "$(Get-TimeStamp) Starting process in directory: $($startInfo.WorkingDirectory)"
+                
+                $process = [System.Diagnostics.Process]::Start($startInfo)
                 Write-Host "$(Get-TimeStamp) Successfully launched Janus application"
-                Write-Host "$(Get-TimeStamp) Process ID: $((Get-Process "nmrkiosk").Id)"
+                Write-Host "$(Get-TimeStamp) Process ID: $($process.Id)"
             }
             catch {
                 Write-Host "$(Get-TimeStamp) ERROR: Failed to start Janus: $_"
-                Write-Host "$(Get-TimeStamp) Please verify the path: $JanusPath"
+                Write-Host "$(Get-TimeStamp) Please verify the path: $JanusFullPath"
             }
         }
         else {
@@ -83,7 +96,7 @@ while ($true) {
     }
     else {
         Write-Host "$(Get-TimeStamp) Network connection failed"
-        # New functionality: Stop Janus process when network is down
+        # Stop Janus process when network is down
         Stop-JanusProcess
         Write-Host "$(Get-TimeStamp) Waiting $WaitTimeSeconds seconds before retry..."
         Write-Host "$(Get-TimeStamp) Next attempt will be at: $((Get-Date).AddSeconds($WaitTimeSeconds))"

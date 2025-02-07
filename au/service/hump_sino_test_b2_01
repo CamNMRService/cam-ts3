@@ -436,6 +436,9 @@ if ( (hs_w_obs_float<hs_w_double) && (hs_l_obs_float<hs_l_double) && (hs_h_obs_f
     WSH(datestamp) 
     WSH("current")
 }
+else {//out of spec
+    
+}
 
 //Now lets gets the sino... We'll need a bit of a different sweep width
 IEXPNO

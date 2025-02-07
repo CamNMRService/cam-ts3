@@ -437,7 +437,8 @@ if ( (hs_w_obs_float<hs_w_double) && (hs_l_obs_float<hs_l_double) && (hs_h_obs_f
     WSH("current")
 }
 else {//out of spec
-    
+  sprintf(tmp_str,"HUMP_OUT_OF_SPEC_%s_%s_HS_W_%2.f_HS_L_%2.f_HS_H_%2.f",instrum_name,nuc,hs_w_obs_float,hs_l_obs_float,hs_h_obs_float);
+  XAU("whoopwhoop",tmp_str)
 }
 
 //Now lets gets the sino... We'll need a bit of a different sweep width

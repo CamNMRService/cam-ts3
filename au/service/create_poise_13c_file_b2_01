@@ -165,7 +165,7 @@ else
      sprintf(tmp_str,"%s,%.2f,%.2f,%.2f,%.2f,",poise_au,t1_float,noise_f1_double,noise_f2_double,noise_width_double);
      strcat(file_text,tmp_str);
      //fputs(file_text,defaults_file);
-     sprintf(tmp_str,"%s,%.2f,%s", sino_aq,sino_lb_float,sino_pp);
+     sprintf(tmp_str,"%s,%.2f,%s,", sino_aq,sino_lb_float,sino_pp);
      strcat(file_text,tmp_str);
      sprintf(tmp_str,"%.2f",sino_spec);
      strcat(file_text,tmp_str);    

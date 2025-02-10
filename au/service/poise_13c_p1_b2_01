@@ -484,7 +484,7 @@ if (( title_file = fopen( title_path_name, "w")) == 0)
 
 //sprintf( results_file_name, "%s/logfiles/%s-%s-%s", PathXWinNMRProg(), instrum_name,probe_name_trunc,method_name );
 sprintf( results_file_name, "%s%s-%s-%s", results_path, instrum_name,probe_name_trunc,method_name );
-char *ptr = results_file_name;
+*ptr = results_file_name;
     
     while (*ptr != '\0') {
         if (*ptr == ' ') {

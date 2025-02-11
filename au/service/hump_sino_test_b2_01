@@ -16,7 +16,8 @@ B1_02 -  April 2023 - moved half width spec to defaults file and writing of shim
                   and humpcal-djh which has MAXI set to 100000 due to bug
          Aug 2024 - remove the ABORT in case of failed humpcal, to avoid complete crash of automation. It will just not write out hump info in this case
 B2_01 - Jan/Feb 2025 make results file only have NO spaces in c can have trouble opening them
-        Need to add code to deal with out of spec results.
+        Added code to deal with out of spec results - send an email
+      - added commandline option, which is an extra argument to pass to topshim;
 */
 
 
@@ -25,6 +26,7 @@ B2_01 - Jan/Feb 2025 make results file only have NO spaces in c can have trouble
 
 //Set some variables for below
 char defaults_file_name[1024];
+char ts_arg[32]="";
 int ts_major = GetTsVersionMajor();
 int ts_minor = GetTsVersionMinor();
 int ts_patch = GetTsVersionPl();
@@ -198,6 +200,13 @@ int err = -1;
 char  datestamp[256];
 
 
+//either called without an argument, or with
+if (i_argc == 3) {
+   sprintf(ts_arg,"%s",i_argv[2]);
+ }
+ else {
+   sprintf(ts_arg," ");
+ }
 RPAR(param_set_name, "all")
 STOREPAR("PULPROG", p_program)
 GETPROSOL
@@ -365,7 +374,9 @@ if (aqtest == 0)
     ATMA
     // add topshim here with full tunea - maybe important if it's run all the otehr tests first
     // and also we want to make sure it adjusts XZ/YZ
-    XCMD("topshim plotall tunea convcomp")
+    sprintf(tmp_str,"topshim plotall tunea convcomp %s",ts_arg);
+    XCMD(tmp_str); 
+    //XCMD("topshim plotall tunea convcomp")
     ZG
     if ( (ts_major=4) && (ts_minor>=0) && (ts_patch>=6) ) {
     FP

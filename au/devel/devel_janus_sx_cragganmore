@@ -412,8 +412,8 @@ interrupt_file = fopen(interrupt_file_path, "r");
        DATASET(dataset_name, expno, 1, diskunit, suser);
        GETCURDATA
        VIEWDATA_SAMEWIN
-	   sprintf(tmp_cmd, "atma storeWobb 700");
-       AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+	   sprintf(tmp_str, "atma storeWobb 700");
+       AUERR=CPR_exec(tmp_str,WAIT_TERM);
        XAU("poise_1h_p1_b2_01","")
     }
     if (strcmp(field2, "poise_13c") )
@@ -422,8 +422,8 @@ interrupt_file = fopen(interrupt_file_path, "r");
        DATASET(dataset_name, expno, 1, diskunit, suser);
        GETCURDATA
        VIEWDATA_SAMEWIN
-	   sprintf(tmp_cmd, "atma storeWobb 700");
-       AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+	   sprintf(tmp_str, "atma storeWobb 700");
+       AUERR=CPR_exec(tmp_str,WAIT_TERM);
        XAU("poise_13c_p1_b2_01","")
     }
     if (strcmp(field2, "poise_31P") )
@@ -432,8 +432,8 @@ interrupt_file = fopen(interrupt_file_path, "r");
        DATASET(dataset_name, expno, 1, diskunit, suser);
        GETCURDATA
        VIEWDATA_SAMEWIN
-	   sprintf(tmp_cmd, "atma storeWobb 700");
-       AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+	   sprintf(tmp_str, "atma storeWobb 700");
+       AUERR=CPR_exec(tmp_str,WAIT_TERM);
        XAU("poise_31p_p1_b2_01","")
     }
     if (strncmp(field2, "poise_19f") )
@@ -442,17 +442,17 @@ interrupt_file = fopen(interrupt_file_path, "r");
        DATASET(dataset_name, expno, 1, diskunit, suser);
        GETCURDATA
        VIEWDATA_SAMEWIN
-	   sprintf(tmp_cmd, "atma storeWobb 700");
-       AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+	   sprintf(tmp_str, "atma storeWobb 700");
+       AUERR=CPR_exec(tmp_str,WAIT_TERM);
        XAU("poise_19f_p1_b2_01","")
     }
-    if (strncmp(field2, "hump") )
+    if (strcmp(field2, "hump") )
     {
        expno=expno+10;
        DATASET(dataset_name, expno, 1, diskunit, suser);
        GETCURDATA
        VIEWDATA_SAMEWIN
-	   sprintf(tmp_cmd, "atma storeWobb 700");
+	   sprintf(tmp_str, "atma storeWobb 700");
        AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
        XAU("hump_sino_test_b2_01","")
     }

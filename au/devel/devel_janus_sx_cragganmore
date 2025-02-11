@@ -471,7 +471,9 @@ if (interrupt_file != NULL) {
 	fputs( tmp_str,fbat);
 	fclose(fbat);
 	system(batcmd);
-	}	//end of if interrupt file is there
+	}	//end of test if sample went in
+}
+
     else{
       // printf("Error: Could not open %s\n",interrupt_file_path);
        
@@ -485,7 +487,7 @@ if (interrupt_file != NULL) {
 
 	
 	XAU("parse_sexpress_web","") //test sample went in, parse the sx logs
-}
+
 
 
 /****End of interrupt test sample routine******/

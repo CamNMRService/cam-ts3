@@ -399,8 +399,9 @@ interrupt_file = fopen(interrupt_file_path, "r");
             }
             field_count++;
             token = strtok(NULL, ",");
-        }
+        } //end of token read while loop
     sleep(number);
+    /*
     if (strcmp(field3,"shim")) //if 3rd field indicates we need to shim
     {
         sprintf(tmp_str,"janus_topshim_watchdog TOPSHIM_FAILED_%s_%i %s",tmp_fname,cpos,ts_arg);
@@ -456,7 +457,7 @@ interrupt_file = fopen(interrupt_file_path, "r");
        AUERR=CPR_exec(tmp_str,WAIT_TERM);
        XAU("hump_sino_test_b2_01","")
     }
-
+ */
     loop++;
     } //end of while loop
    
@@ -483,6 +484,7 @@ interrupt_file = fopen(interrupt_file_path, "r");
 
 	}
 	XAU("parse_sexpress_web","") //test sample went in, parse the sx logs
+
 /****End of interrupt test sample routine******/
 
  //**Get on with normal Janus routine */

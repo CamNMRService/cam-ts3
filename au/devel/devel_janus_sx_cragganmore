@@ -453,7 +453,7 @@ interrupt_file = fopen(interrupt_file_path, "r");
        GETCURDATA
        VIEWDATA_SAMEWIN
 	   sprintf(tmp_str, "atma storeWobb 700");
-       AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+       AUERR=CPR_exec(tmp_str,WAIT_TERM);
        XAU("hump_sino_test_b2_01","")
     }
 

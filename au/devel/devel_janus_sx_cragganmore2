@@ -476,7 +476,7 @@ if (interrupt_file != NULL) {
        VIEWDATA_SAMEWIN
 	   sprintf(tmp_str, "atma storeWobb 700");
        AUERR=CPR_exec(tmp_str,WAIT_TERM);
-       XAU("hump_sino_test_b2_01","")
+       XAU("hump_sino_test_b2_01",ts_arg)
     }
  
     loop++;

@@ -406,13 +406,11 @@ if (interrupt_file != NULL) {
         } //end of token read while loop
     sleep(number);
     
-    if (strcmp(field3,"shim")) //if 3rd field indicates we need to shim
-    {
+    if (strstr(field3, "shim") != NULL) {
         sprintf(tmp_str,"janus_topshim_watchdog TOPSHIM_FAILED_%s_%i %s",tmp_fname,cpos,ts_arg);
 		XCMD(tmp_str); 
     }
-    if (strcmp(field2, "poise_1h") )
-    {
+    if (strstr(field2, "poise_1h") != NULL) {
        expno=expno+10;
        DATASET(dataset_name, expno, 1, diskunit, suser);
        GETCURDATA
@@ -421,8 +419,7 @@ if (interrupt_file != NULL) {
        AUERR=CPR_exec(tmp_str,WAIT_TERM);
        XAU("poise_1h_p1_b2_01","")
     }
-    if (strcmp(field2, "poise_13c") )
-    {
+    if (strstr(field2, "poise_13c") != NULL) {
        expno=expno+10;
        DATASET(dataset_name, expno, 1, diskunit, suser);
        GETCURDATA
@@ -431,8 +428,7 @@ if (interrupt_file != NULL) {
        AUERR=CPR_exec(tmp_str,WAIT_TERM);
        XAU("poise_13c_p1_b2_01","")
     }
-    if (strcmp(field2, "poise_31P") )
-    {
+    if (strstr(field2, "poise_31p") != NULL) {
        expno=expno+10;
        DATASET(dataset_name, expno, 1, diskunit, suser);
        GETCURDATA
@@ -441,8 +437,7 @@ if (interrupt_file != NULL) {
        AUERR=CPR_exec(tmp_str,WAIT_TERM);
        XAU("poise_31p_p1_b2_01","")
     }
-    if (strcmp(field2, "poise_19f") )
-    {
+    if (strstr(field2, "poise_19f") != NULL) {
        expno=expno+10;
        DATASET(dataset_name, expno, 1, diskunit, suser);
        GETCURDATA
@@ -451,8 +446,7 @@ if (interrupt_file != NULL) {
        AUERR=CPR_exec(tmp_str,WAIT_TERM);
        XAU("poise_19f_p1_b2_01","")
     }
-    if (strcmp(field2, "hump") )
-    {
+    if (strstr(field2, "hump") != NULL) {
        expno=expno+10;
        DATASET(dataset_name, expno, 1, diskunit, suser);
        GETCURDATA

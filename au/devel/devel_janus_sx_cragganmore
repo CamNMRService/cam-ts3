@@ -436,7 +436,7 @@ interrupt_file = fopen(interrupt_file_path, "r");
        AUERR=CPR_exec(tmp_str,WAIT_TERM);
        XAU("poise_31p_p1_b2_01","")
     }
-    if (strncmp(field2, "poise_19f") )
+    if (strcmp(field2, "poise_19f") )
     {
        expno=expno+10;
        DATASET(dataset_name, expno, 1, diskunit, suser);
@@ -459,19 +459,17 @@ interrupt_file = fopen(interrupt_file_path, "r");
 
     loop++;
     } //end of while loop
-   // lets run that long command
-    AUERR=CPR_exec(cmd_str,WAIT_TERM); 
+   
     fclose(interrupt_file);
 	//now we should delete the file
-		//sprintf( tmp_str, "del %s", interrupt_file_path );
-		//system( tmp_str );
-	/*	sprintf( tmp_str, "del %s", interrupt_file_path );
-		fbat = fopen(batcmd, "w");
-		fputs( tmp_str,fbat);
-		fclose(fbat);
-		system(batcmd);
-		*/
-	}	
+	sprintf( tmp_str, "del %s", interrupt_file_path );
+	//system( tmp_str );
+	
+	fbat = fopen(batcmd, "w");
+	fputs( tmp_str,fbat);
+	fclose(fbat);
+	system(batcmd);
+	}	//end of if interrupt file is there
     else{
       // printf("Error: Could not open %s\n",interrupt_file_path);
        

@@ -305,8 +305,8 @@ char dataset_name[PATH_MAX]="";
 int number;
 int loop=1;
 interrupt_file = fopen(interrupt_file_path, "r");
-
- if (interrupt_file != NULL) {
+/*
+if (interrupt_file != NULL) {
 
 	// not called with skiptest arg so do the tests
 	// now make systest dataset
@@ -364,7 +364,7 @@ interrupt_file = fopen(interrupt_file_path, "r");
 		// keep first dataset with wobb curves in
 		IEXPNO;
 		//Ok, now to parse the interrupt file.
-        /*
+        
 		while (fgets(line, sizeof(line), interrupt_file)) {
         // Skip comments
         if (strncmp(line, "!!", 2) == 0) {
@@ -483,8 +483,10 @@ interrupt_file = fopen(interrupt_file_path, "r");
 		SETCURDATA
 		XAU("poise_13c_p1_b1_01","")
 
-	}
+	
 	XAU("parse_sexpress_web","") //test sample went in, parse the sx logs
+}
+*/
 
 /****End of interrupt test sample routine******/
 

@@ -491,14 +491,16 @@ if (interrupt_file != NULL) {
 	fputs( tmp_str,fbat);
 	fclose(fbat);
 	system(batcmd);
+    Proc_err (DEF_ERR_OPT,"ran all those commands in %s",interrupt_file_path);
 	}	//end of test if sample went in
+
 }
 
     else{
       // printf("Error: Could not open %s\n",interrupt_file_path);
        
     }
-     Proc_err (DEF_ERR_OPT,"ran all those commands in %s",interrupt_file_path);
+    
 
 	XAU("parse_sexpress_web","") //test sample went in, parse the sx logs
 

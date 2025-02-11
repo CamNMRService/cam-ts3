@@ -364,6 +364,7 @@ interrupt_file = fopen(interrupt_file_path, "r");
 		// keep first dataset with wobb curves in
 		IEXPNO;
 		//Ok, now to parse the interrupt file.
+        /*
 		while (fgets(line, sizeof(line), interrupt_file)) {
         // Skip comments
         if (strncmp(line, "!!", 2) == 0) {
@@ -401,7 +402,7 @@ interrupt_file = fopen(interrupt_file_path, "r");
             token = strtok(NULL, ",");
         } //end of token read while loop
     sleep(number);
-    /*
+    
     if (strcmp(field3,"shim")) //if 3rd field indicates we need to shim
     {
         sprintf(tmp_str,"janus_topshim_watchdog TOPSHIM_FAILED_%s_%i %s",tmp_fname,cpos,ts_arg);
@@ -457,7 +458,7 @@ interrupt_file = fopen(interrupt_file_path, "r");
        AUERR=CPR_exec(tmp_str,WAIT_TERM);
        XAU("hump_sino_test_b2_01","")
     }
- */
+ 
     loop++;
     } //end of while loop
    

@@ -364,7 +364,7 @@ if (interrupt_file != NULL) {
 		// keep first dataset with wobb curves in
 		IEXPNO;
 		//Ok, now to parse the interrupt file.
-        /*
+        
 		while (fgets(line, sizeof(line), interrupt_file)) {
         // Skip comments
         if (strncmp(line, "!!", 2) == 0) {
@@ -402,7 +402,7 @@ if (interrupt_file != NULL) {
             token = strtok(NULL, ",");
         } //end of token read while loop
     sleep(number);
-    */
+    
     if (strcmp(field3,"shim")) //if 3rd field indicates we need to shim
     {
         sprintf(tmp_str,"janus_topshim_watchdog TOPSHIM_FAILED_%s_%i %s",tmp_fname,cpos,ts_arg);

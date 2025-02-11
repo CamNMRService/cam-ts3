@@ -345,13 +345,16 @@ if (interrupt_file != NULL) {
 		sleep(60);
 		sprintf(tmp_cmd, "atma storeWobb 700");
 		STOREPAR("RO",0)
+		/*
 		AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 		if ( AUERR <0 )
 		{
-		sprintf(tmp_str, "INITIAL_TEST_SAMPLE_ATMA_ERROR");
+		sprintf(tmp_str, "INITIAL_TEST_SAMPLE_ATMA_ERROR"); 
+
 		XAU("whoopwhoop",tmp_str)
 		STOPMSG("Janus stopped - initial atma error")
 		}
+		*/
 		sprintf(tmp_cmd, "rsh %s",shimset);
 		AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 		XCMD("lock CD3CN")

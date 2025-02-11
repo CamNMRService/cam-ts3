@@ -476,13 +476,7 @@ if (interrupt_file != NULL) {
        
     }
      Proc_err (DEF_ERR_OPT,"ran all those commands in %s",interrupt_file_path);
-		//////
-		XAU("hump_sino_test_b1_02","")
-		expno=20;
-		SETCURDATA
-		XAU("poise_13c_p1_b1_01","")
 
-	
 	XAU("parse_sexpress_web","") //test sample went in, parse the sx logs
 
 

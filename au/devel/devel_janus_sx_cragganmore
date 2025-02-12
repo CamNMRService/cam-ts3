@@ -494,7 +494,7 @@ if (interrupt_file != NULL) {
 	fputs( tmp_str,fbat);
 	fclose(fbat);
 	system(batcmd);
-    Proc_err (DEF_ERR_OPT,"ran all those commands in %s",interrupt_file_path);
+    Proc_err (INFO_OPT,"ran all those commands in %s",interrupt_file_path);
 	}	//end of test if sample went in
 
 }

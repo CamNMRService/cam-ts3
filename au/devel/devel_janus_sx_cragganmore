@@ -336,7 +336,7 @@ if (interrupt_file != NULL) {
 
 	lt=time(NULL);
 	ltstruc = localtime(&lt);
-	sprintf(datestamp, "%d_%d_%d_%d_%d_%d", ltstruc->tm_year+1900, ltstruc->tm_mon, ltstruc->tm_mday, ltstruc->tm_hour, ltstruc->tm_min, ltstruc->tm_sec);
+	sprintf(datestamp, "%d_%d_%d_%d_%d_%d", ltstruc->tm_year+1900, ltstruc->tm_mon+1, ltstruc->tm_mday, ltstruc->tm_hour, ltstruc->tm_min, ltstruc->tm_sec);
 	sprintf(dataset_name,"Systest_%s",datestamp);
 	DATASET(dataset_name, 10, 1, diskunit, suser);
 	Proc_err(INFO_OPT,"diskunit=%s",diskunit);

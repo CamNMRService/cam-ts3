@@ -735,7 +735,7 @@ if ( strstr ( protocol, "POS59") != NULL )
             ATMAflag=0;
         }
 
-        if (( (ATMAflag==0) & (global_atma_flag !=0) )
+        if (( (ATMAflag==0) && (global_atma_flag !=0) )
         {
             ATMA
             if ( AUERR <0 )

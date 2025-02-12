@@ -295,6 +295,29 @@ Proc_err ( INFO_OPT, "Waiting for sample...");
 /*the below becomes the place the data is stored. Done in the old skool path format for compatibility*/
 sprintf(diskunit,"%sdata\\%s\\nmr\\",diskunit,suser);
 
+
+ //**Get on with normal Janus routine */
+ /*--------------------------------------------------------------*/
+// now move to junk dataset
+DATASET ( "junk", 10, 1, diskunit, suser)
+Proc_err(INFO_OPT,"diskunit=%s",diskunit);
+Proc_err(INFO_OPT,"disk=%s",disk);
+GETCURDATA
+VIEWDATA_SAMEWIN
+
+finish = FALSE;
+proderrcount=0;
+while ( finish != TRUE ) //THE MAIN LOOP
+{
+	/*--- Let everyone know that the loop is running -*/
+/*	Proc_err ( INFO_OPT, "Waiting for sample...Loop(%d)",curloop); */
+
+	sleep(10);
+
+
+//Ok, now try to interrupt
+
+
 //****Interrupt code********/
 FILE *interrupt_file;
 char line[1024];
@@ -453,7 +476,7 @@ if (interrupt_file != NULL) {
        VIEWDATA_SAMEWIN
 	   sprintf(tmp_str, "atma storeWobb 700");
        AUERR=CPR_exec(tmp_str,WAIT_TERM);
-       XAU("hump_sino_test_b2_01","")
+       XAU("hump_sino_test_b2_01",ts_arg)
     }
  
     loop++;
@@ -468,14 +491,16 @@ if (interrupt_file != NULL) {
 	fputs( tmp_str,fbat);
 	fclose(fbat);
 	system(batcmd);
+    Proc_err (DEF_ERR_OPT,"ran all those commands in %s",interrupt_file_path);
 	}	//end of test if sample went in
+
 }
 
     else{
       // printf("Error: Could not open %s\n",interrupt_file_path);
        
     }
-     Proc_err (DEF_ERR_OPT,"ran all those commands in %s",interrupt_file_path);
+    
 
 	XAU("parse_sexpress_web","") //test sample went in, parse the sx logs
 
@@ -483,23 +508,6 @@ if (interrupt_file != NULL) {
 
 /****End of interrupt test sample routine******/
 
- //**Get on with normal Janus routine */
- /*--------------------------------------------------------------*/
-// now move to junk dataset
-DATASET ( "junk", 10, 1, diskunit, suser)
-Proc_err(INFO_OPT,"diskunit=%s",diskunit);
-Proc_err(INFO_OPT,"disk=%s",disk);
-GETCURDATA
-VIEWDATA_SAMEWIN
-
-finish = FALSE;
-proderrcount=0;
-while ( finish != TRUE ) //THE MAIN LOOP
-{
-	/*--- Let everyone know that the loop is running -*/
-/*	Proc_err ( INFO_OPT, "Waiting for sample...Loop(%d)",curloop); */
-
-	sleep(10);
 	/*------------------------------------------------*/
 	if ( access(prodfile,R_OK)!=0)
 	{

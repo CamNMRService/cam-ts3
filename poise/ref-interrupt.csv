@@ -1,0 +1,9 @@
+!!parsed by devel_run_interrupt for example
+!!time delay,system test to run, shim or not
+!!allowable so far for arg2 - poise_1h, poise_13c, poise_31p,poise_19f, hump
+!!allowable for field3 so far - shim
+!!1,poise_13c
+!!1,poise_31p
+1,poise_1h
+1,poise_19f
+1,hump,shim

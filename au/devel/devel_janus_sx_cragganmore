@@ -155,7 +155,7 @@ FILE   *fjup = NULL, *fexpts = NULL, *pidfile = NULL, *fawm = NULL;
 FILE  *sname = NULL;
 FILE 	*fbat=NULL;
 FILE	*plist=NULL;
-FILE	*pornot=NULL;
+//Clip FILE	*pornot=NULL;
 FILE    *sampleinfo=NULL;
 
 char  samplename[80], snamefile[255];
@@ -170,11 +170,11 @@ char errorfile[255];
 char warnfile[255];
 char waitfile[255];
 char protfile[255];
-char pornotfile[255];
+//Clip char pornotfile[255];
 char logfile[255];
 
 char email[80]="camnmrservice@gmail.com";
-int get_proc_or_not_val(FILE *pornot);
+//Clip int get_proc_or_not_val(FILE *pornot);
 
 int ts_major = GetTsVersionMajor();
 int ts_minor = GetTsVersionMinor();
@@ -264,9 +264,10 @@ sprintf(waitfile, "%s%s\\wait.txt",diskunit,suser);
 sprintf(protfile, "%s%s\\prot.txt",diskunit,suser);
 sprintf(logfile, "%s%s\\jchlog.txt",diskunit,suser);
 sprintf(proclist, "%s%s\\proclist.txt",diskunit,suser);
-sprintf(pornotfile, "%s%s\\proc_or_not.txt", diskunit,suser);
+//Clip sprintf(pornotfile, "%s%s\\proc_or_not.txt", diskunit,suser);
 
-/*now write what kind of processing we're doing*/
+/*//Clip 
+//now write what kind of processing we're doing
 pornot = fopen (pornotfile,"w");
 if (pornot == NULL)
 {
@@ -279,9 +280,14 @@ if (pornot == NULL)
 	fclose(pornot);
 }
 
+
 pornot = fopen (pornotfile,"r");
 proc_or_not=get_proc_or_not_val(pornot);
+
+
 Proc_err(INFO_OPT,"prornot val=%i",proc_or_not);
+*///Clip/
+
 Proc_err ( INFO_OPT,"%s",batfile);
 Proc_err ( INFO_OPT,"%s",batcmd);
 Proc_err ( INFO_OPT,"%s",prodfile);
@@ -914,9 +920,11 @@ with NMR service team about whether medium or thick wall tubes are more appropri
             {
                 /*find ou what processing mode we're in*/
                 /*if we're not in mode 1, the external processing software is not running and we need to process*/
-			    pornot = fopen (pornotfile,"r");
-			    proc_or_not=get_proc_or_not_val(pornot);
-			    if ((proc_or_not!=1)||(nexpt==10))
+			    //Clip pornot = fopen (pornotfile,"r");
+			    //Clip proc_or_not=get_proc_or_not_val(pornot);
+			    
+				//Clip if ((proc_or_not!=1)||(nexpt==10))
+				if ( nexpt==10 )
 			    {
 			        //CPR_exec("xaup",WAIT_TERM);
 				    XCMD("service-def-proc") //lets see if this fixes the poise automated programs XAUP(proc_1d) trying to print.
@@ -942,6 +950,7 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 
 /*find out what processing mode we're in*/
 /*if we're in mode 1, add to processing list as we are at the end of the samples exps. move def to start of file*/
+/* //Clip 
 pornot = fopen (pornotfile,"r");
 proc_or_not=get_proc_or_not_val(pornot);
 if (proc_or_not==1)
@@ -960,6 +969,7 @@ if (proc_or_not==1)
 		fclose(plist);
 	}
 }
+*/ //Clip
 /*ok, now at end of this samples experiments; remove prod fie and tidy up*/
 
 		fclose(fprod);
@@ -1084,6 +1094,7 @@ system(tmp_cmd);
 Show_status( "Program aborted!" );
 QUIT
 
+/*//Clip
 int get_proc_or_not_val(FILE *pornot)
 {
 	int i;
@@ -1100,3 +1111,4 @@ int get_proc_or_not_val(FILE *pornot)
 	}
 	return 1;
 }
+*///Clip

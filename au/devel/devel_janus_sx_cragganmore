@@ -105,6 +105,8 @@ And added pulse length check and associated message in SampleProblems*/
 //Added line 112 - interupt_file_path
 //115 - ts_arg
 //interrut code starts at 295
+//Feb 2023
+//Added extra when creating the junk dataset to set the instrument name and probe name
 
 
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
@@ -306,12 +308,25 @@ sprintf(diskunit,"%sdata\\%s\\nmr\\",diskunit,suser);
 
  //**Get on with normal Janus routine */
  /*--------------------------------------------------------------*/
-// now move to junk dataset
+// now create and move to junk dataset, run one scan to get instrument and probe name
 DATASET ( "junk", 10, 1, diskunit, suser)
 Proc_err(INFO_OPT,"diskunit=%s",diskunit);
 Proc_err(INFO_OPT,"disk=%s",disk);
 GETCURDATA
+SETCURDATA
 VIEWDATA_SAMEWIN
+RPAR("PROTON", "all")
+GETPROSOL
+//Dunno if it makes much odds, but lets do almost no power into that potentially untuned, empty bore.
+STOREPAR("P 1", 1.0)
+STOREPAR("PL 1", 0.1)
+STOREPAR("NS", 1)
+STOREPAR("DS", 0)
+ZG_OVERWRITE
+FETCHPARS("INSTRUM", instrum_name)
+FETCHPARS("PROBHD", probe_name)
+
+
 
 finish = FALSE;
 proderrcount=0;

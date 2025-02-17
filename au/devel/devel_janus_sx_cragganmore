@@ -321,7 +321,7 @@ RPAR("PROTON", "all")
 GETPROSOL
 //Dunno if it makes much odds, but lets do almost no power into that potentially untuned, empty bore.
 STOREPAR("P 1", 1.0)
-STOREPAR("PL 1", 0.1)
+STOREPAR("PLW 1", 0.1)
 STOREPAR("NS", 1)
 STOREPAR("DS", 0)
 ZG_OVERWRITE

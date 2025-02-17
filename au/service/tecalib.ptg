@@ -58,6 +58,7 @@
 /*	Name		Date	Modification:			*/
 /*	jos		000601	created				*/
 /*	jos		010112	revised				*/
+// ptg added topshim
 /****************************************************************/
 /*
 $Id: tecalib,v 1.3 2006/11/24 09:17:32 wem Exp $
@@ -231,6 +232,7 @@ TIMES(numtemp)
   sleep(4);
   TESET
   TEREADY(waittime,0.1)
+  XCMD("topshim plotall tunea convcomp ls");
   ZG;
   IEXPNO;
 END

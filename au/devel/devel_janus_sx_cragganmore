@@ -159,7 +159,7 @@ FILE   *fjup = NULL, *fexpts = NULL, *pidfile = NULL, *fawm = NULL;
 FILE  *sname = NULL;
 FILE 	*fbat=NULL;
 FILE	*plist=NULL;
-//Clip FILE	*pornot=NULL;
+
 FILE    *sampleinfo=NULL;
 
 char  samplename[80], snamefile[255];
@@ -174,11 +174,11 @@ char errorfile[255];
 char warnfile[255];
 char waitfile[255];
 char protfile[255];
-//Clip char pornotfile[255];
+
 char logfile[255];
 
 char email[80]="camnmrservice@gmail.com";
-//Clip int get_proc_or_not_val(FILE *pornot);
+
 
 int ts_major = GetTsVersionMajor();
 int ts_minor = GetTsVersionMinor();
@@ -268,29 +268,8 @@ sprintf(waitfile, "%s%s\\wait.txt",diskunit,suser);
 sprintf(protfile, "%s%s\\prot.txt",diskunit,suser);
 sprintf(logfile, "%s%s\\jchlog.txt",diskunit,suser);
 sprintf(proclist, "%s%s\\proclist.txt",diskunit,suser);
-//Clip sprintf(pornotfile, "%s%s\\proc_or_not.txt", diskunit,suser);
+ sprintf(pornotfile, "%s%s\\proc_or_not.txt", diskunit,suser);
 
-/*//Clip 
-//now write what kind of processing we're doing
-pornot = fopen (pornotfile,"w");
-if (pornot == NULL)
-{
-	Proc_err(INFO_OPT, "Can't open %s set processing options. Try logging out and back in again", pornotfile);
-	fclose(pornot);
-	exit(1);
-	//maybe instead of quit here; write what we want to do to a failed processing file
-} else
-{	fprintf(pornot,"%i", proc_or_not);
-	fclose(pornot);
-}
-
-
-pornot = fopen (pornotfile,"r");
-proc_or_not=get_proc_or_not_val(pornot);
-
-
-Proc_err(INFO_OPT,"prornot val=%i",proc_or_not);
-*///Clip/
 
 Proc_err ( INFO_OPT,"%s",batfile);
 Proc_err ( INFO_OPT,"%s",batcmd);
@@ -935,12 +914,7 @@ with NMR service team about whether medium or thick wall tubes are more appropri
             }
             else
             {
-                /*find ou what processing mode we're in*/
-                /*if we're not in mode 1, the external processing software is not running and we need to process*/
-			    //Clip pornot = fopen (pornotfile,"r");
-			    //Clip proc_or_not=get_proc_or_not_val(pornot);
-			    
-				//Clip if ((proc_or_not!=1)||(nexpt==10))
+            
 				if ( nexpt==10 )
 			    {
 			        //CPR_exec("xaup",WAIT_TERM);
@@ -965,28 +939,7 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 			nexpt++;
 		}
 
-/*find out what processing mode we're in*/
-/*if we're in mode 1, add to processing list as we are at the end of the samples exps. move def to start of file*/
-/* //Clip 
-pornot = fopen (pornotfile,"r");
-proc_or_not=get_proc_or_not_val(pornot);
-if (proc_or_not==1)
-{
-	plist = fopen (proclist,"a+");
-	if (plist == NULL)
-	{
-		Proc_err(INFO_OPT, "Can't open %s to add to processing list", proclist);
-		//exit(1);
-		//maybe instead of quit here; write what we want to do to a failed processing file
-	} else
-	{
-		sprintf(procinstruct, "%s,%s,chemist,pdf\n",tmp_fname,diskunit);
-		Proc_err(INFO_OPT,"%s",procinstruct);
-		fputs(procinstruct,plist);
-		fclose(plist);
-	}
-}
-*/ //Clip
+
 /*ok, now at end of this samples experiments; remove prod fie and tidy up*/
 
 		fclose(fprod);
@@ -1111,21 +1064,3 @@ system(tmp_cmd);
 Show_status( "Program aborted!" );
 QUIT
 
-/*//Clip
-int get_proc_or_not_val(FILE *pornot)
-{
-	int i;
-	if (pornot == NULL)
-	{
-		Proc_err(INFO_OPT, "Can't open the file to get the processing options, defaulting to aquisistion only mode");
-		fclose(pornot);
-		return 1;
-	} else
-	{
-		fscanf(pornot,"%d",&i);
-		fclose(pornot);
-		return i;
-	}
-	return 1;
-}
-*///Clip

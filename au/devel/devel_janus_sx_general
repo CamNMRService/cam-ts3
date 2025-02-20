@@ -111,9 +111,9 @@ And added pulse length check and associated message in SampleProblems*/
 /*Run a test scan to get the instrument name and probe type*/
 char    instrum_name[255]="spect";
 char    probe_name[255]="unknown";
-DATASET(junk_name,1 ,10, disk, user)
+DATASET("junk",1 ,10, disk, user)
 GETCURDATA
-RPAR(PROTON, "all")
+RPAR("PROTON", "all")
 GETPROSOL
 GETCURDATA
 SETCURDATA
@@ -127,8 +127,7 @@ ZG_OVERWRITE
 FETCHPARS("INSTRUM", instrum_name)
 FETCHPARS("PROBHD", probe_name)
 
-if (strcmp(instrum_name, "cragganmore") == 0) {
-   /*cragganmore dependent global variables!!!!!!*/
+/*gobal variables to change for each instrument*/
    char def_file[255]="d:/chemist/defaults-csv.txt"; //janus software defaults
    char interrupt_file_path[PATH_MAX]="d:\\chemist\\interrupt.csv";//location of interrupt file, if it exist, contains a list of commands
    char changer_ip[16]="149.236.99.243";
@@ -136,56 +135,66 @@ if (strcmp(instrum_name, "cragganmore") == 0) {
    char test_parset[256] = "PROTON";
    int  test_pos = 16;
    int global_atma_flag=0; //if zero, never do atma  
+   
+if (strcmp(instrum_name, "cragganmore") == 0) {
+   /*cragganmore dependent global variables!!!!!!*/
+   def_file[255]="d:/chemist/defaults-csv.txt"; //janus software defaults
+   interrupt_file_path[PATH_MAX]="d:\\chemist\\interrupt.csv";//location of interrupt file, if it exist, contains a list of commands
+   changer_ip[16]="149.236.99.243";
+   ts_arg[32]="ordmax=5";
+   test_parset[256] = "PROTON";
+   test_pos = 16;
+   global_atma_flag=0; //if zero, never do atma  
 }
 else if (strcmp(instrum_name, "laphroiag") == 0) {
    /*laphroiag dependent global variables!!!!!!*/
-   char def_file[255]="d:/chemist/defaults-csv.txt"; //janus software defaults
-   char interrupt_file_path[PATH_MAX]="d:\\chemist\\interrupt.csv";//location of interrupt file, if it exist, contains a list of commands
-   char changer_ip[16]="149.236.99.243";
-   char ts_arg[32]="ordmax=5";
-   char test_parset[256] = "PROTON";
-   int  test_pos = 60;
-   int global_atma_flag=0; //if zero, never do atma
+   def_file[255]="d:/chemist/defaults-csv.txt"; //janus software defaults
+   interrupt_file_path[PATH_MAX]="d:\\chemist\\interrupt.csv";//location of interrupt file, if it exist, contains a list of commands
+   changer_ip[16]="149.236.99.243";
+   ts_arg[32]="ordmax=5";
+   test_parset[256] = "PROTON";
+   test_pos = 60;
+   global_atma_flag=0; //if zero, never do atma
 }
 else if (strcmp(instrum_name, "tobermory") == 0) {
    /*tobermory dependent global variables!!!!!!*/
-   char def_file[255]="d:/chemist/defaults-csv.txt"; //janus software defaults
-   char interrupt_file_path[PATH_MAX]="d:\\chemist\\interrupt.csv";//location of interrupt file, if it exist, contains a list of commands
-   char changer_ip[16]="149.236.99.243";
-   char ts_arg[32]="ordmax=8";
-   char test_parset[256] = "C13CPD";
-   int  test_pos = 96;
-   int global_atma_flag=0; //if zero, never do atma
+   def_file[255]="d:/chemist/defaults-csv.txt"; //janus software defaults
+   interrupt_file_path[PATH_MAX]="d:\\chemist\\interrupt.csv";//location of interrupt file, if it exist, contains a list of commands
+   changer_ip[16]="149.236.99.243";
+   ts_arg[32]="ordmax=8";
+   test_parset[256] = "C13CPD";
+   test_pos = 96;
+   global_atma_flag=0; //if zero, never do atma
 }
 else if (strcmp(instrum_name, "lagavulin") == 0) {
     /*lagavulin dependent global variables!!!!!!*/
-    char def_file[255]="d:/chemist/defaults-csv.txt"; //janus software defaults
-    char interrupt_file_path[PATH_MAX]="d:\\chemist\\interrupt.csv";//location of interrupt file, if it exist, contains a list of commands
-    char changer_ip[16]="null";
-    char ts_arg[32]="ordmax=5";
-    char test_parset[256] = "C13CPD";
-    int  test_pos = 60;
-    int global_atma_flag=0; //if zero, never do atma
+    def_file[255]="d:/chemist/defaults-csv.txt"; //janus software defaults
+    interrupt_file_path[PATH_MAX]="d:\\chemist\\interrupt.csv";//location of interrupt file, if it exist, contains a list of commands
+    changer_ip[16]="null";
+    ts_arg[32]="ordmax=5";
+    test_parset[256] = "C13CPD";
+    test_pos = 60;
+    global_atma_flag=0; //if zero, never do atma
 }
 else if (strcmp(instrum_name, "glenfairn") == 0) {
     /*glenfairn dependent global variables!!!!!!*/
-    char def_file[255]="d:/chemist/defaults-csv.txt"; //janus software defaults
-    char interrupt_file_path[PATH_MAX]="d:\\chemist\\interrupt.csv";//location of interrupt file, if it exist, contains a list of commands
-    char changer_ip[16]="149.236.99.243";
-    char ts_arg[32]="ordmax=8";
-    char test_parset[256] = "C13CPD";
-    int  test_pos = 60;
-    int global_atma_flag=0; //if zero, never do atma
+    def_file[255]="d:/chemist/defaults-csv.txt"; //janus software defaults
+    interrupt_file_path[PATH_MAX]="d:\\chemist\\interrupt.csv";//location of interrupt file, if it exist, contains a list of commands
+    changer_ip[16]="149.236.99.243";
+    ts_arg[32]="ordmax=8";
+    test_parset[256] = "C13CPD";
+    test_pos = 60;
+    global_atma_flag=0; //if zero, never do atma
 }
 else if (strcmp(instrum_name, "arran") == 0) {
     /*arran dependent global variables!!!!!!*/
-    char def_file[255]="e:/chemist/defaults-csv.txt"; //janus software defaults
-    char interrupt_file_path[PATH_MAX]="e:\\chemist\\interrupt.csv";//location of interrupt file, if it exist, contains a list of commands
-    char changer_ip[16]="null";
-    char ts_arg[32]="ordmax=8";
-    char test_parset[256] = "C13CPD";
-    int  test_pos = 41;
-    int global_atma_flag=0; //if zero, never do atma
+    def_file[255]="e:/chemist/defaults-csv.txt"; //janus software defaults
+    interrupt_file_path[PATH_MAX]="e:\\chemist\\interrupt.csv";//location of interrupt file, if it exist, contains a list of commands
+    changer_ip[16]="null";
+    ts_arg[32]="ordmax=8";
+    test_parset[256] = "C13CPD";
+    test_pos = 41;
+    global_atma_flag=0; //if zero, never do atma
 }
 else {
     printf("Unknown instrument\n");
@@ -256,7 +265,7 @@ int ts_minor = GetTsVersionMinor();
 int ts_patch = GetTsVersionPl();
 
 
-char test_parset[256] = "C13CPD";
+test_parset[256] = "C13CPD";
 
 time_t lt;
 struct tm *ltstruc;	  		/* structure with year, month etc. */

@@ -276,7 +276,6 @@ int ts_minor = GetTsVersionMinor();
 int ts_patch = GetTsVersionPl();
 
 
-test_parset[256] = "C13CPD";
 Proc_err ( INFO_OPT,"line 278 ts_arg - %s",ts_arg);
 time_t lt;
 struct tm *ltstruc;	  		/* structure with year, month etc. */

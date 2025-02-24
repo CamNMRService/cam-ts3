@@ -127,8 +127,8 @@ ZG_OVERWRITE
 FETCHPARS("INSTRUM", instrum_name)
 FETCHPARS("PROBHD", probe_name)
 
-/*gobal variables to change for each instrument*/
-   char def_file[255]="d:/chemist/defaults-csv.txt"; //janus software defaults
+/*initial gobal variables to change for each instrument*/
+   char def_file[PATH_MAX]="d:/chemist/defaults-csv.txt"; //janus software defaults
    char interrupt_file_path[PATH_MAX]="d:\\chemist\\interrupt.csv";//location of interrupt file, if it exist, contains a list of commands
    char changer_ip[16]="149.236.99.243";
    char ts_arg[32]="ordmax=5";
@@ -138,68 +138,69 @@ FETCHPARS("PROBHD", probe_name)
    
 if (strcmp(instrum_name, "cragganmore") == 0) {
    /*cragganmore dependent global variables!!!!!!*/
-   def_file[255]="d:/chemist/defaults-csv.txt"; //janus software defaults
-   interrupt_file_path[PATH_MAX]="d:\\chemist\\interrupt.csv";//location of interrupt file, if it exist, contains a list of commands
-   changer_ip[16]="149.236.99.243";
-   ts_arg[32]="ordmax=5";
-   test_parset[256] = "PROTON";
+   sprintf(def_file,"d:/chemist/defaults-csv.txt"); //janus software defaults file
+   sprintf(interrupt_file_path,"d:\\chemist\\interrupt.csv");//location of interrupt file, if it exist, contains a list of commands
+   sprintf(changer_ip,"NULL");
+   sprintf(ts_arg,"ordmax=5");
+   sprintf(test_parset,"PROTON");
    test_pos = 16;
    global_atma_flag=0; //if zero, never do atma  
 }
 else if (strcmp(instrum_name, "laphroiag") == 0) {
    /*laphroiag dependent global variables!!!!!!*/
-   def_file[255]="d:/chemist/defaults-csv.txt"; //janus software defaults
-   interrupt_file_path[PATH_MAX]="d:\\chemist\\interrupt.csv";//location of interrupt file, if it exist, contains a list of commands
-   changer_ip[16]="149.236.99.243";
-   ts_arg[32]="ordmax=5";
-   test_parset[256] = "PROTON";
-   test_pos = 60;
-   global_atma_flag=0; //if zero, never do atma
+   sprintf(def_file,"d:/chemist/defaults-csv.txt"); //janus software defaults file
+   sprintf(interrupt_file_path,"d:\\chemist\\interrupt.csv");//location of interrupt file, if it exist, contains a list of commands
+   sprintf(changer_ip,"NULL");
+   sprintf(ts_arg,"ordmax=5");
+   sprintf(test_parset,"PROTON");
+   test_pos = 16;
+   global_atma_flag=0; //if zero, never do atma  
 }
 else if (strcmp(instrum_name, "tobermory") == 0) {
    /*tobermory dependent global variables!!!!!!*/
-   def_file[255]="d:/chemist/defaults-csv.txt"; //janus software defaults
-   interrupt_file_path[PATH_MAX]="d:\\chemist\\interrupt.csv";//location of interrupt file, if it exist, contains a list of commands
-   changer_ip[16]="149.236.99.243";
-   ts_arg[32]="ordmax=8";
-   test_parset[256] = "C13CPD";
-   test_pos = 96;
-   global_atma_flag=0; //if zero, never do atma
+   sprintf(def_file,"d:/chemist/defaults-csv.txt"); //janus software defaults file
+   sprintf(interrupt_file_path,"d:\\chemist\\interrupt.csv");//location of interrupt file, if it exist, contains a list of commands
+   sprintf(changer_ip,"NULL");
+   sprintf(ts_arg,"ordmax=5");
+   sprintf(test_parset,"PROTON");
+   test_pos = 16;
+   global_atma_flag=0; //if zero, never do atma 
 }
 else if (strcmp(instrum_name, "lagavulin") == 0) {
-    /*lagavulin dependent global variables!!!!!!*/
-    def_file[255]="d:/chemist/defaults-csv.txt"; //janus software defaults
-    interrupt_file_path[PATH_MAX]="d:\\chemist\\interrupt.csv";//location of interrupt file, if it exist, contains a list of commands
-    changer_ip[16]="null";
-    ts_arg[32]="ordmax=5";
-    test_parset[256] = "C13CPD";
-    test_pos = 60;
-    global_atma_flag=0; //if zero, never do atma
+   sprintf(def_file,"d:/chemist/defaults-csv.txt"); //janus software defaults file
+   sprintf(interrupt_file_path,"d:\\chemist\\interrupt.csv");//location of interrupt file, if it exist, contains a list of commands
+   sprintf(changer_ip,"NULL");
+   sprintf(ts_arg,"ordmax=5");
+   sprintf(test_parset,"PROTON");
+   test_pos = 16;
+   global_atma_flag=0; //if zero, never do atma 
 }
 else if (strcmp(instrum_name, "glenfairn") == 0) {
     /*glenfairn dependent global variables!!!!!!*/
-    def_file[255]="d:/chemist/defaults-csv.txt"; //janus software defaults
-    interrupt_file_path[PATH_MAX]="d:\\chemist\\interrupt.csv";//location of interrupt file, if it exist, contains a list of commands
-    changer_ip[16]="149.236.99.243";
-    ts_arg[32]="ordmax=8";
-    test_parset[256] = "C13CPD";
-    test_pos = 60;
-    global_atma_flag=0; //if zero, never do atma
+   sprintf(def_file,"d:/chemist/defaults-csv.txt"); //janus software defaults file
+   sprintf(interrupt_file_path,"d:\\chemist\\interrupt.csv");//location of interrupt file, if it exist, contains a list of commands
+   sprintf(changer_ip,"NULL");
+   sprintf(ts_arg,"ordmax=5");
+   sprintf(test_parset,"PROTON");
+   test_pos = 16;
+   global_atma_flag=0; //if zero, never do atma 
 }
 else if (strcmp(instrum_name, "arran") == 0) {
     /*arran dependent global variables!!!!!!*/
-    def_file[255]="e:/chemist/defaults-csv.txt"; //janus software defaults
-    interrupt_file_path[PATH_MAX]="e:\\chemist\\interrupt.csv";//location of interrupt file, if it exist, contains a list of commands
-    changer_ip[16]="null";
-    ts_arg[32]="ordmax=8";
-    test_parset[256] = "C13CPD";
-    test_pos = 41;
-    global_atma_flag=0; //if zero, never do atma
+   sprintf(def_file,"d:/chemist/defaults-csv.txt"); //janus software defaults file
+   sprintf(interrupt_file_path,"d:\\chemist\\interrupt.csv");//location of interrupt file, if it exist, contains a list of commands
+   sprintf(changer_ip,"NULL");
+   sprintf(ts_arg,"ordmax=5");
+   sprintf(test_parset,"PROTON");
+   test_pos = 16;
+   global_atma_flag=0; //if zero, never do atma 
 }
 else {
-    printf("Unknown instrument\n");
+    Proc_err(INFO_OPT,"Instrument is unknown - %s", instrum_name);
+    
 }
 
+Proc_err(INFO_OPT,"Instrument is %s", instrum_name);
 
 float   delaytime=1.0;
 int     expt=1, curloop=1, cpos, specno, jexpt, jsolv, finish=FALSE,i=1;

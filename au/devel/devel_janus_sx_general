@@ -109,6 +109,7 @@ And added pulse length check and associated message in SampleProblems*/
 //Added extra when creating the junk dataset to set the instrument name and probe name
 
 /*Run a test scan to get the instrument name and probe type*/
+
 char    instrum_name[255]="spect";
 char    probe_name[255]="unknown";
 DATASET("junk",1 ,10, disk, user)
@@ -130,18 +131,18 @@ FETCHPARS("PROBHD", probe_name)
 /*initial gobal variables to change for each instrument*/
    char def_file[PATH_MAX]="d:/chemist/defaults-csv.txt"; //janus software defaults
    char interrupt_file_path[PATH_MAX]="d:\\chemist\\interrupt.csv";//location of interrupt file, if it exist, contains a list of commands
-   char changer_ip[16]="149.236.99.243";
-   char ts_arg[32]="ordmax=5";
+   char changer_ip[16]="null";
+   char ts_arg[32]="none";
    char test_parset[256] = "PROTON";
    int  test_pos = 16;
-   int global_atma_flag=0; //if zero, never do atma  
+   int global_atma_flag=1; //if zero, never do atma  
    
 if (strcmp(instrum_name, "cragganmore") == 0) {
    /*cragganmore dependent global variables!!!!!!*/
    sprintf(def_file,"d:/chemist/defaults-csv.txt"); //janus software defaults file
    sprintf(interrupt_file_path,"d:\\chemist\\interrupt.csv");//location of interrupt file, if it exist, contains a list of commands
    sprintf(changer_ip,"NULL");
-   sprintf(ts_arg,"ordmax=5");
+   sprintf(ts_arg," ordmax=5");
    sprintf(test_parset,"PROTON");
    test_pos = 16;
    global_atma_flag=0; //if zero, never do atma  
@@ -201,6 +202,13 @@ else {
 }
 
 Proc_err(INFO_OPT,"Instrument is %s", instrum_name);
+Proc_err(INFO_OPT,"def_file - %s",def_file);
+Proc_err(INFO_OPT,"interrupt_file_path - %s",interrupt_file_path);
+Proc_err(INFO_OPT,"changer_ip - %s",changer_ip);
+Proc_err(INFO_OPT,"ts_arg - %s",ts_arg);
+Proc_err(INFO_OPT,"global_atma_flag - %i",global_atma_flag);
+
+//STOPMSG("global defaults set!");
 
 float   delaytime=1.0;
 int     expt=1, curloop=1, cpos, specno, jexpt, jsolv, finish=FALSE,i=1;
@@ -449,23 +457,26 @@ if (interrupt_file != NULL) {
 	RPAR(test_parset, "all")
     //Now get the test sample in
 	sprintf(tmp_cmd, "ii");
+	Proc_err ( INFO_OPT,"tmp_cmd - %s",tmp_cmd);
 	AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 	if ( AUERR <0 )
 	{
-		sprintf(tmp_str, "INITIAL_II_ERROR");
-		XAU("whoopwhoop",tmp_str)
+		sprintf(tmp_str, "INITIAL_II_ERROR"); 
+    Proc_err ( INFO_OPT,"%s",tmp_str);
+	//whoop	XAU("whoopwhoop",tmp_str)
 		STOPMSG("Janus stopped - initial ii error")
 	}
 
 	sprintf(tmp_cmd, "sx %i", test_pos);
+	Proc_err ( INFO_OPT,"tmp_cmd - %s",tmp_cmd);
 	AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 	sprintf(tmp_cmd,"wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", changer_ip);
 	system(tmp_cmd);
 	if ( AUERR <0 )
 	{
 		XAU("parse_sexpress_web","")
-		sprintf(tmp_str, "INITIAL_TEST_SAMPLE_SX_%i_ERROR",test_pos);
-		XAU("whoopwhoop",tmp_str)
+		sprintf(tmp_str, "INTERRUPT_SAMPLE_SX_%i_ERROR",test_pos);
+		//whoop	XAU("whoopwhoop",tmp_str)
 	} else {
 		RPAR(test_parset, "all")
 		sleep(60);
@@ -476,20 +487,25 @@ if (interrupt_file != NULL) {
 		   AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 		   if ( AUERR <0 )
 		  {
-		      sprintf(tmp_str, "INITIAL_TEST_SAMPLE_ATMA_ERROR"); 
-		      XAU("whoopwhoop",tmp_str)
+		      sprintf(tmp_str, "INTERRUPT_TEST_SAMPLE_ATMA_ERROR"); 
+		     //whoop	 XAU("whoopwhoop",tmp_str)
 		      STOPMSG("Janus stopped - initial atma error")
 		   }
 	    }
 		
 		sprintf(tmp_cmd, "rsh %s",shimset);
+		Proc_err ( INFO_OPT,"tmp_cmd - %s",tmp_cmd);
 		AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
-		XCMD("lock CD3CN")
-		sprintf(tmp_str,"janus_topshim_watchdog TOPSHIM_FAILED_%s_%i %s",tmp_fname,cpos, ts_arg);
-		XCMD(tmp_str);
+	  sprintf(tmp_cmd, "lock CD3CN");
+	  Proc_err ( INFO_OPT,"tmp_cmd - %s",tmp_cmd);
+		XCMD(tmp_cmd)
+		Proc_err ( INFO_OPT,"ts_arg - %s",ts_arg);
+		sprintf(tmp_cmd,"janus_topshim_watchdog TOPSHIM_FAILED_%s %s",name, ts_arg);
+		Proc_err ( INFO_OPT,"tmp_cmd - %s, ts_arg - %s",tmp_cmd,ts_arg);
+		XCMD(tmp_cmd);
 		if (AUERR<0)
 		{
-			XAU("whoopwhoop",tmp_str);
+			//whoop	XAU("whoopwhoop",tmp_cmd);
 		}
 		// keep first dataset with wobb curves in
 		IEXPNO;
@@ -534,16 +550,18 @@ if (interrupt_file != NULL) {
     sleep(number);
     
     if (strstr(field3, "shim") != NULL) {
-        sprintf(tmp_str,"janus_topshim_watchdog TOPSHIM_FAILED_%s_%i %s",tmp_fname,cpos,ts_arg);
-		XCMD(tmp_str); 
+        sprintf(tmp_cmd,"janus_topshim_watchdog TOPSHIM_FAILED_%s %s",name, ts_arg);
+        Proc_err ( INFO_OPT,"tmp_cmd - %s",tmp_cmd);
+		XCMD(tmp_cmd); 
     }
     if (strstr(field2, "poise_1h") != NULL) {
        expno=expno+10;
        DATASET(dataset_name, expno, 1, diskunit, suser);
        GETCURDATA
        VIEWDATA_SAMEWIN
-	   sprintf(tmp_str, "atma storeWobb 700");
-       AUERR=CPR_exec(tmp_str,WAIT_TERM);
+	   sprintf(tmp_cmd, "atma storeWobb 700");
+	     Proc_err ( INFO_OPT,"tmp_cmd- %s",tmp_cmd);
+       AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
        XAU("poise_1h_p1_b2_01","")
     }
     if (strstr(field2, "poise_13c") != NULL) {
@@ -551,8 +569,9 @@ if (interrupt_file != NULL) {
        DATASET(dataset_name, expno, 1, diskunit, suser);
        GETCURDATA
        VIEWDATA_SAMEWIN
-	   sprintf(tmp_str, "atma storeWobb 700");
-       AUERR=CPR_exec(tmp_str,WAIT_TERM);
+	   sprintf(tmp_cmd, "atma storeWobb 700");
+	     Proc_err ( INFO_OPT,"tmp_cmd - %s",tmp_cmd);
+       AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
        XAU("poise_13c_p1_b2_01","")
     }
     if (strstr(field2, "poise_31p") != NULL) {
@@ -560,8 +579,9 @@ if (interrupt_file != NULL) {
        DATASET(dataset_name, expno, 1, diskunit, suser);
        GETCURDATA
        VIEWDATA_SAMEWIN
-	   sprintf(tmp_str, "atma storeWobb 700");
-       AUERR=CPR_exec(tmp_str,WAIT_TERM);
+	   sprintf(tmp_cmd, "atma storeWobb 700");
+	     Proc_err ( INFO_OPT,"tmp_cmd - %s",tmp_cmd);
+       AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
        XAU("poise_31p_p1_b2_01","")
     }
     if (strstr(field2, "poise_19f") != NULL) {
@@ -569,8 +589,9 @@ if (interrupt_file != NULL) {
        DATASET(dataset_name, expno, 1, diskunit, suser);
        GETCURDATA
        VIEWDATA_SAMEWIN
-	   sprintf(tmp_str, "atma storeWobb 700");
-       AUERR=CPR_exec(tmp_str,WAIT_TERM);
+	   sprintf(tmp_cmd, "atma storeWobb 700");
+	     Proc_err ( INFO_OPT,"tmp_cmd - %s",tmp_cmd);
+       AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
        XAU("poise_19f_p1_b2_01","")
     }
     if (strstr(field2, "hump") != NULL) {
@@ -578,8 +599,9 @@ if (interrupt_file != NULL) {
        DATASET(dataset_name, expno, 1, diskunit, suser);
        GETCURDATA
        VIEWDATA_SAMEWIN
-	   sprintf(tmp_str, "atma storeWobb 700");
-       AUERR=CPR_exec(tmp_str,WAIT_TERM);
+	   sprintf(tmp_cmd, "atma storeWobb 700");
+	     Proc_err ( INFO_OPT,"tmp_cmd - %s",tmp_cmd);
+       AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
        XAU("hump_sino_test_b2_01",ts_arg)
     }
  
@@ -589,6 +611,7 @@ if (interrupt_file != NULL) {
     fclose(interrupt_file);
 	//now we should delete the file
 	sprintf( tmp_str, "del %s", interrupt_file_path );
+	Proc_err ( INFO_OPT,"tmp_str",tmp_str);
 	//system( tmp_str );
 	
 	fbat = fopen(batcmd, "w");
@@ -644,6 +667,7 @@ if (interrupt_file != NULL) {
 		if (proderrcount>2)
 		{
 			sprintf( tmp_str, "del %s", prodfiletxt );
+			Proc_err ( INFO_OPT,"tmp_str",tmp_str);
 			fbat = fopen(batcmd, "w");
 			fputs( tmp_str,fbat);
 			fclose(fbat);
@@ -698,6 +722,7 @@ if (interrupt_file != NULL) {
 	sprintf(expttime, ctime(&lt));
 	fputs( expttime, flog);
 	sprintf( tmp_str, " Specno: %s,Sample: %s, User: %s, Sol= %s, Expt= %s, Cpos= %d\n", tmp_fname, oi, juser, solvent, protocol, cpos);
+	Proc_err ( INFO_OPT,"tmp_str",tmp_str);
 	fputs( tmp_str, flog);
 	fclose( flog );
 	/*CHECK*/
@@ -709,6 +734,7 @@ if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
 {
 	Proc_err ( INFO_OPT,"%s",fidpath);
 	sprintf(tmp_str, "OVERWRITE_FID_ERROR_%i_%s", cpos,tmp_fname);
+	Proc_err ( INFO_OPT,"tmp_str",tmp_str);
 	XAU("whoopwhoop",tmp_str)
 //	XAU("whoopwhoop",cmd)
 	exit(1);
@@ -775,7 +801,7 @@ if ( strstr ( protocol, "POS59") != NULL )
       sprintf(tmp_cmd,"wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", changer_ip);
 	  XAU("parse_sexpress_web","")
       sprintf(tmp_str, "SX_INSERT_ERROR_%i_%s", cpos, tmp_fname);
-	  XAU("whoopwhoop",tmp_str)
+      XAU("whoopwhoop",tmp_str)
 	}
 	 XAU("parse_sexpress_web","") //lets parse any samplexpress log as we have the sample in now.
 /*ok, we have put the sample in the magnet; now run through its exps*/
@@ -787,6 +813,7 @@ if ( strstr ( protocol, "POS59") != NULL )
         ATMAflag=1; // default behaviour
 		STOREPAR( "SOLVENT", solvent)
 		sprintf(tmp_cmd, "rsh %s",shimset);
+		Proc_err ( INFO_OPT,"tmp_cmd - %s",tmp_cmd);
         AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
         if ( AUERR <0 )
         {
@@ -794,7 +821,7 @@ if ( strstr ( protocol, "POS59") != NULL )
 	       XAU("whoopwhoop",tmp_str)
         }
 		sprintf(tmp_cmd, "lock %s",solvent);
-	    
+	  Proc_err ( INFO_OPT,"tmp_cmd -%s",tmp_cmd);
 		AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
 		if ( AUERR <0 )
         {
@@ -808,7 +835,7 @@ if ( strstr ( protocol, "POS59") != NULL )
 		   // If topshim succeeds it must have  been locked so false alarm
 		   
 	       sprintf(tmp_str, "FAILED_TO_LOCK_%s_%i_%s",solvent, cpos, tmp_fname);
-	      // XAU("whoopwhoop",tmp_str)
+	     	      // XAU("whoopwhoop",tmp_str)
 		  sampleproblem=1;
         }
 	//	sprintf(tmp_cmd, "ROT");
@@ -842,6 +869,7 @@ if ( strstr ( protocol, "POS59") != NULL )
             if ( AUERR <0 )
 		    {
 		         sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
+		         Proc_err ( INFO_OPT,"tmp_str",tmp_str);
 	            XAU("whoopwhoop",tmp_str)
 		   	    sampleproblem=1;
 			    strcat(sampleinfostring, "\n ATMA failed - does your sample have high ionic strength? \n Check \
@@ -852,6 +880,7 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 		if ( AUERR <0 )
         {
 	       sprintf(tmp_str, "ROT_FAILED_%i_%s", cpos, tmp_fname);
+	       Proc_err ( INFO_OPT,"tmp_str",tmp_str);
 	     //  XAU("whoopwhoop",tmp_str)
 		 ROT
         }
@@ -864,13 +893,14 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 
 //janus_topshim_watchdog should also take care of the whoopwhoop email
 
-sprintf(tmp_str,"janus_topshim_watchdog TOPSHIM_FAILED_%s_%i %s",tmp_fname,cpos,ts_arg);
-XCMD(tmp_str);
+sprintf(tmp_cmd,"janus_topshim_watchdog TOPSHIM_FAILED_%s_%i %s",tmp_fname,cpos,ts_arg);
+Proc_err ( INFO_OPT,"tmp_cmd - %s",tmp_cmd);
+XCMD(tmp_cmd);
 if (AUERR<0)
 {
 	if (sampleproblem==1)
 	{
-		 XAU("whoopwhoop",tmp_str);
+		 XAU("whoopwhoop",tmp_cmd);
 		sprintf(tmp_str,"\n Failed to lock: check sample is clear, sample filling is >40mm, solvent is deuterated\n \
 		Solvent is listed as %s, if this is not as expected there is probably a rogue character in the Sample ID such as a comma.\n \
 		In this case resubmit with correct Sample ID- only letters, numbers, underscores, dashes and full stops allowed. \n \n", solvent);
@@ -923,6 +953,7 @@ else
 		// stop spinning
 		ROTOFF
         sprintf(tmp_cmd,"atma storewobb 700");
+        Proc_err ( INFO_OPT,"tmp_cmd - %s",tmp_cmd);
 		AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 	    if ( AUERR <0 )
 		  {
@@ -948,6 +979,7 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 	fclose ( ftitle );
 	
 	sprintf(tmp_cmd,"xaua");
+	Proc_err ( INFO_OPT,"tmp_cmd - %s",tmp_cmd);
 	XCMD("setdef ackn no"); //Lets see if this fixes the poise AU programs turning on the click away messages
     AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
     if ( AUERR <0 )
@@ -1106,8 +1138,8 @@ if(sampleproblem==1)
 }
 
 //janus-email needs the location of the defaults file to be passed to it
-sprintf(tmp_str,"janus-email %s",def_file);
-XCMD(tmp_str);
+sprintf(tmp_cmd,"janus-email %s",def_file);
+XCMD(tmp_cmd);
 
 //CPR_exec("janus-email",WAIT_TERM);
 XCMD("setdef ackn no");

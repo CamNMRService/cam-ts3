@@ -237,6 +237,8 @@ char    pulsecalfilename[PATH_MAX];
 char    pulsecalcontent[128];
 char    pulsecalerror[256];
 
+Proc_err ( INFO_OPT,"line 240 ts_arg - %s",ts_arg);
+
 FILE    *pulsecalfile = NULL;
 float   p1, statusp1;
 
@@ -275,7 +277,7 @@ int ts_patch = GetTsVersionPl();
 
 
 test_parset[256] = "C13CPD";
-
+Proc_err ( INFO_OPT,"line 278 ts_arg - %s",ts_arg);
 time_t lt;
 struct tm *ltstruc;	  		/* structure with year, month etc. */
 char datestamp[256];
@@ -332,6 +334,8 @@ field = strtok(NULL,",");
 sscanf(field,"%s",&gradshim);
 	Proc_err(INFO_OPT,"gradshim is %s", gradshim);
 Proc_err(INFO_OPT,"parsed file");
+
+Proc_err ( INFO_OPT,"line 336 ts_arg - %s",ts_arg);
 /*file should contain something like but separated with commas instead of newline:-
 Z		-prefix
 f:\	-diskunit
@@ -378,7 +382,7 @@ if ( access(januskillfile,F_OK) == 0) // file found
     sleep(5);
     STOPMSG("janus finished, IconNMR started")
 }
-
+Proc_err ( INFO_OPT,"line 381 ts_arg - %s",ts_arg);
 Proc_err ( INFO_OPT, "Waiting for sample...");
 
 /*the below becomes the place the data is stored. Done in the old skool path format for compatibility*/
@@ -405,7 +409,7 @@ ZG_OVERWRITE
 FETCHPARS("INSTRUM", instrum_name)
 FETCHPARS("PROBHD", probe_name)
 
-
+Proc_err ( INFO_OPT,"line 408 ts_arg - %s",ts_arg);
 
 finish = FALSE;
 proderrcount=0;
@@ -440,6 +444,7 @@ int number;
 int loop=1;
 interrupt_file = fopen(interrupt_file_path, "r");
 
+Proc_err ( INFO_OPT,"line 443 ts_arg - %s",ts_arg);
 if (interrupt_file != NULL) {
 
 	// not called with skiptest arg so do the tests
@@ -454,6 +459,7 @@ if (interrupt_file != NULL) {
 	Proc_err(INFO_OPT,"disk=%s",disk);
 	SETCURDATA
 	VIEWDATA_SAMEWIN
+	Proc_err ( INFO_OPT,"line 457 ts_arg - %s",ts_arg);
 	RPAR(test_parset, "all")
     //Now get the test sample in
 	sprintf(tmp_cmd, "ii");
@@ -472,6 +478,7 @@ if (interrupt_file != NULL) {
 	AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 	sprintf(tmp_cmd,"wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", changer_ip);
 	system(tmp_cmd);
+	Proc_err ( INFO_OPT,"line 475 ts_arg - %s",ts_arg);
 	if ( AUERR <0 )
 	{
 		XAU("parse_sexpress_web","")
@@ -492,12 +499,12 @@ if (interrupt_file != NULL) {
 		      STOPMSG("Janus stopped - initial atma error")
 		   }
 	    }
-		
+		Proc_err ( INFO_OPT,"line 495 ts_arg - %s",ts_arg);
 		sprintf(tmp_cmd, "rsh %s",shimset);
 		Proc_err ( INFO_OPT,"tmp_cmd - %s",tmp_cmd);
 		AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
-	  sprintf(tmp_cmd, "lock CD3CN");
-	  Proc_err ( INFO_OPT,"tmp_cmd - %s",tmp_cmd);
+	    sprintf(tmp_cmd, "lock CD3CN");
+	    Proc_err ( INFO_OPT,"tmp_cmd - %s",tmp_cmd);
 		XCMD(tmp_cmd)
 		Proc_err ( INFO_OPT,"ts_arg - %s",ts_arg);
 		sprintf(tmp_cmd,"janus_topshim_watchdog TOPSHIM_FAILED_%s %s",name, ts_arg);

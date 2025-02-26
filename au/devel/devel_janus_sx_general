@@ -478,12 +478,15 @@ if (interrupt_file != NULL) {
 	sprintf(tmp_cmd, "sx %i", test_pos);
 	Proc_err ( INFO_OPT,"tmp_cmd - %s",tmp_cmd);
 	AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
-	sprintf(tmp_cmd,"wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", changer_ip);
-	system(tmp_cmd);
-
+	if (strcmp(changer_ip, "NULL") != 0) {
+	   sprintf(tmp_cmd,"wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", changer_ip);
+	   system(tmp_cmd);
+	}
 	if ( AUERR <0 )
 	{
-		XAU("parse_sexpress_web","")
+		if (strcmp(changer_ip, "NULL") != 0) {
+		   XAU("parse_sexpress_web","")
+		}
 		sprintf(tmp_str, "INTERRUPT_SAMPLE_SX_%i_ERROR",test_pos);
 		//whoop	XAU("whoopwhoop",tmp_str)
 	} else {
@@ -493,6 +496,7 @@ if (interrupt_file != NULL) {
 		STOREPAR("RO",0)
 		if ( (global_atma_flag !=0) ) 
 		{
+		   Proc_err ( INFO_OPT,"tmp_cmd - %s",tmp_cmd);
 		   AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 		   if ( AUERR <0 )
 		  {
@@ -637,8 +641,9 @@ if (interrupt_file != NULL) {
        
     }
     
-
-	XAU("parse_sexpress_web","") //test sample went in, parse the sx logs
+    if (strcmp(changer_ip, "null") != 0){
+	   XAU("parse_sexpress_web","") //test sample went in, parse the sx logs
+	}
 
 
 
@@ -772,9 +777,10 @@ if ( strstr ( protocol, "POS59") != NULL )
 
 	sprintf( tmp_cmd, "sx %d",cpos);
 	AUERR=CPR_exec(tmp_cmd, WAIT_TERM);
-    sprintf(tmp_cmd,"wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", changer_ip);
-	system(tmp_cmd);
-
+	if (strcmp(changer_ip, "NULL") != 0) {
+       sprintf(tmp_cmd,"wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", changer_ip);
+	   system(tmp_cmd);
+	}
     /* initialse sample info string:*/
     sprintf(sampleinfostring,"Problems occurred while running this sample:\n");
     sampleproblem=0;
@@ -790,8 +796,11 @@ if ( strstr ( protocol, "POS59") != NULL )
 		sprintf( sxcmd, "sx %d ",cpos);
 
 		AUERR=CPR_exec(sxcmd, WAIT_TERM);
-		sprintf(tmp_cmd,"wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", changer_ip);
-		system(tmp_cmd); //lets download the webpage with the samplejet status on
+		if (strcmp(changer_ip, "NULL") != 0) {
+		   sprintf(tmp_cmd,"wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", changer_ip);
+		   system(tmp_cmd); //lets download the webpage with the samplejet status on		
+		}
+
 
 	}
 	if ( AUERR <0 )
@@ -807,12 +816,18 @@ if ( strstr ( protocol, "POS59") != NULL )
 	  fclose( flog );
 	  skipsample=1;
 // email us but don't quit in case it's not a real problem and is just skipping sample!!
-      sprintf(tmp_cmd,"wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", changer_ip);
-	  XAU("parse_sexpress_web","")
-      sprintf(tmp_str, "SX_INSERT_ERROR_%i_%s", cpos, tmp_fname);
-      XAU("whoopwhoop",tmp_str)
+      if (strcmp(changer_ip, "NULL") != 0) 
+	  {
+         sprintf(tmp_cmd,"wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", changer_ip);
+	     system(tmp_cmd); //lets download the webpage with the samplejet status on	
+		 XAU("parse_sexpress_web","")
+	  }
+    sprintf(tmp_str, "SX_INSERT_ERROR_%i_%s", cpos, tmp_fname);
+    XAU("whoopwhoop",tmp_str)
 	}
+	if (strcmp(changer_ip, "NULL") != 0) {
 	 XAU("parse_sexpress_web","") //lets parse any samplexpress log as we have the sample in now.
+	}
 /*ok, we have put the sample in the magnet; now run through its exps*/
 	if (skipsample==0)
 	{
@@ -1095,17 +1110,24 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 	           /*PUT_SAMPLE_BACK*/
 	           /*remove comment on next line for production*/
 		      AUERR=CPR_exec("sx ej",WAIT_TERM);
-              sprintf(tmp_cmd,"wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", changer_ip);
-	          system(tmp_cmd); //lets download the webpage with the samplejet status on
+			  if (strcmp(changer_ip, "NULL") != 0) {
+                 sprintf(tmp_cmd,"wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", changer_ip);
+			     system(tmp_cmd); //lets download the webpage with the samplejet status on
+			  }
 		     
 		      if ( AUERR <0 )
-		         {
-	             XAU("parse_sexpress_web","")//lets parse the log 
+		        {
+				if (strcmp(changer_ip, "NULL") != 0) {
+	               XAU("parse_sexpress_web","")//lets parse the log 
+				}
 		      	 sprintf(tmp_cmd, "SX_EJECT_ERROR_%i_%s", cpos, tmp_fname);
 	             XAU("whoopwhoop",tmp_cmd)
 	             STOPMSG(tmp_cmd)
 		         }
-	          XAU("parse_sexpress_web","")//lets parse the log 
+			  if (strcmp(changer_ip, "NULL") != 0) 
+			  {
+	             XAU("parse_sexpress_web","")//lets parse the log
+			  } 
 	          LastSample=TRUE;
 		      sleep( delaytime );
 	        }
@@ -1162,7 +1184,7 @@ XCMD("setdef ackn no");
     sprintf(tmp_cmd,"cp -rp /opt/topspin3.6.4/data/topshimData %s/topshimData_%s_%d", AQCUPATH(0),name, expno);
 #endif
 
-Proc_err(DEF_ERR_OPT,tmp_cmd);
+Proc_err(INFO_OPT,tmp_cmd);
 system(tmp_cmd);  
 
 /*Now remove the prodfile */

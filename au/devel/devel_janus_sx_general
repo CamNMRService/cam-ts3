@@ -109,6 +109,10 @@ And added pulse length check and associated message in SampleProblems*/
 //Added extra when creating the junk dataset to set the instrument name and probe name
 
 /*Run a test scan to get the instrument name and probe type*/
+/*Create a codebase general to all instruments. Seems to work on -
+- cragganmore
+*/
+
 
 char    instrum_name[255]="spect";
 char    probe_name[255]="unknown";
@@ -121,7 +125,7 @@ SETCURDATA
 VIEWDATA_SAMEWIN
 //Use not a lot of power on this probably untuned/absent sample
 STOREPAR("P 1", 1.0)
-STOREPAR("PLW 1", 0.1)
+STOREPAR("PLW 1", 0.01)
 STOREPAR("NS", 1)
 STOREPAR("DS", 0)
 ZG_OVERWRITE
@@ -168,13 +172,13 @@ else if (strcmp(instrum_name, "tobermory") == 0) {
    global_atma_flag=0; //if zero, never do atma 
 }
 else if (strcmp(instrum_name, "lagavulin") == 0) {
-   sprintf(def_file,"d:/chemist/defaults-csv.txt"); //janus software defaults file
-   sprintf(interrupt_file_path,"d:\\chemist\\interrupt.csv");//location of interrupt file, if it exist, contains a list of commands
+   sprintf(def_file,"f:/chemist/defaults-csv.txt"); //janus software defaults file
+   sprintf(interrupt_file_path,"f:\\chemist\\interrupt.csv");//location of interrupt file, if it exist, contains a list of commands
    sprintf(changer_ip,"NULL");
    sprintf(ts_arg,"ordmax=5");
    sprintf(test_parset,"PROTON");
-   test_pos = 16;
-   global_atma_flag=0; //if zero, never do atma 
+   test_pos = 60;
+   global_atma_flag=1; //if zero, never do atma 
 }
 else if (strcmp(instrum_name, "glenfairn") == 0) {
     /*glenfairn dependent global variables!!!!!!*/
@@ -237,7 +241,6 @@ char    pulsecalfilename[PATH_MAX];
 char    pulsecalcontent[128];
 char    pulsecalerror[256];
 
-Proc_err ( INFO_OPT,"line 240 ts_arg - %s",ts_arg);
 
 FILE    *pulsecalfile = NULL;
 float   p1, statusp1;
@@ -276,7 +279,7 @@ int ts_minor = GetTsVersionMinor();
 int ts_patch = GetTsVersionPl();
 
 
-Proc_err ( INFO_OPT,"line 278 ts_arg - %s",ts_arg);
+
 time_t lt;
 struct tm *ltstruc;	  		/* structure with year, month etc. */
 char datestamp[256];
@@ -334,7 +337,7 @@ sscanf(field,"%s",&gradshim);
 	Proc_err(INFO_OPT,"gradshim is %s", gradshim);
 Proc_err(INFO_OPT,"parsed file");
 
-Proc_err ( INFO_OPT,"line 336 ts_arg - %s",ts_arg);
+
 /*file should contain something like but separated with commas instead of newline:-
 Z		-prefix
 f:\	-diskunit
@@ -381,7 +384,7 @@ if ( access(januskillfile,F_OK) == 0) // file found
     sleep(5);
     STOPMSG("janus finished, IconNMR started")
 }
-Proc_err ( INFO_OPT,"line 381 ts_arg - %s",ts_arg);
+
 Proc_err ( INFO_OPT, "Waiting for sample...");
 
 /*the below becomes the place the data is stored. Done in the old skool path format for compatibility*/
@@ -408,7 +411,7 @@ ZG_OVERWRITE
 FETCHPARS("INSTRUM", instrum_name)
 FETCHPARS("PROBHD", probe_name)
 
-Proc_err ( INFO_OPT,"line 408 ts_arg - %s",ts_arg);
+
 
 finish = FALSE;
 proderrcount=0;
@@ -443,7 +446,7 @@ int number;
 int loop=1;
 interrupt_file = fopen(interrupt_file_path, "r");
 
-Proc_err ( INFO_OPT,"line 443 ts_arg - %s",ts_arg);
+
 if (interrupt_file != NULL) {
 
 	// not called with skiptest arg so do the tests
@@ -458,7 +461,7 @@ if (interrupt_file != NULL) {
 	Proc_err(INFO_OPT,"disk=%s",disk);
 	SETCURDATA
 	VIEWDATA_SAMEWIN
-	Proc_err ( INFO_OPT,"line 457 ts_arg - %s",ts_arg);
+	
 	RPAR(test_parset, "all")
     //Now get the test sample in
 	sprintf(tmp_cmd, "ii");
@@ -477,7 +480,7 @@ if (interrupt_file != NULL) {
 	AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 	sprintf(tmp_cmd,"wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", changer_ip);
 	system(tmp_cmd);
-	Proc_err ( INFO_OPT,"line 475 ts_arg - %s",ts_arg);
+
 	if ( AUERR <0 )
 	{
 		XAU("parse_sexpress_web","")
@@ -498,7 +501,7 @@ if (interrupt_file != NULL) {
 		      STOPMSG("Janus stopped - initial atma error")
 		   }
 	    }
-		Proc_err ( INFO_OPT,"line 495 ts_arg - %s",ts_arg);
+
 		sprintf(tmp_cmd, "rsh %s",shimset);
 		Proc_err ( INFO_OPT,"tmp_cmd - %s",tmp_cmd);
 		AUERR=CPR_exec(tmp_cmd,WAIT_TERM);

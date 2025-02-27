@@ -886,20 +886,23 @@ if ( strstr ( protocol, "POS59") != NULL )
             RPAR("janus-11b.bbf", "all") // need this to get 1H to tune
             ATMAflag=0;
         }
-
-        if ( ((ATMAflag==0) && (global_atma_flag !=0)) || (strcmp(instrum_name, "tobermory") == 0) ) //OR for tobermory here - its its tobermory, always tune
-        {
-            ATMA
-            if ( AUERR <0 )
-		    {
-		         sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
-		         Proc_err ( INFO_OPT,"tmp_str",tmp_str);
-	            XAU("whoopwhoop",tmp_str)
-		   	    sampleproblem=1;
-			    strcat(sampleinfostring, "\n ATMA failed - does your sample have high ionic strength? \n Check \
+        if ( (strstr ( experiment, "2h") == NULL) && (strstr ( experiment, "2H") == NULL)) // So this means "the string 2h is not present AND the string 2H is not present"
+		//only do the below if its not 2H
+		{
+           if ( ((ATMAflag==0) && (global_atma_flag !=0)) || (strcmp(instrum_name, "tobermory") == 0) ) //OR for tobermory here - if its tobermory, always tune
+           {
+               ATMA
+               if ( AUERR <0 )
+		       {
+		           sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
+		           Proc_err ( INFO_OPT,"tmp_str",tmp_str);
+	               XAU("whoopwhoop",tmp_str)
+		   	       sampleproblem=1;
+			       strcat(sampleinfostring, "\n ATMA failed - does your sample have high ionic strength? \n Check \
 with NMR service team about whether medium or thick wall tubes are more appropriate for similar samples. \n");
-		    }
-        }
+		       }
+           }
+	    }
 		ROT
 		if ( AUERR <0 )
         {

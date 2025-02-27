@@ -116,6 +116,8 @@ And added pulse length check and associated message in SampleProblems*/
 
 char    instrum_name[255]="spect";
 char    probe_name[255]="unknown";
+
+/*Get instrument and probe name*/
 DATASET("junk",1 ,10, disk, user)
 GETCURDATA
 RPAR("PROTON", "all")
@@ -131,6 +133,7 @@ STOREPAR("DS", 0)
 ZG_OVERWRITE
 FETCHPARS("INSTRUM", instrum_name)
 FETCHPARS("PROBHD", probe_name)
+/*end of get instrument and probe name*/
 
 /*initial gobal variables to change for each instrument*/
    char def_file[PATH_MAX]="d:/chemist/defaults-csv.txt"; //janus software defaults

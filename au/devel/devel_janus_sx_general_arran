@@ -218,10 +218,12 @@ Proc_err(INFO_OPT,"global_atma_flag - %i",global_atma_flag);
 //STOPMSG("global defaults set!");
 
 float   delaytime=1.0;
-int     expt=1, curloop=1, cpos, specno, jexpt, jsolv, finish=FALSE,i=1;
-int     LastSample, FatalError=FALSE, nexpt, parmo, proderrcount, sthou;
+int     expt=1, curloop=1, cpos, specno, jexpt, jsolv;
+int     finish=0,i=1;
+int     LastSample=0;
+int     FatalError=0, nexpt, parmo, proderrcount, sthou;
 int     skipsample, pid, x, proc_or_not=0,sampleproblem=0;
-int ATMAflag=1;
+int     ATMAflag=1;
 
 
 char    oi[80], juser[50], suser[40], in_data[1024], tmp_fname[1024];
@@ -416,9 +418,9 @@ FETCHPARS("PROBHD", probe_name)
 
 
 
-finish = FALSE;
+finish = 0;
 proderrcount=0;
-while ( finish != TRUE ) //THE MAIN LOOP
+while ( finish != 1 ) //THE MAIN LOOP
 {
 	/*--- Let everyone know that the loop is running -*/
 /*	Proc_err ( INFO_OPT, "Waiting for sample...Loop(%d)",curloop); */
@@ -1156,7 +1158,7 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 /*ok, now at end of this samples experiments; remove prod fie and tidy up*/
 
 		fclose(fprod);
-		LastSample=FALSE;
+		LastSample=0;
        
 	   //copy topshim report
 
@@ -1186,7 +1188,7 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 			  {
 	             XAU("parse_sexpress_web","")//lets parse the log
 			  } 
-	          LastSample=TRUE;
+	          LastSample=1;
 		      sleep( delaytime );
 	        }
 

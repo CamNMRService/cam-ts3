@@ -990,7 +990,7 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 		}
 	    else
         { 
-           sprintf(tmp_str,"%s\n",tmp_cmd)
+           sprintf(tmp_str,"%s\n",tmp_cmd);
            strcat(janusinfostring, "atma nowin selectnuc\n");
            XCMD("atma nowin selectnuc")
         }

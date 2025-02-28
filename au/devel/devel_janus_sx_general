@@ -944,36 +944,34 @@ else
 			GETPROSOL //needed since paracon!
 
 	
-    
-	if ( (strstr ( experiment, "janus-1h") == NULL) && (ATMAflag==1) && (global_atma_flag !=0) ) //strstr returns a pointer if a match
+	if ( (strstr ( experiment, "2h") == NULL) && (strstr ( experiment, "2H") == NULL)) //so if its not 2h, we might tune
 	{
-	
-
-		if ( (strstr ( experiment, "2h") == NULL) && (strstr ( experiment, "2H") == NULL)) //so if its janus-1h, and not 2h, tune
-		{
-			// stop spinning
-		    ROTOFF
-			sprintf(tmp_cmd,"atma storewobb 700");	
-            Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
-		    AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
-	    if ( AUERR <0 )
-		  {
-		     sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
-	        XAU("whoopwhoop",tmp_str)
-		   	sampleproblem=1;
-			strcat(sampleinfostring, "\n ATMA failed - does your sample have high ionic strength? \n Check \
+	   ROTOFF
+	   if ( (strstr ( experiment, "janus-1h") == NULL) && (ATMAflag==1) && (global_atma_flag !=0) ) //strstr returns a pointer if a match
+	   {
+	       // stop spinning
+		   sprintf(tmp_cmd,"atma storewobb 700");	
+           Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
+		   AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+	       if ( AUERR <0 )
+		   {
+		       sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
+	           XAU("whoopwhoop",tmp_str)
+		       sampleproblem=1;
+			   strcat(sampleinfostring, "\n ATMA failed - does your sample have high ionic strength? \n Check \
 with NMR service team about whether medium or thick wall tubes are more appropriate for similar samples.");
 
 	       // STOPMSG(tmp_str)
-		  }
+		    }
 		}
-		ROT // does "ro acqu"
-	}
-	else
-    { 
-        XCMD("atma nowin selectnuc")
-    }
+		
 	
+	   else
+       { 
+           XCMD("atma nowin selectnuc")
+       }
+	   ROT // does "ro acqu"
+    }
 	//Add a space to title here in 'w' mode to erase any guff
 	sprintf( titlefile, "%s%s/%s/%d/pdata/1/title", diskunit, user,tmp_fname, nexpt );
 	ftitle = fopen( titlefile, "w" ); 

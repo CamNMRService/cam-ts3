@@ -642,6 +642,7 @@ if (interrupt_file != NULL) {
 	file_data = fgets(in_data, 1024, fprod);
 	Proc_err ( INFO_OPT, "prod file contains :- %s",in_data);
 	sprintf(tmp_str,"Prod_file contains - %s\n", in_data);
+    sprintf(janusinfostring,"log\n");
 	strcat(janusinfostring, tmp_str);
 	/*------------------------------------------------*/
 

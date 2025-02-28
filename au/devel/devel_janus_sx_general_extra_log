@@ -641,7 +641,7 @@ if (interrupt_file != NULL) {
 	sleep( delaytime ); //maybe this will clear possible bug with submission pc/spectrometer prodfile write/read contention
 	file_data = fgets(in_data, 1024, fprod);
 	Proc_err ( INFO_OPT, "prod file contains :- %s",in_data);
-	sprintf(tmp_str,"Prod_file contains - %s\n", in_data)
+	sprintf(tmp_str,"Prod_file contains - %s\n", in_data);
 	strcat(janusinfostring, tmp_str);
 	/*------------------------------------------------*/
 
@@ -754,7 +754,7 @@ if ( strstr ( protocol, "POS59") != NULL )
 	sprintf( tmp_cmd, "sx %d",cpos);
 	Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
 	AUERR=CPR_exec(tmp_cmd, WAIT_TERM);
-	sprintf(tmp_str,"%s\n",tmp_cmd)
+	sprintf(tmp_str,"%s\n",tmp_cmd);
 	strcat(janusinfostring, tmp_str);
 	if (strcmp(changer_ip, "NULL") != 0) {
        sprintf(tmp_cmd,"wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", changer_ip);
@@ -773,7 +773,7 @@ if ( strstr ( protocol, "POS59") != NULL )
 		fclose( flog );
 		sleep( 60 );
 		sprintf(sxcmd, "sx %d ",cpos);
-    	sprintf(tmp_str,"%s\n",sxcmd)
+    	sprintf(tmp_str,"%s\n",sxcmd);
 	    strcat(janusinfostring, tmp_str);
         Proc_err ( INFO_OPT,"***sxcmd - %s",sxcmd);
 		AUERR=CPR_exec(sxcmd, WAIT_TERM);
@@ -817,7 +817,7 @@ if ( strstr ( protocol, "POS59") != NULL )
 		STOREPAR( "SOLVENT", solvent)
 		sprintf(tmp_cmd, "rsh %s",shimset);
 		Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
-        sprintf(tmp_str,"%s\n",tmp_cmd)
+        sprintf(tmp_str,"%s\n",tmp_cmd);
         strcat(janusinfostring, tmp_str);
         AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
         if ( AUERR <0 )
@@ -827,7 +827,7 @@ if ( strstr ( protocol, "POS59") != NULL )
         }
 		sprintf(tmp_cmd, "lock %s",solvent);
 	    Proc_err ( INFO_OPT,"***tmp_cmd -%s",tmp_cmd);
-        sprintf(tmp_str,"%s\n",tmp_cmd)
+        sprintf(tmp_str,"%s\n",tmp_cmd);
         strcat(janusinfostring, tmp_str);
 		AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
 		if ( AUERR <0 )
@@ -874,7 +874,7 @@ if ( strstr ( protocol, "POS59") != NULL )
 		{
            if ( ((ATMAflag==0) && (global_atma_flag !=0)) || (strcmp(instrum_name, "tobermory") == 0) ) //OR for tobermory here - if its tobermory, always tune
            {
-            sprintf(tmp_str,"protocol - %s, experiment - % s, ATMA\n",protocol,experiment)
+            sprintf(tmp_str,"protocol - %s, experiment - % s, ATMA\n",protocol,experiment);
             strcat(janusinfostring, tmp_str);
                ATMA
                if ( AUERR <0 )
@@ -909,7 +909,7 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 
 sprintf(tmp_cmd,"janus_topshim_watchdog TOPSHIM_FAILED_%s_%i %s",tmp_fname,cpos,ts_arg);
 Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
-sprintf(tmp_str,"%s\n",tmp_cmd)
+sprintf(tmp_str,"%s\n",tmp_cmd);
 strcat(janusinfostring, tmp_str);
 XCMD(tmp_cmd);
 if (AUERR<0)
@@ -953,7 +953,7 @@ else
 			experiment[strlen(experiment)-1]=NULL;
 			/*--Get that data acquiring!----------------------*/
 			sprintf(statusstr,"Sample: %s, Expt: %s, solvent: %s",oi,experiment,solvent);
-            sprintf(tmp_str,"%s\n",statusstr)
+            sprintf(tmp_str,"%s\n",statusstr);
             strcat(janusinfostring, tmp_str);
 			Show_status(statusstr );
 			sleep(delaytime); //do we need to sleep here?
@@ -973,7 +973,7 @@ else
 	   {
 	       // stop spinning
 		   sprintf(tmp_cmd,"atma storewobb 700");
-           sprintf(tmp_str,"%s\n",tmp_cmd)
+           sprintf(tmp_str,"%s\n",tmp_cmd);
            strcat(janusinfostring, tmp_str);
            Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
 		   AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
@@ -1003,7 +1003,7 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 	fputs ( " ", ftitle );
 	fclose ( ftitle );
 	sprintf(tmp_cmd,"xaua");
-    sprintf(tmp_str,"%s\n",tmp_cmd)
+    sprintf(tmp_str,"%s\n",tmp_cmd);
     strcat(janusinfostring, tmp_str);
 	Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
     

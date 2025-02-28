@@ -849,7 +849,8 @@ if ( strstr ( protocol, "POS59") != NULL )
 	//	sprintf(tmp_cmd, "ROT");
 	//	AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
 		// new atma handling:
-
+        sprintf(tmp_str,"protocol - %s, experiment - % s, ATMA\n",protocol,experiment);
+        strcat(janusinfostring, tmp_str);
         if ( strstr ( protocol, "19F") != NULL )
         {
             RPAR("F19CPD", "all")
@@ -877,6 +878,7 @@ if ( strstr ( protocol, "POS59") != NULL )
            {
             sprintf(tmp_str,"protocol - %s, experiment - % s, ATMA\n",protocol,experiment);
             strcat(janusinfostring, tmp_str);
+            strcat(janusinfostring,"ATMA");
                ATMA
                if ( AUERR <0 )
 		       {
@@ -893,10 +895,10 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 		ROT
 		if ( AUERR <0 )
         {
-	       sprintf(tmp_str, "ROT_FAILED_%i_%s", cpos, tmp_fname);
+	       sprintf(tmp_str, "ROT_FAILED_%i_%s Doing ROT again", cpos, tmp_fname);
 	       Proc_err ( INFO_OPT,"tmp_str",tmp_str);
 	     //  XAU("whoopwhoop",tmp_str)
-         strcat(janusinfostring, "ROT\n");
+         strcat(janusinfostring, tmp_str);
 		 ROT
         }
 		

@@ -123,14 +123,15 @@ if (strcmp(instrum_name, "cragganmore") == 0) {
 }
 else if (strcmp(instrum_name, "laphroiag") == 0) {
    /*laphroiag dependent global variables!!!!!!*/
-   sprintf(def_file,"d:/chemist/defaults-csv.txt"); //janus software defaults file
-   sprintf(interrupt_file_path,"d:\\chemist\\interrupt.csv");//location of interrupt file, if it exist, contains a list of commands
+   sprintf(def_file,"f:/chemist/defaults-csv.txt"); //janus software defaults file
+   sprintf(interrupt_file_path,"f:\\chemist\\interrupt.csv");//location of interrupt file, if it exist, contains a list of commands
    sprintf(changer_ip,"NULL");
    sprintf(ts_arg,"ordmax=5");
    sprintf(test_parset,"PROTON"); //has got a broken probe and can only do 1H and 19F
    test_pos = 60;
    global_atma_flag=0; //if zero, never do atma  
 }
+
 else if (strcmp(instrum_name, "tobermory") == 0) {
    /*tobermory dependent global variables!!!!!!*/
    sprintf(def_file,"d:/chemist/defaults-csv.txt"); //janus software defaults file
@@ -420,7 +421,8 @@ int loop=1;
 interrupt_file = fopen(interrupt_file_path, "r");
 
 
-if (interrupt_file != NULL) {
+if (interrupt_file != NULL) 
+{
 
 	// not called with skiptest arg so do the tests
 	// now make systest dataset
@@ -462,7 +464,8 @@ if (interrupt_file != NULL) {
 		}
 		sprintf(tmp_str, "INTERRUPT_SAMPLE_SX_%i_ERROR",test_pos);
 		//whoop	XAU("whoopwhoop",tmp_str)
-	} else {
+	} else 
+	{
 		RPAR(test_parset, "all")
 		sleep(60);
 		sprintf(tmp_cmd, "atma storeWobb 700");
@@ -529,72 +532,74 @@ if (interrupt_file != NULL) {
                     strncpy(field3, token, 255);
                     field3[255] = '\0';
                     break;
-            }
+            } //end of switch
             field_count++;
             token = strtok(NULL, ",");
         } //end of token read while loop
-    sleep(number);
+       sleep(number);
     
-    if (strstr(field3, "shim") != NULL) {
-        sprintf(tmp_cmd,"janus_topshim_watchdog TOPSHIM_FAILED_%s %s",name, ts_arg);
-        Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
-		XCMD(tmp_cmd); 
-    }
-    if (strstr(field2, "poise_1h") != NULL) {
-       expno=expno+10;
-       DATASET(dataset_name, expno, 1, diskunit, suser);
-       GETCURDATA
-       VIEWDATA_SAMEWIN
-	   sprintf(tmp_cmd, "atma storeWobb 700");
-	     Proc_err ( INFO_OPT,"***tmp_cmd- %s",tmp_cmd);
-       AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
-       XAU("poise_1h_p1_b2_01","")
-    }
-    if (strstr(field2, "poise_13c") != NULL) {
-       expno=expno+10;
-       DATASET(dataset_name, expno, 1, diskunit, suser);
-       GETCURDATA
-       VIEWDATA_SAMEWIN
-	   sprintf(tmp_cmd, "atma storeWobb 700");
-	     Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
-       AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
-       XAU("poise_13c_p1_b2_01","")
-    }
-    if (strstr(field2, "poise_31p") != NULL) {
-       expno=expno+10;
-       DATASET(dataset_name, expno, 1, diskunit, suser);
-       GETCURDATA
-       VIEWDATA_SAMEWIN
-	   sprintf(tmp_cmd, "atma storeWobb 700");
-	     Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
-       AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
-       XAU("poise_31p_p1_b2_01","")
-    }
-    if (strstr(field2, "poise_19f") != NULL) {
-       expno=expno+10;
-       DATASET(dataset_name, expno, 1, diskunit, suser);
-       GETCURDATA
-       VIEWDATA_SAMEWIN
-	   sprintf(tmp_cmd, "atma storeWobb 700");
-	     Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
-       AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
-       XAU("poise_19f_p1_b2_01","")
-    }
-    if (strstr(field2, "hump") != NULL) {
-       expno=expno+10;
-       DATASET(dataset_name, expno, 1, diskunit, suser);
-       GETCURDATA
-       VIEWDATA_SAMEWIN
-	   sprintf(tmp_cmd, "atma storeWobb 700");
-	     Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
-       AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
-       XAU("hump_sino_test_b2_01",ts_arg)
-    }
+       if (strstr(field3, "shim") != NULL) {
+           sprintf(tmp_cmd,"janus_topshim_watchdog TOPSHIM_FAILED_%s %s",name, ts_arg);
+           Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
+	       XCMD(tmp_cmd); 
+       }
+       if (strstr(field2, "poise_1h") != NULL) {
+          expno=expno+10;
+          DATASET(dataset_name, expno, 1, diskunit, suser);
+          GETCURDATA
+          VIEWDATA_SAMEWIN
+	      sprintf(tmp_cmd, "atma storeWobb 700");
+	      Proc_err ( INFO_OPT,"***tmp_cmd- %s",tmp_cmd);
+          AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+          XAU("poise_1h_p1_b2_01","")
+       }
+       if (strstr(field2, "poise_13c") != NULL) {
+          expno=expno+10;
+          DATASET(dataset_name, expno, 1, diskunit, suser);
+          GETCURDATA
+          VIEWDATA_SAMEWIN
+	      sprintf(tmp_cmd, "atma storeWobb 700");
+	      Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
+          AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+          XAU("poise_13c_p1_b2_01","")
+       }
+       if (strstr(field2, "poise_31p") != NULL) {
+          expno=expno+10;
+          DATASET(dataset_name, expno, 1, diskunit, suser);
+          GETCURDATA
+          VIEWDATA_SAMEWIN
+	      sprintf(tmp_cmd, "atma storeWobb 700");
+	      Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
+          AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+          XAU("poise_31p_p1_b2_01","")
+       }
+       if (strstr(field2, "poise_19f") != NULL) {
+          expno=expno+10;
+          DATASET(dataset_name, expno, 1, diskunit, suser);
+          GETCURDATA
+          VIEWDATA_SAMEWIN
+	      sprintf(tmp_cmd, "atma storeWobb 700");
+	       Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
+          AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+          XAU("poise_19f_p1_b2_01","")
+       }
+       if (strstr(field2, "hump") != NULL) {
+          expno=expno+10;
+          DATASET(dataset_name, expno, 1, diskunit, suser);
+          GETCURDATA
+          VIEWDATA_SAMEWIN
+	      sprintf(tmp_cmd, "atma storeWobb 700");
+	      Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
+          AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+          XAU("hump_sino_test_b2_01",ts_arg)
+       }
  
-    loop++;
-    } //end of while loop
+       loop++;
+       } //end of reading interrupt.csv  while loop
    
-    fclose(interrupt_file);
+    
+	}	//end of test if sample went in
+	fclose(interrupt_file); //need to do this here - failure mode of interrupt file is there, but test sample isnt...
 	//now we should delete the file
 	sprintf( tmp_str, "del %s", interrupt_file_path );
 	Proc_err ( INFO_OPT,"tmp_str",tmp_str);
@@ -605,18 +610,15 @@ if (interrupt_file != NULL) {
 	fclose(fbat);
 	system(batcmd);
     Proc_err (INFO_OPT,"ran all those commands in %s",interrupt_file_path);
-	}	//end of test if sample went in
+} //end of reading interrupt file.
 
+else{
+   // printf("Error: Could not open %s\n",interrupt_file_path);       
 }
-
-    else{
-      // printf("Error: Could not open %s\n",interrupt_file_path);
-       
-    }
     
-    if (strcmp(changer_ip, "null") != 0){
-	   XAU("parse_sexpress_web","") //test sample went in, parse the sx logs
-	}
+if (strcmp(changer_ip, "null") != 0){
+XAU("parse_sexpress_web","") //test sample went in, parse the sx logs
+}
 
 
 

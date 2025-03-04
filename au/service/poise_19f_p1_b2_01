@@ -425,6 +425,9 @@ if (aqtest == 0)//so we are in aquire mode, test if poise has run
 
 
 //Now deal with result
+//Have to divide by 4 as we set this to the 360 degree pulse above
+p1_init=p1_init/4;
+
 FETCHPAR("P 1", &p1_opt)
 p1_opt = p1_opt/4;
 STOREPAR("P 1", p1_opt)
@@ -462,7 +465,7 @@ if (verbose == 1) {
 //Then compare p1_opt to p1_init (should be unchanged from prosol. Report if too different.
 
 sprintf( title_path_name, "%s/title", PROCPATH(0) );
-sprintf( title_text, " Original P1 = %.2f \n Poise calibrated P1 = %.2f \n Original Sino = %.2f \n Final Sino = %.2f \n %s", p1_init/4, p1_opt, initial_sino_result, final_sino_result, gui_cmd );
+sprintf( title_text, " Original P1 = %.2f \n Poise calibrated P1 = %.2f \n Original Sino = %.2f \n Final Sino = %.2f \n %s", p1_init, p1_opt, initial_sino_result, final_sino_result, gui_cmd );
 
 if (verbose == 1) {
 	   Proc_err(DEF_ERR_OPT, "Writing %s into file %s", title_text, title_path_name);
@@ -513,7 +516,7 @@ if ((results_file = fopen(results_file_name, "a+")) == 0)
 			Proc_err(DEF_ERR_OPT, "Cannot open file for writing:\n%s", results_file_name);
 		  exit(1);
 } else {
-     sprintf( results_content, "%s,%.2f,%.2f,%.2f,%.2f,",time_buffer,p1_init/4,p1_opt,initial_sino_result,final_sino_result);
+     sprintf( results_content, "%s,%.2f,%.2f,%.2f,%.2f,",time_buffer,p1_init,p1_opt,initial_sino_result,final_sino_result);
      fputs(results_content, results_file);
      sprintf( results_content, "%2.f,%.2f,%s,%i,",rg_float,sino_lb_float,name,expno);
      fputs(results_content, results_file);
@@ -524,9 +527,9 @@ if ((results_file = fopen(results_file_name, "a+")) == 0)
 
 
 //Check how much p1_opt has changed from p1_init - report if too different
-deviation=((fabs(p1_opt/(p1_init/4)))*100)-100;
+deviation=((fabs(p1_opt/p1_init))*100)-100;
 if (verbose == 1) {
-	   Proc_err(DEF_ERR_OPT, " P1 has deviated by %.1f percent. \n P1_init=%.1f \n p1_opt=%.1f", deviation,p1_init/4,p1_opt);
+	   Proc_err(DEF_ERR_OPT, " P1 has deviated by %.1f percent. \n P1_init=%.1f \n p1_opt=%.1f", deviation,p1_init,p1_opt);
 }
 
 if ( (fabs(deviation)) >= max_deviation){

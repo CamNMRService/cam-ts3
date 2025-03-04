@@ -530,7 +530,7 @@ if ((results_file = fopen(results_file_name, "a+")) == 0)
 
 
 //Check how much p1_opt has changed from 
-deviation=fabs(((p1_opt/p1_init))*100)-100);
+deviation=fabs((((p1_opt/p1_init))*100)-100);
 if (verbose == 1) {
 	   Proc_err(DEF_ERR_OPT, " P1 has deviated by %f percent. \n P1_init=%f \n p1_opt=%f", deviation,p1_init,p1_opt);
 }

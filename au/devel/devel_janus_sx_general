@@ -80,7 +80,7 @@ And added pulse length check and associated message in SampleProblems*/
 - cragganmore
 */
 
-
+#pragma region Get_Instrument_Name
 char    instrum_name[255]="spect";
 char    probe_name[255]="unknown";
 
@@ -101,15 +101,17 @@ ZG_OVERWRITE
 FETCHPARS("INSTRUM", instrum_name)
 FETCHPARS("PROBHD", probe_name)
 /*end of get instrument and probe name*/
+#pragma endregion Get_Instrument_Name
 
+#pragma region Initialise Global Variables Per Instrument
 /*initial gobal variables to change for each instrument*/
-   char def_file[PATH_MAX]="d:/chemist/defaults-csv.txt"; //janus software defaults
-   char interrupt_file_path[PATH_MAX]="d:\\chemist\\interrupt.csv";//location of interrupt file, if it exist, contains a list of commands
-   char changer_ip[16]="null";
-   char ts_arg[32]="none";
-   char test_parset[256] = "PROTON"; //assume this is going to be ok
-   int  test_pos = 60;
-   int global_atma_flag=1; //if zero, never do atma  
+char def_file[PATH_MAX]="d:/chemist/defaults-csv.txt"; //janus software defaults
+char interrupt_file_path[PATH_MAX]="d:\\chemist\\interrupt.csv";//location of interrupt file, if it exist, contains a list of commands
+char changer_ip[16]="null";
+char ts_arg[32]="none";
+char test_parset[256] = "PROTON"; //assume this is going to be ok
+int  test_pos = 60;
+int global_atma_flag=1; //if zero, never do atma  
    
 if (strcmp(instrum_name, "cragganmore") == 0) {
    /*cragganmore dependent global variables!!!!!!*/
@@ -183,7 +185,9 @@ Proc_err ( INFO_OPT,"***ts_arg - %s",ts_arg);
 Proc_err ( INFO_OPT,"***global_atma_flag - %i",global_atma_flag);
 
 //STOPMSG("global defaults set!");
+#pragma endregion Initialise Global Variables Per Instrument
 
+#pragma region Initialise other global variables
 float   delaytime=1.0;
 int     expt=1, curloop=1, cpos, specno, jexpt, jsolv, finish=FALSE,i=1;
 int     LastSample, FatalError=FALSE, nexpt, parmo, proderrcount, sthou;
@@ -258,8 +262,9 @@ char testdata[256];
 GETCURDATA;
 proc_or_not=1;
 
+#pragma endregion Initialise other global variables
 
-
+#pragma region Read janus default file and set variables
 Proc_err ( INFO_OPT, "Starting program");
 sleep(delaytime);
 XCMD("setdef ackn no");
@@ -344,7 +349,9 @@ Proc_err ( INFO_OPT,"%s",waitfile);
 Proc_err ( INFO_OPT,"%s",protfile);
 Proc_err ( INFO_OPT,"%s",logfile);
 
+#pragma endregion Read janus default file and set variables
 
+#pragma region Check for januskillfile and stop janus and start iconnmr
 //If januskillfile is there, start iconnmr and abort
 if ( access(januskillfile,F_OK) == 0) // file found
 {
@@ -355,7 +362,10 @@ if ( access(januskillfile,F_OK) == 0) // file found
     STOPMSG("janus finished, IconNMR started")
 }
 
+#pragma endregion Check for januskillfile and stop janus and start iconnmr
+
 Proc_err ( INFO_OPT, "Waiting for sample...");
+#pragma region THE MAIN JANUS LOOP
 
 /*the below becomes the place the data is stored. Done in the old skool path format for compatibility*/
 sprintf(diskunit,"%sdata\\%s\\nmr\\",diskunit,suser);
@@ -363,25 +373,6 @@ sprintf(diskunit,"%sdata\\%s\\nmr\\",diskunit,suser);
 
  //**Get on with normal Janus routine */
  /*--------------------------------------------------------------*/
-// now create and move to junk dataset, run one scan to get instrument and probe name
-DATASET ( "junk", 10, 1, diskunit, suser)
-Proc_err ( INFO_OPT,"***diskunit=%s",diskunit);
-Proc_err ( INFO_OPT,"***disk=%s",disk);
-GETCURDATA
-SETCURDATA
-VIEWDATA_SAMEWIN
-RPAR("PROTON", "all")
-GETPROSOL
-//Dunno if it makes much odds, but lets do almost no power into that potentially untuned, empty bore.
-STOREPAR("P 1", 1.0)
-STOREPAR("PLW 1", 0.1)
-STOREPAR("NS", 1)
-STOREPAR("DS", 0)
-ZG_OVERWRITE
-FETCHPARS("INSTRUM", instrum_name)
-FETCHPARS("PROBHD", probe_name)
-
-
 
 finish = FALSE;
 proderrcount=0;
@@ -392,9 +383,8 @@ while ( finish != TRUE ) //THE MAIN LOOP
 
 	sleep(10);
 
-
-//Ok, now try to interrupt
-
+#pragma region Check for januskillfile and stop janus and start iconnmr
+//Ok, check if we need to start Iconnmr
 
 if ( access(januskillfile,F_OK) == 0) // file found
 {
@@ -404,6 +394,9 @@ if ( access(januskillfile,F_OK) == 0) // file found
     sleep(5);
     STOPMSG("janus finished, IconNMR started")
 }
+#pragma endregion Check for januskillfile and stop janus and start iconnmr
+
+#pragma region Code to interrupt main Janus loop to run tests
 
 //****Interrupt code********/
 FILE *interrupt_file;
@@ -618,6 +611,8 @@ if (interrupt_file != NULL) {
 
 
 /****End of interrupt test sample routine******/
+
+#pragma endregion Code to interrupt main Janus loop to run tests
 
 	/*------------------------------------------------*/
 	if ( access(prodfile,R_OK)!=0)
@@ -1199,6 +1194,8 @@ system(tmp_cmd);
 	}
 	Proc_err ( INFO_OPT, "Waiting for sample...");
 }/*End while*/
+#pragma endregion THE MAIN JANUS LOOP
+
 Show_status( "Program aborted!" );
 QUIT
 

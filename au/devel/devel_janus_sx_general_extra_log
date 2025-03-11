@@ -354,6 +354,7 @@ Proc_err ( INFO_OPT,"%s",logfile);
 
 #pragma endregion Read Defaults From File
 
+#pragma region Check for januskillfile - stop janus - start iconnnmr
 //If januskillfile is there, start iconnmr and abort
 if ( access(januskillfile,F_OK) == 0) // file found
 {
@@ -363,34 +364,15 @@ if ( access(januskillfile,F_OK) == 0) // file found
     sleep(5);
     STOPMSG("janus finished, IconNMR started")
 }
-
+#pragma endregion Check for januskillfile - stop janus - start iconnnmr
 Proc_err ( INFO_OPT, "Waiting for sample...");
 
+#pragma region MAIN JANUS WHILE finish != true LOOP
 /*the below becomes the place the data is stored. Done in the old skool path format for compatibility*/
 sprintf(diskunit,"%sdata\\%s\\nmr\\",diskunit,suser);
 
 
  //**Get on with normal Janus routine */
- /*--------------------------------------------------------------*/
-// now create and move to junk dataset, run one scan to get instrument and probe name
-DATASET ( "junk", 10, 1, diskunit, suser)
-Proc_err ( INFO_OPT,"***diskunit=%s",diskunit);
-Proc_err ( INFO_OPT,"***disk=%s",disk);
-GETCURDATA
-SETCURDATA
-VIEWDATA_SAMEWIN
-RPAR("PROTON", "all")
-GETPROSOL
-//Dunno if it makes much odds, but lets do almost no power into that potentially untuned, empty bore.
-STOREPAR("P 1", 1.0)
-STOREPAR("PLW 1", 0.1)
-STOREPAR("NS", 1)
-STOREPAR("DS", 0)
-ZG_OVERWRITE
-FETCHPARS("INSTRUM", instrum_name)
-FETCHPARS("PROBHD", probe_name)
-
-
 
 finish = FALSE;
 proderrcount=0;
@@ -404,150 +386,152 @@ while ( finish != TRUE ) //THE MAIN LOOP
 
 //Ok, now try to interrupt
 
+   #pragma region Check for januskillfile - stop janus - start iconnnmr
+   if ( access(januskillfile,F_OK) == 0) // file found
+   {
+       Proc_err ( INFO_OPT, "Stopping kiosk mode!");
+       remove(januskillfile);  // get rid of the kil file!
+       XCMD("sendgui icon -start")   // start the IconNMR run 
+       sleep(5);
+       STOPMSG("janus finished, IconNMR started")
+   }
 
-if ( access(januskillfile,F_OK) == 0) // file found
-{
-    Proc_err ( INFO_OPT, "Stopping kiosk mode!");
-    remove(januskillfile);  // get rid of the kil file!
-    XCMD("sendgui icon -start")   // start the IconNMR run 
-    sleep(5);
-    STOPMSG("janus finished, IconNMR started")
-}
+   #pragma endregion Check for januskillfile - stop janus - start iconnnmr
 
-//****Interrupt code********/
-FILE *interrupt_file;
-char line[1024];
-char field2[256]="";
-char field3[256]="";
-char *token;
-char dataset_name[PATH_MAX]="";
-int number;
-int loop=1;
-interrupt_file = fopen(interrupt_file_path, "r");
+   #pragma region Check for interrupt file and run tests if present
+   //****Interrupt code********/
+   FILE *interrupt_file;
+   char line[1024];
+   char field2[256]="";
+   char field3[256]="";
+   char *token;
+   char dataset_name[PATH_MAX]="";
+   int number;
+   int loop=1;
+   interrupt_file = fopen(interrupt_file_path, "r");
 
+   if (interrupt_file != NULL) 
+   {
 
-if (interrupt_file != NULL) 
-{
+	   // not called with skiptest arg so do the tests
+	   // now make systest dataset
 
-	// not called with skiptest arg so do the tests
-	// now make systest dataset
-
-	lt=time(NULL);
-	ltstruc = localtime(&lt);
-	sprintf(datestamp, "%d_%d_%d_%d_%d_%d", ltstruc->tm_year+1900, ltstruc->tm_mon+1, ltstruc->tm_mday, ltstruc->tm_hour, ltstruc->tm_min, ltstruc->tm_sec);
-	sprintf(dataset_name,"Systest_%s",datestamp);
-	DATASET(dataset_name, 10, 1, diskunit, suser);
-	Proc_err ( INFO_OPT,"***diskunit=%s",diskunit);
-	Proc_err ( INFO_OPT,"***disk=%s",disk);
-	SETCURDATA
-	VIEWDATA_SAMEWIN
-	
-	RPAR(test_parset, "all")
-    //Now get the test sample in
-	sprintf(tmp_cmd, "ii");
-	Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
-	AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
-	if ( AUERR <0 )
-	{
-		sprintf(tmp_str, "INITIAL_II_ERROR"); 
-    Proc_err ( INFO_OPT,"%s",tmp_str);
-	//whoop	XAU("whoopwhoop",tmp_str)
-		STOPMSG("Janus stopped - initial ii error")
-	}
-
-	sprintf(tmp_cmd, "sx %i", test_pos);
-	Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
-	AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
-	if (strcmp(changer_ip, "NULL") != 0) {
-	   sprintf(tmp_cmd,"wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", changer_ip);
-	   system(tmp_cmd);
-	}
-	if ( AUERR <0 )
-	{
-		if (strcmp(changer_ip, "NULL") != 0) {
-		   XAU("parse_sexpress_web","")
-		}
-		sprintf(tmp_str, "INTERRUPT_SAMPLE_SX_%i_ERROR",test_pos);
-		//whoop	XAU("whoopwhoop",tmp_str)
-	} else 
-	{
+	   lt=time(NULL);
+	   ltstruc = localtime(&lt);
+	   sprintf(datestamp, "%d_%d_%d_%d_%d_%d", ltstruc->tm_year+1900, ltstruc->tm_mon+1, ltstruc->tm_mday, ltstruc->tm_hour, ltstruc->tm_min, ltstruc->tm_sec);
+	   sprintf(dataset_name,"Systest_%s",datestamp);
+	   DATASET(dataset_name, 10, 1, diskunit, suser);
+	   Proc_err ( INFO_OPT,"***diskunit=%s",diskunit);
+	   Proc_err ( INFO_OPT,"***disk=%s",disk);
+	   SETCURDATA
+	   VIEWDATA_SAMEWIN
+		
 		RPAR(test_parset, "all")
-		sleep(60);
-		sprintf(tmp_cmd, "atma storeWobb 700");
-		STOREPAR("RO",0)
-		if ( (global_atma_flag !=0) ) 
-		{
-		   Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
-		   AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
-		   if ( AUERR <0 )
-		  {
-		      sprintf(tmp_str, "INTERRUPT_TEST_SAMPLE_ATMA_ERROR"); 
-		     //whoop	 XAU("whoopwhoop",tmp_str)
-		      STOPMSG("Janus stopped - initial atma error")
-		   }
-	    }
-
-		sprintf(tmp_cmd, "rsh %s",shimset);
+		//Now get the test sample in
+		sprintf(tmp_cmd, "ii");
 		Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
 		AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
-	    sprintf(tmp_cmd, "lock CD3CN");
-	    Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
-		XCMD(tmp_cmd)
-		Proc_err ( INFO_OPT,"ts_arg - %s",ts_arg);
-		sprintf(tmp_cmd,"janus_topshim_watchdog TOPSHIM_FAILED_%s %s",name, ts_arg);
-		Proc_err ( INFO_OPT,"***tmp_cmd - %s, ts_arg - %s",tmp_cmd,ts_arg);
-		XCMD(tmp_cmd);
-		if (AUERR<0)
+		if ( AUERR <0 )
 		{
-			//whoop	XAU("whoopwhoop",tmp_cmd);
+			sprintf(tmp_str, "INITIAL_II_ERROR"); 
+		Proc_err ( INFO_OPT,"%s",tmp_str);
+		//whoop	XAU("whoopwhoop",tmp_str)
+			STOPMSG("Janus stopped - initial ii error")
 		}
-		// keep first dataset with wobb curves in
-		IEXPNO;
-		//Ok, now to parse the interrupt file.
-        
-		while (fgets(line, sizeof(line), interrupt_file)) {
-        // Skip comments
-        if (strncmp(line, "!!", 2) == 0) {
-            continue; //exit out of while loop
-        }
-        // Remove newline if present
-        line[strcspn(line, "\n")] = 0;
-        // Initialize field count
-        int field_count = 0;
-        // Get first token
-        token = strtok(line, ",");
-        // Process all tokens
-        while (token != NULL && field_count < 3) {
-            // Remove leading/trailing whitespace
-            while (*token == ' ') token++;
-            char *end = token + strlen(token) - 1;
-            while (end > token && *end == ' ') end--;
-            *(end + 1) = 0;
-            
-            // Process based on field number
-            switch (field_count) {
-                case 0:
-                    number = atoi(token);
-                    break;
-                case 1:
-                    strncpy(field2, token, 255);
-                    field2[255] = '\0';
-                    break;
-                case 2:
-                    strncpy(field3, token, 255);
-                    field3[255] = '\0';
-                    break;
-            } //end of switch
-            field_count++;
-            token = strtok(NULL, ",");
-        } //end of token read while loop
-       sleep(number);
-    
-       if (strstr(field3, "shim") != NULL) {
+
+		sprintf(tmp_cmd, "sx %i", test_pos);
+		Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
+		AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+		if (strcmp(changer_ip, "NULL") != 0) {
+		sprintf(tmp_cmd,"wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", changer_ip);
+		system(tmp_cmd);
+		}
+		if ( AUERR <0 )
+		{
+			if (strcmp(changer_ip, "NULL") != 0) {
+			XAU("parse_sexpress_web","")
+			}
+			sprintf(tmp_str, "INTERRUPT_SAMPLE_SX_%i_ERROR",test_pos);
+			//whoop	XAU("whoopwhoop",tmp_str)
+		} else 
+		{
+			RPAR(test_parset, "all")
+			sleep(60);
+			sprintf(tmp_cmd, "atma storeWobb 700");
+			STOREPAR("RO",0)
+			if ( (global_atma_flag !=0) ) 
+			{
+			   Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
+			   AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+			if ( AUERR <0 )
+			{
+				sprintf(tmp_str, "INTERRUPT_TEST_SAMPLE_ATMA_ERROR"); 
+				//whoop	 XAU("whoopwhoop",tmp_str)
+				STOPMSG("Janus stopped - initial atma error")
+			}
+			}
+
+			sprintf(tmp_cmd, "rsh %s",shimset);
+			Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
+			AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+			sprintf(tmp_cmd, "lock CD3CN");
+			Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
+			XCMD(tmp_cmd)
+			Proc_err ( INFO_OPT,"ts_arg - %s",ts_arg);
+			sprintf(tmp_cmd,"janus_topshim_watchdog TOPSHIM_FAILED_%s %s",name, ts_arg);
+			Proc_err ( INFO_OPT,"***tmp_cmd - %s, ts_arg - %s",tmp_cmd,ts_arg);
+			XCMD(tmp_cmd);
+			if (AUERR<0)
+			{
+				//whoop	XAU("whoopwhoop",tmp_cmd);
+			}
+			// keep first dataset with wobb curves in
+			IEXPNO;
+			//Ok, now to parse the interrupt file.
+			
+			while (fgets(line, sizeof(line), interrupt_file)) {
+				// Skip comments
+				if (strncmp(line, "!!", 2) == 0) {
+					continue; //exit out of while loop
+				}
+				// Remove newline if present
+				line[strcspn(line, "\n")] = 0;
+				// Initialize field count
+				int field_count = 0;
+				// Get first token
+				token = strtok(line, ",");
+				// Process all tokens
+				while (token != NULL && field_count < 3) {
+					// Remove leading/trailing whitespace
+					while (*token == ' ') token++;
+					char *end = token + strlen(token) - 1;
+					while (end > token && *end == ' ') end--;
+					*(end + 1) = 0;
+					
+					// Process based on field number
+					switch (field_count) {
+						case 0:
+							number = atoi(token);
+							break;
+						case 1:
+							strncpy(field2, token, 255);
+							field2[255] = '\0';
+							break;
+						case 2:
+							strncpy(field3, token, 255);
+							field3[255] = '\0';
+							break;
+					} //end of switch
+					field_count++;
+					token = strtok(NULL, ",");
+				} //end of token read while loop
+		sleep(number);
+        #pragma region Deal with the contents of the field read in - ie run test
+        if (strstr(field3, "shim") != NULL) {
            sprintf(tmp_cmd,"janus_topshim_watchdog TOPSHIM_FAILED_%s %s",name, ts_arg);
            Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
 	       XCMD(tmp_cmd); 
-       }
+        }
        if (strstr(field2, "poise_1h") != NULL) {
           expno=expno+10;
           DATASET(dataset_name, expno, 1, diskunit, suser);
@@ -598,7 +582,7 @@ if (interrupt_file != NULL)
           AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
           XAU("hump_sino_test_b2_01",ts_arg)
        }
- 
+       #pragma endregion Deal with the contents of the field read in - ie run test
        loop++;
        } //end of reading interrupt.csv  while loop
    
@@ -628,8 +612,10 @@ XAU("parse_sexpress_web","") //test sample went in, parse the sx logs
 
 
 /****End of interrupt test sample routine******/
+#pragma endregion Check for interrupt file and run tests if present
 
-	/*------------------------------------------------*/
+   #pragma region Check Prodfile has read access (0 if it does) if it doesnt, skip the rest of the main jauns while loop
+/*------------------------------------------------*/
 	if ( access(prodfile,R_OK)!=0)
 	{
 		sleep( delaytime );
@@ -637,7 +623,10 @@ XAU("parse_sexpress_web","") //test sample went in, parse the sx logs
 		curloop++;
 		continue;
 	}
-	/*--- Reset the loop counter ---------------------*/
+#pragma endregion Check Prodfile has read access (0 if it does) if it doesnt, skip the rest of the main jauns while loop
+	
+   #pragma region Prodfile has R_OK==0 so read it in
+   /*--- Reset the loop counter ---------------------*/
 	curloop=1;
 	skipsample=0;
 	/*------------------------------------------------*/
@@ -654,7 +643,7 @@ XAU("parse_sexpress_web","") //test sample went in, parse the sx logs
 	/*------------------------------------------------*/
 
 	/*------------------------------------------------*/
-
+    #pragma region Handle if no data == NULL in prodfile
 	/*---Now extract the data from the line-----------*/
 	if ( file_data == NULL ) //what to do if no data from prod file
 	{
@@ -683,8 +672,11 @@ XAU("parse_sexpress_web","") //test sample went in, parse the sx logs
 		fclose( flog );
 		exit(1);
 	}
+	#pragma endregion Handle if no data == NULL in prodfile
+	
+	#pragma region Read data into variables
 	proderrcount=0;
-/*Now parse the prod file into the various variables*/
+    /*Now parse the prod file into the various variables*/
 
 	field = strtok( in_data, "," );
 	sscanf( field, "%d", &cpos );
@@ -712,8 +704,14 @@ XAU("parse_sexpress_web","") //test sample went in, parse the sx logs
 		}
 	field = strtok( NULL, ",");
 	}
+	STOREPAR("USERP5",comments);
+	Proc_err ( INFO_OPT,"***comments from prod is :- %s",comments);
+	//need to remove trailing NULL from comments for use elsewhere
+	comments[strlen(comments)-1]=NULL;
 
+    #pragma endregion Read data into variables
 
+	#pragma region Write variables to a log file
 	flog = fopen(logfile,"a+");
 	lt=time(NULL);
 	sprintf(expttime, ctime(&lt));
@@ -723,42 +721,45 @@ XAU("parse_sexpress_web","") //test sample went in, parse the sx logs
 	Proc_err ( INFO_OPT,"tmp_str",tmp_str);
 	fputs( tmp_str, flog);
 	fclose( flog );
-	/*CHECK*/
-/* DJH MOD Heres a good place to check whether the data already exists; ie, the submission software has crashed and hasn't incremented the V/Z no.*/
-/*remove comment block for production	*/
-sprintf( fidpath, "%s%s/%s/%d/fid", disk, user, tmp_fname, expno );
 
-if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
-{
-	Proc_err ( INFO_OPT,"%s",fidpath);
-	sprintf(tmp_str, "OVERWRITE_FID_ERROR_%i_%s", cpos,tmp_fname);
-	Proc_err ( INFO_OPT,"tmp_str",tmp_str);
-	XAU("whoopwhoop",tmp_str)
-//	XAU("whoopwhoop",cmd)
-	exit(1);
-}
-	/*need to remove trailing character from comments*/
-	STOREPAR("USERP5",comments);
-	Proc_err ( INFO_OPT,"***comments from prod is :- %s",comments);
-	comments[strlen(comments)-1]=NULL;
+	#pragma endregion Write variables to a log file
 
-/*END MOD*/
+	#pragma endregion Prodfile has R_OK==0 so read it in
+	
+   #pragma region Check is data is going to be overwritten - exit if it is
+   /* DJH MOD Heres a good place to check whether the data already exists; ie, the submission software has crashed and hasn't incremented the V/Z no.*/
+   /*remove comment block for production	*/
+   sprintf( fidpath, "%s%s/%s/%d/fid", disk, user, tmp_fname, expno );
 
-// Check "protocol" entry from prod file to see if this is a system test
-// and if so change cpos to 60
+   if( access( fidpath, R_OK ) == 0 ) // if there is a fid there
+   {
+	   Proc_err ( INFO_OPT,"%s",fidpath);
+	   sprintf(tmp_str, "OVERWRITE_FID_ERROR_%i_%s", cpos,tmp_fname);
+	   Proc_err ( INFO_OPT,"tmp_str",tmp_str);
+	   XAU("whoopwhoop",tmp_str)
+       //  XAU("whoopwhoop",cmd)
+	   exit(1);
+    }
+	#pragma endregion Check is data is going to be overwritten - exit if it is
 
-if ( strstr ( protocol, "POS60") != NULL )
-{
-	// found test sample string in protocol so set pos to 60
-	cpos=60;
-}
+   #pragma region NEEDS PATCHING Check protocol if it is a test position and if so put set that to be put into magnet
+   // Check "protocol" entry from prod file to see if this is a system test
+   // and if so change cpos to 60
 
-if ( strstr ( protocol, "POS59") != NULL )
-{
-	// found test sample string in protocol so set pos to 59
-	cpos=59;
-}
+   if ( strstr ( protocol, "POS60") != NULL )
+   {
+	   // found test sample string in protocol so set pos to 60
+	   cpos=60;
+   }
 
+	if ( strstr ( protocol, "POS59") != NULL )
+	{
+		// found test sample string in protocol so set pos to 59
+		cpos=59;
+	}
+    #pragma endregion NEEDS PATCHING Check protocol if it is a test position and if so put set that to be put into magnet
+   
+   #pragma region Put sample in the magnet and deal with errors
 	sprintf( tmp_cmd, "sx %d",cpos);
 	Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
 	AUERR=CPR_exec(tmp_cmd, WAIT_TERM);
@@ -815,7 +816,8 @@ if ( strstr ( protocol, "POS59") != NULL )
 	if (strcmp(changer_ip, "NULL") != 0) {
 	 XAU("parse_sexpress_web","") //lets parse any samplexpress log as we have the sample in now.
 	}
-/*ok, we have put the sample in the magnet; now run through its exps*/
+	#pragma endregion Put sample in the magnet and deal with errors
+   /*ok, we have put the sample in the magnet; now run through its exps*/
 	if (skipsample==0)
 	{
 		DATASET ( "junk", 10, 1, diskunit, suser)
@@ -823,6 +825,7 @@ if ( strstr ( protocol, "POS59") != NULL )
 		RPAR("PROTONRO","all")  //need a spinning parset
         ATMAflag=1; // default behaviour
 		STOREPAR( "SOLVENT", solvent)
+		#pragma region Read shimset in
 		sprintf(tmp_cmd, "rsh %s",shimset);
 		Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
         sprintf(tmp_str,"%s\n",tmp_cmd);
@@ -833,6 +836,8 @@ if ( strstr ( protocol, "POS59") != NULL )
 	       sprintf(tmp_str, "FAILED_TO_READ_SHIMS_%s_%i_%s",shimset, cpos, tmp_fname);
 	       XAU("whoopwhoop",tmp_str)
         }
+		#pragma endregion Read shimset in
+		#pragma region Lock solvent
 		sprintf(tmp_cmd, "lock %s",solvent);
 	    Proc_err ( INFO_OPT,"***tmp_cmd -%s",tmp_cmd);
         sprintf(tmp_str,"%s\n",tmp_cmd);
@@ -853,8 +858,10 @@ if ( strstr ( protocol, "POS59") != NULL )
 	     	      // XAU("whoopwhoop",tmp_str)
 		  sampleproblem=1;
         }
+		#pragma endregion Lock solvent
 	//	sprintf(tmp_cmd, "ROT");
 	//	AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
+	    #pragma region Check protocol for X nuclei & set ATMAflag
 		// new atma handling:
         sprintf(tmp_str,"protocol - %s, experiment - % s, ATMA\n",protocol,experiment);
         strcat(janusinfostring, tmp_str);
@@ -878,6 +885,8 @@ if ( strstr ( protocol, "POS59") != NULL )
             RPAR("janus-11b.bbf", "all") // need this to get 1H to tune
             ATMAflag=0;
         }
+		#pragma endregion Check protocol for X nuclei & set ATMAflag
+		#pragma region Check if experiment is not a 2H and  ATMAflag  appropriate
         if ( (strstr ( experiment, "2h") == NULL) && (strstr ( experiment, "2H") == NULL)) // So this means "the string 2h is not present AND the string 2H is not present"
 		//only do the below if its not 2H
 		{
@@ -898,7 +907,9 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 		       }
            }
 	    }
-        strcat(janusinfostring, "ROT\n");
+		#pragma endregion ~Check if experiment is not a 2H and ATMA if appropriate
+        #pragma region Rotate sample
+		strcat(janusinfostring, "ROT\n");
 		ROT
 		if ( AUERR <0 )
         {
@@ -908,56 +919,46 @@ with NMR service team about whether medium or thick wall tubes are more appropri
          strcat(janusinfostring, tmp_str);
 		 ROT
         }
+		#pragma endregion Rotate sample
+		//topshim has to be here, as we only want to do it once per sample, have to do atma each exp, or put more logic in.
 		
-//topshim has to be here, as we only want to do it once per sample, have to do atma each exp, or put more logic in.
- 
-// use topshim_watchdog to force timeout and to save topshim data in case of failure
-//NB janus_topshim_watchdog can take an option for an additional option to pass to topshim
-//should be called with janus_topshim_watchdog MESSAGE_NO_SPACES_OR DASHES ordmax=5
+		// use topshim_watchdog to force timeout and to save topshim data in case of failure
+		//NB janus_topshim_watchdog can take an option for an additional option to pass to topshim
+		//should be called with janus_topshim_watchdog MESSAGE_NO_SPACES_OR_DASHES ordmax=5
 
-//janus_topshim_watchdog should also take care of the whoopwhoop email
-
-sprintf(tmp_cmd,"janus_topshim_watchdog TOPSHIM_FAILED_%s_%i %s",tmp_fname,cpos,ts_arg);
-Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
-sprintf(tmp_str,"%s\n",tmp_cmd);
-strcat(janusinfostring, tmp_str);
-XCMD(tmp_cmd);
-if (AUERR<0)
-{
-	if (sampleproblem==1)
-	{
-		 XAU("whoopwhoop",tmp_cmd);
-		sprintf(tmp_str,"\n Failed to lock: check sample is clear, sample filling is >40mm, solvent is deuterated\n \
-		Solvent is listed as %s, if this is not as expected there is probably a rogue character in the Sample ID such as a comma.\n \
-		In this case resubmit with correct Sample ID- only letters, numbers, underscores, dashes and full stops allowed. \n \n", solvent);
-		strcat(sampleinfostring,tmp_str);
-	}
-    strcat(sampleinfostring,"Failed to shim: check spectrum quality - lineshape may be bad. Check sample is clear, check sample filling is >40mm, check for precipitate at the bottom.\n");
-    sampleproblem=1;
-}
-else
-{
-	if (sampleproblem==1)
-	{
-		sprintf(tmp_str,"\n Sample failed to lock, but shimmed OK: check spectrum is OK and shfts are sensible.\n \
-		Solvent is listed as %s, if this is not as expected there is probably a rogue character in the Sample ID such as a comma.\n \
-		In this case if necessary resubmit with correct Sample ID- only letters, numbers, underscores, dashes and full stops allowed", solvent);
-		strcat(sampleinfostring,tmp_str);
-	}
-}
-//old way of calling topshim below
-//CPR_exec("janus_topshim_watchdog",WAIT_TERM);
-
-//	      AUERR=CPR_exec("topshim convcomp",WAIT_TERM);
-/*  no error emails here
-       if ( AUERR <0 )
-        {
-	       sprintf(tmp_str, "TOPSHIM_FAILED_%i_%s",cpos, tmp_fname);
-	       XAU("whoopwhoop",tmp_str)
-        }
-  */
-
+		//janus_topshim_watchdog should also take care of the whoopwhoop email
+        #pragma region Shim the sample
+		sprintf(tmp_cmd,"janus_topshim_watchdog TOPSHIM_FAILED_%s_%i %s",tmp_fname,cpos,ts_arg);
+		Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
+		sprintf(tmp_str,"%s\n",tmp_cmd);
+		strcat(janusinfostring, tmp_str);
+		XCMD(tmp_cmd);
+		if (AUERR<0)
+		{
+			if (sampleproblem==1)
+			{
+				XAU("whoopwhoop",tmp_cmd);
+				sprintf(tmp_str,"\n Failed to lock: check sample is clear, sample filling is >40mm, solvent is deuterated\n \
+				Solvent is listed as %s, if this is not as expected there is probably a rogue character in the Sample ID such as a comma.\n \
+				In this case resubmit with correct Sample ID- only letters, numbers, underscores, dashes and full stops allowed. \n \n", solvent);
+				strcat(sampleinfostring,tmp_str);
+			}
+			strcat(sampleinfostring,"Failed to shim: check spectrum quality - lineshape may be bad. Check sample is clear, check sample filling is >40mm, check for precipitate at the bottom.\n");
+			sampleproblem=1;
+		}
+		else
+		{
+			if (sampleproblem==1)
+			{
+				sprintf(tmp_str,"\n Sample failed to lock, but shimmed OK: check spectrum is OK and shfts are sensible.\n \
+				Solvent is listed as %s, if this is not as expected there is probably a rogue character in the Sample ID such as a comma.\n \
+				In this case if necessary resubmit with correct Sample ID- only letters, numbers, underscores, dashes and full stops allowed", solvent);
+				strcat(sampleinfostring,tmp_str);
+			}
+		}
+		#pragma endregion Shim the sample
 		nexpt=10;
+		#pragma region Run through all the experiments from the prod file
 		while ((fgets( experiment, 155, fprod)!=NULL)&&(strlen(experiment)>2)) //this is slightly magic to me, but reads prod into experiment
 		{
 			experiment[strlen(experiment)-1]=NULL;
@@ -975,63 +976,62 @@ else
 			GETPROSOL //needed since paracon!
 
 	
-	if ( (strstr ( experiment, "2h") == NULL) && (strstr ( experiment, "2H") == NULL)) //so if its not 2h, we might tune
-	{
-       strcat(janusinfostring, "ROTOFF \n");
-	   ROTOFF
-	   if ( (strstr ( experiment, "janus-1h") == NULL) && (ATMAflag==1) && (global_atma_flag !=0) ) //strstr returns a pointer if a match
-	   {
-	       // stop spinning
-		   sprintf(tmp_cmd,"atma storewobb 700");
-           sprintf(tmp_str,"%s\n",tmp_cmd);
-           strcat(janusinfostring, tmp_str);
-           Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
-		   AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
-	       if ( AUERR <0 )
-		   {
-		       sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
-	           XAU("whoopwhoop",tmp_str)
-		       sampleproblem=1;
-			   strcat(sampleinfostring, "\n ATMA failed - does your sample have high ionic strength? \n Check \
-with NMR service team about whether medium or thick wall tubes are more appropriate for similar samples.");
+			if ( (strstr ( experiment, "2h") == NULL) && (strstr ( experiment, "2H") == NULL)) //so if its not 2h, we might tune
+			{
+				strcat(janusinfostring, "ROTOFF \n");
+				ROTOFF
+				if ( (strstr ( experiment, "janus-1h") == NULL) && (ATMAflag==1) && (global_atma_flag !=0) ) //strstr returns a pointer if a match
+				{
+					// stop spinning
+					sprintf(tmp_cmd,"atma storewobb 700");
+					sprintf(tmp_str,"%s\n",tmp_cmd);
+					strcat(janusinfostring, tmp_str);
+					Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
+					AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+					if ( AUERR <0 )
+					{
+						sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
+						XAU("whoopwhoop",tmp_str)
+						sampleproblem=1;
+						strcat(sampleinfostring, "\n ATMA failed - does your sample have high ionic strength? \n Check with NMR service team about whether medium or thick wall tubes are more appropriate for similar samples.");
 
-	       // STOPMSG(tmp_str)
-		    }
-		}
-	    else
-        { 
-           sprintf(tmp_str,"%s\n",tmp_cmd);
-           strcat(janusinfostring, "atma nowin selectnuc\n");
-           XCMD("atma nowin selectnuc")
-        }
-        strcat(janusinfostring, "ROT \n");
-	    ROT // does "ro acqu"
-    }
-	//Add a space to title here in 'w' mode to erase any guff
-	sprintf( titlefile, "%s%s/%s/%d/pdata/1/title", diskunit, user,tmp_fname, nexpt );
-	ftitle = fopen( titlefile, "w" ); 
-	fputs ( " ", ftitle );
-	fclose ( ftitle );
-	sprintf(tmp_cmd,"xaua");
-    sprintf(tmp_str,"%s\n",tmp_cmd);
-    strcat(janusinfostring, tmp_str);
-	Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
-    
-	XCMD("setdef ackn no"); //Lets see if this fixes the poise AU programs turning on the click away messages
-    AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
-    if ( AUERR <0 )
-    	{
-	       Show_status( "***Acquisition failed***" );
-	       fwarn = fopen(warnfile,"w");
-	       fputs( "Acquisition failed", fwarn);
-	       fclose( fwarn );
-	       flog = fopen(logfile,"a+");
-	       fputs( "ACQUISITION FAILED!\n", flog);
-	       fclose( flog );
-	       sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
-	       XAU("whoopwhoop",tmp_str)
-	       STOPMSG("XAUA Failed. Maybe check IPSO")
-    	}
+					// STOPMSG(tmp_str)
+					}
+				}
+				else
+				{ 
+				   sprintf(tmp_str,"%s\n",tmp_cmd);
+				   strcat(janusinfostring, "atma nowin selectnuc\n");
+				   XCMD("atma nowin selectnuc")
+				}
+				strcat(janusinfostring, "ROT \n");
+				ROT // does "ro acqu"
+			}
+		    //Add a space to title here in 'w' mode to erase any guff
+			sprintf( titlefile, "%s%s/%s/%d/pdata/1/title", diskunit, user,tmp_fname, nexpt );
+			ftitle = fopen( titlefile, "w" ); 
+			fputs ( " ", ftitle );
+			fclose ( ftitle );
+			sprintf(tmp_cmd,"xaua");
+			sprintf(tmp_str,"%s\n",tmp_cmd);
+			strcat(janusinfostring, tmp_str);
+			Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
+		
+			XCMD("setdef ackn no"); //Lets see if this fixes the poise AU programs turning on the click away messages
+			AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+			if ( AUERR <0 )
+			{
+				Show_status( "***Acquisition failed***" );
+				fwarn = fopen(warnfile,"w");
+				fputs( "Acquisition failed", fwarn);
+				fclose( fwarn );
+				flog = fopen(logfile,"a+");
+				fputs( "ACQUISITION FAILED!\n", flog);
+				fclose( flog );
+				sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
+				XAU("whoopwhoop",tmp_str)
+				STOPMSG("XAUA Failed. Maybe check IPSO")
+			}
 
 			lt=time(NULL);
 			sprintf(expttime, ctime(&lt));
@@ -1050,50 +1050,49 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 			fputs ( titletext, ftitle );
 			fclose ( ftitle );
 
-/*Now a mod by DJH to make a filename containing the sample name, without any 'rogue' characters', and poke that into USERP2. Set USERP1 to be the comments, if an email*/
+            /*Now a mod by DJH to make a filename containing the sample name, without any 'rogue' characters', and poke that into USERP2. Set USERP1 to be the comments, if an email*/
 
 			sprintf( samplename, "%s", oi );
 			for( i = 0; i < strlen(samplename); i++ )
-   			 {
-    				if( samplename[i] == '\\' || samplename[i] == '/' || samplename[i] == ':' || samplename[i] == '*' ||
-          				samplename[i] == '?' || samplename[i] == '\"' || samplename[i] == '<' || samplename[i] == '>' ||
-           				samplename[i]== '#' || samplename[i]=='$' || samplename[i]=='%' || samplename[i]=='^' || samplename[i]=='&' ||
-				samplename[i]=='=' || samplename[i]=='+' || samplename[i]==' ' ||
-          				samplename[i]=='(' || samplename[i]==')' || samplename[i]=='{' || samplename[i]=='}' || samplename[i]=='[' ||
-          				samplename[i]==']' || samplename[i]==';' || samplename[i]=='@' || samplename[i]=='~' || samplename[i]=='!' || samplename[i]=='`')
-     		 			{
-        					samplename[i] = '_';
-     		 			}
-   			 }
+			{
+				if( samplename[i] == '\\' || samplename[i] == '/' || samplename[i] == ':' || samplename[i] == '*' ||
+					samplename[i] == '?' || samplename[i] == '\"' || samplename[i] == '<' || samplename[i] == '>' ||
+					samplename[i]== '#' || samplename[i]=='$' || samplename[i]=='%' || samplename[i]=='^' || samplename[i]=='&' ||
+			samplename[i]=='=' || samplename[i]=='+' || samplename[i]==' ' ||
+					samplename[i]=='(' || samplename[i]==')' || samplename[i]=='{' || samplename[i]=='}' || samplename[i]=='[' ||
+					samplename[i]==']' || samplename[i]==';' || samplename[i]=='@' || samplename[i]=='~' || samplename[i]=='!' || samplename[i]=='`')
+					{
+						samplename[i] = '_';
+					}
+			}
    			 /*CHECK*/
-   			sprintf(snamefile,PROCPATH("samplename"));
-   	 		sname=fopen(snamefile,"w");
+			sprintf(snamefile,PROCPATH("samplename"));
+			sname=fopen(snamefile,"w");
 			fprintf(sname, "%s", samplename);
 			fclose(sname);
 			STOREPAR("USERP2", samplename);
 
-
-/*slight mod to XAUP command to allow it to finish before going on...*/
+			/*slight mod to XAUP command to allow it to finish before going on...*/
 			FETCHPAR ("AUNMP",&procau)
-// if splitx_au we need to run it
-            if(strcmp(procau,"janus_splitx_au")==0)
-            {
-                CPR_exec(procau,WAIT_TERM);
-            }
-            else
-            {
-            
+			// if splitx_au we need to run it
+			if(strcmp(procau,"janus_splitx_au")==0)
+			{
+				CPR_exec(procau,WAIT_TERM);
+			}
+			else
+			{
+			
 				if ( nexpt==10 )
-			    {
-			        //CPR_exec("xaup",WAIT_TERM);
-				    XCMD("service-def-proc") //lets see if this fixes the poise automated programs XAUP(proc_1d) trying to print.
-			    }
-            }
+				{
+					//CPR_exec("xaup",WAIT_TERM);
+					XCMD("service-def-proc") //lets see if this fixes the poise automated programs XAUP(proc_1d) trying to print.
+				}
+			}
 
-	/*if there's no email address in the comments file, set it to camnmr, useful for testing*/
-     /*the comments variable is read from the prod file.*/
-     /*email is a variable set at the start of this program to camnmr@gmail.com*/
-      STOREPAR("USERP5",comments);
+			/*if there's no email address in the comments file, set it to camnmr, useful for testing*/
+			/*the comments variable is read from the prod file.*/
+			/*email is a variable set at the start of this program to camnmr@gmail.com*/
+			STOREPAR("USERP5",comments);
 			if (strchr(comments,'@') == NULL)
 			{
 				sprintf(comments,"%s",email);
@@ -1105,14 +1104,14 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 			}
 
 			nexpt++;
-		}
+		} // of of while loop running through prod file
+        #pragma endregion Run through all the experiment from the prod file
 
-
-/*ok, now at end of this samples experiments; remove prod fie and tidy up*/
-
+    /*ok, now at end of this samples experiments; remove prod fie and tidy up*/
+        
 		fclose(fprod);
 		LastSample=FALSE;
-       
+		
 	   //copy topshim report
 
         strcpy(reportdest, ACQUPATH("topshim_report.txt"));
@@ -1145,72 +1144,77 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 		      sleep( delaytime );
 	        }
 
-/* Check for a pulsecal file in the root NAME directory, and if it's there check the P1 vs s P1*/
-sprintf(pulsecalfilename,"%s\\%s\\pulsecal",disk,name);
-if ((pulsecalfile = fopen(pulsecalfilename, "r")) != 0)
-{
+		/* Check for a pulsecal file in the root NAME directory, and if it's there check the P1 vs s P1*/
+		sprintf(pulsecalfilename,"%s\\%s\\pulsecal",disk,name);
+		if ((pulsecalfile = fopen(pulsecalfilename, "r")) != 0)
+		{
+			
+			if( fgets(pulsecalcontent,128,pulsecalfile) !=NULL)
+			{
+				sscanf(pulsecalcontent,"%f %f", &p1, &statusp1);
+				if (p1/statusp1 > 1.5)
+				{
+					sampleproblem=1;
+					sprintf(pulsecalerror,"\n Measured proton pulse %.2fus is more than 50%% longer than the reference pulse length %.2fus - data quality may be compromised.\n Does your sample have high ionic strength?\n \
+		Please talk to the NMR service team about whether medium or thick wall tubes are more suitable for similar samples. \n \n", p1, statusp1);
+					strcat(sampleinfostring,pulsecalerror);
+				}
+			} 
+		fclose(pulsecalfile);
+		} 
 	
-	if( fgets(pulsecalcontent,128,pulsecalfile) !=NULL)
-    {
-        sscanf(pulsecalcontent,"%f %f", &p1, &statusp1);
-        if (p1/statusp1 > 1.5)
-        {
-            sampleproblem=1;
-            sprintf(pulsecalerror,"\n Measured proton pulse %.2fus is more than 50%% longer than the reference pulse length %.2fus - data quality may be compromised.\n Does your sample have high ionic strength?\n \
-Please talk to the NMR service team about whether medium or thick wall tubes are more suitable for similar samples. \n \n", p1, statusp1);
-            strcat(sampleinfostring,pulsecalerror);
-        }
-    } 
-fclose(pulsecalfile);
-} 
+		// write out info file in current dataset for janus purposes, if necessary
+		if(sampleproblem==1)
+		{
+			strcat(sampleinfostring,"\n Please contact the NMR service team in case of any questions! \n nmr@ch.cam.ac.uk");
+			strcpy(sampleinfofile,ACQUPATH("SampleProblems.txt"));
+			sampleinfo = fopen (sampleinfofile,"w");
+			if (sampleinfo == NULL)
+			{
+				Proc_err(INFO_OPT, "Can't open %s to write sample problem info", sampleinfofile);
+			} else
+			{
+				fputs(sampleinfostring,sampleinfo);
+				fclose(sampleinfo);
+			}
 
-// write out info file in current dataset for janus purposes, if necessary
-if(sampleproblem==1)
-{
-    strcat(sampleinfostring,"\n Please contact the NMR service team in case of any questions! \n nmr@ch.cam.ac.uk");
-    strcpy(sampleinfofile,ACQUPATH("SampleProblems.txt"));
-    sampleinfo = fopen (sampleinfofile,"w");
-	if (sampleinfo == NULL)
-	{
-		Proc_err(INFO_OPT, "Can't open %s to write sample problem info", sampleinfofile);
-	} else
-	{
-		fputs(sampleinfostring,sampleinfo);
-		fclose(sampleinfo);
-	}
-
-}
-//write janusinfostring out.
-strcpy(janusinfofile,ACQUPATH("/../janus_commands_run.txt"));
-janusinfo = fopen (janusinfofile,"w");
-if (janusinfo == NULL)
-{
-    Proc_err(INFO_OPT, "Can't open %s to write janus command/status - %s", janusinfofile);
-} else
-{
-    fputs(janusinfostring,janusinfo);
-    fclose(janusinfo);
-}
-//janus-email needs the location of the defaults file to be passed to it
-sprintf(tmp_cmd,"janus-email %s",def_file);
-XCMD(tmp_cmd);
-
-//CPR_exec("janus-email",WAIT_TERM);
-XCMD("setdef ackn no");
-//OK, now copy the topshim data to the dataset somewhere
-#ifdef	HAS_WINDOWS_FEATURES
+		}
 		
-// sprintf(tmp_cmd,"robocopy C:\\Bruker\\TopSpin3.6.4\\data\\topshimData /S %s\\topshimData_%s_%d", ACQUPATH(0),name, expno);  
-    sprintf( tmp_cmd, "7za a  %s\\topshimData_%s_%i.zip C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData\\ > nul",ACQUPATH(0),name,expno,ts_major,ts_minor,ts_patch);
-	
-#else 
-    sprintf(tmp_cmd,"cp -rp /opt/topspin3.6.4/data/topshimData %s/topshimData_%s_%d", AQCUPATH(0),name, expno);
-#endif
+		//write janusinfostring out.
+		strcpy(janusinfofile,ACQUPATH("/../janus_commands_run.txt"));
+		janusinfo = fopen (janusinfofile,"w");
+		if (janusinfo == NULL)
+		{
+			Proc_err(INFO_OPT, "Can't open %s to write janus command/status - %s", janusinfofile);
+		} else
+		{
+			fputs(janusinfostring,janusinfo);
+			fclose(janusinfo);
+		}
+		
+		//janus-email needs the location of the defaults file to be passed to it
+		sprintf(tmp_cmd,"janus-email %s",def_file);
+		XCMD(tmp_cmd);
 
-Proc_err(INFO_OPT,tmp_cmd);
-system(tmp_cmd);  
+		//CPR_exec("janus-email",WAIT_TERM);
+		XCMD("setdef ackn no");
+		#pragma endregion We have run all the experiments - now finish up
+	}/*End while*/
+	#pragma region We have run all the experiments - now finish up
+	//OK, now copy the topshim data to the dataset somewhere
+	#ifdef	HAS_WINDOWS_FEATURES
+			
+	// sprintf(tmp_cmd,"robocopy C:\\Bruker\\TopSpin3.6.4\\data\\topshimData /S %s\\topshimData_%s_%d", ACQUPATH(0),name, expno);  
+		sprintf( tmp_cmd, "7za a  %s\\topshimData_%s_%i.zip C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData\\ > nul",ACQUPATH(0),name,expno,ts_major,ts_minor,ts_patch);
+		
+	#else 
+		sprintf(tmp_cmd,"cp -rp /opt/topspin3.6.4/data/topshimData %s/topshimData_%s_%d", AQCUPATH(0),name, expno);
+	#endif
 
-/*Now remove the prodfile */
+	Proc_err(INFO_OPT,tmp_cmd);
+	system(tmp_cmd);  
+
+	/*Now remove the prodfile */
 
 		sprintf( tmp_str, "del %s", prodfiletxt );
 		fbat = fopen(batcmd, "w");
@@ -1224,7 +1228,7 @@ system(tmp_cmd);
 		fputs( "Sample completed...\n", flog);
 		fclose( flog );
 	}
-
+	
 	if (skipsample!=0)
 	{
 		fclose( fprod );
@@ -1236,16 +1240,18 @@ system(tmp_cmd);
 		system(batcmd);
 		//sprintf( tmp_str, "del %s", prodfile );
 		//sprintf( tmp_str, "rm %s", prodfile );
-//why is the below here? needs tidying
-	//	system( tmp_str );
+        //why is the below here? needs tidying
+	    //	system( tmp_str );
 		Proc_err ( INFO_OPT, "by running command %s", tmp_str);
 		Proc_err ( INFO_OPT, "deleted prod file?");
 		flog = fopen(logfile,"a+");
 		fputs("Sample missing and skipped...\n", flog);
 		fclose( flog );
 	}
+	#pragma endregion We have run all the experiments - now finish up
 	Proc_err ( INFO_OPT, "Waiting for sample...");
-}/*End while*/
+       
+#pragma endregion MAIN JANUS WHILE finish != true LOOP
 Show_status( "Program aborted!" );
 QUIT
 

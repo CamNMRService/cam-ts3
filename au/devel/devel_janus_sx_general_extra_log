@@ -80,7 +80,7 @@ And added pulse length check and associated message in SampleProblems*/
 - cragganmore
 */
 
-
+#pragma region Get Instrument name
 char    instrum_name[255]="spect";
 char    probe_name[255]="unknown";
 
@@ -101,7 +101,9 @@ ZG_OVERWRITE
 FETCHPARS("INSTRUM", instrum_name)
 FETCHPARS("PROBHD", probe_name)
 /*end of get instrument and probe name*/
+#pragma endregion Get Instrument Name
 
+#pragma region Set Instrument Global Variables
 /*initial gobal variables to change for each instrument*/
    char def_file[PATH_MAX]="d:/chemist/defaults-csv.txt"; //janus software defaults
    char interrupt_file_path[PATH_MAX]="d:\\chemist\\interrupt.csv";//location of interrupt file, if it exist, contains a list of commands
@@ -184,7 +186,9 @@ Proc_err ( INFO_OPT,"***ts_arg - %s",ts_arg);
 Proc_err ( INFO_OPT,"***global_atma_flag - %i",global_atma_flag);
 
 //STOPMSG("global defaults set!");
+#pragma endregion Set Instrument Global Variables
 
+#pragma region Set Other Global Variables
 float   delaytime=1.0;
 int     expt=1, curloop=1, cpos, specno, jexpt, jsolv, finish=FALSE,i=1;
 int     LastSample, FatalError=FALSE, nexpt, parmo, proderrcount, sthou;
@@ -261,9 +265,9 @@ char testdata[256];
 
 GETCURDATA;
 proc_or_not=1;
+#pragma endregion Set Other Global Variables
 
-
-
+#pragma region Read Defaults From File
 Proc_err ( INFO_OPT, "Starting program");
 sleep(delaytime);
 XCMD("setdef ackn no");
@@ -348,6 +352,7 @@ Proc_err ( INFO_OPT,"%s",waitfile);
 Proc_err ( INFO_OPT,"%s",protfile);
 Proc_err ( INFO_OPT,"%s",logfile);
 
+#pragma endregion Read Defaults From File
 
 //If januskillfile is there, start iconnmr and abort
 if ( access(januskillfile,F_OK) == 0) // file found

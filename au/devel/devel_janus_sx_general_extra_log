@@ -371,7 +371,6 @@ Proc_err ( INFO_OPT, "Waiting for sample...");
 /*the below becomes the place the data is stored. Done in the old skool path format for compatibility*/
 sprintf(diskunit,"%sdata\\%s\\nmr\\",diskunit,suser);
 
-
  //**Get on with normal Janus routine */
 
 finish = FALSE;
@@ -382,9 +381,6 @@ while ( finish != TRUE ) //THE MAIN LOOP
 /*	Proc_err ( INFO_OPT, "Waiting for sample...Loop(%d)",curloop); */
 
 	sleep(10);
-
-
-//Ok, now try to interrupt
 
    #pragma region Check for januskillfile - stop janus - start iconnnmr
    if ( access(januskillfile,F_OK) == 0) // file found
@@ -818,6 +814,7 @@ XAU("parse_sexpress_web","") //test sample went in, parse the sx logs
 	}
 	#pragma endregion Put sample in the magnet and deal with errors
    /*ok, we have put the sample in the magnet; now run through its exps*/
+   
 	if (skipsample==0)
 	{
 		DATASET ( "junk", 10, 1, diskunit, suser)
@@ -859,8 +856,6 @@ XAU("parse_sexpress_web","") //test sample went in, parse the sx logs
 		  sampleproblem=1;
         }
 		#pragma endregion Lock solvent
-	//	sprintf(tmp_cmd, "ROT");
-	//	AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
 	    #pragma region Check protocol for X nuclei & set ATMAflag
 		// new atma handling:
         sprintf(tmp_str,"protocol - %s, experiment - % s, ATMA\n",protocol,experiment);
@@ -1058,7 +1053,7 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 				if( samplename[i] == '\\' || samplename[i] == '/' || samplename[i] == ':' || samplename[i] == '*' ||
 					samplename[i] == '?' || samplename[i] == '\"' || samplename[i] == '<' || samplename[i] == '>' ||
 					samplename[i]== '#' || samplename[i]=='$' || samplename[i]=='%' || samplename[i]=='^' || samplename[i]=='&' ||
-			samplename[i]=='=' || samplename[i]=='+' || samplename[i]==' ' ||
+			        samplename[i]=='=' || samplename[i]=='+' || samplename[i]==' ' ||
 					samplename[i]=='(' || samplename[i]==')' || samplename[i]=='{' || samplename[i]=='}' || samplename[i]=='[' ||
 					samplename[i]==']' || samplename[i]==';' || samplename[i]=='@' || samplename[i]=='~' || samplename[i]=='!' || samplename[i]=='`')
 					{
@@ -1082,7 +1077,7 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 			else
 			{
 			
-				if ( nexpt==10 )
+			if ( nexpt==10 )
 				{
 					//CPR_exec("xaup",WAIT_TERM);
 					XCMD("service-def-proc") //lets see if this fixes the poise automated programs XAUP(proc_1d) trying to print.
@@ -1107,8 +1102,9 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 		} // of of while loop running through prod file
         #pragma endregion Run through all the experiment from the prod file
 
-    /*ok, now at end of this samples experiments; remove prod fie and tidy up*/
-        
+        #pragma region Finished experiments in prod file - now tidy up		
+        /*ok, now at end of this samples experiments; remove prod fie and tidy up*/
+   
 		fclose(fprod);
 		LastSample=FALSE;
 		
@@ -1118,32 +1114,32 @@ with NMR service team about whether medium or thick wall tubes are more appropri
         sprintf(reportsource, "%s/%s/topshim_report.txt", PathXWinNMRProg(), PathXWinNMRCurDir());
         dircp(reportsource, reportdest);
 		if ( access(waitfile,R_OK)!=0)
-	        {
-	           /*PUT_SAMPLE_BACK*/
-	           /*remove comment on next line for production*/
-		      AUERR=CPR_exec("sx ej",WAIT_TERM);
-			  if (strcmp(changer_ip, "NULL") != 0) {
-                 sprintf(tmp_cmd,"wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", changer_ip);
-			     system(tmp_cmd); //lets download the webpage with the samplejet status on
-			  }
-		     
-		      if ( AUERR <0 )
-		        {
+		{
+			/*PUT_SAMPLE_BACK*/
+			/*remove comment on next line for production*/
+			AUERR=CPR_exec("sx ej",WAIT_TERM);
+			if (strcmp(changer_ip, "NULL") != 0) {
+				sprintf(tmp_cmd,"wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", changer_ip);
+				system(tmp_cmd); //lets download the webpage with the samplejet status on
+			}
+			
+			if ( AUERR <0 )
+			{
 				if (strcmp(changer_ip, "NULL") != 0) {
-	               XAU("parse_sexpress_web","")//lets parse the log 
+					XAU("parse_sexpress_web","")//lets parse the log 
 				}
-		      	 sprintf(tmp_cmd, "SX_EJECT_ERROR_%i_%s", cpos, tmp_fname);
-	             XAU("whoopwhoop",tmp_cmd)
-	             STOPMSG(tmp_cmd)
-		         }
-			  if (strcmp(changer_ip, "NULL") != 0) 
-			  {
-	             XAU("parse_sexpress_web","")//lets parse the log
-			  } 
-	          LastSample=TRUE;
-		      sleep( delaytime );
-	        }
-
+				sprintf(tmp_cmd, "SX_EJECT_ERROR_%i_%s", cpos, tmp_fname);
+				XAU("whoopwhoop",tmp_cmd)
+				STOPMSG(tmp_cmd)
+			}
+			if (strcmp(changer_ip, "NULL") != 0) 
+			{
+				XAU("parse_sexpress_web","")//lets parse the log
+			} 
+			LastSample=TRUE;
+			sleep( delaytime );
+		}
+		
 		/* Check for a pulsecal file in the root NAME directory, and if it's there check the P1 vs s P1*/
 		sprintf(pulsecalfilename,"%s\\%s\\pulsecal",disk,name);
 		if ((pulsecalfile = fopen(pulsecalfilename, "r")) != 0)
@@ -1162,7 +1158,7 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 			} 
 		fclose(pulsecalfile);
 		} 
-	
+		
 		// write out info file in current dataset for janus purposes, if necessary
 		if(sampleproblem==1)
 		{
@@ -1191,25 +1187,19 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 			fputs(janusinfostring,janusinfo);
 			fclose(janusinfo);
 		}
-		
+		#pragma endregion Finished experiments in prod file - now tidy up
 		//janus-email needs the location of the defaults file to be passed to it
 		sprintf(tmp_cmd,"janus-email %s",def_file);
 		XCMD(tmp_cmd);
 
 		//CPR_exec("janus-email",WAIT_TERM);
 		XCMD("setdef ackn no");
-		#pragma endregion We have run all the experiments - now finish up
-	}/*End while*/
-	#pragma region We have run all the experiments - now finish up
-	//OK, now copy the topshim data to the dataset somewhere
-	#ifdef	HAS_WINDOWS_FEATURES
-			
+	}
+	
+
 	// sprintf(tmp_cmd,"robocopy C:\\Bruker\\TopSpin3.6.4\\data\\topshimData /S %s\\topshimData_%s_%d", ACQUPATH(0),name, expno);  
-		sprintf( tmp_cmd, "7za a  %s\\topshimData_%s_%i.zip C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData\\ > nul",ACQUPATH(0),name,expno,ts_major,ts_minor,ts_patch);
+	sprintf( tmp_cmd, "7za a  %s\\topshimData_%s_%i.zip C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData\\ > nul",ACQUPATH(0),name,expno,ts_major,ts_minor,ts_patch);
 		
-	#else 
-		sprintf(tmp_cmd,"cp -rp /opt/topspin3.6.4/data/topshimData %s/topshimData_%s_%d", AQCUPATH(0),name, expno);
-	#endif
 
 	Proc_err(INFO_OPT,tmp_cmd);
 	system(tmp_cmd);  
@@ -1228,7 +1218,7 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 		fputs( "Sample completed...\n", flog);
 		fclose( flog );
 	}
-	
+
 	if (skipsample!=0)
 	{
 		fclose( fprod );
@@ -1248,7 +1238,7 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 		fputs("Sample missing and skipped...\n", flog);
 		fclose( flog );
 	}
-	#pragma endregion We have run all the experiments - now finish up
+
 	Proc_err ( INFO_OPT, "Waiting for sample...");
        
 #pragma endregion MAIN JANUS WHILE finish != true LOOP

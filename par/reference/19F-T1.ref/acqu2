@@ -1,0 +1,24 @@
+##TITLE= Parameter file, TopSpin 3.6.4
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 2	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= ss3220
+$$ 2024-12-11 23:35:04.316 +0000  chemist@Glenfairn
+$$ C:\Bruker\cam-ts3\par\reference/19F-T1.ref/acqu2
+$$ process C:\Bruker\TopSpin3.6.4\prog\mod\edparproc.exe
+##$ACQT0= 0
+##$BF1= 500.214
+##$FnILOOP= 0
+##$FnMODE= 1
+##$NUC1= <1H>
+##$NusJSP= 0
+##$NusT2= 1
+##$NusTD= 0
+##$O1= 2501.07
+##$ProjAngle= 0
+##$SFO1= 500.21650107
+##$SW= 9.99670407139769
+##$SW_h= 5000.51633282678
+##$TD= 7
+##END=

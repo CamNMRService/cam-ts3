@@ -1,0 +1,557 @@
+/* This Au program is designed to perform a humpcal on a defined peak, then a sino on this peak*/
+/*devel_hump_sino_test*/
+/* djh35, June 22*/
+/*now takes LB and AQ for sino*/
+/*V4 - Add disclaimer*/
+/*Use STOPMSG to exit more usefully*/
+/* add version check to reading/creating defaults file*/
+/*hump_sino_test_b1_01 - beta 1
+Verbose and disclaimer set to 0 to automation use
+b1_01 -fix apbk logic
+b1_01 - add nucleus, sino_pp and instrument name to output
+b1_01 - try and fail more gracefully if humpcal fails - use -1.0 in values to indicate
+b1_01 - Nov 22 - Make NOT verbose mode  not pop error box up that can stall automation
+B1_02 -  April 2023 - moved half width spec to defaults file and writing of shim files if spec passed
+         July 2023 - added topshim before acq - kept same verion number for simplicity
+                  and humpcal-djh which has MAXI set to 100000 due to bug
+         Aug 2024 - remove the ABORT in case of failed humpcal, to avoid complete crash of automation. It will just not write out hump info in this case
+B2_01 - Jan/Feb 2025 make results file only have NO spaces in c can have trouble opening them
+        Added code to deal with out of spec results - send an email
+      - added commandline option, which is an extra argument to pass to topshim;
+*/
+
+
+#include <stdio.h>
+#include <time.h>
+
+//Set some variables for below
+char defaults_file_name[1024];
+char ts_arg[32]="";
+int ts_major = GetTsVersionMajor();
+int ts_minor = GetTsVersionMinor();
+int ts_patch = GetTsVersionPl();
+char* str_probe;
+char probe_id[40];
+char probe_nickname[40];
+char results_path[PATH_MAX];
+char tmp_str[PATH_MAX];
+
+
+/*!!!!VARIABLES THAT NEED TO BE SET!!!!*/
+/********************************/
+char repo_name[40]="cam-ts"; //Set this to be the name of your repository
+//Handlly print out what its doing as it goes along. Can change to output diff levels of verbosity. (in future)
+//verbose == 0 is no output
+//disclaimer == 0 suppress disclaimer message
+
+int verbose = 0;
+int disclaimer = 0;
+//Version - the version of this AU program, to ensure defaults files used are of the correct version
+char au_version[8] ="b2_01";
+//set aqtest = 0 to issue aquisition commands to the spectrometer
+int aqtest = 0; // !=0 == test mode ==0 for aquire mode
+char default_au[40]="service_zg_efp"; //au program to aquire and process results. Set to default for default method within poise.
+//This acts as an overide for poise, for it to use default method, default need to be saved in the service_poise_19f_p1_defaults.txt AND in this variable
+char param_set_name[40]="PROTON";
+char param[40] = "p1";
+char p_program[40] = "zg";
+/*!!!!END OF VARIABLES THAT NEED TO BE SET!!!!*/
+
+if (verbose ==1) {
+  Proc_err(INFO_OPT,"ts_major is %i \n minor %i \n patch %i",ts_major, ts_minor, ts_patch);
+  }
+
+
+
+if (disclaimer == 1){
+i1 = Proc_err(QUESTION_OPT,"THIS PROGRAM IS DISTRIBUTED IN THE HOPE THAT IT WILL BE USEFUL, \
+WITHOUT ANY WARRANTY.\n IT IS PROVIDED 'AS IS' WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED,\n \
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTY OF FITNESS FOR A PARTICULAR PURPOSE.\n \
+THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU.\n \
+SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING,\n \
+REPAIR OR CORRECTION.\n\n \
+IN NO EVENT WILL THE AUTHOR BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL,\n \
+SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY\n \
+TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING RENDERED\n \
+INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM\n \
+TO OPERATE WITH ANY OTHER PROGRAMS), EVEN IF THE AUTHOR HAS BEEN ADVISED OF THE \n \
+POSSIBILITY OF SUCH DAMAGES.\n\n \
+Click OK to agree and continue. \nClick cancel to disagree.\n\n \
+Remove this warning by setting disclaimer to 0 in the AU program.");
+
+   if ( i1 == ERR_CANCEL )
+   {
+      ABORT
+   }
+  else {
+  }
+} //end of disclaimer
+
+if (verbose ==1) {
+   XCMD("setdef ackn ok");
+   XCMD("setdef stdout on");
+   XCMD("setdef stderr on");
+} else {
+   XCMD("setdef ackn no");
+   XCMD("setdef stdout off");
+   XCMD("setdef stderr off");
+}
+
+#ifdef HAS_WINDOWS_FEATURES
+   sprintf(defaults_file_name,"C:\\Bruker\\%s%i\\poise\\service_hump_sino_1h_defaults_%s",repo_name,ts_major,au_version);
+   // Also need a place for the results to go. I'm thinking same place as the helium log will suit us.
+   if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
+    	sprintf(results_path,"C:\\Bruker\\diskless\\prog\\logfiles\\");
+   }
+   else{
+      sprintf( results_path, "%s\\logfiles\\", PathXWinNMRProg() );
+   }
+#else //Not actually checked this on linux... We have no linux xpectrometers
+ 		sprintf(defaults_file_name,"/opt/%s%i/poise/service_hump_sino_1h_defaults_%s",repo_name,ts_major,au_version);
+ 		if ( (ts_major==3) && (ts_minor>5) && (ts_patch>3) ) {
+    	sprintf(results_path,"/opt/diskless/prog/logfiles/");
+   }
+   else{
+      sprintf( results_path, "%s/logfiles/", PathXWinNMRProg() );
+   }
+#endif
+float max_deviation = 10.0;
+
+//Variable definitions
+int i; //loop counter
+FILE *results_file = NULL;
+FILE *defaults_file = NULL;
+FILE *title_file = NULL;
+FILE *hump_file = NULL;
+
+char results_file_name[PATH_MAX];
+char title_path_name[PATH_MAX];
+char hump_file_path[PATH_MAX];
+char defaults_content[1024]="";
+char title_text[1024]="";
+char results_content[1024]="";
+char instrum_name[40]="";
+char probe_name[PATH_MAX];
+char probe_name_trunc[PATH_MAX];
+char *field;
+char *defaults_content_ptr;
+char *end_ptr;
+char sw[40];
+char o1p[40];
+char aq[40];
+char ns[40];
+char f1p[40];
+char f2p[40];
+char rg[40];
+char d1s[40];
+char hs_l[40]; // hump 0.11% spec read from defaults_file
+char hs_h[40]; // hump 0.55% spec read from defaults_file
+char hs_w[40]; // hump 50% width spec read from defaults file
+char hs_l_obs[40];
+char hs_h_obs[40];
+char hs_w_obs[40];
+char pc_lb[40];
+char pc_hb[40];
+char tol[40];
+char cost_function[40];
+char gui_cmd[PATH_MAX];
+char poise_au[PATH_MAX];
+char poise_status[40];
+char sino_lb[40];
+char sino_pp[40]; //pulse program for sino
+
+char sig_f1[40];
+char sig_f2[40];
+char noise_f1[40];
+char noise_f2[40];
+char noise_width[40];
+char nuc[8];
+
+double sw_double;
+double o1_ppm_double;
+double o1_hz_double;
+double sfo1;
+double aq_double;
+double hs_l_double;
+double hs_h_double;
+double hs_w_double;
+float hs_l_obs_float=-1.0;
+float hs_h_obs_float=-1.0;
+float hs_w_obs_float=-1.0;
+float sino_lb_float;
+double f1p_double;
+double f2p_double;
+double deviation;
+double sig_f1_double;
+double sig_f2_double;
+double noise_f1_double;
+double noise_f2_double;
+double noise_width_double;
+
+float rg_float=1.1;
+float d1_float;
+float sino_result=1.0;
+int pc_lb_int;
+int pc_hb_int;
+int ns_int;
+int ro_int=0;
+int err = -1;
+
+char  datestamp[256];
+
+
+//either called without an argument, or with
+if (i_argc == 3) {
+   sprintf(ts_arg,"%s",i_argv[2]);
+ }
+ else {
+   sprintf(ts_arg," ");
+ }
+RPAR(param_set_name, "all")
+STOREPAR("PULPROG", p_program)
+GETPROSOL
+GETCURDATA
+SETCURDATA
+STOREPAR("NS", 1)
+STOREPAR("DS", 0)
+ZG
+//The instrum and probhd doesn't seem to be filled in until some aquisition has been done... at least on laphroiag
+FETCHPARS("INSTRUM", instrum_name)
+FETCHPARS("PROBHD", probe_name)
+
+CALL_PROBESERVER("probe_client getParams getInstalledProbe", str_probe);
+//str_probe will be a big long string, separated by commas - we only need the first csv entry
+//some magic from au_sst1ir
+(void) sscanf(str_probe, "%[^,]%*c%*[^,]%*c%*[^,]%*c%*[^,]%*c%[^,]%*s", probe_id, probe_nickname);
+sprintf(probe_name_trunc,"%s",probe_id);
+
+if (verbose ==1) {
+    Proc_err(DEF_ERR_OPT,"instrum_name is - %s \n probe_name - %s \n probe_name_trunc - %s", instrum_name,probe_name,probe_name_trunc);
+}
+
+sprintf( defaults_file_name,"%s-%s-%s.txt",defaults_file_name,instrum_name,probe_name_trunc);
+//Get the defaults content
+
+//c won't open the file is spaces are in it it seems.
+char *ptr = defaults_file_name;
+    
+    while (*ptr != '\0') {
+        if (*ptr == ' ') {
+            *ptr = '_';
+        }
+        ptr++;
+    }
+  
+
+defaults_file = fopen (defaults_file_name,"r");
+if (defaults_file == NULL)
+{
+	Proc_err(DEF_ERR_OPT,"can't open file - %s", defaults_file_name);
+  err = Proc_err(QUESTION_OPT,"The file %s might not exist, would you like to try and create a default one?", defaults_file_name);
+  if (err == 0) {
+    sprintf(tmp_str,"create_hump_sino_file_%s",au_version);
+    XAU(tmp_str,defaults_file_name)
+   // XAU("create_hump_sino_file_V4",defaults_file_name)
+    sprintf( tmp_str,"Defaults file created - %s \n You need to return to origianl dataset out of this junk one.",defaults_file_name);
+    if (verbose !=1) {
+       XCMD("setdef ackn ok");
+       XCMD("setdef stdout on");
+       XCMD("setdef stderr on");
+    }
+    STOPMSG(tmp_str)
+    //exit(1);
+  }
+  else {
+      if (verbose !=1) {
+      XCMD("setdef ackn ok");
+      XCMD("setdef stdout on");
+      XCMD("setdef stderr on");
+      }
+	  exit(1);
+  }
+}
+else
+{
+	rewind(defaults_file);
+//	defaults_content_ptr = fgets(defaults_content, 1024, defaults_file); // don't think I need this.
+  fgets(defaults_content, 1024, defaults_file);
+	if (verbose == 1) {
+	    Proc_err(DEF_ERR_OPT,"defaults file name = %s", defaults_file_name);
+      Proc_err(DEF_ERR_OPT,"defaults content is  = %s", defaults_content);
+  } else {}
+	fclose(defaults_file);
+}
+//OK, we have the defaults file content, now to parse it.
+//The format should be  :-
+//sw, o1p, aq      ,rg,  d1s,  ns, hs_w halfwidth spec, hs_l 10% hump spec, hs_h 50% hump spec,sig_f1, sig_f2, noise_f1, noise_f2, noise_width, , sino_lb sino_pp
+//4.0, 5.3, 16,     32.0,1.0, 4, 0.8, 15,                  8,                ,5.6,    5.4,    10.0,     8.0,      0.2,        ,zg30
+//Below taen from the janus_sx au program. The first line at least is always slightly magic to me.
+field = strtok(defaults_content, ",");
+strcpy (sw,field);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &o1p);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &aq);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &rg);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &d1s);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &ns);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &hs_w);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &hs_l);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &hs_h);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &sig_f1);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &sig_f2);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &noise_f1);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &noise_f2);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &noise_width);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &sino_lb);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &sino_pp);
+
+
+
+
+//Ok, now have to convert those strings to float/doubles
+sw_double = strtod(sw, &end_ptr);
+o1_ppm_double = strtod(o1p, &end_ptr);
+aq_double = strtod(aq, &end_ptr);
+f2p_double = strtod(f2p, &end_ptr);
+rg_float = strtof(rg, &end_ptr);
+d1_float = strtof(d1s, &end_ptr);
+ns_int = atoi(ns);
+hs_l_double = strtod(hs_l, &end_ptr);
+hs_h_double = strtod(hs_h, &end_ptr);
+hs_w_double = strtod(hs_w, &end_ptr);
+f1p_double = o1_ppm_double+(sw_double/2);
+f2p_double = o1_ppm_double-(sw_double/2);
+sig_f1_double = strtod(sig_f1,&end_ptr);
+sig_f2_double = strtod(sig_f2,&end_ptr);
+noise_f1_double = strtod(noise_f1, &end_ptr);
+noise_f2_double = strtod(noise_f2, &end_ptr);
+noise_width_double = strtod(noise_width, &end_ptr);
+sino_lb_float = strtof(sino_lb, &end_ptr);
+
+
+if (verbose == 1) {
+//show text to number conversion values
+    Proc_err(DEF_ERR_OPT, "Poise pulse cal :- \n sw ppm %f \n o1p ppm %f \n f1p ppm %f \n f2p ppm %f \n rg is %f \n d1 is %f\n aq is %f\n", sw_double, o1_ppm_double, f1p_double, f2p_double, rg_float, d1_float, aq_double);
+    Proc_err(DEF_ERR_OPT, "Sino parameters :- \n signal f1 %.2f \n signal f2 %.2f \n noise f1 %.2f \n noise f2 %.2f \n noise_width %.2f \n sino lb %.2f \n sino pp %s",sig_f1_double,sig_f2_double,noise_f1_double,noise_f2_double,noise_width_double,sino_lb_float,sino_pp);
+} else {}
+
+RPAR(param_set_name, "all")
+STOREPAR("PULPROG", p_program)
+GETPROSOL
+STOREPAR("NS", ns_int)
+STOREPAR("DS", 0)
+STOREPAR("D 1", d1_float)
+STOREPAR("SW", sw_double)
+STOREPAR("F1P", f1p_double )
+STOREPAR("F2P", f2p_double )
+STOREPARS("F1P", f1p_double )
+STOREPARS("F2P", f2p_double )
+STOREPAR("O1P", o1_ppm_double)
+//STOREPAR("RG", rg_float) // This just does not work on my reproc mac... not sure about a spect - seems ok.
+STOREPAR("RG", rg_float)
+
+
+
+//Only do aquisition if not in test mode.
+if (aqtest == 0)
+{
+    sprintf(gui_cmd,"sendgui AQ %f",aq_double);
+    XCMD(gui_cmd)
+    ATMA
+    // add topshim here with full tunea - maybe important if it's run all the otehr tests first
+    // and also we want to make sure it adjusts XZ/YZ
+    sprintf(tmp_str,"topshim plotall tunea convcomp %s",ts_arg);
+    XCMD(tmp_str); 
+    //XCMD("topshim plotall tunea convcomp")
+    ZG
+    if ( (ts_major=4) && (ts_minor>=0) && (ts_patch>=6) ) {
+    FP
+    XCMD("sendgui apbk -apk0")
+    XCMD("sendgui apbk -bo" )
+    }
+     else{
+        FP
+        APK
+        ABS
+        }
+}
+
+//XAU("djh-humpcal","") //I've found sometimes I've had to change parameters and roll my own humpcal
+XAU("humpcal-djh","")
+//Get the humpcal results
+strcpy(hump_file_path, PROCPATH("humpcal.txt"));
+
+if ( ( hump_file = fopen (hump_file_path, "r") ) == NULL)
+{
+	Proc_err(INFO_OPT, "Could not open file %s Maybe Humpcal failed?", hump_file_path);
+	//ABORT - Don';'t do this as it crashes the automation! ("xau failed - maybe check ipso")
+}
+else{
+   fscanf(hump_file, "%f", &hs_h_obs_float);
+   fscanf(hump_file, "%f", &hs_l_obs_float);
+   fscanf(hump_file, "%f", &hs_w_obs_float);
+   fclose(hump_file);
+
+   sprintf( title_path_name, "%s/title", PROCPATH(0) );
+   sprintf( title_text, " hump 0.11 = %.2f \n hump 0.55 = %.2f \n hump 50pc = %.2f", hs_l_obs_float, hs_h_obs_float, hs_w_obs_float );
+   
+   if (verbose == 1) {
+   	   Proc_err(DEF_ERR_OPT, "Writing %s into file %s", title_text, title_path_name);
+   }
+
+   if (( title_file = fopen( title_path_name, "w")) == 0)
+   {
+   		Proc_err(DEF_ERR_OPT, "Cannot open title file for writing:\n%s", title_path_name);
+   	   //debating wether to put the Proc_err below th if... But don't want automation to stop.
+         if (verbose !=1) {
+            XCMD("setdef ackn ok");
+            XCMD("setdef stdout on");
+            XCMD("setdef stderr on");
+         }
+         exit(1);
+   } else
+   {
+      fputs( title_text, title_file);
+      fclose(title_file);
+   }
+}
+//end of trying to write hump result to title file
+
+// check against spec and write out shim files if OK
+
+if ( (hs_w_obs_float<hs_w_double) && (hs_l_obs_float<hs_l_double) && (hs_h_obs_float<hs_h_double))
+{
+    //spec is passed => write out shim file
+    /* get current time for timestamping the copy - can't use experiment name here because kiosk */
+
+    // time variables for writing dated shimfile 
+    time_t now_s, dtime_s;		  	/* seconds since 1970 */
+    struct tm *now;			      /* structure with year, month etc. */
+    now_s=time(NULL);
+    now = localtime(&now_s);
+    sprintf(datestamp, "current_%d_%d_%d_%d_%d_%d", now->tm_year+1900, 1+now->tm_mon, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
+    WSH(datestamp) 
+    WSH("current")
+}
+else {//out of spec
+  sprintf(tmp_str,"HUMP_OUT_OF_SPEC_%s_%s_HS_W_%.1f_HS_L_%.1f_HS_H_%.1f",instrum_name,nuc,hs_w_obs_float,hs_l_obs_float,hs_h_obs_float);
+  XAU("whoopwhoop",tmp_str)
+}
+
+//Now lets gets the sino... We'll need a bit of a different sweep width
+IEXPNO
+SETCURDATA
+VIEWDATA_SAMEWIN
+RPAR(param_set_name, "all")
+STOREPAR("PULPROG", sino_pp)
+GETPROSOL
+STOREPAR("NS", 1)
+STOREPAR("DS", 0)
+//STOREPAR("RG", rg_float) // This just does not work on my reproc mac... not sure about a spect - seems ok.
+STOREPAR("RG", rg_float)
+STOREPAR("LB", sino_lb_float)
+
+ZG
+EFP
+if ( (ts_major=4) && (ts_minor>=0) && (ts_patch>=6) ) {
+   XCMD("sendgui apbk")
+   XCMD("sendgui apbk -bo" )
+}
+else{
+    APK
+    ABS
+}
+
+FETCHPARS("RO",&ro_int)
+
+//next, write the result to a file. Maybe to title also.
+//Then compare p1_opt to p1_init (should be unchanged from prosol. Report if too different.
+sprintf(gui_cmd, "sendgui sinocal %.2f %.2f %.2f %.2f %.2f", sig_f1_double,sig_f2_double,noise_f1_double,noise_f2_double,noise_width_double);
+XCMD(gui_cmd)
+SINO
+
+FETCHPARS("SINO", &sino_result)
+sprintf( title_path_name, "%s/title", PROCPATH(0) );
+sprintf( title_text, "sino is - %.2f ", sino_result );
+if (verbose == 1) {
+	   Proc_err(DEF_ERR_OPT, "Writing %s into file %s", title_text, title_path_name);
+}
+
+
+if (( title_file = fopen( title_path_name, "w")) == 0)
+{
+		Proc_err(DEF_ERR_OPT, "Cannot open title file for writing:\n%s", title_path_name);
+   	//debating wether to put the Proc_err below th if... But don't want automation to stop.
+      if (verbose !=1) {
+         XCMD("setdef ackn ok");
+         XCMD("setdef stdout on");
+         XCMD("setdef stderr on");
+      }
+      exit(1);
+} else
+{
+   fputs( title_text, title_file);
+   fclose(title_file);
+}
+
+
+
+//now print to results file
+
+//sprintf( results_file_name, "%s/logfiles/%s-%s-%s", PathXWinNMRProg(), instrum_name,probe_name_trunc,method_name );
+sprintf( results_file_name, "%s%s-%s-hump-sino", results_path, instrum_name,probe_name_trunc );
+//what the time mr wolf?
+time_t rawtime;
+
+
+
+
+struct tm *info;
+char time_buffer[80];
+time(&rawtime);
+
+info = localtime( &rawtime);
+strftime(time_buffer , 80, "%x,%X", info);
+FETCHPAR("NUC1",&nuc);
+sprintf( results_content, "%s,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%i,%s,%s,%s,%s\n",time_buffer,hs_h_obs_float,hs_l_obs_float,hs_w_obs_float,sino_result,sino_lb_float,rg_float,ro_int, name, nuc,sino_pp,instrum_name);
+if (verbose == 1) {
+	   Proc_err(DEF_ERR_OPT, "Writing %s into file %s", results_content, results_file_name);
+}
+//now write to results file in append mode.
+if ((results_file = fopen(results_file_name, "a+")) == 0)
+{
+	Proc_err(DEF_ERR_OPT, "Cannot open file for writing:\n%s", results_file_name);
+	//debating wether to put the Proc_err below th if... But don't want automation to stop.
+      if (verbose !=1) {
+         XCMD("setdef ackn ok");
+         XCMD("setdef stdout on");
+         XCMD("setdef stderr on");
+      }
+   exit(1);
+} else {
+     fputs(results_content, results_file);
+     fclose(results_file);
+}
+
+if (verbose !=1) {
+   XCMD("setdef ackn ok");
+   XCMD("setdef stdout on");
+   XCMD("setdef stderr on");
+}
+
+
+QUIT

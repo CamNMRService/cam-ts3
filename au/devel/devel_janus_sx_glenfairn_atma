@@ -689,8 +689,12 @@ TUNE(tunefile)
 		// stop spinning
 		ROTOFF
         sprintf(tmp_cmd,"atma storewobb 700");
-		AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
-	    if ( AUERR <0 )
+    if ( (strstr ( experiment, "2h") == NULL) && (strstr ( experiment, "2H") == NULL))
+		{
+			// no 2H or 2h in experiment name so do atma
+			AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+		}
+	  if ( AUERR <0 )
 		  {
 		     sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
 	       XAU("whoopwhoop",tmp_str)

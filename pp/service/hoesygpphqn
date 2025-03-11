@@ -1,0 +1,120 @@
+;hoesygpph
+;avance-version (13/08/06)
+;2D heteronuclear NOE
+;phase sensitive
+;
+;C. Yu & G. Levy, J. Am. Chem. Soc. 106, 6533 (1984)
+;
+;With QNP switching commands 
+; nb these are harmless if no switch present
+;No decoupling
+
+;$CLASS=HighRes
+;$DIM=2D
+;$TYPE=
+;$SUBTYPE=
+;$COMMENT=
+
+
+#include <Avance.incl>
+#include <Delay.incl>
+#include <Grad.incl>
+
+
+"p2=p1*2"
+"p4=p3*2"
+"d12=20u"
+
+
+"d0=3u"
+
+"in0=inf1/2"
+
+
+"DELTA=d0*2+p2+8u"
+#ifdef purge
+"TAU=d8-p16-d16-54u-p3-p3-d12"
+#else
+"TAU=d8-p16-d16-54u-d12"
+#endif
+
+1 ze
+  d11 QNP_X
+2 d1  
+#ifdef pregrad
+  50u UNBLKGRAD
+  p16:gp1*-1
+  d16
+  d16
+# endif
+3 d12 pl2:f2
+  d12 SWITO_F
+  (p3 ph1):f2
+  DELTA
+  (p4 ph5):f2
+  4u SWITO_H
+  d0
+  p2 ph3
+  d0
+  4u SWITO_F
+  (p3 ph2):f2
+  50u UNBLKGRAD
+  TAU 
+  p16:gp1
+  d16 SWITO_F
+  4u BLKGRAD
+#ifdef purge
+  (p3 ph6):f2
+  (p3 ph7):f2
+#endif
+  d12 SWITO_H
+  p1 ph4
+  go=2 ph31 
+  d1 mc #0 to 2 
+     F1PH(calph(ph1, +90) & calph(ph5, +90), caldel(d0, +in0))
+exit
+
+
+ph1=0
+ph2=0 2
+ph3=0 0 2 2
+ph4=0 0 0 0 1 1 1 1 2 2 2 2 3 3 3 3
+ph5=1
+ph6=0
+ph7=0 0 2 2
+ph31=0 2 0 2 1 3 1 3 2 0 2 0 3 1 3 1
+
+
+;pl1 : f1 channel - power level for pulse (default)
+;pl2 : f2 channel - power level for pulse (default)
+;pl12: f2 channel - power level for CPD/BB decoupling
+;p1 : f1 channel -  90 degree high power pulse
+;p2 : f1 channel - 180 degree high power pulse
+;p3 : f2 channel -  90 degree high power pulse
+;p4 : f2 channel - 180 degree high power pulse
+;p16: homospoil/gradient pulse                       [1 msec]
+;d0 : incremented delay (2D)                         [3 usec]
+;d1 : relaxation delay; 1-5 * T1
+;d8 : mixing time
+;d12: delay for power switching                      [20 usec]
+;d16: delay for homospoil/gradient recovery
+;inf1: 1/SW = 2 * DW
+;in0: 1/(2 * SW) = DW
+;nd0: 2
+;ns: 8 * n
+;ds: 32
+;td1: number of experiments
+;FnMODE: States-TPPI, TPPI, States or QSEQ
+;cpd2: decoupling according to sequence defined by cpdprg2
+;pcpd2: f2 channel - 90 degree pulse for decoupling sequence
+
+
+;for z-only gradients:
+;gpz1: 30%
+
+;use gradient files:
+;gpnam1: SMSQ10.100
+
+
+
+;$Id: hoesygpph,v 1.1.2.2 2013/08/30 09:43:35 ber Exp $

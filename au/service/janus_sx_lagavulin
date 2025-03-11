@@ -92,11 +92,13 @@ Removed various debugging messages
 Now lock errors only do anythign if shim also fails
 Added note about solvent to SampleProblems file and warnign to check for strange characters
 And added pulse length check and associated message in SAmpleProblems*/
+/*Oct 2024 - added a variable to set options for topshim_watchdog*/
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 /*instrument dependent variables!!!!!!*/
-char def_file[255]="f:/chemist/defaults-csv.txt"; //janus software defaults
+char    def_file[255]="f:/chemist/defaults-csv.txt"; //janus software defaults
 char    sxpress_ip[16]="149.236.99.34"; //lagavulins is joined via a serial connection...
-int test_pos = 60;
+char    ts_opt[32]="ordmax=5";
+int     test_pos = 60;
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
 float   delaytime=1.0;
@@ -114,9 +116,10 @@ char    archpath[80], archive[20], jcmd_str[1024], outpath[1024];
 char    janusup[80], expttime[40], exptsfile[80], protocol[80];
 char    sxcmd[255], gradshim[20], comments[1024], command[1024], snostr[1024], tmp_cmd[1024];
 char    statusstr[1024], awmfile[80],tmparchpath[1024],fidpath[1024],procau[1024];
-char	proclist[1024],procinstruct[1024];
+char  	proclist[1024],procinstruct[1024];
 char    reportdest[PATH_MAX];
 char    reportsource[PATH_MAX];
+
 
 char    sampleinfofile[PATH_MAX];
 char    sampleinfostring[2048];// just make one string, and write to file at the end so that we aer in the dataset from which janus email runs
@@ -325,7 +328,7 @@ if(strcmp(cmd,"skiptest"))
 		sprintf(tmp_cmd, "rsh %s",shimset);
 		AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 		XCMD("lock CD3CN")
-		sprintf(tmp_str,"janus_topshim_watchdog TOPSHIM_FAILED_%s_%i",tmp_fname,cpos);
+		sprintf(tmp_str,"janus_topshim_watchdog TOPSHIM_FAILED_%s_%i %s",tmp_fname,cpos, ts_opt);
 		XCMD(tmp_str);
 		if (AUERR<0)
 		{
@@ -576,7 +579,7 @@ if ( strstr ( protocol, "POS59") != NULL )
 
 //janus_topshim_watchdog should also take care of the whoopwhoop email
 
-sprintf(tmp_str,"janus_topshim_watchdog TOPSHIM_FAILED_%s_%i",tmp_fname,cpos);
+sprintf(tmp_str,"janus_topshim_watchdog TOPSHIM_FAILED_%s_%i %s",tmp_fname,cpos, ts_opt);
 XCMD(tmp_str);
 if (AUERR<0)
 {

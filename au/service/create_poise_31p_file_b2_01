@@ -1,0 +1,179 @@
+/*Used to create a default file*/
+/*create_poise_31p_file_b1_02*/
+/*beta 1 - remove verbose and disclaimer toggle for automation use/
+
+/*add version info to defaults file*/
+/*  For V3+ :- */
+//For CH2Cl2 as an example, the files should contain the numbers (see create_poise_NUC):-
+// 12,5.4,6,5,8,8,50,60,0.2,minabsint,default,8,10,8,0.2,10s,1,zg30//
+//which are :-
+//SW,O1P,P1 peak ppm UB,P1 peak ppm  HB,RG,T1,Poise P1 % LB,Poise P1 % UB,Poise Tolerance,Poise calc method,poise aquisistion/processing program,Sino T!,Sino noise  F1,Sino Noise F2,Sino noise width,Sino AQ time,Sino LB,Sino PP
+/*V4 - add disclaimer*/
+
+/*add version info to defaults file*/
+/*bug with sinocal?
+change sinopulprog to zgpg not ig30
+change noise region to -20 to -30 and larger width seems less variable
+*/
+/*b2_01 - add sino spec
+make defaults filename not have spaces in - hard to open those files
+*/
+
+
+char defaults_file_name[PATH_MAX];
+char param_set_name[PATH_MAX]="P31CPD";
+char junk_name[PATH_MAX]="junk";
+char file_text[1024]="";
+char tmp_str[1024]="";
+char instrum_name[40];
+char probe_name[PATH_MAX];
+char probe_name_trunc[PATH_MAX];
+char probe_id[40];
+char probe_nickname[40];
+char* str_probe;
+FILE *defaults_file = NULL;
+
+double sw_double = 30;
+double o1_ppm_double = -17.0;
+double f1p_double = -16.0;
+double f2p_double = -18.0;
+float rg_float = 64.0;
+
+float d1_float = 10.0;
+int pc_lb_int = 50;
+int pc_hb_int = 60;
+float tol_float = 0.2;
+char cost_function[40]="minabsint";
+char poise_au[40]="default";
+
+float t1_float=20.0;
+double noise_f1_double = -20.0;
+double noise_f2_double = -30.0;
+double noise_width_double=5.0;
+char sino_aq[8]="10s";
+float sino_lb_float=3.0;
+float sino_spec=1.0;
+
+char sino_pp[40]="zgpg";
+
+/**** Variables to be set  *******/
+char repo_name[40]="cam-ts"; //set to name of your repository
+char au_version[8]="b2_01";
+/****                     *******/
+
+int ts_major = GetTsVersionMajor();
+int ts_minor = GetTsVersionMinor();
+int ts_patch = GetTsVersionPl();
+
+int disclaimer = 0;
+int verbose = 0;
+
+if(disclaimer == 1){
+i1 = Proc_err(QUESTION_OPT,"THIS PROGRAM IS DISTRIBUTED IN THE HOPE THAT IT WILL BE USEFUL, \
+WITHOUT ANY WARRANTY.\n IT IS PROVIDED 'AS IS' WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED,\n \
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTY OF FITNESS FOR A PARTICULAR PURPOSE.\n \
+THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU.\n \
+SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING,\n \
+REPAIR OR CORRECTION.\n\n \
+IN NO EVENT WILL THE AUTHOR BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL,\n \
+SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY\n \
+TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING RENDERED\n \
+INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM\n \
+TO OPERATE WITH ANY OTHER PROGRAMS), EVEN IF THE AUTHOR HAS BEEN ADVISED OF THE \n \
+POSSIBILITY OF SUCH DAMAGES.\n\n \
+Click OK to agree and continue. \nClick cancel to disagree.\n\n \
+Remove this warning by setting disclaimer to 0 in the AU program.");
+
+   if ( i1 == ERR_CANCEL )
+  {
+      ABORT
+   }
+  else {
+  }
+} //end of disclaimer
+
+GETCURDATA
+
+#ifdef HAS_WINDOWS_FEATURES
+   sprintf(defaults_file_name,"C:\\Bruker\\%s%i\\poise\\service_poise_31p_p1_defaults_%s",repo_name,ts_major,au_version);
+#else //Not actually checked this on linux... We have no linux solution-state spectrometers
+ 		sprintf(defaults_file_name,"/opt/%s%i/poise/service_poise_1h_31p_defaults_%s",repo_name,ts_major,au_version);
+#endif
+
+if (i_argc == 3 ) {
+	sprintf(defaults_file_name,"%s",i_argv[2]); //lets just assume first argument is a filename
+} else
+  {
+		//Ask if want to determine what it should be - can't do that unless run an expt.
+    DATASET(junk_name,1 ,procno, disk, user)
+		GETCURDATA
+		RPAR(param_set_name, "all")
+		GETPROSOL
+		GETCURDATA
+		SETCURDATA
+    VIEWDATA_SAMEWIN
+		STOREPAR("NS", 1)
+		STOREPAR("DS", 0)
+		STOREPAR("P 1", 1.0)
+		ZG_OVERWRITE
+		FETCHPARS("INSTRUM", instrum_name)
+    FETCHPARS("PROBHD", probe_name)
+
+    CALL_PROBESERVER("probe_client getParams getInstalledProbe", str_probe);
+
+    //some magic from au_sst1ir
+    (void) sscanf(str_probe, "%[^,]%*c%*[^,]%*c%*[^,]%*c%*[^,]%*c%[^,]%*s", probe_id, probe_nickname);
+    sprintf(probe_name_trunc,"%s",probe_id);
+    sprintf( defaults_file_name,"%s-%s-%s.txt",defaults_file_name,instrum_name,probe_name_trunc);
+
+  }
+  //maybe make it ask for values here
+
+//write out above defined values to defaults file
+
+///c won't open the file is spaces are in it it seems.
+char *ptr = defaults_file_name;
+    
+    while (*ptr != '\0') {
+        if (*ptr == ' ') {
+            *ptr = '_';
+        }
+        ptr++;
+    }
+
+if (verbose ==1) {
+    Proc_err(DEF_ERR_OPT,"defaults filename - %s",defaults_file_name); 
+}
+
+defaults_file = fopen (defaults_file_name,"w");
+if (defaults_file == NULL) 
+{
+     Proc_err(DEF_ERR_OPT,"can't open file - %s", defaults_file_name);
+     exit(1);
+}
+else 
+{
+     GETFLOAT("Please enter the specification for 31P sino:", sino_spec)
+     if (verbose ==1) {
+        Proc_err(DEF_ERR_OPT,"31P sino spec set to -- %2.f",sino_spec); 
+     }
+     sprintf(file_text,"%.2f,%.2f,%.2f,%.2f,%.2f," ,sw_double,o1_ppm_double,f1p_double,f2p_double,rg_float);
+     //fputs(file_text,defaults_file);
+     sprintf(tmp_str,"%.2f,%i,%i,%.2f,%s,",d1_float,pc_lb_int,pc_hb_int,tol_float,cost_function);
+     strcat(file_text,tmp_str);
+     //fputs(file_text,defaults_file);
+     sprintf(tmp_str,"%s,%.2f,%.2f,%.2f,%.2f,",poise_au,t1_float,noise_f1_double,noise_f2_double,noise_width_double);
+     strcat(file_text,tmp_str);
+     //fputs(file_text,defaults_file);
+     sprintf(tmp_str,"%s,%.2f,%s,", sino_aq,sino_lb_float,sino_pp);
+     strcat(file_text,tmp_str);
+     sprintf(tmp_str,"%.2f",sino_spec);
+     strcat(file_text,tmp_str);
+     if (verbose ==1) {
+        Proc_err(DEF_ERR_OPT,"defaults file text - %s",file_text); 
+     }
+     fputs(file_text,defaults_file);
+     fclose(defaults_file);
+}
+
+QUIT

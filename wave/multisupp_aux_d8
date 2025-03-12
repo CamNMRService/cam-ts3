@@ -2,6 +2,16 @@
 ##JCAMPDX= 5.0
 ##DATATYPE= Parameter Values
 ##ORIGIN= Bruker BioSpin GmbH
+<<<<<<< HEAD
+##OWNER= nmrservice
+$$ 2024-12-09 18:39:31.177 +0000  nmrservice@aberlour
+$$ C:/Bruker/cam-ts3/wave/multisupp_aux_d8
+$$ process C:\Bruker\TopSpin3.7.0\prog\mod\xwinshape.exe
+##MINX= 4.66586300
+##MAXX= 100.00000000
+##MINY= 0.00000000
+##MAXY= 339.24524700
+=======
 ##OWNER= agh58
 $$ 2024-12-10 17:42:13.893 +0000  agh58@auchentoshan
 $$ C:/Bruker/cam-ts3/wave/multisupp_aux_d8
@@ -10,6 +20,7 @@ $$ process C:\Bruker\TopSpin3.6.4\prog\mod\xwinshape.exe
 ##MAXX= 1.#QNAN000
 ##MINY= 1.#QNAN000
 ##MAXY= 1.#QNAN000
+>>>>>>> 0b60954434cf48b69ad1070c44beeb3efba65144
 ##$SHAPE_ADDPHASE= 0
 ##$SHAPE_AMP= 1.#QNAN
 ##$SHAPE_BWFAC= 0
@@ -40,9 +51,15 @@ $$ process C:\Bruker\TopSpin3.6.4\prog\mod\xwinshape.exe
 ##$SHAPE_NPOINTS= 10
 ##$SHAPE_OFFS= <1 0>
 ##$SHAPE_OFFSCOEFF= (0..95)
+<<<<<<< HEAD
+-834.8739 0 100 -2047.7306 0 100 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+=======
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+>>>>>>> 0b60954434cf48b69ad1070c44beeb3efba65144
 ##$SHAPE_PARAMETER= <>
 ##$SHAPE_REPHFAC= 0
 ##$SHAPE_RES= 0
@@ -479,6 +496,33 @@ yes yes yes yes yes yes yes yes yes yes yes yes yes yes yes yes
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 ##NPOINTS= 10
 ##XYPOINTS= (XY..XY)
+<<<<<<< HEAD
+25.529091, 290.942959
+10.553958, 311.697713
+4.665863, 152.452466
+19.777509, 173.207220
+34.430622, 193.961973
+48.285479, 214.716726
+61.020861, 235.471480
+72.341504, 256.226233
+81.984944, 276.980986
+89.727605, 297.735740
+95.389974, 318.490493
+98.840775, 339.245247
+100.000000, 0.000000
+98.840775, 20.754753
+95.389974, 41.509507
+89.727605, 62.264260
+81.984944, 83.019014
+72.341504, 103.773767
+61.020861, 124.528520
+48.285479, 145.283274
+34.430622, 166.038027
+19.777509, 186.792780
+4.665863, 207.547534
+10.553958, 48.302287
+25.529091, 69.057041
+=======
 1.#QNAN0, 1.#QNAN0
 1.#QNAN0, 1.#QNAN0
 1.#QNAN0, 1.#QNAN0
@@ -489,4 +533,5 @@ yes yes yes yes yes yes yes yes yes yes yes yes yes yes yes yes
 1.#QNAN0, 1.#QNAN0
 1.#QNAN0, 1.#QNAN0
 1.#QNAN0, 1.#QNAN0
+>>>>>>> 0b60954434cf48b69ad1070c44beeb3efba65144
 ##END=

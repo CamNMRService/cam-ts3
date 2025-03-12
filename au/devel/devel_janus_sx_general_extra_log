@@ -756,6 +756,7 @@ XAU("parse_sexpress_web","") //test sample went in, parse the sx logs
     #pragma endregion NEEDS PATCHING Check protocol if it is a test position and if so put set that to be put into magnet
    
    #pragma region Put sample in the magnet and deal with errors
+
 	sprintf( tmp_cmd, "sx %d",cpos);
 	Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
 	AUERR=CPR_exec(tmp_cmd, WAIT_TERM);
@@ -814,7 +815,6 @@ XAU("parse_sexpress_web","") //test sample went in, parse the sx logs
 	}
 	#pragma endregion Put sample in the magnet and deal with errors
    /*ok, we have put the sample in the magnet; now run through its exps*/
-   
 	if (skipsample==0)
 	{
 		DATASET ( "junk", 10, 1, diskunit, suser)
@@ -1240,8 +1240,7 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 		fclose( flog );
 	}
 	#pragma endregion If we have skipped the sample, remove the prodfile
-	Proc_err ( INFO_OPT, "Waiting for sample...");
-       
+	Proc_err ( INFO_OPT, "Waiting for sample...");      
 } //end of main janus while loop
 #pragma endregion MAIN JANUS WHILE finish != true LOOP
 

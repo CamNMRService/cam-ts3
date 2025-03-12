@@ -1099,9 +1099,7 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 			nexpt++;
 		} // of of while loop running through prod file
         #pragma endregion Run through all the experiment from the prod file
-		
         /*ok, now at end of this samples experiments; remove prod fie and tidy up*/
-   
 		fclose(fprod);
 		LastSample=FALSE;
 		#pragma region Copy topshim report
@@ -1191,19 +1189,19 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 			fclose(janusinfo);
 		}
 		#pragma endregion Write out janusinfosfile with commands run 
-
+        #pragma region Email results
 		//janus-email needs the location of the defaults file to be passed to it
 		sprintf(tmp_cmd,"janus-email %s",def_file);
 		XCMD(tmp_cmd);
 		//CPR_exec("janus-email",WAIT_TERM);
+		#pragma endregion Email results
 		XCMD("setdef ackn no");
-	
-	#pragma region Zip topshimData directory into expno
+	    #pragma region Zip topshimData directory into expno
 	sprintf( tmp_cmd, "7za a  %s\\topshimData_%s_%i.zip C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData\\ > nul",ACQUPATH(0),name,expno,ts_major,ts_minor,ts_patch);
 	Proc_err(INFO_OPT,tmp_cmd);
 	system(tmp_cmd); 
 	#pragma endregion Zip topshimData directory into expno 
-    #pragma region Remove the prodfile
+        #pragma region Remove the prodfile
     /*Now remove the prodfile */
 	sprintf( tmp_str, "del %s", prodfiletxt );
 	fbat = fopen(batcmd, "w");
@@ -1214,13 +1212,14 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 	//sprintf( tmp_str, "rm %s", prodfile );
 	//system( tmp_str );
 	#pragma endregion Remove the prodfile
-	#pragma region Write the janus logfile
+	    #pragma region Write the janus logfile
 	flog = fopen(logfile,"a+");
 	fputs( "Sample completed...\n", flog);
 	fclose( flog );
 	#pragma endregion Write the janus logfile
-	#pragma region If we have skipped the sample, remove the prodfile
+	
 	}
+	#pragma region If we have skipped the sample, remove the prodfile
 	if (skipsample!=0)
     {
 		fclose( fprod );

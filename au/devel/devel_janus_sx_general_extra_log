@@ -1194,16 +1194,16 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 	system(tmp_cmd); 
 	#pragma endregion Zip topshimData directory into expno 
         #pragma region Remove the prodfile
-    /*Now remove the prodfile */
-	sprintf( tmp_str, "del %s", prodfiletxt );
-	fbat = fopen(batcmd, "w");
-	fputs( tmp_str,fbat);
-	fclose(fbat);
-	system(batcmd);
-	//sprintf( tmp_str, "del %s", prodfile );
-	//sprintf( tmp_str, "rm %s", prodfile );
-	//system( tmp_str );
-	#pragma endregion Remove the prodfile
+        /*Now remove the prodfile */
+	    sprintf( tmp_str, "del %s", prodfiletxt );
+	    fbat = fopen(batcmd, "w");
+	    fputs( tmp_str,fbat);
+	    fclose(fbat);
+	    system(batcmd);
+	    //sprintf( tmp_str, "del %s", prodfile );
+	    //sprintf( tmp_str, "rm %s", prodfile );
+	    //system( tmp_str );
+	    #pragma endregion Remove the prodfile
 	    #pragma region Write the janus logfile
 	    flog = fopen(logfile,"a+");
 	    fputs( "Sample completed...\n", flog);

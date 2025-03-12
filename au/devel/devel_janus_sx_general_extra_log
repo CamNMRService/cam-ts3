@@ -378,10 +378,8 @@ proderrcount=0;
 while ( finish != TRUE ) //THE MAIN LOOP
 {
 	/*--- Let everyone know that the loop is running -*/
-/*	Proc_err ( INFO_OPT, "Waiting for sample...Loop(%d)",curloop); */
-
-	sleep(10);
-
+   Proc_err ( INFO_OPT, "Waiting for sample...");
+   sleep(10);
    #pragma region Check for januskillfile - stop janus - start iconnnmr
    if ( access(januskillfile,F_OK) == 0) // file found
    {
@@ -393,7 +391,6 @@ while ( finish != TRUE ) //THE MAIN LOOP
    }
 
    #pragma endregion Check for januskillfile - stop janus - start iconnnmr
-
    #pragma region Check for interrupt file and run tests if present
    //****Interrupt code********/
    FILE *interrupt_file;
@@ -609,7 +606,6 @@ XAU("parse_sexpress_web","") //test sample went in, parse the sx logs
 
 /****End of interrupt test sample routine******/
 #pragma endregion Check for interrupt file and run tests if present
-
    #pragma region Check Prodfile has read access (0 if it does) if it doesnt, skip the rest of the main jauns while loop
 /*------------------------------------------------*/
 	if ( access(prodfile,R_OK)!=0)
@@ -620,7 +616,6 @@ XAU("parse_sexpress_web","") //test sample went in, parse the sx logs
 		continue;
 	}
 #pragma endregion Check Prodfile has read access (0 if it does) if it doesnt, skip the rest of the main jauns while loop
-	
    #pragma region Prodfile has R_OK==0 so read it in
    /*--- Reset the loop counter ---------------------*/
 	curloop=1;
@@ -720,8 +715,7 @@ XAU("parse_sexpress_web","") //test sample went in, parse the sx logs
 
 	#pragma endregion Write variables to a log file
 
-	#pragma endregion Prodfile has R_OK==0 so read it in
-	
+	#pragma endregion Prodfile has R_OK==0 so read it in	
    #pragma region Check is data is going to be overwritten - exit if it is
    /* DJH MOD Heres a good place to check whether the data already exists; ie, the submission software has crashed and hasn't incremented the V/Z no.*/
    /*remove comment block for production	*/
@@ -737,7 +731,6 @@ XAU("parse_sexpress_web","") //test sample went in, parse the sx logs
 	   exit(1);
     }
 	#pragma endregion Check is data is going to be overwritten - exit if it is
-
    #pragma region NEEDS PATCHING Check protocol if it is a test position and if so put set that to be put into magnet
    // Check "protocol" entry from prod file to see if this is a system test
    // and if so change cpos to 60
@@ -753,8 +746,7 @@ XAU("parse_sexpress_web","") //test sample went in, parse the sx logs
 		// found test sample string in protocol so set pos to 59
 		cpos=59;
 	}
-    #pragma endregion NEEDS PATCHING Check protocol if it is a test position and if so put set that to be put into magnet
-   
+    #pragma endregion NEEDS PATCHING Check protocol if it is a test position and if so put set that to be put into magnet  
    #pragma region Put sample in the magnet and deal with errors
 
 	sprintf( tmp_cmd, "sx %d",cpos);
@@ -1213,11 +1205,10 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 	//system( tmp_str );
 	#pragma endregion Remove the prodfile
 	    #pragma region Write the janus logfile
-	flog = fopen(logfile,"a+");
-	fputs( "Sample completed...\n", flog);
-	fclose( flog );
-	#pragma endregion Write the janus logfile
-	
+	    flog = fopen(logfile,"a+");
+	    fputs( "Sample completed...\n", flog);
+	    fclose( flog );
+	    #pragma endregion Write the janus logfile
 	}
 	#pragma region If we have skipped the sample, remove the prodfile
 	if (skipsample!=0)

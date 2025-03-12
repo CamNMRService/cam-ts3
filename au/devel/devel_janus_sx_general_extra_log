@@ -1197,7 +1197,7 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 		XCMD(tmp_cmd);
 		//CPR_exec("janus-email",WAIT_TERM);
 		XCMD("setdef ackn no");
-	}
+	
 	#pragma region Zip topshimData directory into expno
 	sprintf( tmp_cmd, "7za a  %s\\topshimData_%s_%i.zip C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData\\ > nul",ACQUPATH(0),name,expno,ts_major,ts_minor,ts_patch);
 	Proc_err(INFO_OPT,tmp_cmd);
@@ -1220,6 +1220,7 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 	fclose( flog );
 	#pragma endregion Write the janus logfile
 	#pragma region If we have skipped the sample, remove the prodfile
+	}
 	if (skipsample!=0)
     {
 		fclose( fprod );

@@ -114,6 +114,10 @@ FETCHPARS("PROBHD", probe_name)
    char ts_arg[32]="none";
    char test_parset[256] = "PROTON"; //assume this is going to be ok
    int  test_pos = 60;
+   int  protocol_pos_a = 59;
+   int  protocol_pos_b = 60;
+   char protocol_str_a[256] = "POS59";
+   char protocol_str_b[256] = "POS60";
    int global_atma_flag=1; //if zero, never do atma  
    
 if (strcmp(instrum_name, "cragganmore") == 0) {
@@ -134,6 +138,10 @@ else if (strcmp(instrum_name, "laphroiag") == 0) {
    sprintf(ts_arg,"ordmax=5");
    sprintf(test_parset,"PROTON"); //has got a broken probe and can only do 1H and 19F
    test_pos = 60;
+   protocol_pos_a = 59;
+   protocol_pos_b = 60;
+   sprintf(protocol_str_a,"POS59");
+   sprintf(protocol_str_a,"POS60");
    global_atma_flag=0; //if zero, never do atma  
 }
 
@@ -145,6 +153,10 @@ else if (strcmp(instrum_name, "tobermory") == 0) {
    sprintf(ts_arg,"ordmax=5");
    sprintf(test_parset,"C13CPD");
    test_pos = 96;
+   protocol_pos_a = 95;
+   protocol_pos_b = 96	;
+   sprintf(protocol_str_a,"POS95");
+   sprintf(protocol_str_a,"POS96");
    global_atma_flag=0; //if zero, never do atma 
 }
 else if (strcmp(instrum_name, "lagavulin") == 0) {
@@ -154,6 +166,10 @@ else if (strcmp(instrum_name, "lagavulin") == 0) {
    sprintf(ts_arg,"ordmax=5");
    sprintf(test_parset,"C13CPD");
    test_pos = 60;
+   protocol_pos_a = 59;
+   protocol_pos_b = 60;
+   sprintf(protocol_str_a,"POS59");
+   sprintf(protocol_str_a,"POS60");
    global_atma_flag=1; //if zero, never do atma 
 }
 else if (strcmp(instrum_name, "glenfairn") == 0) {
@@ -164,6 +180,10 @@ else if (strcmp(instrum_name, "glenfairn") == 0) {
    sprintf(ts_arg," ");
    sprintf(test_parset,"C13CPD");
    test_pos = 60;
+   protocol_pos_a = 59;
+   protocol_pos_b = 60;
+   sprintf(protocol_str_a,"POS59");
+   sprintf(protocol_str_a,"POS60");
    global_atma_flag=1; //if zero, never do atma 
 }
 else if (strcmp(instrum_name, "arran") == 0) {
@@ -173,7 +193,11 @@ else if (strcmp(instrum_name, "arran") == 0) {
    sprintf(changer_ip,"NULL");
    sprintf(ts_arg,"ordmax=5");
    sprintf(test_parset,"C13CPD");
-   test_pos = 60;
+   test_pos = 41;
+   protocol_pos_a = 59;
+   protocol_pos_b = 60;
+   sprintf(protocol_str_a,"POS59");
+   sprintf(protocol_str_a,"POS60");
    global_atma_flag=0; //if zero, never do atma 
 }
 else {

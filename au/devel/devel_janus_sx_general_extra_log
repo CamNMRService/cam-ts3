@@ -758,20 +758,20 @@ XAU("parse_sexpress_web","") //test sample went in, parse the sx logs
 	   exit(1);
     }
 	#pragma endregion Check is data is going to be overwritten - exit if it is
-   #pragma region NEEDS PATCHING Check protocol if it is a test position and if so put set that to be put into magnet
+   #pragma region Needs new code testing - Check protocol if it is a test position and if so put set that to be put into magnet
    // Check "protocol" entry from prod file to see if this is a system test
    // and if so change cpos to 60
 
-   if ( strstr ( protocol, "POS60") != NULL )
+   if ( strstr ( protocol, protocol_str_a) != NULL )
    {
 	   // found test sample string in protocol so set pos to 60
-	   cpos=60;
+	   cpos=protocol_pos_a;
    }
 
-	if ( strstr ( protocol, "POS59") != NULL )
+	if ( strstr ( protocol, protocol_str_b) != NULL )
 	{
 		// found test sample string in protocol so set pos to 59
-		cpos=59;
+		cpos=protocol_pos_b;
 	}
     #pragma endregion NEEDS PATCHING Check protocol if it is a test position and if so put set that to be put into magnet  
    #pragma region Put sample in the magnet and deal with errors

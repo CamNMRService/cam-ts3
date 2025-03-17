@@ -23,10 +23,6 @@
 /*Incidentals							*/
 
 
-
-
-
-
 //2023_04_11 SX checks if this is the test experiment and changes position to 60 if so
 // This avoids test expt failures if no sample in set position, and avoids wasting time shimming
 // on different sample
@@ -41,7 +37,7 @@
 // sprintf(tmp_str,"janus_topshim_watchdog TOPSHIM_FAILED_%s_%i ordmax=5",tmp_fname,cpos);
 // XCMD(tmp_str);
 //---changed XAUP for service-def-proc
-//---sprinkled some more setdef ackn no - when poise is called, it might turn click awway messages on again
+//---sprinkled some more setdef ackn no - when poise is called, it might turn click away messages on again
 //Added/moved code for title writing so its erased in 'w' mode, then appended after XAUA. Retains any title XAUA writes
 /****************************************/
 //PTG 2023/06/06 atma storewobb 700
@@ -53,35 +49,40 @@
 // system(tmp_cmd);
 //added variable char changer_ip[16]="149.236.99.251"; to call devel_get_sxpress with
 //July/august 2023
-/*dded creation of an info file which reports any errors with lock, atma , topshim, and long proton pulse
+/*added creation of an info file which reports any errors with lock, atma , topshim, and long proton pulse
 Made string for holding info file text, long enough...
 Removed various debugging messages
 Now lock errors only do anythign if shim also fails
 Added note about solvent to SampleProblems file and warnign to check for strange characters
 And added pulse length check and associated message in SampleProblems*/
 
-// Version with new atma handling as per glenfairn
+/** Version with new atma handling as per glenfairn
 //
-
 // Looks for 31P or 19F or 11B or 13C in protocol - if there does suitable ATMA on junk dataset
 // and sets atma flag to 0
 // NB if we want a multinuclear composite experiment need lowercase 
-// If atma flag is 1 it's done on every experiment otherwise it does "anma nowin selectnuc" for safety
+// If atma flag is 1 it's done on every experiment otherwise it does "atma nowin selectnuc" for safety
+ - atma selectNuc - sets the broad-band channel to the requested and terminates the atma command.
+ No optimization will be done
+  - atma f1 f3 f1 noWin - will automatically tune and match the channel f1, f3 and again f1. If it get an error no
+ message window will be shown
+ (so only moves the position to the X channel and gives no errors??)
+ 
 // which costs only a couple of seconds hopefully...
-//djh Feb 2025 add code to run an interrupt to run automated tests
-//Added line 112 - interupt_file_path
-//115 - ts_arg
-//interrut code starts at 295
-//Feb 2025
-//Added extra when creating the junk dataset to set the instrument name and probe name
+*/
+/*
+djh Feb 2025 add code to run an interrupt to run automated tests
 
-/*Run a test scan to get the instrument name and probe type*/
+Added extra when creating the junk dataset to set the instrument name and probe name
+- Runs a test scan to get the instrument name and probe type
+*/
 /*Create a codebase general to all instruments. Seems to work on -
-- cragganmore
+- cragganmore, laphroiag, lagavulin, glenfairn
 */
 //March 2025
 //Added #pragma region /endregion code to allow visual studio code to do folding  
 //fixed several bugs and got code indentation more consistent in the process
+//Added code and instrument defaults for test samples in (eg) POS59 & POS60
 
 #pragma region Get Instrument name
 char    instrum_name[255]="spect";
@@ -875,7 +876,7 @@ XAU("parse_sexpress_web","") //test sample went in, parse the sx logs
 		  sampleproblem=1;
         }
 		#pragma endregion Lock solvent
-	    #pragma region Check protocol for X nuclei & set ATMAflag
+	    #pragma region Check protocol for X nuclei & set ATMAflag=0
 		// new atma handling:
         sprintf(tmp_str,"protocol - %s, experiment - % s, ATMA\n",protocol,experiment);
         strcat(janusinfostring, tmp_str);
@@ -899,8 +900,8 @@ XAU("parse_sexpress_web","") //test sample went in, parse the sx logs
             RPAR("janus-11b.bbf", "all") // need this to get 1H to tune
             ATMAflag=0;
         }
-		#pragma endregion Check protocol for X nuclei & set ATMAflag
-		#pragma region Check if experiment is not a 2H and  ATMAflag  appropriate
+		#pragma endregion Check protocol for X nuclei & set ATMAflag=0
+		#pragma region Check if experiment is not a 2H and ATMA on PROTONRO parset
         if ( (strstr ( experiment, "2h") == NULL) && (strstr ( experiment, "2H") == NULL)) // So this means "the string 2h is not present AND the string 2H is not present"
 		//only do the below if its not 2H
 		{
@@ -973,6 +974,7 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 		#pragma region Run through all the experiments from the prod file
 		while ((fgets( experiment, 155, fprod)!=NULL)&&(strlen(experiment)>2)) //this is slightly magic to me, but reads prod into experiment
 		{
+			#pragma region RPAR experiment from prodfile,storepar solvent. getprosol 
 			experiment[strlen(experiment)-1]=NULL;
 			/*--Get that data acquiring!----------------------*/
 			sprintf(statusstr,"Sample: %s, Expt: %s, solvent: %s",oi,experiment,solvent);
@@ -986,8 +988,8 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 			GETCURDATA
 			STOREPAR( "SOLVENT", solvent )
 			GETPROSOL //needed since paracon!
-
-	
+            #pragma endregion RPAR experiment from prodfile,storepar solvent. getprosol
+            #pragma region Logic for tuning
 			if ( (strstr ( experiment, "2h") == NULL) && (strstr ( experiment, "2H") == NULL)) //so if its not 2h, we might tune
 			{
 				strcat(janusinfostring, "ROTOFF \n");
@@ -1019,16 +1021,19 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 				strcat(janusinfostring, "ROT \n");
 				ROT // does "ro acqu"
 			}
+			#pragma endregion Logic for tuning
+			#pragma region Prep titlefile
 		    //Add a space to title here in 'w' mode to erase any guff
 			sprintf( titlefile, "%s%s/%s/%d/pdata/1/title", diskunit, user,tmp_fname, nexpt );
 			ftitle = fopen( titlefile, "w" ); 
 			fputs ( " ", ftitle );
 			fclose ( ftitle );
+			#pragma endregion Prep titlefile
+			#pragma region Acquire spectrum with XAUA and deal with errors
 			sprintf(tmp_cmd,"xaua");
 			sprintf(tmp_str,"%s\n",tmp_cmd);
 			strcat(janusinfostring, tmp_str);
 			Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
-		
 			XCMD("setdef ackn no"); //Lets see if this fixes the poise AU programs turning on the click away messages
 			AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 			if ( AUERR <0 )
@@ -1044,7 +1049,8 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 				XAU("whoopwhoop",tmp_str)
 				STOPMSG("XAUA Failed. Maybe check IPSO")
 			}
-
+            #pragma endregion Acquire spectrum with XAUA and deal with errors
+			#pragma region Append to title.
 			lt=time(NULL);
 			sprintf(expttime, ctime(&lt));
 			expttime[strlen(expttime)-1]=NULL;
@@ -1061,9 +1067,9 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 			sprintf( titletext, "%s\n%s\n%s\n%s\n%s\nPosition: %d\n%s", tmp_fname, oi, juser, experiment, solvent, cpos, comments );
 			fputs ( titletext, ftitle );
 			fclose ( ftitle );
-
-            /*Now a mod by DJH to make a filename containing the sample name, without any 'rogue' characters', and poke that into USERP2. Set USERP1 to be the comments, if an email*/
-
+            #pragma endregion Append to title.
+            #pragma region Create samplename from oi replacing all rogue caharacters with underscore. Write this to USERP2 & snamefile
+			/*Now a mod by DJH to make a filename containing the sample name, without any 'rogue' characters', and poke that into USERP2. Set USERP1 to be the comments, if an email*/
 			sprintf( samplename, "%s", oi );
 			for( i = 0; i < strlen(samplename); i++ )
 			{
@@ -1077,13 +1083,13 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 						samplename[i] = '_';
 					}
 			}
-   			 /*CHECK*/
 			sprintf(snamefile,PROCPATH("samplename"));
 			sname=fopen(snamefile,"w");
 			fprintf(sname, "%s", samplename);
 			fclose(sname);
 			STOREPAR("USERP2", samplename);
-
+            #pragma endregion Create samplename from oi replacing all rogue caharacters with underscore. Write this to USERP2 & snamefile
+			#pragma region Process the data - Always if procau==janus_splitx_au Or if expno==10 do service-def-proc
 			/*slight mod to XAUP command to allow it to finish before going on...*/
 			FETCHPAR ("AUNMP",&procau)
 			// if splitx_au we need to run it
@@ -1093,15 +1099,15 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 			}
 			else
 			{
-			
-			if ( nexpt==10 )
-				{
+			   if ( nexpt==10 )
+			   {
 					//CPR_exec("xaup",WAIT_TERM);
 					XCMD("service-def-proc") //lets see if this fixes the poise automated programs XAUP(proc_1d) trying to print.
-				}
+			   }
 			}
-
-			/*if there's no email address in the comments file, set it to camnmr, useful for testing*/
+            #pragma endregion Process the data - Always if procau==janus_splitx_au Or if expno==10 do service-def-proc
+			#pragma region Check for @ in comments
+			/*if there's no email address in the comments file, will keep default address set above, useful for if typos*/
 			/*the comments variable is read from the prod file.*/
 			/*email is a variable set at the start of this program to camnmr@gmail.com*/
 			STOREPAR("USERP5",comments);
@@ -1114,7 +1120,7 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 			{
 				STOREPAR("USERP1", comments);
 			}
-
+            #pragma endregion Check for @ in comments
 			nexpt++;
 		} // of of while loop running through prod file
         #pragma endregion Run through all the experiment from the prod file

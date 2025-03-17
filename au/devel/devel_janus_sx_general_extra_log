@@ -106,7 +106,6 @@ FETCHPARS("INSTRUM", instrum_name)
 FETCHPARS("PROBHD", probe_name)
 /*end of get instrument and probe name*/
 #pragma endregion Get Instrument Name
-
 #pragma region Set Instrument Global Variables
 /*initial gobal variables to change for each instrument*/
    char def_file[PATH_MAX]="d:/chemist/defaults-csv.txt"; //janus software defaults
@@ -215,7 +214,6 @@ Proc_err ( INFO_OPT,"***global_atma_flag - %i",global_atma_flag);
 
 //STOPMSG("global defaults set!");
 #pragma endregion Set Instrument Global Variables
-
 #pragma region Set Other Global Variables
 float   delaytime=1.0;
 int     expt=1, curloop=1, cpos, specno, jexpt, jsolv, finish=FALSE,i=1;
@@ -294,7 +292,6 @@ char testdata[256];
 GETCURDATA;
 proc_or_not=1;
 #pragma endregion Set Other Global Variables
-
 #pragma region Read Defaults From File
 Proc_err ( INFO_OPT, "Starting program");
 sleep(delaytime);
@@ -381,7 +378,6 @@ Proc_err ( INFO_OPT,"%s",protfile);
 Proc_err ( INFO_OPT,"%s",logfile);
 
 #pragma endregion Read Defaults From File
-
 #pragma region Check for januskillfile - stop janus - start iconnnmr
 //If januskillfile is there, start iconnmr and abort
 if ( access(januskillfile,F_OK) == 0) // file found
@@ -394,7 +390,6 @@ if ( access(januskillfile,F_OK) == 0) // file found
 }
 #pragma endregion Check for januskillfile - stop janus - start iconnnmr
 Proc_err ( INFO_OPT, "Waiting for sample...");
-
 #pragma region MAIN JANUS WHILE finish != true LOOP
 /*the below becomes the place the data is stored. Done in the old skool path format for compatibility*/
 sprintf(diskunit,"%sdata\\%s\\nmr\\",diskunit,suser);

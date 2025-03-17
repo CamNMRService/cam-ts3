@@ -876,7 +876,7 @@ XAU("parse_sexpress_web","") //test sample went in, parse the sx logs
 		  sampleproblem=1;
         }
 		#pragma endregion Lock solvent
-	    #pragma region Check protocol for X nuclei & set ATMAflag=0
+	    #pragma region Check protocol for X nuclei, if present set ATMAflag=0
 		// new atma handling:
         sprintf(tmp_str,"protocol - %s, experiment - % s, ATMA\n",protocol,experiment);
         strcat(janusinfostring, tmp_str);
@@ -1068,7 +1068,7 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 			fputs ( titletext, ftitle );
 			fclose ( ftitle );
             #pragma endregion Append to title.
-            #pragma region Create samplename from oi replacing all rogue caharacters with underscore. Write this to USERP2 & snamefile
+            #pragma region Create samplename from oi replacing all rogue characters with underscore. Write this to USERP2 & snamefile
 			/*Now a mod by DJH to make a filename containing the sample name, without any 'rogue' characters', and poke that into USERP2. Set USERP1 to be the comments, if an email*/
 			sprintf( samplename, "%s", oi );
 			for( i = 0; i < strlen(samplename); i++ )

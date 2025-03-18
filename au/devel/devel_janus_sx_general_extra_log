@@ -416,6 +416,7 @@ while ( finish != TRUE ) //THE MAIN LOOP
    #pragma endregion Check for januskillfile - stop janus - start iconnnmr
    #pragma region Check for interrupt file and run tests if present
    //****Interrupt code********/
+   #pragma region Set variables used by interrupt routine
    FILE *interrupt_file;
    char line[1024];
    char field2[256]="";
@@ -424,14 +425,13 @@ while ( finish != TRUE ) //THE MAIN LOOP
    char dataset_name[PATH_MAX]="";
    int number;
    int loop=1;
+   #pragma endregion Set variables used by interrupt routine
    interrupt_file = fopen(interrupt_file_path, "r");
-
+   #pragma region If we can open the interrupt file, read it and run through its contents
    if (interrupt_file != NULL) 
    {
-
-	   // not called with skiptest arg so do the tests
+       #pragma region Create dataset based on time rpar test_parset
 	   // now make systest dataset
-
 	   lt=time(NULL);
 	   ltstruc = localtime(&lt);
 	   sprintf(datestamp, "%d_%d_%d_%d_%d_%d", ltstruc->tm_year+1900, ltstruc->tm_mon+1, ltstruc->tm_mday, ltstruc->tm_hour, ltstruc->tm_min, ltstruc->tm_sec);
@@ -441,10 +441,12 @@ while ( finish != TRUE ) //THE MAIN LOOP
 	   Proc_err ( INFO_OPT,"***disk=%s",disk);
 	   SETCURDATA
 	   VIEWDATA_SAMEWIN
-		
-		RPAR(test_parset, "all")
-		//Now get the test sample in
-		sprintf(tmp_cmd, "ii");
+	   RPAR(test_parset, "all")
+	   GETPROSOL
+	   #pragma endregion Create dataset based on time rpar test_parset
+	   #pragma region Check we can ii, if we can put the sample in and deal with errors   
+	   //Now get the test sample in
+	   sprintf(tmp_cmd, "ii");
 		Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
 		AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 		if ( AUERR <0 )
@@ -470,7 +472,10 @@ while ( finish != TRUE ) //THE MAIN LOOP
 			sprintf(tmp_str, "INTERRUPT_SAMPLE_SX_%i_ERROR",test_pos);
 			//whoop	XAU("whoopwhoop",tmp_str)
 		} else 
+		#pragma endregion Check we can ii, if we can put the sample in and deal with errors 
+		#pragma region The sx command had no error - so do start to work through the main interrupt routine
 		{
+			#pragma region rpar test_parset if global atma, tune, deal with errors
 			RPAR(test_parset, "all")
 			sleep(60);
 			sprintf(tmp_cmd, "atma storeWobb 700");
@@ -479,14 +484,15 @@ while ( finish != TRUE ) //THE MAIN LOOP
 			{
 			   Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
 			   AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
-			if ( AUERR <0 )
-			{
-				sprintf(tmp_str, "INTERRUPT_TEST_SAMPLE_ATMA_ERROR"); 
-				//whoop	 XAU("whoopwhoop",tmp_str)
-				STOPMSG("Janus stopped - initial atma error")
+			   if ( AUERR <0 )
+			   {
+			       sprintf(tmp_str, "INTERRUPT_TEST_SAMPLE_ATMA_ERROR"); 
+				   XAU("whoopwhoop",tmp_str)
+				   STOPMSG("Janus stopped - initial atma error")
+			   }
 			}
-			}
-
+            #pragma endregion rpar test_parset if global atma, tune, deal with errors
+			#pragma region rsh, lock, topshim, deal with errors
 			sprintf(tmp_cmd, "rsh %s",shimset);
 			Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
 			AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
@@ -499,13 +505,15 @@ while ( finish != TRUE ) //THE MAIN LOOP
 			XCMD(tmp_cmd);
 			if (AUERR<0)
 			{
-				//whoop	XAU("whoopwhoop",tmp_cmd);
+				XAU("whoopwhoop",tmp_cmd);
 			}
 			// keep first dataset with wobb curves in
 			IEXPNO;
 			//Ok, now to parse the interrupt file.
-			
-			while (fgets(line, sizeof(line), interrupt_file)) {
+			#pragma endregion rsh, lock, topshim, deal with errors
+			#pragma region Parse the interrupt file line by line
+			while (fgets(line, sizeof(line), interrupt_file)) 
+			{
 				// Skip comments
 				if (strncmp(line, "!!", 2) == 0) {
 					continue; //exit out of while loop
@@ -541,94 +549,94 @@ while ( finish != TRUE ) //THE MAIN LOOP
 					field_count++;
 					token = strtok(NULL, ",");
 				} //end of token read while loop
-		sleep(number);
-        #pragma region Deal with the contents of the field read in - ie run test
-        if (strstr(field3, "shim") != NULL) {
-           sprintf(tmp_cmd,"janus_topshim_watchdog TOPSHIM_FAILED_%s %s",name, ts_arg);
-           Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
-	       XCMD(tmp_cmd); 
-        }
-       if (strstr(field2, "poise_1h") != NULL) {
-          expno=expno+10;
-          DATASET(dataset_name, expno, 1, diskunit, suser);
-          GETCURDATA
-          VIEWDATA_SAMEWIN
-	      sprintf(tmp_cmd, "atma storeWobb 700");
-	      Proc_err ( INFO_OPT,"***tmp_cmd- %s",tmp_cmd);
-          AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
-          XAU("poise_1h_p1_b2_01","")
-       }
-       if (strstr(field2, "poise_13c") != NULL) {
-          expno=expno+10;
-          DATASET(dataset_name, expno, 1, diskunit, suser);
-          GETCURDATA
-          VIEWDATA_SAMEWIN
-	      sprintf(tmp_cmd, "atma storeWobb 700");
-	      Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
-          AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
-          XAU("poise_13c_p1_b2_01","")
-       }
-       if (strstr(field2, "poise_31p") != NULL) {
-          expno=expno+10;
-          DATASET(dataset_name, expno, 1, diskunit, suser);
-          GETCURDATA
-          VIEWDATA_SAMEWIN
-	      sprintf(tmp_cmd, "atma storeWobb 700");
-	      Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
-          AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
-          XAU("poise_31p_p1_b2_01","")
-       }
-       if (strstr(field2, "poise_19f") != NULL) {
-          expno=expno+10;
-          DATASET(dataset_name, expno, 1, diskunit, suser);
-          GETCURDATA
-          VIEWDATA_SAMEWIN
-	      sprintf(tmp_cmd, "atma storeWobb 700");
-	       Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
-          AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
-          XAU("poise_19f_p1_b2_01","")
-       }
-       if (strstr(field2, "hump") != NULL) {
-          expno=expno+10;
-          DATASET(dataset_name, expno, 1, diskunit, suser);
-          GETCURDATA
-          VIEWDATA_SAMEWIN
-	      sprintf(tmp_cmd, "atma storeWobb 700");
-	      Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
-          AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
-          XAU("hump_sino_test_b2_01",ts_arg)
-       }
-       #pragma endregion Deal with the contents of the field read in - ie run test
-       loop++;
-       } //end of reading interrupt.csv  while loop
-   
-    
-	}	//end of test if sample went in
-	fclose(interrupt_file); //need to do this here - failure mode of interrupt file is there, but test sample isnt...
-	//now we should delete the file
-	sprintf( tmp_str, "del %s", interrupt_file_path );
-	Proc_err ( INFO_OPT,"tmp_str",tmp_str);
-	//system( tmp_str );
-	
-	fbat = fopen(batcmd, "w");
-	fputs( tmp_str,fbat);
-	fclose(fbat);
-	system(batcmd);
-    Proc_err (INFO_OPT,"ran all those commands in %s",interrupt_file_path);
-} //end of reading interrupt file.
+		   sleep(number);
+           #pragma region Deal with the contents of the line read in - ie run test
+			if (strstr(field3, "shim") != NULL) {
+				sprintf(tmp_cmd,"janus_topshim_watchdog TOPSHIM_FAILED_%s %s",name, ts_arg);
+				Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
+				XCMD(tmp_cmd); 
+			}
+			if (strstr(field2, "poise_1h") != NULL) {
+				expno=expno+10;
+				DATASET(dataset_name, expno, 1, diskunit, suser);
+				GETCURDATA
+				VIEWDATA_SAMEWIN
+				sprintf(tmp_cmd, "atma storeWobb 700");
+				Proc_err ( INFO_OPT,"***tmp_cmd- %s",tmp_cmd);
+				AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+				XAU("poise_1h_p1_b2_01","")
+			}
+			if (strstr(field2, "poise_13c") != NULL) {
+				expno=expno+10;
+				DATASET(dataset_name, expno, 1, diskunit, suser);
+				GETCURDATA
+				VIEWDATA_SAMEWIN
+				sprintf(tmp_cmd, "atma storeWobb 700");
+				Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
+				AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+				XAU("poise_13c_p1_b2_01","")
+			}
+			if (strstr(field2, "poise_31p") != NULL) {
+				expno=expno+10;
+				DATASET(dataset_name, expno, 1, diskunit, suser);
+				GETCURDATA
+				VIEWDATA_SAMEWIN
+				sprintf(tmp_cmd, "atma storeWobb 700");
+				Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
+				AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+				XAU("poise_31p_p1_b2_01","")
+			}
+			if (strstr(field2, "poise_19f") != NULL) {
+				expno=expno+10;
+				DATASET(dataset_name, expno, 1, diskunit, suser);
+				GETCURDATA
+				VIEWDATA_SAMEWIN
+				sprintf(tmp_cmd, "atma storeWobb 700");
+				Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
+				AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+				XAU("poise_19f_p1_b2_01","")
+			}
+			if (strstr(field2, "hump") != NULL) {
+				expno=expno+10;
+				DATASET(dataset_name, expno, 1, diskunit, suser);
+				GETCURDATA
+				VIEWDATA_SAMEWIN
+				sprintf(tmp_cmd, "atma storeWobb 700");
+				Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
+				AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+				XAU("hump_sino_test_b2_01",ts_arg)
+			}
+            #pragma endregion Deal with the contents of the line read in - ie run test
+           loop++;
+           } //end of reading interrupt.csv  while loop
+		   #pragma endregion Parse the interrupt file line by line
+	    }	//end of test if sample went in
+	    #pragma endregion The sx command had no error - so do start to work through the main interrupt routine
+	    #pragma region Close and delete interrupt_file
+		fclose(interrupt_file); //need to do this here - failure mode of interrupt file is there, but test sample isnt...
+	    //now we should delete the file
+	    sprintf( tmp_str, "del %s", interrupt_file_path );
+	    Proc_err ( INFO_OPT,"tmp_str",tmp_str);
+	    //system( tmp_str );
+	    fbat = fopen(batcmd, "w");
+	    fputs( tmp_str,fbat);
+	    fclose(fbat);
+	    system(batcmd);
+        Proc_err (INFO_OPT,"ran all those commands in %s",interrupt_file_path);
+		#pragma endregion Close and delete interrupt_file
+   } //end of reading interrupt file.
 
-else{
-   // printf("Error: Could not open %s\n",interrupt_file_path);       
-}
-    
-if (strcmp(changer_ip, "null") != 0){
-XAU("parse_sexpress_web","") //test sample went in, parse the sx logs
-}
-
-
-
-/****End of interrupt test sample routine******/
-#pragma endregion Check for interrupt file and run tests if present
+   else{
+      // printf("Error: Could not open %s\n",interrupt_file_path);       
+   }
+   #pragma endregion If we can open the interrupt file, read it and run through its contents    
+   #pragma region Maybe parse_sexpress_web  
+   if (strcmp(changer_ip, "null") != 0){
+      XAU("parse_sexpress_web","") //test sample went in, parse the sx logs
+   }
+   #pragma endregion Maybe parse_sexpress_web 
+   /****End of interrupt test sample routine******/
+   #pragma endregion Check for interrupt file and run tests if present
    #pragma region Check Prodfile has read access (0 if it does) if it doesnt, skip the rest of the main jauns while loop
 /*------------------------------------------------*/
 	if ( access(prodfile,R_OK)!=0)

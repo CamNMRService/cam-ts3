@@ -47,3 +47,13 @@ sendgui XAU setaq
 !! can shrink SW here as limited by bandwidth of inversion pulsecal
 !! NB required crp100,0.5,20.1 for 19F, obs in prosol
 sendgui sw 150
+##19Fselective1dHOESY.ref
+!!1d HOESY, selective on 19F vian CNST55
+sendgui XAU setaq
+##j-19F-bb-cpd.ref
+!!1d 19F with BB excitation, currently OPERA45, nb needs bb prosol relations file
+sendgui XAU setaq
+##j-31P-bb-cpd.ref
+!!1d 31P with BB excitation, currently OPERA45, nb needs bb prosol relations file
+sendgui XAU setaq
+

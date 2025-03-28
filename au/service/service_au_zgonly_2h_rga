@@ -1,0 +1,56 @@
+// au prog to run 2H spectra allowing for the fact that the sample may be locked
+//AVIII only 
+// PTG 20203_12_20 modified to try explicit lock if LOCK_ON_AFTER_HOLD fails;
+// and if that fails to reset AUERR so failure of this doesn't bring down the automation
+
+#include <inc/bsms_program>    /* must be the first statement ****/
+double  lockshift=0, lockpower=0, lockgain;
+float   lockpower_par;
+char solvent[256];
+
+
+
+// get current numbers from BSMS
+GETBSMSVAL(BSN_LOCK_SHIFT, lockshift);
+GETBSMSVAL(BSN_LOCK_GAIN,lockgain);
+
+GET_LOCK_POWER(lockpower);
+STOREPAR("CNST 31", lockpower);
+
+
+STOREPAR("LOCNUC","off");
+
+/*  Switch off lock and lock sweep                              */
+LOCK_AND_SWEEP_OFF;
+
+//set minimal lock power
+SET_LOCK_POWER(-60.0);
+
+// acquire - no rga needed
+RGA
+ZG
+
+// at this point "s solvent" should be correct so read that
+
+FETCHPARS("SOLVENT",&solvent);
+
+/* restore preamplifier for BSMS */
+DATASET("~TEMP",1,1,disk,user);
+RPAR("PROTON","all");
+II;
+sleep(5);
+// reset lock power and put lock back on
+SET_LOCK_POWER(lockpower);
+sleep(5);
+LOCK_ON_AFTER_HOLD; /* waits while LOCK PENDING */
+if (AUERR < 0)
+{
+    STOREPAR("SOLVENT", solvent)
+    LOCK 
+    if (AUERR < 0)
+    {
+        AUERR=0;
+    }
+}
+
+QUIT

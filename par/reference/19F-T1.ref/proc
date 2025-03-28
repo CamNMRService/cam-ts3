@@ -1,11 +1,11 @@
 ##TITLE= Parameter file, TopSpin 3.6.4
 ##JCAMPDX= 5.0
 ##DATATYPE= Parameter Values
-##NPOINTS= 1	$$ modification sequence number
+##NPOINTS= 2	$$ modification sequence number
 ##ORIGIN= Bruker BioSpin GmbH
 ##OWNER= ss3220
-$$ 2024-12-11 23:14:03.117 +0000  ss3220@auchentoshan
-$$ C:/Bruker/TopSpin3.6.4/exp/stan/nmr/par/user/19F_T1.std/proc
+$$ 2024-12-11 23:35:04.316 +0000  chemist@Glenfairn
+$$ C:\Bruker\cam-ts3\par\reference/19F-T1.ref/proc
 $$ process C:\Bruker\TopSpin3.6.4\prog\mod\edparproc.exe
 ##$ABSF1= 1000
 ##$ABSF2= -1000
@@ -85,7 +85,7 @@ $$ process C:\Bruker\TopSpin3.6.4\prog\mod\edparproc.exe
 ##$NSP= 1
 ##$NTH_PI= 0
 ##$NZP= 0
-##$OFFSET= 14.98828
+##$OFFSET= 19.9566
 ##$PC= 1
 ##$PHC0= 143.799
 ##$PHC1= 0
@@ -105,7 +105,7 @@ $$ process C:\Bruker\TopSpin3.6.4\prog\mod\edparproc.exe
 ##$RDINT= 0
 ##$RDPOS= 0
 ##$REVERSE= no
-##$SF= 376.498366
+##$SF= 470.671416183
 ##$SI= 131072
 ##$SIGF1= 1
 ##$SIGF2= -1
@@ -117,7 +117,7 @@ $$ process C:\Bruker\TopSpin3.6.4\prog\mod\edparproc.exe
 ##$SSB= 5
 ##$STSI= 0
 ##$STSR= 0
-##$SW_p= 8012.8205128205
+##$SW_p= 11961.7224880383
 ##$SYMM= 0
 ##$S_DEV= 0
 ##$TDeff= 0

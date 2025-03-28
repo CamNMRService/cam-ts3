@@ -18,6 +18,7 @@ STOREPAR("mi",0.5);
 
 XCMD("efp");
 XCMD("sendgui apk0");
+XCMD("sendgui pscal global");
 XCMD("efp");
 XCMD("abs");
 XAU("service_cycalc",cmd);

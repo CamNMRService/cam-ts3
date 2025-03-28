@@ -221,6 +221,8 @@ sprintf(jcmd,"Calculated CY=%f",cytmp);
 Show_status(jcmd);
 STOREPAR("CY",cytmp)
 STOREPAR("MAXI",cytmp*4)
+XCMD("sendgui pscal global");
+PP
 /*
 sprintf(jcmd,"cp %s %s/data/%s/nmr/%s/%d/pdata/%d/orig_peak.txt",path,disk,user,name,expno,procno);
 system(jcmd);

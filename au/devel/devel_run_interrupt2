@@ -1,0 +1,167 @@
+/***** New code Jan 2025 ****/
+/*devel_run_interrupt
+/*run all command in interrupt.csv file
+/*To test parsing or interupt.csv does what its supposed to*/ 
+/*!!!*/
+/*example interrpt.csv file :_
+
+
+/*
+!!lines beginning with !! are ignored
+!!parsed by devel_run_interrupt for example
+!!time delay,command, reserved for additional arguments
+10,sx 16
+10,interrupt-test,dataset
+10,rpar PROTON all
+10,rpar proton16.std all
+10,getprosol
+10,lock cdcl3
+10,topshim convcomp ordmax=5
+10,ns 1
+10,zg
+10,iexpno
+10,re 11
+10,zg
+*/
+
+/* Just cannot get it to increment the experiment number with iexpno, re 11*/
+/*so lets try making a macro and running that!*/
+
+char macro_name[32]="auto_interrupt";
+char interrupt_file_path[PATH_MAX]="d:\\chemist\\interrupt.csv";//location of interrupt file, if it exist, contains a list of commands
+char macro_file_path[PATH_MAX]="";
+
+char cmd_str[1024]="";
+
+FILE *interrupt_file;
+FILE *macro_file;
+FILE *pardef_file;
+
+char line[1024];
+char field2[256]="";
+char field3[256]="";
+   
+char dataset_name[PATH_MAX]=""; 
+
+
+
+time_t lt;
+struct tm *ltstruc;	  		/* structure with year, month etc. */
+char datestamp[256]="";
+int number;
+int loop=1;
+
+int ts_major = GetTsVersionMajor();
+int ts_minor = GetTsVersionMinor();
+int ts_patch = GetTsVersionPl();
+
+char *token; 
+ 
+sprintf(macro_file_path,"C:\\Bruker\\topspin%i.%i.%i\\exp\\stan\\nmr\\lists\\mac\\user\\%s",ts_major,ts_minor,ts_patch,macro_name);
+	// Try to open the file
+    interrupt_file = fopen(interrupt_file_path, "r");
+	//if file exists, do stuff.
+    if (interrupt_file != NULL) {
+    //first create a new dataset - we may rename this.
+       lt=time(NULL);
+	   ltstruc = localtime(&lt);
+	   sprintf(datestamp, "%d_%d_%d_%d_%d_%d", ltstruc->tm_year+1900, ltstruc->tm_mon, ltstruc->tm_mday, ltstruc->tm_hour, ltstruc->tm_min, ltstruc->tm_sec);
+	   sprintf(dataset_name,"interrupt_%s",datestamp);
+	   //DATASET(dataset_name, 10, 1, disk, user);
+       DATASET("junk", 10, 1, disk, user); //we'll do junk though
+       SETCURDATA
+       GETCURDATA
+	   VIEWDATA_SAMEWIN
+	  // 	sprintf(cmd_str,"sendgui ");  //lets initialise the command string - we'll try and compose a big string to run all at once
+    // now Read file line by line
+    while (fgets(line, sizeof(line), interrupt_file)) {
+        // Skip comments
+        if (strncmp(line, "!!", 2) == 0) {
+            continue; //exit out of while loop
+        }
+        
+        // Remove newline if present
+        line[strcspn(line, "\n")] = 0;
+        
+        // Initialize field count
+        int field_count = 0;
+        
+        // Get first token
+        token = strtok(line, ",");
+        
+        // Process all tokens
+        while (token != NULL && field_count < 3) {
+            // Remove leading/trailing whitespace
+            while (*token == ' ') token++;
+            char *end = token + strlen(token) - 1;
+            while (end > token && *end == ' ') end--;
+            *(end + 1) = 0;
+            
+            // Process based on field number
+            switch (field_count) {
+                case 0:
+                    number = atoi(token);
+                    break;
+                case 1:
+                    strncpy(field2, token, 255);
+                    field2[255] = '\0';
+                    break;
+                case 2:
+                    strncpy(field3, token, 255);
+                    field3[255] = '\0';
+                    break;
+            }
+            field_count++;
+            token = strtok(NULL, ",");
+        }
+    sleep(number);
+   // if (strcmp(field3,"dataset")) //if 3rd field has dataset, create a dataset
+    if (strncmp(field3, "dataset", 7) == 0)
+    {
+       lt=time(NULL);
+	   ltstruc = localtime(&lt);
+	   sprintf(datestamp, "_%d_%d_%d_%d_%d_%d", ltstruc->tm_year+1900, ltstruc->tm_mon, ltstruc->tm_mday, ltstruc->tm_hour, ltstruc->tm_min, ltstruc->tm_sec);
+       sprintf(dataset_name,"%s",field2);
+       strcat(dataset_name,datestamp); 
+       XAU("devel_create_test_dataset",dataset_name);
+       DATASET(dataset_name, 10, 1, disk, user);
+       SETCURDATA
+       GETCURDATA
+	     VIEWDATA_SAMEWIN
+       sprintf(field3,"done field3"); //wipe filed3, might perpetuate a loop otherwise of creating a new dataset
+    }
+    else { 
+    	 macro_file=fopen(macro_file_path,"a");
+       
+       //strcat(cmd_str,field2);  
+       Proc_err (DEF_ERR_OPT,"cmd_str is - %s",cmd_str);
+       sprintf(cmd_str,"%s\n",field2); 
+       fputs(cmd_str,macro_file);
+       //sprintf(cmd_str,"sendgui %s",field2);   
+       //AUERR=CPR_exec(cmd_str,WAIT_TERM); 
+       fclose(macro_file);
+    }   
+    loop++;
+    } //end of while loop
+   // lets run that long command
+   XMAC(macro_name);
+   // AUERR=CPR_exec(cmd_str,WAIT_TERM); 
+    fclose(interrupt_file);
+	//now we should delete the file
+		//sprintf( tmp_str, "del %s", interrupt_file_path );
+		//system( tmp_str );
+	/*	sprintf( tmp_str, "del %s", interrupt_file_path );
+		fbat = fopen(batcmd, "w");
+		fputs( tmp_str,fbat);
+		fclose(fbat);
+		system(batcmd);
+		*/
+	}	
+    else{
+      // printf("Error: Could not open %s\n",interrupt_file_path);
+       
+    }
+Proc_err (DEF_ERR_OPT,"ran all those commands in %s",interrupt_file_path);
+	
+QUIT
+											

@@ -1,6 +1,45 @@
 char sxcmd[32];
-int cpos=4;
-sprintf( sxcmd, "sx %d ",cpos);
-	AUERR=CPR_exec(sxcmd, WAIT_TERM);
-	Proc_err(DEF_ERR_OPT,"auerr=%d", AUERR);
-	QUIT
+int i=1;
+int l=1;
+int start_pos;
+int end_pos;
+int num_loops=1;
+char tmp_str[1024]="";
+int count=0;
+int init_start_pos=1;
+int init_end_pos=1;
+GETINT("Enter starting posistion - ", init_start_pos);
+GETINT("Enter end posistion - ", init_end_pos);
+GETINT("Enter number of loops - ", num_loops);
+
+for (l=1; l <= num_loops; l++)
+{
+   start_pos=init_start_pos;
+   end_pos=init_end_pos;
+   for (i = start_pos; i <= end_pos; i++) 
+   {   	
+      sprintf( sxcmd, "sx %i ",i);
+	    AUERR=CPR_exec(sxcmd, WAIT_TERM);
+	    if (AUERR <0) 
+	    {	
+	      //	 	 Proc_err(DEF_ERR_OPT,"auerr=%d", AUERR);
+	 	    sprintf(tmp_str, "TOBERMORY_TEST_LOOP_ERROR_POS_%i",i);
+		    XAU("whoopwhoop",tmp_str)	
+		    STOP;		    
+	    }
+	    count++;
+	    Proc_err(INFO_OPT, "Changed %i samples..",count);		    
+    
+   } //end of sx loop
+} ///end of number of loops
+
+sprintf( sxcmd, "sx ej ");
+AUERR=CPR_exec(sxcmd, WAIT_TERM);
+if (AUERR <0) 
+{	
+   sprintf(tmp_str, "TOBERMORY_TEST_LOOP_EJECT_LAST_SAMPLE_ERROR_POS_%i",i);
+	 XAU("whoopwhoop",tmp_str)	
+	 STOP;		    
+}
+
+QUIT

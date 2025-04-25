@@ -348,12 +348,12 @@ if(strcmp(cmd,"skiptest"))
 		}
 		// keep first dataset with wobb curves in
 		IEXPNO;
-		XAU("hump_sino_test_b1_02","")
+		XAU("hump_sino_test_b2_01","")
 		if(strcmp(cmd,"skipcarbon"))
 		{
 			expno=20;
 			SETCURDATA
-			XAU("poise_13c_p1_b1_01","")
+			XAU("poise_13c_p1_b2_01","")
 		}
 
 	}

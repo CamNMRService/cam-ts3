@@ -39,6 +39,10 @@ if(strcmp(cmd,"")!=0)
                         fprintf(fptr,"%d", currlockfield);
                         fclose(fptr);
                     }
+                    else
+                    {
+                    	Proc_err(DEF_ERR_OPT, "cannot open fieldvalue file for writing");
+                    }
                 }
             }
         }

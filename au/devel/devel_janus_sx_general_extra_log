@@ -401,7 +401,8 @@ proderrcount=0;
 while ( finish != TRUE ) //THE MAIN LOOP
 {
 	/*--- Let everyone know that the loop is running -*/
-   Proc_err ( INFO_OPT, "Waiting for sample...");
+   //Proc_err ( INFO_OPT, "Waiting for sample...");
+   Show_status( "Waiting for sample...");
    sleep(10);
    #pragma region Check for januskillfile - stop janus - start iconnnmr
    if ( access(januskillfile,F_OK) == 0) // file found

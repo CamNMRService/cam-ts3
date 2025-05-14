@@ -83,6 +83,8 @@ Added extra when creating the junk dataset to set the instrument name and probe 
 //Added #pragma region /endregion code to allow visual studio code to do folding  
 //fixed several bugs and got code indentation more consistent in the process
 //Added code and instrument defaults for test samples in (eg) POS59 & POS60
+//May 2025
+//call poise, hump with global_global_atma flag. Don't do atma before calling poise, hump
 
 #pragma region Get Instrument name
 char    instrum_name[255]="spect";
@@ -564,8 +566,8 @@ while ( finish != TRUE ) //THE MAIN LOOP
 				VIEWDATA_SAMEWIN
 				sprintf(tmp_cmd, "atma storeWobb 700");
 				Proc_err ( INFO_OPT,"***tmp_cmd- %s",tmp_cmd);
-				AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
-				XAU("poise_1h_p1_b2_01","")
+				//AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+				XAU("poise_1h_p1_b2_01",global_atma_flag)
 			}
 			if (strstr(field2, "poise_13c") != NULL) {
 				expno=expno+10;

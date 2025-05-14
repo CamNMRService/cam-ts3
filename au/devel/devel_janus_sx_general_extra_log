@@ -596,7 +596,7 @@ while ( finish != TRUE ) //THE MAIN LOOP
 				VIEWDATA_SAMEWIN
 				sprintf(tmp_cmd, "atma storeWobb 700");
 				Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
-				AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+				//AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 				XAU("poise_19f_p1_b2_01","")
 			}
 			if (strstr(field2, "hump") != NULL) {
@@ -606,7 +606,7 @@ while ( finish != TRUE ) //THE MAIN LOOP
 				VIEWDATA_SAMEWIN
 				sprintf(tmp_cmd, "atma storeWobb 700");
 				Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
-				AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+				//AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 				XAU("hump_sino_test_b2_01",ts_arg)
 			}
             #pragma endregion Deal with the contents of the line read in - ie run test

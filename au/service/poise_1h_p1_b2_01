@@ -162,6 +162,7 @@ if (i_argc == 3 ) { //assume the argument to set the atma_flag
     atma_flag = atoi(atma_flag_str);
     Proc_err(DEF_ERR_OPT,"atma_flag_str=%s, atma_flag=%i",atma_flag_str,atma_flag);
 }
+else {Proc_err(DEF_ERR_OPT,"not called with any options i_argc=%i, atma_flag_str=%s",i_argc,atma_flag_str)}
 
 //Data doesn't have instr or probehd set until an aquisition has been done.
 RPAR(param_set_name, "all")

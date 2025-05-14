@@ -17,7 +17,9 @@ B1_02 -  April 2023 - moved half width spec to defaults file and writing of shim
          Aug 2024 - remove the ABORT in case of failed humpcal, to avoid complete crash of automation. It will just not write out hump info in this case
 B2_01 - Jan/Feb 2025 make results file only have NO spaces in c can have trouble opening them
         Added code to deal with out of spec results - send an email
-      - added commandline option, which is an extra argument to pass to topshim;
+      - added commandline options, 
+      1 - which is an extra argument to pass to topshim;
+      2 - flag to set atma. If ==1, do atma. The default is to always atma.
 */
 
 
@@ -35,7 +37,7 @@ char probe_id[40];
 char probe_nickname[40];
 char results_path[PATH_MAX];
 char tmp_str[PATH_MAX];
-
+char atma_flag_str[8]="unset";
 
 /*!!!!VARIABLES THAT NEED TO BE SET!!!!*/
 /********************************/
@@ -46,6 +48,7 @@ char repo_name[40]="cam-ts"; //Set this to be the name of your repository
 
 int verbose = 0;
 int disclaimer = 0;
+int atma_flag=1; //if atma_flag==1, tune. Overriden by commandline options if present.
 //Version - the version of this AU program, to ensure defaults files used are of the correct version
 char au_version[8] ="b2_01";
 //set aqtest = 0 to issue aquisition commands to the spectrometer
@@ -86,6 +89,8 @@ Remove this warning by setting disclaimer to 0 in the AU program.");
   else {
   }
 } //end of disclaimer
+
+
 
 if (verbose ==1) {
    XCMD("setdef ackn ok");
@@ -204,9 +209,15 @@ char  datestamp[256];
 if (i_argc == 3) {
    sprintf(ts_arg,"%s",i_argv[2]);
  }
- else {
+
+if (i_argc == 4 ) { //assume the 2 argument is to set the atma_flag
+    sprintf(ts_arg,"%s",i_argv[2]);
+    sprintf(atma_flag_str,"%s",i_argv[3]); 
+    atma_flag = atoi(atma_flag_str);
+} else {
    sprintf(ts_arg," ");
  }
+
 RPAR(param_set_name, "all")
 STOREPAR("PULPROG", p_program)
 GETPROSOL
@@ -371,7 +382,11 @@ if (aqtest == 0)
 {
     sprintf(gui_cmd,"sendgui AQ %f",aq_double);
     XCMD(gui_cmd)
-    ATMA
+    if (atma_flag==1)
+      {
+         ATMA
+      }
+   
     // add topshim here with full tunea - maybe important if it's run all the otehr tests first
     // and also we want to make sure it adjusts XZ/YZ
     sprintf(tmp_str,"topshim plotall tunea convcomp %s",ts_arg);

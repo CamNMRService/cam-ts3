@@ -214,6 +214,7 @@ if (i_argc == 4 ) { //assume the 2 argument is to set the atma_flag
     sprintf(ts_arg,"%s",i_argv[2]);
     sprintf(atma_flag_str,"%s",i_argv[3]); 
     atma_flag = atoi(atma_flag_str);
+    Proc_err(DEF_ERR_OPT,"ts_arg,atma_flag_str=%s, atma_flag=%i",ts_arg,atma_flag_str,atma_flag);
 } else {
    sprintf(ts_arg," ");
  }

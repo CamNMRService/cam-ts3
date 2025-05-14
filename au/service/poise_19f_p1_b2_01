@@ -159,7 +159,7 @@ Remove this warning by setting disclaimer to 0 in the AU program.");
 if (i_argc == 3 ) { //assume the argument to set the atma_flag
     sprintf(atma_flag_str,"%s",i_argv[2]); 
     atma_flag = atoi(atma_flag_str);
-}
+    Proc_err(DEF_ERR_OPT,"atma_flag_str=%s, atma_flag=%i",atma_flag_str,atma_flag);
 
 
 //Data doesn't have instr or probehd set until an aquisition has been done.

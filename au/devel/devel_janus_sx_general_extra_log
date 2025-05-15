@@ -568,7 +568,7 @@ while ( finish != TRUE ) //THE MAIN LOOP
 				//Proc_err ( INFO_OPT,"***tmp_cmd- %s",tmp_cmd);
 				//AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 				//XAU("poise_1h_p1_b2_01",global_atma_flag)
-				sprintf(tmp_cmd,"poise_1h_p1_b2_01 %i",global_atma_flag)
+				sprintf(tmp_cmd,"poise_1h_p1_b2_01 %i",global_atma_flag);
 				XCMD(tmp_cmd)
 			}
 			if (strstr(field2, "poise_13c") != NULL) {
@@ -600,7 +600,7 @@ while ( finish != TRUE ) //THE MAIN LOOP
 				//Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
 				//AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 				//XAU("poise_19f_p1_b2_01",global_atma_flag)
-				sprintf(tmp_cmd,"poise_19f_p1_b2_01 %i",global_atma_flag)
+				sprintf(tmp_cmd,"poise_19f_p1_b2_01 %i",global_atma_flag);
 				XCMD(tmp_cmd)
 			}
 			if (strstr(field2, "hump") != NULL) {

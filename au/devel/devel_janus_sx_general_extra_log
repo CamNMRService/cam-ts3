@@ -577,9 +577,11 @@ while ( finish != TRUE ) //THE MAIN LOOP
 				GETCURDATA
 				VIEWDATA_SAMEWIN
 				sprintf(tmp_cmd, "atma storeWobb 700");
-				Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
-				AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
-				XAU("poise_13c_p1_b2_01","")
+				//Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
+				//AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+				//XAU("poise_13c_p1_b2_01","")
+				sprintf(tmp_cmd,"poise_13c_p1_b2_01 %i",global_atma_flag);
+				XCMD(tmp_cmd)
 			}
 			if (strstr(field2, "poise_31p") != NULL) {
 				expno=expno+10;
@@ -587,9 +589,11 @@ while ( finish != TRUE ) //THE MAIN LOOP
 				GETCURDATA
 				VIEWDATA_SAMEWIN
 				sprintf(tmp_cmd, "atma storeWobb 700");
-				Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
-				AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
-				XAU("poise_31p_p1_b2_01","")
+				//Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
+				//AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
+				//XAU("poise_31p_p1_b2_01","")
+				sprintf(tmp_cmd,"poise_31p_p1_b2_01 %i",global_atma_flag);
+				XCMD(tmp_cmd)
 			}
 			if (strstr(field2, "poise_19f") != NULL) {
 				expno=expno+10;

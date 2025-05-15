@@ -565,9 +565,11 @@ while ( finish != TRUE ) //THE MAIN LOOP
 				GETCURDATA
 				VIEWDATA_SAMEWIN
 				sprintf(tmp_cmd, "atma storeWobb 700");
-				Proc_err ( INFO_OPT,"***tmp_cmd- %s",tmp_cmd);
+				//Proc_err ( INFO_OPT,"***tmp_cmd- %s",tmp_cmd);
 				//AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
-				XAU("poise_1h_p1_b2_01",global_atma_flag)
+				//XAU("poise_1h_p1_b2_01",global_atma_flag)
+				sprintf(tmp_cmd,"poise_1h_p1_b2_01 %i",global_atma_flag)
+				XCMD(tmp_cmd)
 			}
 			if (strstr(field2, "poise_13c") != NULL) {
 				expno=expno+10;
@@ -595,9 +597,11 @@ while ( finish != TRUE ) //THE MAIN LOOP
 				GETCURDATA
 				VIEWDATA_SAMEWIN
 				sprintf(tmp_cmd, "atma storeWobb 700");
-				Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
+				//Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
 				//AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
-				XAU("poise_19f_p1_b2_01",global_atma_flag)
+				//XAU("poise_19f_p1_b2_01",global_atma_flag)
+				sprintf(tmp_cmd,"poise_19f_p1_b2_01 %i",global_atma_flag)
+				XCMD(tmp_cmd)
 			}
 			if (strstr(field2, "hump") != NULL) {
 				expno=expno+10;
@@ -608,10 +612,10 @@ while ( finish != TRUE ) //THE MAIN LOOP
 				Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
 				//AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 				sprintf(tmp_str,"%s %i",ts_arg,global_atma_flag);
-				sprintf(tmp_cmd,"sendgui hump_sino_b2_01 %s",tmp_str);
-				Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
+				sprintf(tmp_cmd,"hump_sino_b2_01 %s",tmp_str);
+				//Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
 				XCMD(tmp_cmd)
-				//XAU("hump_sino_test_b2_01",tmp_str)
+				
 			}
             #pragma endregion Deal with the contents of the line read in - ie run test
            loop++;

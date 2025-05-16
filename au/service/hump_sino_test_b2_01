@@ -20,6 +20,7 @@ B2_01 - Jan/Feb 2025 make results file only have NO spaces in c can have trouble
       - added commandline options, 
       1 - which is an extra argument to pass to topshim;
       2 - flag to set atma. If ==1, do atma. The default is to always atma.
+      Bugfix 16 May 2025 - If humpcal not read, stop (not abort) with error email 
 */
 
 
@@ -416,7 +417,9 @@ strcpy(hump_file_path, PROCPATH("humpcal.txt"));
 if ( ( hump_file = fopen (hump_file_path, "r") ) == NULL)
 {
 	Proc_err(INFO_OPT, "Could not open file %s Maybe Humpcal failed?", hump_file_path);
-	//ABORT - Don';'t do this as it crashes the automation! ("xau failed - maybe check ipso")
+   sprintf(tmp_str,"HUMP_MEASUREMENT_FAILED_%s_%s_HS_W_%.1f_HS_L_%.1f_HS_H_%.1f",instrum_name,nuc,hs_w_obs_float,hs_l_obs_float,hs_h_obs_float);
+   XAU("whoopwhoop",tmp_str)
+	STOP
 }
 else{
    fscanf(hump_file, "%f", &hs_h_obs_float);

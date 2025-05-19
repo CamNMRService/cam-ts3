@@ -570,6 +570,9 @@ while ( finish != TRUE ) //THE MAIN LOOP
 				//XAU("poise_1h_p1_b2_01",global_atma_flag)
 				sprintf(tmp_cmd,"poise_1h_p1_b2_01 %i",global_atma_flag);
 				XCMD(tmp_cmd)
+				XCMD("setdef ackn no");
+                XCMD("setdef stdout on");
+                XCMD("setdef stderr on");  
 			}
 			if (strstr(field2, "poise_13c") != NULL) {
 				expno=expno+10;
@@ -582,6 +585,9 @@ while ( finish != TRUE ) //THE MAIN LOOP
 				//XAU("poise_13c_p1_b2_01","")
 				sprintf(tmp_cmd,"poise_13c_p1_b2_01 %i",global_atma_flag);
 				XCMD(tmp_cmd)
+				XCMD("setdef ackn no");
+                XCMD("setdef stdout on");
+                XCMD("setdef stderr on");
 			}
 			if (strstr(field2, "poise_31p") != NULL) {
 				expno=expno+10;
@@ -594,6 +600,9 @@ while ( finish != TRUE ) //THE MAIN LOOP
 				//XAU("poise_31p_p1_b2_01","")
 				sprintf(tmp_cmd,"poise_31p_p1_b2_01 %i",global_atma_flag);
 				XCMD(tmp_cmd)
+				XCMD("setdef ackn no");
+                XCMD("setdef stdout on");
+                XCMD("setdef stderr on");
 			}
 			if (strstr(field2, "poise_19f") != NULL) {
 				expno=expno+10;
@@ -606,6 +615,9 @@ while ( finish != TRUE ) //THE MAIN LOOP
 				//XAU("poise_19f_p1_b2_01",global_atma_flag)
 				sprintf(tmp_cmd,"poise_19f_p1_b2_01 %i",global_atma_flag);
 				XCMD(tmp_cmd)
+				XCMD("setdef ackn no");
+                XCMD("setdef stdout on");
+                XCMD("setdef stderr on");
 			}
 			if (strstr(field2, "hump") != NULL) {
 				expno=expno+10;
@@ -619,6 +631,9 @@ while ( finish != TRUE ) //THE MAIN LOOP
 				sprintf(tmp_cmd,"hump_sino_b2_01 %s",tmp_str);
 				//Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
 				XCMD(tmp_cmd)
+				XCMD("setdef ackn no");
+                XCMD("setdef stdout on");
+                XCMD("setdef stderr on");
 				
 			}
             #pragma endregion Deal with the contents of the line read in - ie run test

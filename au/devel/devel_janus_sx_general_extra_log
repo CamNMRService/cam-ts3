@@ -143,7 +143,7 @@ else if (strcmp(instrum_name, "laphroiag") == 0) {
    protocol_pos_a = 59;
    protocol_pos_b = 60;
    sprintf(protocol_str_a,"POS59");
-   sprintf(protocol_str_a,"POS60");
+   sprintf(protocol_str_b,"POS60");
    global_atma_flag=0; //if zero, never do atma  
 }
 
@@ -158,7 +158,7 @@ else if (strcmp(instrum_name, "tobermory") == 0) {
    protocol_pos_a = 95;
    protocol_pos_b = 96	;
    sprintf(protocol_str_a,"POS95");
-   sprintf(protocol_str_a,"POS96");
+   sprintf(protocol_str_b,"POS96");
    global_atma_flag=0; //if zero, never do atma 
 }
 else if (strcmp(instrum_name, "lagavulin") == 0) {
@@ -171,7 +171,7 @@ else if (strcmp(instrum_name, "lagavulin") == 0) {
    protocol_pos_a = 59;
    protocol_pos_b = 60;
    sprintf(protocol_str_a,"POS59");
-   sprintf(protocol_str_a,"POS60");
+   sprintf(protocol_str_b,"POS60");
    global_atma_flag=1; //if zero, never do atma 
 }
 else if (strcmp(instrum_name, "glenfairn") == 0) {
@@ -185,7 +185,7 @@ else if (strcmp(instrum_name, "glenfairn") == 0) {
    protocol_pos_a = 59;
    protocol_pos_b = 60;
    sprintf(protocol_str_a,"POS59");
-   sprintf(protocol_str_a,"POS60");
+   sprintf(protocol_str_b,"POS60");
    global_atma_flag=1; //if zero, never do atma 
 }
 else if (strcmp(instrum_name, "arran") == 0) {
@@ -199,7 +199,7 @@ else if (strcmp(instrum_name, "arran") == 0) {
    protocol_pos_a = 59;
    protocol_pos_b = 60;
    sprintf(protocol_str_a,"POS59");
-   sprintf(protocol_str_a,"POS60");
+   sprintf(protocol_str_b,"POS60");
    global_atma_flag=0; //if zero, never do atma 
 }
 else {
@@ -798,13 +798,13 @@ while ( finish != TRUE ) //THE MAIN LOOP
 
    if ( strstr ( protocol, protocol_str_a) != NULL )
    {
-	   // found test sample string in protocol so set pos to 60
+	   // found test sample string in protocol so set pos to 59
 	   cpos=protocol_pos_a;
    }
 
 	if ( strstr ( protocol, protocol_str_b) != NULL )
 	{
-		// found test sample string in protocol so set pos to 59
+		// found test sample string in protocol so set pos to 60
 		cpos=protocol_pos_b;
 	}
     #pragma endregion NEEDS PATCHING Check protocol if it is a test position and if so put set that to be put into magnet  

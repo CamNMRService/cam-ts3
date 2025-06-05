@@ -14,7 +14,7 @@
 //example usage :- 
 //janus_topshim_watchdog THIS_IS_A_MESSAGE_TO_SEND ordmax=8
 //NB the message can't have spaces in... Ortherwise would look like more command line options.
-
+//Additions June 2025 - Take an extra commandline argument.
 
 
 #include <time.h>
@@ -30,8 +30,9 @@ char tmp_str[PATH_MAX];
 char datestamp[256];
 char lockpath[PATH_MAX];
 char pidpath[PATH_MAX];
-char message[1023];
-char topshim_option[255];
+char message[1023]="NO_MESSAGE";
+char topshim_option_a[255];
+char topshim_option_b[255];
 char bat_cmd_path[PATH_MAX]="NULL";
 int pid;
 int ts_major = GetTsVersionMajor();
@@ -47,7 +48,8 @@ sprintf(bat_cmd_path,"F:\\chemist\\xcopy_tsData.bat",ts_major,ts_minor,ts_patch)
 //set topshim_option to just a blank character - will this prevent errors?
 
 
-sprintf(topshim_option," ");
+sprintf(topshim_option_a," ");
+sprintf(topshim_option_b," ");
 
 if (i_argc == 3 ) { //assume the argument is a message to send
     sprintf(message,"%s",i_argv[2]); 
@@ -55,10 +57,14 @@ if (i_argc == 3 ) { //assume the argument is a message to send
 
 if (i_argc == 4) {
    sprintf(message,"%s",i_argv[2]); 
-   sprintf(topshim_option,"%s",i_argv[3]); 
+   sprintf(topshim_option_a,"%s",i_argv[3]); 
+}
+if (i_argc == 5) {
+   sprintf(message,"%s",i_argv[2]); 
+   sprintf(topshim_option_b,"%s",i_argv[4]); 
 }
 
-if (i_argc > 4 ){
+if (i_argc > 5 ){
     sprintf(tmp_str,"Too many arguments passed to %s",i_argv[0]);
     STOPMSG(tmp_str)
 }
@@ -84,7 +90,8 @@ CPR_exec("xau topshimkiller", WAIT_START);
 
 // execute topshim as desired
 //sprintf(tscommand,"topshim plotall convcomp %s", cmd); //not sure why cmd is here...
-sprintf(tscommand,"topshim plotall convcomp %s",topshim_option);
+sprintf(tscommand,"topshim plotall convcomp %s %s",topshim_option_a,topshim_option_b);
+Proc_err ( INFO_OPT, "topshim command is - %s Number of arguments this au program called with is - %i", tscommand, i_argc);
 XCMD(tscommand);
 
 

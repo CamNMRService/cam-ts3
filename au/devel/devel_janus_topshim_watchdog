@@ -30,9 +30,9 @@ char tmp_str[PATH_MAX];
 char datestamp[256];
 char lockpath[PATH_MAX];
 char pidpath[PATH_MAX];
-char message[1023]="NO_MESSAGE";
-char topshim_option_a[255];
-char topshim_option_b[255];
+char message[1023]="NO_DEFINED_MESSAGE_SOMETHING_WENT_WRONG_WITH_janus_topshim_watchdog";
+char topshim_option_a[255]=" ";
+char topshim_option_b[255]=" ";
 char bat_cmd_path[PATH_MAX]="NULL";
 int pid;
 int ts_major = GetTsVersionMajor();
@@ -59,6 +59,7 @@ if (i_argc == 4) {
    sprintf(message,"%s",i_argv[2]); 
    sprintf(topshim_option_a,"%s",i_argv[3]); 
 }
+
 if (i_argc == 5) {
    sprintf(message,"%s",i_argv[2]); 
    sprintf(topshim_option_b,"%s",i_argv[4]); 
@@ -87,13 +88,11 @@ fclose(lockfile);
 CPR_exec("xau topshimkiller", WAIT_START); 
 
 
-
 // execute topshim as desired
 //sprintf(tscommand,"topshim plotall convcomp %s", cmd); //not sure why cmd is here...
 sprintf(tscommand,"topshim plotall convcomp %s %s",topshim_option_a,topshim_option_b);
 Proc_err ( INFO_OPT, "topshim command is - %s Number of arguments this au program called with is - %i", tscommand, i_argc);
 XCMD(tscommand);
-
 
 
 // delete the lockfile  *and kill the killer program!!!!!* if topshim completes OK

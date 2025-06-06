@@ -32,6 +32,7 @@ if (i_argc == 2)
     zinc=DEFZINC;
    }
 
+Proc_err(DEF_ERR_OPT,"Called with this number of arguments - %i,\n zinc_str=%s \n zinc-int = %i",i_argc,zinc_str,zinc);
 GETCURDATA
 sprintf(tscommand,"topshim plotall tunea %s", cmd);
 XCMD(tscommand);

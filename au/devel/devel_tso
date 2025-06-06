@@ -17,7 +17,7 @@ char zinc_str[256]="0";
 
 zinc=DEFZINC;
 
-if (i_argc == 2) 
+if (i_argc == 3) 
 { //assume the 2 argument is to set the zinc
     sprintf(zinc_str,"%s",i_argv[2]);
     zinc = atoi(zinc_str);
@@ -34,7 +34,7 @@ if (i_argc == 2)
 
 Proc_err(DEF_ERR_OPT,"Called with this number of arguments - %i,\n zinc_str=%s \n zinc-int = %i",i_argc,zinc_str,zinc);
 GETCURDATA
-sprintf(tscommand,"topshim plotall tunea %s", cmd);
+sprintf(tscommand,"topshim plotall tunea", "");
 XCMD(tscommand);
 
 GETBSMSVAL(BSN_Z,z)

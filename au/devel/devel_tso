@@ -1,0 +1,41 @@
+/****************************************************************/
+/*     tso
+     
+Topshim, then
+add number to z shim, default is 22 units
+- June 2025 DJH add command line option to set zinc
+*/
+// recalibrated on 700 for 670l/hr vt flow 2024/02/13
+#include <inc/bsms_program>    /* must be the first statement ****/
+
+#define DEFZINC 18
+
+int z, zinc;
+char tscommand [256];
+char zinc_str[256]="0";
+
+if (i_argc == 2) 
+{ //assume the 2 argument is to set the zinc
+    sprintf(zinc_str,"%s",i_argv[2]);
+    zinc = atoi(zinc_str);
+    Proc_err(DEF_ERR_OPT,"Called with this number of arguments - %i,\n zinc_str=%s \n zinc-int = %i",i_argc,zinc_str_str,zinc);
+    if ( (zinc>30) || (zinc < -30) )
+    {
+      Proc_err(DEF_ERR_OPT,"Zinc is too wild - %i, setting to default DEFINC",zinc);
+      zinc=DEFINC;
+    }
+} else
+   {
+    zinc=DEFZINC;
+   }
+
+GETCURDATA
+sprintf(tscommand,"topshim plotall tunea %s", cmd);
+XCMD(tscommand);
+
+GETBSMSVAL(BSN_Z,z)
+
+z+=zinc;
+PUTBSMSVAL(BSN_Z, z)
+
+QUIT

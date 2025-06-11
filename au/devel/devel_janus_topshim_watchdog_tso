@@ -40,6 +40,7 @@ int pid;
 int ts_major = GetTsVersionMajor();
 int ts_minor = GetTsVersionMinor();
 int ts_patch = GetTsVersionPl();
+int z;
 int z_inc = 0;
 int max_z_inc = 50;
 int default_z_inc = 10;

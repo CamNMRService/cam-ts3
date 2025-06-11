@@ -16,7 +16,7 @@
 //NB the message can't have spaces in... Ortherwise would look like more command line options.
 //Additions June 2025 - Take an extra commandline argument.
 
-
+#include <inc/bsms_program>    /* must be the first statement ****/
 #include <time.h>
 time_t now_s, dtime_s;		  	/* seconds since 1970 */
 struct tm *now;	  		/* structure with year, month etc. */

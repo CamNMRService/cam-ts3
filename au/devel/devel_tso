@@ -8,7 +8,7 @@ add number to z shim, default is 22 units
 // recalibrated on 700 for 670l/hr vt flow 2024/02/13
 #include <inc/bsms_program>    /* must be the first statement ****/
 
-#define DEFZINC 18
+#define DEFZINC 10
 #define MAXZINC 50
 
 int z, zinc;

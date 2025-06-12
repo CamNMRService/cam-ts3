@@ -152,8 +152,8 @@ Proc_err ( INFO_OPT, "topshim command is - %s Number of arguments this au progra
 XCMD(tscommand);
 
 //if called with the tso method
-if ( (strcmp(method,"tso")==0) )
-{
+if (strcmp(method, "tso") == 0){
+
   Proc_err ( INFO_OPT,"method = %s\n z_inc = %i",method,z_inc)
   GETBSMSVAL(BSN_Z,z)
   z+=z_inc;

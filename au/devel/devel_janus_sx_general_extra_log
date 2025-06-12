@@ -628,7 +628,7 @@ while ( finish != TRUE ) //THE MAIN LOOP
 				Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
 				//AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 				sprintf(tmp_str,"%s %i",ts_arg,global_atma_flag);
-				sprintf(tmp_cmd,"hump_sino_b2_01 %s",tmp_str);
+				sprintf(tmp_cmd,"hump_sino_test_b2_01 %s",tmp_str);
 				//Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
 				XCMD(tmp_cmd)
 				XCMD("setdef ackn no");

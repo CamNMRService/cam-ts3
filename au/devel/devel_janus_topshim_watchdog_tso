@@ -14,7 +14,10 @@
 //example usage :- 
 //janus_topshim_watchdog THIS_IS_A_MESSAGE_TO_SEND ordmax=8
 //NB the message can't have spaces in... Ortherwise would look like more command line options.
-//Additions June 2025 - Take an extra commandline argument.
+//Additions June 2025 - Take  extra commandline arguments to do z offset for temperature compensation
+//example usage <cmd> // method, z_inc, message, topshim_option_a, topshim_option_b
+//if tso is tso, do temperature offset.
+
 
 #include <inc/bsms_program>    /* must be the first statement ****/
 #include <time.h>

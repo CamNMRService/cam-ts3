@@ -895,7 +895,7 @@ while ( finish != TRUE ) //THE MAIN LOOP
 	    Proc_err ( INFO_OPT,"***tmp_cmd -%s",tmp_cmd);
         sprintf(tmp_str,"%s\n",tmp_cmd);
         strcat(janusinfostring, tmp_str);
-		if ( (strstr(instrument,"arran")!=NULL) )
+		if ( (strstr(instrum_name,"arran")!=NULL) )
 		{
 			XAU("setfield",solvent)
 			sprintf(tmp_str,"setfield %s\n",solvent);
@@ -918,10 +918,10 @@ while ( finish != TRUE ) //THE MAIN LOOP
 		  sampleproblem=1;
         }
         else {
-            if ( (strstr(instrument,"arran")!=NULL) )
+            if ( (strstr(instrum_name,"arran")!=NULL) )
 		    {
 			   XAU("storefield",solvent)
-			   sprintf(tmp_str,"strorefield %s\n",solvent);
+			   sprintf(tmp_str,"storefield %s\n",solvent);
                strcat(janusinfostring, tmp_str);
 		    } 
 

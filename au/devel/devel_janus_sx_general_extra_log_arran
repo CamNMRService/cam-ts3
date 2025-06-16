@@ -88,6 +88,9 @@ Added extra when creating the junk dataset to set the instrument name and probe 
 //June 2025
 //Working on arran
 //Added setfield/store field around lock.
+//Now adding new topshim calling with method, z_inc, message, topshim_option_a, topshim_option_b
+
+
 
 #pragma region Get Instrument name
 char    instrum_name[255]="spect";
@@ -112,10 +115,10 @@ FETCHPARS("PROBHD", probe_name)
 /*end of get instrument and probe name*/
 #pragma endregion Get Instrument Name
 #pragma region Set Instrument Global Variables
-/*initial gobal variables to change for each instrument*/
+/*initial global variables to change for each instrument and their default values*/
    char def_file[PATH_MAX]="d:/chemist/defaults-csv.txt"; //janus software defaults
    char interrupt_file_path[PATH_MAX]="d:\\chemist\\interrupt.csv";//location of interrupt file, if it exist, contains a list of commands
-   char changer_ip[16]="null";
+   char changer_ip[16]="null"; //Set to null for all until code is generalised
    char ts_arg[32]="none";
    char test_parset[256] = "PROTON"; //assume this is going to be ok
    int  test_pos = 60;
@@ -124,13 +127,16 @@ FETCHPARS("PROBHD", probe_name)
    char protocol_str_a[256] = "POS59";
    char protocol_str_b[256] = "POS60";
    int global_atma_flag=1; //if zero, never do atma  
-   
+   char topshim_option_a[255]=" ordmax=5"; //This should be good on all instruments
+   char topshim_option_b[255]=" ";
+   int z_inc=0; //temperature offset for z-shim correction for D2O
+
 if (strcmp(instrum_name, "cragganmore") == 0) {
    /*cragganmore dependent global variables!!!!!!*/
    sprintf(def_file,"d:/chemist/defaults-csv.txt"); //janus software defaults file
    sprintf(interrupt_file_path,"d:\\chemist\\interrupt.csv");//location of interrupt file, if it exist, contains a list of commands
    sprintf(changer_ip,"NULL");
-   sprintf(ts_arg," ordmax=5");
+   sprintf(topshim_option_a," ordmax=5");
    sprintf(test_parset,"PROTON"); //has got an untunable QNP probe
    test_pos = 16;
    global_atma_flag=0; //if zero, never do atma  
@@ -140,14 +146,14 @@ else if (strcmp(instrum_name, "laphroiag") == 0) {
    sprintf(def_file,"f:/chemist/defaults-csv.txt"); //janus software defaults file
    sprintf(interrupt_file_path,"f:\\chemist\\interrupt.csv");//location of interrupt file, if it exist, contains a list of commands
    sprintf(changer_ip,"NULL");
-   sprintf(ts_arg,"ordmax=5");
+   sprintf(topshim_option_a," ordmax=5");
    sprintf(test_parset,"PROTON"); //has got a broken probe and can only do 1H and 19F
    test_pos = 60;
    protocol_pos_a = 59;
    protocol_pos_b = 60;
    sprintf(protocol_str_a,"POS59");
    sprintf(protocol_str_b,"POS60");
-   global_atma_flag=0; //if zero, never do atma  
+   global_atma_flag=0; //if zero, never do atma  - laphroiags probe is broken
 }
 
 else if (strcmp(instrum_name, "tobermory") == 0) {
@@ -155,7 +161,6 @@ else if (strcmp(instrum_name, "tobermory") == 0) {
    sprintf(def_file,"d:/chemist/defaults-csv.txt"); //janus software defaults file
    sprintf(interrupt_file_path,"d:\\chemist\\interrupt.csv");//location of interrupt file, if it exist, contains a list of commands
    sprintf(changer_ip,"NULL");
-   sprintf(ts_arg,"ordmax=5");
    sprintf(test_parset,"C13CPD");
    test_pos = 96;
    protocol_pos_a = 95;
@@ -168,7 +173,7 @@ else if (strcmp(instrum_name, "lagavulin") == 0) {
    sprintf(def_file,"f:/chemist/defaults-csv.txt"); //janus software defaults file
    sprintf(interrupt_file_path,"f:\\chemist\\interrupt.csv");//location of interrupt file, if it exist, contains a list of commands
    sprintf(changer_ip,"NULL");
-   sprintf(ts_arg,"ordmax=5");
+   sprintf(topshim_option_a," ordmax=5");
    sprintf(test_parset,"C13CPD");
    test_pos = 60;
    protocol_pos_a = 59;
@@ -204,6 +209,8 @@ else if (strcmp(instrum_name, "arran") == 0) {
    sprintf(protocol_str_a,"POS59");
    sprintf(protocol_str_b,"POS60");
    global_atma_flag=0; //if zero, never do atma 
+   sprintf(topshim_option_a," tuneaxyz");
+   z_inc=11;
 }
 else {
     Proc_err ( INFO_OPT,"***Instrument is unknown - %s", instrum_name);
@@ -895,6 +902,7 @@ while ( finish != TRUE ) //THE MAIN LOOP
 	    Proc_err ( INFO_OPT,"***tmp_cmd -%s",tmp_cmd);
         sprintf(tmp_str,"%s\n",tmp_cmd);
         strcat(janusinfostring, tmp_str);
+       //If Arran, do set field
 		if ( (strstr(instrum_name,"arran")!=NULL) )
 		{
 			XAU("setfield",solvent)
@@ -917,6 +925,7 @@ while ( finish != TRUE ) //THE MAIN LOOP
 	     	      // XAU("whoopwhoop",tmp_str)
 		  sampleproblem=1;
         }
+        //If it did lock and the instrument is Arran, storefield
         else {
             if ( (strstr(instrum_name,"arran")!=NULL) )
 		    {

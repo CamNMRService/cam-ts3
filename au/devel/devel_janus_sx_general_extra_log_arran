@@ -1013,7 +1013,7 @@ with NMR service team about whether medium or thick wall tubes are more appropri
         else //special solvents with d2o in, to *NOT* do tso need to in lowercase
         {
 	       sprintf(topshim_method,"tso");
-		   if(strstr(instrument,"rran")!=0)
+		   if(strstr(instrum_name,"rran")!=0)
 		   {
 			  sprintf(topshim_option_a,"tunea");
 		   }

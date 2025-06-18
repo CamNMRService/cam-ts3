@@ -119,16 +119,17 @@ FETCHPARS("PROBHD", probe_name)
    char def_file[PATH_MAX]="d:/chemist/defaults-csv.txt"; //janus software defaults
    char interrupt_file_path[PATH_MAX]="d:\\chemist\\interrupt.csv";//location of interrupt file, if it exist, contains a list of commands
    char changer_ip[16]="null"; //Set to null for all until code is generalised
-   char ts_arg[32]="none";
+   char ts_arg[32]="none"; //should be redundant
    char test_parset[256] = "PROTON"; //assume this is going to be ok
-   int  test_pos = 60;
-   int  protocol_pos_a = 59;
+   int  test_pos = 60; // where the test sample goes for the interrupt.csv triggered tests
+   int  protocol_pos_a = 59; //special position for service samples which are priotised
    int  protocol_pos_b = 60;
    char protocol_str_a[256] = "POS59";
    char protocol_str_b[256] = "POS60";
    int global_atma_flag=1; //if zero, never do atma  
-   char topshim_option_a[255]=" ordmax=5"; //This should be good on all instruments
-   char topshim_option_b[255]=" ";
+   char topshim_option_a[255]=" "; // reset according to instrument/solvent (convcomp is always done)
+   char topshim_option_b[255]=" "; //set to ordmax=5 for those instruments that go funny >5
+   char topshim_method[16]="topshim"; //default method - also can do tso for z-shim temperature correction
    int z_inc=0; //temperature offset for z-shim correction for D2O
 
 if (strcmp(instrum_name, "cragganmore") == 0) {
@@ -136,7 +137,7 @@ if (strcmp(instrum_name, "cragganmore") == 0) {
    sprintf(def_file,"d:/chemist/defaults-csv.txt"); //janus software defaults file
    sprintf(interrupt_file_path,"d:\\chemist\\interrupt.csv");//location of interrupt file, if it exist, contains a list of commands
    sprintf(changer_ip,"NULL");
-   sprintf(topshim_option_a," ordmax=5");
+   sprintf(topshim_option_b," ordmax=5");
    sprintf(test_parset,"PROTON"); //has got an untunable QNP probe
    test_pos = 16;
    global_atma_flag=0; //if zero, never do atma  
@@ -146,7 +147,7 @@ else if (strcmp(instrum_name, "laphroiag") == 0) {
    sprintf(def_file,"f:/chemist/defaults-csv.txt"); //janus software defaults file
    sprintf(interrupt_file_path,"f:\\chemist\\interrupt.csv");//location of interrupt file, if it exist, contains a list of commands
    sprintf(changer_ip,"NULL");
-   sprintf(topshim_option_a," ordmax=5");
+   sprintf(topshim_option_b," ordmax=5");
    sprintf(test_parset,"PROTON"); //has got a broken probe and can only do 1H and 19F
    test_pos = 60;
    protocol_pos_a = 59;
@@ -173,7 +174,7 @@ else if (strcmp(instrum_name, "lagavulin") == 0) {
    sprintf(def_file,"f:/chemist/defaults-csv.txt"); //janus software defaults file
    sprintf(interrupt_file_path,"f:\\chemist\\interrupt.csv");//location of interrupt file, if it exist, contains a list of commands
    sprintf(changer_ip,"NULL");
-   sprintf(topshim_option_a," ordmax=5");
+   sprintf(topshim_option_b," ordmax=5");
    sprintf(test_parset,"C13CPD");
    test_pos = 60;
    protocol_pos_a = 59;
@@ -1001,7 +1002,23 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 		//NB janus_topshim_watchdog can take an option for an additional option to pass to topshim
 		//should be called with janus_topshim_watchdog MESSAGE_NO_SPACES_OR_DASHES ordmax=5
 		//janus_topshim_watchdog should also take care of the whoopwhoop email
-		sprintf(tmp_cmd,"janus_topshim_watchdog TOPSHIM_FAILED_%s_%i %s",tmp_fname,cpos,ts_arg);
+		// the tso topshim command sprintf(tscommand,"topshim plotall tunea %s", cmd);
+		//new devel_janus_topshim_watchdog_tso arguments -
+		// method, z_inc, message, topshim_option_a, topshim_option_b
+
+        if(strstr(solvent, "D2O")==0)
+        {
+	       sprintf(topshim_method,"topshim");
+        }
+        else //special solvents with d2o in, to *NOT* do tso need to in lowercase
+        {
+	       sprintf(topshim_method,"tso");
+		   if(strstr(instrument,"rran")!=0)
+		   {
+			  sprintf(topshim_option_a,"tunea");
+		   }
+        }
+		sprintf(tmp_cmd,"devel_janus_topshim_watchdog_tso %s %i TOPSHIM_FAILED_%s_%i %s %s",topshim_method, z_inc, tmp_fname,cpos,topshim_option_a,topshim_option_b);
 		Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
 		sprintf(tmp_str,"%s\n",tmp_cmd);
 		strcat(janusinfostring, tmp_str);

@@ -1006,7 +1006,7 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 		//new devel_janus_topshim_watchdog_tso arguments -
 		// method, z_inc, message, topshim_option_a, topshim_option_b
 
-        if(strstr(solvent, "D2O")==0)
+        if(strstr(solvent, "D2O")==0) //not found, so no pointer returned to start of substring
         {
 	       sprintf(topshim_method,"topshim");
         }

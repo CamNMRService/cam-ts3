@@ -514,8 +514,9 @@ while ( finish != TRUE ) //THE MAIN LOOP
 			Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
 			XCMD(tmp_cmd)
 			Proc_err ( INFO_OPT,"ts_arg - %s",ts_arg);
-			sprintf(tmp_cmd,"janus_topshim_watchdog TOPSHIM_FAILED_%s %s",name, ts_arg);
-			Proc_err ( INFO_OPT,"***tmp_cmd - %s, ts_arg - %s",tmp_cmd,ts_arg);
+			sprintf(tmp_cmd,"devel_janus_topshim_watchdog_tso %s %i TEST_SAMPLE_TOPSHIM_FAILED_%s_%i %s %s",topshim_method, z_inc, tmp_fname,cpos,topshim_option_a,topshim_option_b);
+			//sprintf(tmp_cmd,"janus_topshim_watchdog TOPSHIM_FAILED_%s %s",name, ts_arg);
+			Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
 			XCMD(tmp_cmd);
 			if (AUERR<0)
 			{

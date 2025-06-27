@@ -199,8 +199,8 @@ else if (strcmp(instrum_name, "glenfairn") == 0) {
 }
 else if (strcmp(instrum_name, "arran") == 0) {
     /*arran dependent global variables!!!!!!*/
-   sprintf(def_file,"d:/chemist/defaults-csv.txt"); //janus software defaults file
-   sprintf(interrupt_file_path,"d:\\chemist\\interrupt.csv");//location of interrupt file, if it exist, contains a list of commands
+   sprintf(def_file,"e:/chemist/defaults-csv.txt"); //janus software defaults file
+   sprintf(interrupt_file_path,"e:\\chemist\\interrupt.csv");//location of interrupt file, if it exist, contains a list of commands
    sprintf(changer_ip,"NULL");
    sprintf(ts_arg,"ordmax=5");
    sprintf(test_parset,"C13CPD");
@@ -640,7 +640,8 @@ while ( finish != TRUE ) //THE MAIN LOOP
 				Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
 				//AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 				sprintf(tmp_str,"%s %i",ts_arg,global_atma_flag);
-				sprintf(tmp_cmd,"hump_sino_b2_01 %s",tmp_str);
+				
+				sprintf(tmp_cmd,"hump_sino_test_b2_01 %s",tmp_str);
 				//Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
 				XCMD(tmp_cmd)
 				XCMD("setdef ackn no");
@@ -673,7 +674,7 @@ while ( finish != TRUE ) //THE MAIN LOOP
    }
    #pragma endregion If we can open the interrupt file, read it and run through its contents    
    #pragma region Maybe parse_sexpress_web  
-   if (strcmp(changer_ip, "null") != 0){
+   if (strcmp(changer_ip, "NULL") != 0){
       XAU("parse_sexpress_web","") //test sample went in, parse the sx logs
    }
    #pragma endregion Maybe parse_sexpress_web 
@@ -940,6 +941,7 @@ while ( finish != TRUE ) //THE MAIN LOOP
 		#pragma endregion Lock solvent
 	    #pragma region Check protocol for X nuclei, if present set ATMAflag=0
 		// new atma handling:
+		//BUG experiment isn't defined/read in here???
         sprintf(tmp_str,"protocol - %s, experiment - % s, ATMA\n",protocol,experiment);
         strcat(janusinfostring, tmp_str);
         if ( strstr ( protocol, "19F") != NULL )

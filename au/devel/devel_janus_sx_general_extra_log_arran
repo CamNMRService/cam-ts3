@@ -966,7 +966,9 @@ while ( finish != TRUE ) //THE MAIN LOOP
         }
 		#pragma endregion Check protocol for X nuclei & set ATMAflag=0
 		#pragma region Check if experiment is not a 2H and ATMA on PROTONRO parset
-        if ( (strstr ( experiment, "2h") == NULL) && (strstr ( experiment, "2H") == NULL)) // So this means "the string 2h is not present AND the string 2H is not present"
+		//has to be a check on protocol as experiment is not set - is set further below.
+        //if ( (strstr ( experiment, "2h") == NULL) && (strstr ( experiment, "2H") == NULL)) // So this means "the string 2h is not present AND the string 2H is not present"
+		if ( (strstr ( protocol, "2h") == NULL) && (strstr ( protocol_pos_a, "2H") == NULL)) // So this means "the string 2h is not present AND the string 2H is not present"
 		//only do the below if its not 2H
 		{
            if ( ((ATMAflag==0) && (global_atma_flag !=0)) || (strcmp(instrum_name, "tobermory") == 0) ) //OR for tobermory here - if its tobermory, always tune

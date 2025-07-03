@@ -403,7 +403,7 @@ if (aqtest == 0)
     STOREPAR("LB",sino_lb_float);
     ZG_OVERWRITE
 
-    if ( (ts_major=4) && (ts_minor>=0) && (ts_patch>=6) ) {
+    if ( (ts_major>=3) && (ts_minor>=6) ) {
     EFP
     XCMD("sendgui apbk")
     XCMD("sendgui apbk -bo" )

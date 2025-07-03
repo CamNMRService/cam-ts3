@@ -99,6 +99,7 @@ Added option to skip systest etc - call with "janus_sx_arran skiptest"
 Then it will skip the 2 min delay, the systems tests, and the initial ii
 and just crack on with the experiments . Also "skipcarbon" to skip just the carbonn test but do the rest
 
+Short delay before shim in vain hope it will minimise the odd failures...
 */
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 char def_file[255]="e:/chemist/defaults-csv.txt"; //janus software defaults
@@ -609,6 +610,9 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 //should be called with janus_topshim_watchdog MESSAGE_NO_SPACES_OR DASHES ordmax=5
 
 //janus_topshim_watchdog should also take care of the whoopwhoop email
+
+//trying to make the shimming better...
+sleep(30);
 
 sprintf(tmp_str,"janus_topshim_watchdog_arran TOPSHIM_FAILED_%s_%i",tmp_fname,cpos);
 XCMD(tmp_str);

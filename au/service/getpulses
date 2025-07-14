@@ -3,7 +3,7 @@
 
 
 //This au program checks the pulsecal value against the default value 
-// and if the result is within +5% it doesn't do anything (because pulsecal is not super reliable on organic samples)
+// and if the result is within +2% it doesn't do anything (because pulsecal is not super reliable on organic samples)
 // if between +5 and +50%, does getprosol with the found proton pulse length
 // If >+50%, does getprosol with default value +50% 
 // This is for safety: shaped pulses and decoupling get executed at higher power
@@ -63,7 +63,7 @@ if ((pulsecalfile=fopen(pulsecalfilename, "r")) != NULL)
 		{
 			// we found integers in a vaguely sensible range, continue
 			
-		    if(protonpulse>(statusprotonpulse*1.05))
+		    if(protonpulse>(statusprotonpulse*1.02))
 	        { 
             //Proc_err(DEF_ERR_OPT, "long pulse");
 			// pulse is longer than normal, so check how long

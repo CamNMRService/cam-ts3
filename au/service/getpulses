@@ -3,7 +3,7 @@
 
 
 //This au program checks the pulsecal value against the default value 
-// and if the result is within +5% it doesn't do anything (because pulsecal is not super reliable on organic samples)
+// and if the result is within +2% it doesn't do anything (because pulsecal is not super reliable on organic samples)
 // if between +5 and +50%, does getprosol with the found proton pulse length
 // If >+50%, does getprosol with default value +50% 
 // This is for safety: shaped pulses and decoupling get executed at higher power
@@ -29,7 +29,7 @@ char instrum[128], result[255];
 char nuc1[8], nuc2[8], prosolstring[256], CPulse[8],HPulse[8];
 float carbonpulse;
 double carbonfactor, realcarbonfactor;
-float protonpulse, statusprotonpulse, protonpower, carbonpower, dummyp1, realcarbonpulse;
+float protonpulse, statusprotonpulse, protonpower, carbonpower, dummyp1,prosolcarbonpulse, realcarbonpulse;
 int test;
 
 GETCURDATA;
@@ -63,7 +63,7 @@ if ((pulsecalfile=fopen(pulsecalfilename, "r")) != NULL)
 		{
 			// we found integers in a vaguely sensible range, continue
 			
-		    if(protonpulse>(statusprotonpulse*1.05))
+		    if(protonpulse>(statusprotonpulse*1.02))
 	        { 
             //Proc_err(DEF_ERR_OPT, "long pulse");
 			// pulse is longer than normal, so check how long
@@ -124,16 +124,16 @@ if ((pulsecalfile=fopen(pulsecalfilename, "r")) != NULL)
 	  	            }
 	  	            else carbonfactor=1.0;
 	                //Calculate reference carbon pulse
-	  	            carbonpulse=carbonpulse*carbonfactor;
+	  	            prosolcarbonpulse=carbonpulse*carbonfactor;
                     // Build the string for getprosol 
-                    sprintf(prosolstring,"sendgui getprosol 1H %f %f 13C %.2lf %.2lf", dummyp1, protonpower, carbonpulse, carbonpower);
+                    sprintf(prosolstring,"sendgui getprosol 1H %f %f 13C %.2lf %.2lf", dummyp1, protonpower, prosolcarbonpulse, carbonpower);
 					// Find real carbon pulse
 					realcarbonfactor=sqrt(protonpulse/statusprotonpulse);
-					realcarbonpulse=carbonpulse*carbonfactor;
+					realcarbonpulse=carbonpulse*realcarbonfactor;
 					 // now we can execute getprosol - moved inside loop as we need to do p1/p3 stuff afterwards
                		 if(dummy)
                		{
-                    	Proc_err(DEF_ERR_OPT,"Getprosol string is: %s \n CPulse is %s  = %f HPulse is %s = %f", prosolstring,CPulse, realcarbonpulse,HPulse, protonpulse);
+                    	Proc_err(DEF_ERR_OPT,"Getprosol string is: %s \n CPulse is %s  = %f HPulse is %s = %f, carbonfactor is %f, realcarbonfactor is %f", prosolstring,CPulse, realcarbonpulse,HPulse, protonpulse, carbonfactor, realcarbonfactor);
                 	}
                 	else
                 	{

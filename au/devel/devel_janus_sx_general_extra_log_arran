@@ -85,6 +85,12 @@ Added extra when creating the junk dataset to set the instrument name and probe 
 //Added code and instrument defaults for test samples in (eg) POS59 & POS60
 //May 2025
 //call poise, hump with global_global_atma flag. Don't do atma before calling poise, hump
+//June 2025
+//Working on arran
+//Added setfield/store field around lock.
+//Now adding new topshim calling with method, z_inc, message, topshim_option_a, topshim_option_b
+
+
 
 #pragma region Get Instrument name
 char    instrum_name[255]="spect";
@@ -109,25 +115,29 @@ FETCHPARS("PROBHD", probe_name)
 /*end of get instrument and probe name*/
 #pragma endregion Get Instrument Name
 #pragma region Set Instrument Global Variables
-/*initial gobal variables to change for each instrument*/
+/*initial global variables to change for each instrument and their default values*/
    char def_file[PATH_MAX]="d:/chemist/defaults-csv.txt"; //janus software defaults
    char interrupt_file_path[PATH_MAX]="d:\\chemist\\interrupt.csv";//location of interrupt file, if it exist, contains a list of commands
-   char changer_ip[16]="null";
-   char ts_arg[32]="none";
+   char changer_ip[16]="null"; //Set to null for all until code is generalised
+   char ts_arg[32]="none"; //should be redundant
    char test_parset[256] = "PROTON"; //assume this is going to be ok
-   int  test_pos = 60;
-   int  protocol_pos_a = 59;
+   int  test_pos = 60; // where the test sample goes for the interrupt.csv triggered tests
+   int  protocol_pos_a = 59; //special position for service samples which are priotised
    int  protocol_pos_b = 60;
    char protocol_str_a[256] = "POS59";
    char protocol_str_b[256] = "POS60";
    int global_atma_flag=1; //if zero, never do atma  
-   
+   char topshim_option_a[255]=" "; // reset according to instrument/solvent (convcomp is always done)
+   char topshim_option_b[255]=" "; //set to ordmax=5 for those instruments that go funny >5
+   char topshim_method[16]="topshim"; //default method - also can do tso for z-shim temperature correction
+   int z_inc=0; //temperature offset for z-shim correction for D2O
+
 if (strcmp(instrum_name, "cragganmore") == 0) {
    /*cragganmore dependent global variables!!!!!!*/
    sprintf(def_file,"d:/chemist/defaults-csv.txt"); //janus software defaults file
    sprintf(interrupt_file_path,"d:\\chemist\\interrupt.csv");//location of interrupt file, if it exist, contains a list of commands
    sprintf(changer_ip,"NULL");
-   sprintf(ts_arg," ordmax=5");
+   sprintf(topshim_option_b," ordmax=5");
    sprintf(test_parset,"PROTON"); //has got an untunable QNP probe
    test_pos = 16;
    global_atma_flag=0; //if zero, never do atma  
@@ -137,14 +147,14 @@ else if (strcmp(instrum_name, "laphroiag") == 0) {
    sprintf(def_file,"f:/chemist/defaults-csv.txt"); //janus software defaults file
    sprintf(interrupt_file_path,"f:\\chemist\\interrupt.csv");//location of interrupt file, if it exist, contains a list of commands
    sprintf(changer_ip,"NULL");
-   sprintf(ts_arg,"ordmax=5");
+   sprintf(topshim_option_b," ordmax=5");
    sprintf(test_parset,"PROTON"); //has got a broken probe and can only do 1H and 19F
    test_pos = 60;
    protocol_pos_a = 59;
    protocol_pos_b = 60;
    sprintf(protocol_str_a,"POS59");
    sprintf(protocol_str_b,"POS60");
-   global_atma_flag=0; //if zero, never do atma  
+   global_atma_flag=0; //if zero, never do atma  - laphroiags probe is broken
 }
 
 else if (strcmp(instrum_name, "tobermory") == 0) {
@@ -152,7 +162,6 @@ else if (strcmp(instrum_name, "tobermory") == 0) {
    sprintf(def_file,"d:/chemist/defaults-csv.txt"); //janus software defaults file
    sprintf(interrupt_file_path,"d:\\chemist\\interrupt.csv");//location of interrupt file, if it exist, contains a list of commands
    sprintf(changer_ip,"NULL");
-   sprintf(ts_arg,"ordmax=5");
    sprintf(test_parset,"C13CPD");
    test_pos = 96;
    protocol_pos_a = 95;
@@ -165,7 +174,7 @@ else if (strcmp(instrum_name, "lagavulin") == 0) {
    sprintf(def_file,"f:/chemist/defaults-csv.txt"); //janus software defaults file
    sprintf(interrupt_file_path,"f:\\chemist\\interrupt.csv");//location of interrupt file, if it exist, contains a list of commands
    sprintf(changer_ip,"NULL");
-   sprintf(ts_arg,"ordmax=5");
+   sprintf(topshim_option_b," ordmax=5");
    sprintf(test_parset,"C13CPD");
    test_pos = 60;
    protocol_pos_a = 59;
@@ -190,8 +199,8 @@ else if (strcmp(instrum_name, "glenfairn") == 0) {
 }
 else if (strcmp(instrum_name, "arran") == 0) {
     /*arran dependent global variables!!!!!!*/
-   sprintf(def_file,"d:/chemist/defaults-csv.txt"); //janus software defaults file
-   sprintf(interrupt_file_path,"d:\\chemist\\interrupt.csv");//location of interrupt file, if it exist, contains a list of commands
+   sprintf(def_file,"e:/chemist/defaults-csv.txt"); //janus software defaults file
+   sprintf(interrupt_file_path,"e:\\chemist\\interrupt.csv");//location of interrupt file, if it exist, contains a list of commands
    sprintf(changer_ip,"NULL");
    sprintf(ts_arg,"ordmax=5");
    sprintf(test_parset,"C13CPD");
@@ -201,6 +210,8 @@ else if (strcmp(instrum_name, "arran") == 0) {
    sprintf(protocol_str_a,"POS59");
    sprintf(protocol_str_b,"POS60");
    global_atma_flag=0; //if zero, never do atma 
+   sprintf(topshim_option_a," tuneaxyz");
+   z_inc=11;
 }
 else {
     Proc_err ( INFO_OPT,"***Instrument is unknown - %s", instrum_name);
@@ -503,8 +514,9 @@ while ( finish != TRUE ) //THE MAIN LOOP
 			Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
 			XCMD(tmp_cmd)
 			Proc_err ( INFO_OPT,"ts_arg - %s",ts_arg);
-			sprintf(tmp_cmd,"janus_topshim_watchdog TOPSHIM_FAILED_%s %s",name, ts_arg);
-			Proc_err ( INFO_OPT,"***tmp_cmd - %s, ts_arg - %s",tmp_cmd,ts_arg);
+			sprintf(tmp_cmd,"devel_janus_topshim_watchdog_tso %s %i TEST_SAMPLE_TOPSHIM_FAILED_%s_%i %s %s",topshim_method, z_inc, tmp_fname,cpos,topshim_option_a,topshim_option_b);
+			//sprintf(tmp_cmd,"janus_topshim_watchdog TOPSHIM_FAILED_%s %s",name, ts_arg);
+			Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
 			XCMD(tmp_cmd);
 			if (AUERR<0)
 			{
@@ -628,6 +640,7 @@ while ( finish != TRUE ) //THE MAIN LOOP
 				Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
 				//AUERR=CPR_exec(tmp_cmd,WAIT_TERM);
 				sprintf(tmp_str,"%s %i",ts_arg,global_atma_flag);
+				
 				sprintf(tmp_cmd,"hump_sino_test_b2_01 %s",tmp_str);
 				//Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
 				XCMD(tmp_cmd)
@@ -661,7 +674,7 @@ while ( finish != TRUE ) //THE MAIN LOOP
    }
    #pragma endregion If we can open the interrupt file, read it and run through its contents    
    #pragma region Maybe parse_sexpress_web  
-   if (strcmp(changer_ip, "null") != 0){
+   if (strcmp(changer_ip, "NULL") != 0){
       XAU("parse_sexpress_web","") //test sample went in, parse the sx logs
    }
    #pragma endregion Maybe parse_sexpress_web 
@@ -892,6 +905,13 @@ while ( finish != TRUE ) //THE MAIN LOOP
 	    Proc_err ( INFO_OPT,"***tmp_cmd -%s",tmp_cmd);
         sprintf(tmp_str,"%s\n",tmp_cmd);
         strcat(janusinfostring, tmp_str);
+       //If Arran, do set field
+		if ( (strstr(instrum_name,"arran")!=NULL) )
+		{
+			XAU("setfield",solvent)
+			sprintf(tmp_str,"setfield %s\n",solvent);
+            strcat(janusinfostring, tmp_str);
+		} 
 		AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
 		if ( AUERR <0 )
         {
@@ -908,9 +928,20 @@ while ( finish != TRUE ) //THE MAIN LOOP
 	     	      // XAU("whoopwhoop",tmp_str)
 		  sampleproblem=1;
         }
+        //If it did lock and the instrument is Arran, storefield
+        else {
+            if ( (strstr(instrum_name,"arran")!=NULL) )
+		    {
+			   XAU("storefield",solvent)
+			   sprintf(tmp_str,"storefield %s\n",solvent);
+               strcat(janusinfostring, tmp_str);
+		    } 
+
+        }
 		#pragma endregion Lock solvent
 	    #pragma region Check protocol for X nuclei, if present set ATMAflag=0
 		// new atma handling:
+		//BUG experiment isn't defined/read in here???
         sprintf(tmp_str,"protocol - %s, experiment - % s, ATMA\n",protocol,experiment);
         strcat(janusinfostring, tmp_str);
         if ( strstr ( protocol, "19F") != NULL )
@@ -935,7 +966,9 @@ while ( finish != TRUE ) //THE MAIN LOOP
         }
 		#pragma endregion Check protocol for X nuclei & set ATMAflag=0
 		#pragma region Check if experiment is not a 2H and ATMA on PROTONRO parset
-        if ( (strstr ( experiment, "2h") == NULL) && (strstr ( experiment, "2H") == NULL)) // So this means "the string 2h is not present AND the string 2H is not present"
+		//has to be a check on protocol as experiment is not set - is set further below.
+        //if ( (strstr ( experiment, "2h") == NULL) && (strstr ( experiment, "2H") == NULL)) // So this means "the string 2h is not present AND the string 2H is not present"
+		if ( (strstr ( protocol, "2h") == NULL) && (strstr ( protocol_pos_a, "2H") == NULL)) // So this means "the string 2h is not present AND the string 2H is not present"
 		//only do the below if its not 2H
 		{
            if ( ((ATMAflag==0) && (global_atma_flag !=0)) || (strcmp(instrum_name, "tobermory") == 0) ) //OR for tobermory here - if its tobermory, always tune
@@ -974,7 +1007,23 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 		//NB janus_topshim_watchdog can take an option for an additional option to pass to topshim
 		//should be called with janus_topshim_watchdog MESSAGE_NO_SPACES_OR_DASHES ordmax=5
 		//janus_topshim_watchdog should also take care of the whoopwhoop email
-		sprintf(tmp_cmd,"janus_topshim_watchdog TOPSHIM_FAILED_%s_%i %s",tmp_fname,cpos,ts_arg);
+		// the tso topshim command sprintf(tscommand,"topshim plotall tunea %s", cmd);
+		//new devel_janus_topshim_watchdog_tso arguments -
+		// method, z_inc, message, topshim_option_a, topshim_option_b
+
+        if(strstr(solvent, "D2O")==0) //not found, so no pointer returned to start of substring
+        {
+	       sprintf(topshim_method,"topshim");
+        }
+        else //special solvents with d2o in, to *NOT* do tso need to in lowercase
+        {
+	       sprintf(topshim_method,"tso");
+		   if(strstr(instrum_name,"rran")!=0)
+		   {
+			  sprintf(topshim_option_a,"tunea");
+		   }
+        }
+		sprintf(tmp_cmd,"devel_janus_topshim_watchdog_tso %s %i TOPSHIM_FAILED_%s_%i %s %s",topshim_method, z_inc, tmp_fname,cpos,topshim_option_a,topshim_option_b);
 		Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
 		sprintf(tmp_str,"%s\n",tmp_cmd);
 		strcat(janusinfostring, tmp_str);

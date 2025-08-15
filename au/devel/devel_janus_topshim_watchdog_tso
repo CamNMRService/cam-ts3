@@ -14,9 +14,12 @@
 //example usage :- 
 //janus_topshim_watchdog THIS_IS_A_MESSAGE_TO_SEND ordmax=8
 //NB the message can't have spaces in... Ortherwise would look like more command line options.
-//Additions June 2025 - Take an extra commandline argument.
+//Additions June 2025 - Take  extra commandline arguments to do z offset for temperature compensation
+//example usage <cmd> // method, z_inc, message, topshim_option_a, topshim_option_b
+//if tso is tso, do temperature offset.
 
 
+#include <inc/bsms_program>    /* must be the first statement ****/
 #include <time.h>
 time_t now_s, dtime_s;		  	/* seconds since 1970 */
 struct tm *now;	  		/* structure with year, month etc. */
@@ -31,13 +34,21 @@ char datestamp[256];
 char lockpath[PATH_MAX];
 char pidpath[PATH_MAX];
 char message[1023]="NO_DEFINED_MESSAGE_SOMETHING_WENT_WRONG_WITH_janus_topshim_watchdog";
+char method[15]="topshim";
 char topshim_option_a[255]=" ";
 char topshim_option_b[255]=" ";
 char bat_cmd_path[PATH_MAX]="NULL";
+char z_inc_str[3]="0";
 int pid;
 int ts_major = GetTsVersionMajor();
 int ts_minor = GetTsVersionMinor();
 int ts_patch = GetTsVersionPl();
+int z;
+int z_inc = 0;
+int max_z_inc = 50;
+int default_z_inc = 10;
+
+
 
 FILE *pidfile;
 FILE *lockfile;
@@ -46,28 +57,66 @@ FILE *fbat=NULL;
 //sprintf(bat_cmd_path,"C:\\Bruker\\TopSpin%i.%i.%i\\data\\xcopy_tsData.bat",ts_major,ts_minor,ts_patch);
 sprintf(bat_cmd_path,"F:\\chemist\\xcopy_tsData.bat",ts_major,ts_minor,ts_patch);
 //set topshim_option to just a blank character - will this prevent errors?
-
-
 sprintf(topshim_option_a," ");
 sprintf(topshim_option_b," ");
 
-if (i_argc == 3 ) { //assume the argument is a message to send
-    sprintf(message,"%s",i_argv[2]); 
+// method, z_inc, message, topshim_option_a, topshim_option_b
+
+if (i_argc == 3 ) { //assume the argument is method to use
+    sprintf(method,"%s",i_argv[2]); 
+    //but z_inc not set, so assume default
+    z_inc=default_z_inc;
 }
 
 if (i_argc == 4) {
-   sprintf(message,"%s",i_argv[2]); 
-   sprintf(topshim_option_a,"%s",i_argv[3]); 
+   sprintf(method,"%s",i_argv[2]); 
+   sprintf(z_inc_str,"%s",i_argv[3]);
+   z_inc = atoi(z_inc_str);
+   if (z_inc>max_z_inc)
+   {
+      z_inc=default_z_inc;
+   }
 }
 
 if (i_argc == 5) {
-   sprintf(message,"%s",i_argv[2]); 
-   sprintf(topshim_option_b,"%s",i_argv[4]); 
+  sprintf(method,"%s",i_argv[2]); 
+  sprintf(z_inc_str,"%s",i_argv[3]);
+  z_inc = atoi(z_inc_str);
+  if (z_inc>max_z_inc)
+   {
+      z_inc=default_z_inc;
+   }
+  sprintf(message,"%s",i_argv[4]); 
 }
 
-if (i_argc > 5 ){
-    sprintf(tmp_str,"Too many arguments passed to %s",i_argv[0]);
-    STOPMSG(tmp_str)
+if (i_argc == 6) {
+  sprintf(method,"%s",i_argv[2]); 
+  sprintf(z_inc_str,"%s",i_argv[3]);
+  z_inc = atoi(z_inc_str);
+  if (z_inc>max_z_inc)
+   {
+      z_inc=default_z_inc;
+   }
+  sprintf(message,"%s",i_argv[4]); 
+  sprintf(topshim_option_a,"%s",i_argv[5]); 
+}
+
+if (i_argc == 7) {
+  sprintf(method,"%s",i_argv[2]); 
+  sprintf(z_inc_str,"%s",i_argv[3]);
+  z_inc = atoi(z_inc_str);
+  if (z_inc>max_z_inc)
+   {
+      z_inc=default_z_inc;
+   }
+  sprintf(message,"%s",i_argv[4]); 
+  sprintf(topshim_option_a,"%s",i_argv[5]); 
+  sprintf(topshim_option_b,"%s",i_argv[6]); 
+}
+
+if ( (i_argc > 7 ) || (i_argc < 3) ) {
+    sprintf(tmp_str,"wrong number of arguments passed :- %i \n Need at least one for the method :- \n method, z_inc, message, topshim_option_a, topshim_option_b",i_argv[0]);
+   // STOPMSG(tmp_str)
 }
 GETCURDATA 
 
@@ -89,11 +138,18 @@ CPR_exec("xau topshimkiller", WAIT_START);
 
 
 // execute topshim as desired
-//sprintf(tscommand,"topshim plotall convcomp %s", cmd); //not sure why cmd is here...
 sprintf(tscommand,"topshim plotall convcomp %s %s",topshim_option_a,topshim_option_b);
 Proc_err ( INFO_OPT, "topshim command is - %s Number of arguments this au program called with is - %i", tscommand, i_argc);
 XCMD(tscommand);
 
+//if called with the tso method
+if (strcmp(method, "tso") == 0){
+
+  Proc_err ( INFO_OPT,"method = %s\n z_inc = %i",method,z_inc);
+  GETBSMSVAL(BSN_Z,z)
+  z+=z_inc;
+  PUTBSMSVAL(BSN_Z, z)
+}
 
 // delete the lockfile  *and kill the killer program!!!!!* if topshim completes OK
 
@@ -144,7 +200,7 @@ if(AUERR)
   // sprintf(command,"ren C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData topshimData_%s", ts_major,ts_minor,ts_patch,datestamp);  
   //xcopy just doesnt seem to run, not even in a bat file
   //   sprintf(command,"xcopy C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData_%s\\ /E /H \n", ts_major,ts_minor,ts_patch,ts_major,ts_minor,ts_patch,datestamp);
-     sprintf( command, "robocopy C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData /S C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData_%s",ts_major,ts_minor,ts_patch,ts_major,ts_minor,ts_patch,datestamp);
+     sprintf( command, "robocopy C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData /S C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData_%s > nul",ts_major,ts_minor,ts_patch,ts_major,ts_minor,ts_patch,datestamp);
    /* code if you want to make a bat file to run the command
        fbat = fopen(bat_cmd_path, "w");
      fputs( command,fbat);

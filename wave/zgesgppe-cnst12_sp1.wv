@@ -1,4 +1,4 @@
-##TITLE= square180, 3.0000ms, 0.000753 W
+##TITLE= square180, 2.0000ms, 0.001630 W
 ##JCAMP-DX= 5.00 Bruker JCAMP library 
 ##DATA TYPE= Shape Data 
 ##ORIGIN= Bruker BioSpin GmbH 
@@ -13,7 +13,7 @@
 ##$SHAPE_EXMODE= Inversion
 ##$SHAPE_TOTROT= 180.00 
 ##$SHAPE_TYPE= Excitation
-##$SHAPE_USER_DEF= Tp=3000.0000 us, gB1max=166.7 Hz, f1=-233.5 Hz, f2=233.5 Hz
+##$SHAPE_USER_DEF= Tp=2000.0000 us, gB1max=250.0 Hz, f1=-350.3 Hz, f2=350.3 Hz
 ##$SHAPE_REPHFAC= 
 ##$SHAPE_BWFAC= 0.467 
 ##$SHAPE_BWFAC50= 

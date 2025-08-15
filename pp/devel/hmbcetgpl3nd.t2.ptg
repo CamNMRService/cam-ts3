@@ -1,0 +1,161 @@
+;hmbcetgpl3nd
+;avance-version (12/01/11)
+;HMBC
+;2D H-1/X correlation via heteronuclear zero and double quantum
+;   coherence
+;phase sensitive using Echo/Antiecho gradient selection
+;with three-fold low-pass J-filter to suppress one-bond correlations
+;no decoupling during acquisition
+;
+;D.O. Cicero, G. Barbato & R. Bazzo, J. Magn. Reson. 148, 
+;   209-213 (2001)
+;PTG: replace proton 180 with shaped pulse for B1 compensation
+; and therefore symmetrise teh sequence like in teh noah
+; t2: proton spin echo before aq
+;$CLASS=HighRes
+;$DIM=2D
+;$TYPE=
+;$SUBTYPE=
+;$COMMENT=
+;$RECOMMEND=y
+
+
+#include <Avance.incl>
+#include <Grad.incl>
+#include <Delay.incl>
+
+
+
+
+
+
+
+"p2=p1*2"
+"d6=1s/(cnst13*2)"
+
+
+"d0=3u"
+
+"in0=inf1/2"
+"cnst41      = 2*sfo2/sfo1" 
+"cnst41=cnst41"
+
+define list<gradient> EA1 = {cnst41 -cnst41}
+
+"DELTA1=1s/(2 * (cnst6 + 0.07 * (cnst7-cnst6) ) ) -p16-d16"
+"DELTA2=1s/(cnst7 + cnst6) -p16-d16"
+"DELTA3=1s/(2 * (cnst7 - 0.07 * (cnst7-cnst6) ) ) -p16-d16"
+"DELTA4=d6-p16-d16-4u"
+"DELTA5=p16+d16+d16+p44/2+d0-p3*2/PI"
+"DELTA=p16+d16+4u"
+
+
+1 ze 
+2 d1
+3 p1 ph1
+  DELTA1 UNBLKGRAD
+  p16:gp3
+  d16 pl2:f2
+  (p3 ph3):f2
+  DELTA2
+  p16:gp4
+  d16
+  (p3 ph3):f2
+  DELTA3
+  p16:gp5
+  d16
+  (p3 ph3):f2
+  4u
+  p16:gp6
+  d16
+  DELTA4
+  (p3 ph4):f2
+  DELTA5
+  (p14:sp3 ph5):f2
+  d16
+  p16:gp1
+  d16
+  d0
+ ; p2 ph2
+  (p44:sp30 ph2):f1
+  d0
+  d16
+  p16:gp1
+  d16 pl1:f1
+  (p14:sp3 ph5):f2
+  DELTA5 pl2:f2
+  (p3 ph5):f2
+  p16:gp1*EA1
+  d16
+  4u BLKGRAD
+  (p2 ph6):f1
+  DELTA
+  go=2 ph31
+  d1 mc #0 to 2 
+     F1EA(calgrad(EA1), caldel(d0, +in0) & calph(ph4, +180) & calph(ph31, +180))
+exit 
+  
+
+ph1=0
+ph2=0 0 0 0 2 2 2 2
+ph3=0 0 2 2
+ph4=0 2
+ph5=0 0 0 0 0 0 0 0 2 2 2 2 2 2 2 2
+ph6=1
+ph31=0 2 0 2 0 2 0 2 2 0 2 0 2 0 2 0
+
+
+;pl1 : f1 channel - power level for pulse (default)
+;pl2 : f2 channel - power level for pulse (default)
+;sp7: f2 channel - shaped pulse (180degree refocussing)
+;spnam7: Crp60comp.4
+;p1 : f1 channel -  90 degree high power pulse
+;p2 : f1 channel - 180 degree high power pulse
+;p3 : f2 channel -  90 degree high power pulse
+;p16: homospoil/gradient pulse                         [1 msec]
+;p24: f2 channel - 180 degree shaped pulse for refocussing
+;     = 2msec for Crp60comp.4
+;d0 : incremented delay (2D)                           [3 usec]
+;d1 : relaxation delay; 1-5 * T1
+;d6 : delay for evolution of long range couplings (1/2Jlr)
+;d16: delay for homospoil/gradient recovery
+;cnst6: = 1J(XH)min
+;cnst7: = 1J(XH)max
+;cnst13: = J(XH) long range
+;inf1: 1/SW(X) = 2 * DW(X)
+;in0: 1/(2 * SW(X)) = DW(X)
+;nd0: 2
+;ns: 2 * n
+;ds: 16
+;td1: number of experiments
+;FnMODE: echo-antiecho
+
+
+;use gradient ratio:    gp 1 : gp 3 : gp 4 : gp 5 : gp 6
+;                         80 :   14 :   -8 :   -4 :   -2
+
+;for z-only gradients:
+;gpz1: 80%
+;gpz3: 14%
+;gpz4: -8%
+;gpz5: -4%
+;gpz6: -2%
+
+;use gradient files:
+;gpnam1: SMSQ10.100
+;gpnam3: SMSQ10.100
+;gpnam4: SMSQ10.100
+;gpnam5: SMSQ10.100
+;gpnam6: SMSQ10.100
+
+
+
+;Processing
+
+;PH_mod(F1): pk (or no)
+
+;use xfb and xf2m
+
+
+
+;$Id: hmbcetgpl3nd,v 1.5 2012/01/31 17:49:23 ber Exp $

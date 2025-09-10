@@ -24,6 +24,7 @@
 /*  ge        20071212  readPeakList		                */
 /*  wem	      20150326	care of NUS data			*/
 /*  ptg 		more intelligent handling of NUS data */
+
 /****************************************************************/
 /*
 $Id: proc_2dphf2het,v 1.6.12.2 2015/03/27 09:22:23 wem Exp $
@@ -31,7 +32,7 @@ $Id: proc_2dphf2het,v 1.6.12.2 2015/03/27 09:22:23 wem Exp $
 
 /********************************************/
 /* Declare variables                        */
-    int     mc2, fntype, niter_orig, sif2, tdf2;
+    int     mc2, fntype, niter_orig, sif2, tdf2, csalg;
     int     irow,s_procno,nprocno, nprocno2;
     float   phc0,phc1;
 
@@ -42,7 +43,7 @@ $Id: proc_2dphf2het,v 1.6.12.2 2015/03/27 09:22:23 wem Exp $
     nprocno2=10000;
 
     FETCHPARS("FnTYPE",&fntype);
-    
+    FETCHPAR("MDD_CSalg", &csalg);
 // for first transform, can reduce number of iterations for processing to speed it up
 // also make sure one round of zero filling done to avoid artefacts in  Hilbert transform 	
 	if (fntype == 2)

@@ -32,7 +32,7 @@
 
 "DELTA=d0*2+p44"
 "DELTA1=d4-p16-d16-(p14/2)"
-"DELTA2=d4-p16-d16-de-(p1*2/3.14159)-50u-(p14/2)"
+"DELTA2=d4-p16-d16-p3-de-(p1*2/3.14159)-50u-(p14/2)"
 
 1 ze 
   d11 pl12:f2
@@ -88,7 +88,8 @@
   p16:gp3
   d16
   50u BLKGRAD
-  DELTA2 pl12:f2
+  DELTA2 pl12:f2 
+  (p3 ph10):f2
   go=2 ph31 cpd2:f2 
   d11 do:f2 mc #0 to 2 F1PH(calph(ph6, +90) & calph(ph9, +90), caldel(d0, +in0))
 exit 
@@ -103,6 +104,7 @@ ph6=0 2
 ph7=0 0 0 0 2 2 2 2
 ph8=0 0 2 2
 ph9=0 0 0 0 0 0 0 0 2 2 2 2 2 2 2 2
+ph10=0
 ph29=0
 ph31=0 2 0 2 2 0 2 0
 
@@ -129,6 +131,15 @@ ph31=0 2 0 2 2 0 2 0
 ;FnMODE: States-TPPI, TPPI, States or QSEQ
 ;cpd2: decoupling according to sequence defined by cpdprg2
 ;pcpd2: f2 channel - 90 degree pulse for decoupling sequence
+
+;for z-only gradients:
+;gpz1: 37.13%
+;gpz2: 20.1% 
+;gpz3: 13.17%
+
+;use gradient files:   
+;gpnam1: SMSQ10.100
+;gpnam2: SMSQ10.100
 
 
                                           ;preprocessor-flags-start

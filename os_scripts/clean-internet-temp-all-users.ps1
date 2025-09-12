@@ -19,11 +19,12 @@ Else
                         '\AppData\Local\CrashDumps',
                         '\AppData\Local\Temp',
                         '\AppData\Local\Microsoft\Edge\User Data\Default\Cache',
-						'\AppData\Local\Microsoft\Edge\User Data\ProvenanceData',
-						'\AppData\Local\Microsoft\Edge\User Data\component_crx_cache',
-						'\AppData\Local\Microsoft\Edge\User Data\Default\Code Cache\js',
-						'\AppData\Local\Google\Chrome\User Data\Default\Code Cache\js',
-						'\AppData\Local\Google\Chrome\User Data\Default\Cache\Cache_Data'
+                        '\AppData\Local\Microsoft\Edge\User Data\ProvenanceData',
+			'\AppData\Local\Microsoft\Edge\User Data\component_crx_cache',
+			'\AppData\Local\Microsoft\Edge\User Data\Default\Code Cache\js',
+			'\AppData\Local\Microsoft\Edge\User Data\Default\Service Worker\CacheStorage',
+			'\AppData\Local\Google\Chrome\User Data\Default\Code Cache\js',
+			'\AppData\Local\Google\Chrome\User Data\Default\Cache\Cache_Data'
                        )
 Write-Host ' Complete'
 Write-Host 'Scanning User Folders... ' -NoNewline

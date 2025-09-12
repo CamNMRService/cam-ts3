@@ -1,0 +1,4 @@
+HSQC without gradients, optimised for broad signals
+This experiment produces less clean data when strong signals are
+present but avoids attenuation of broad carbon signals.
+If very broad proton signals are present (tens of Hz) you can set CNST2 larger to minimise losses

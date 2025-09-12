@@ -23,6 +23,7 @@
         "devel_run_interrupt": "cpp",
         "devel_janus_sx_cragganmore": "cpp",
         "devel_janus_sx_general": "cpp",
-        "devel_janus_sx_general_extra_log": "cpp"
+        "devel_janus_sx_general_extra_log": "cpp",
+        "devel_janus_sx_general_extra_log_arran": "cpp"
     }
 }

@@ -1,0 +1,4 @@
+HSQC with gradients and multiplicity editing, normal sampling
+
+
+To run without multiplicity editing change pulprog to hsqcetgpsp.2.ptg

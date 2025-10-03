@@ -811,14 +811,13 @@ if (proc_or_not==1)
 
 		// Copy procnos 700 and 701 from the junk dataset to this last dataset
 
-		strcpy(wobbdest ,  ACQUPATH("pdata/700"));
-		strcpy(test, ACQUPATH("test"));
+		strcpy(wobbdest,  ACQUPATH("pdata/700"));
+		sprintf(wobbsource, "%s/junk/10/pdata/700", disk);
 
-
-		sprintf(wobbsource, "%sjunk/10/pdata/700", diskunit, suser);
-
-		Proc_err(DEF_ERR_OPT, "%s, %s, %s",wobbsource, wobbdest, disk,test);
-		dircp(wobbsource, wobbdest);
+		
+		sprintf( command, "robocopy %s /S %s > nul", wobbsource, wobbdest);
+		Proc_err(DEF_ERR_OPT,command);
+		system(command);
        
 	   //copy topshim report
 

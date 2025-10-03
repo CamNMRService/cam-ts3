@@ -121,7 +121,7 @@ char    sxcmd[255], gradshim[20], comments[1024], command[1024], snostr[1024], t
 char    statusstr[1024], awmfile[80],tmparchpath[1024],fidpath[1024],procau[1024];
 char	  proclist[1024],procinstruct[1024];
 char    reportdest[PATH_MAX], wobbdest[PATH_MAX];
-char    reportsource[PATH_MAX], wobbsource[PATH_MAX];
+char    reportsource[PATH_MAX], wobbsource[PATH_MAX], test[PATH_MAX];
 char    sampleinfofile[PATH_MAX];
 char sampleinfostring[2048];// just make one string, and write to file at the end so that we aer in the dataset from which janus email runs
 char    pulsecalfilename[PATH_MAX];
@@ -812,11 +812,12 @@ if (proc_or_not==1)
 		// Copy procnos 700 and 701 from the junk dataset to this last dataset
 
 		strcpy(wobbdest ,  ACQUPATH("pdata/700"));
+		strcpy(test, ACQUPATH("test));
 
 
-		sprintf(wobbsource, "%s/junk/10/pdata/700", diskunit, suser);
+		sprintf(wobbsource, "%sjunk/10/pdata/700", diskunit, suser);
 
-		Proc_err(DEF_ERR_OPT, "%s, %s, %s",wobbsource, wobbdest, disk);
+		Proc_err(DEF_ERR_OPT, "%s, %s, %s",wobbsource, wobbdest, disk,test);
 		dircp(wobbsource, wobbdest);
        
 	   //copy topshim report

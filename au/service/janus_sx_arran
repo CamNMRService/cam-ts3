@@ -812,7 +812,7 @@ if (proc_or_not==1)
 		// Copy procnos 700 and 701 from the junk dataset to this last dataset
 
 		strcpy(wobbdest ,  ACQUPATH("pdata/700"));
-		strcpy(test, ACQUPATH("test));
+		strcpy(test, ACQUPATH("test"));
 
 
 		sprintf(wobbsource, "%sjunk/10/pdata/700", diskunit, suser);

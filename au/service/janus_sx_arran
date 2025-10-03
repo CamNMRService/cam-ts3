@@ -816,7 +816,7 @@ if (proc_or_not==1)
 
 		sprintf(wobbsource, "%s/junk/10/pdata/700", diskunit, suser);
 
-		Proc_err(DEF_ERR_OPT, "%s, %s",wobbsource, wobbdest);
+		Proc_err(DEF_ERR_OPT, "%s, %s, %s",wobbsource, wobbdest, disk);
 		dircp(wobbsource, wobbdest);
        
 	   //copy topshim report

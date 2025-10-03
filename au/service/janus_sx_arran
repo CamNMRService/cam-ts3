@@ -82,6 +82,7 @@
 // PTG incorporate SAmpleProblems stuff from laphroiag version 
 // For NOAH expets check aunmp and if it's splitx_au tehn run it cont_ex
 // PTG 17_09_2024 added setfield/storefield commaands either side of lock, to solve MeOD problems
+//PTG  3_10_2025 Copy wobb curves from junk dataset into first experiment
 /****************************************/
 /*
 Production version
@@ -803,6 +804,16 @@ if (proc_or_not==1)
 
 		fclose(fprod);
 		LastSample=FALSE;
+
+		// Copy procnos 700 and 701 from the junk dataset to this last dataset
+
+		strcpy(wobbdest ,  ACQUPATH("pdata/700"));
+
+
+		sprintf(wobbsource, "%s/data/%s/nmr/10/pdata/700", diskunit, suser);
+
+		Proc_err(DEF_ERR_OPT, "%s, %s",wobbsource, wobbdest);
+		dircp(wobbsource, wobbdest);
        
 	   //copy topshim report
 

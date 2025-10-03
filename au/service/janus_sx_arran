@@ -819,6 +819,13 @@ if (proc_or_not==1)
 		Proc_err(DEF_ERR_OPT,command);
 		system(command);
        
+		strcpy(wobbdest,  ACQUPATH("pdata/701"));
+		sprintf(wobbsource, "%s/junk/10/pdata/701", disk);
+
+		
+		sprintf( command, "robocopy %s /S %s > nul", wobbsource, wobbdest);
+		Proc_err(DEF_ERR_OPT,command);
+		system(command);
 	   //copy topshim report
 
         strcpy(reportdest, ACQUPATH("topshim_report.txt"));

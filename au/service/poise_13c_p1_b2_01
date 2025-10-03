@@ -159,10 +159,10 @@ Remove this warning by setting disclaimer to 0 in the AU program.");
 if (i_argc == 3 ) { //assume the argument to set the atma_flag
     sprintf(atma_flag_str,"%s",i_argv[2]); 
     atma_flag = atoi(atma_flag_str);
-    Proc_err(DEF_ERR_OPT,"atma_flag_str=%s, atma_flag=%i",atma_flag_str,atma_flag);
+    Proc_err(INFO_OPT,"atma_flag_str=%s, atma_flag=%i",atma_flag_str,atma_flag);
 }
 else {
-    Proc_err(DEF_ERR_OPT,"not called with any options i_argc=%i, atma_flag_str=%s",i_argc,atma_flag_str);
+    Proc_err(INFO_OPT,"not called with any options i_argc=%i, atma_flag_str=%s",i_argc,atma_flag_str);
 }
 
 //Data doesn't have instr or probehd set until an aquisition has been done.
@@ -403,7 +403,7 @@ if (aqtest == 0)
     STOREPAR("LB",sino_lb_float);
     ZG_OVERWRITE
 
-    if ( (ts_major=4) && (ts_minor>=0) && (ts_patch>=6) ) {
+    if ( (ts_major>=3) && (ts_minor>=6) ) {
     EFP
     XCMD("sendgui apbk")
     XCMD("sendgui apbk -bo" )

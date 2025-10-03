@@ -1,0 +1,7 @@
+HSQC with gradienrts and multiplicity editing
+With Non-uniform sampling for higher resolution - 24% of 512 points
+Process as normal with XFB
+To phase correct, type xht2 first, and then phase rows only
+Or for automatic processing type xaup
+
+To run without multiplicity editing change pulprog to hsqcetgpsp.2.ptg

@@ -1,0 +1,16 @@
+##TITLE= Parameter file, TopSpin 3.8.0
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= ptg20
+$$ 2025-09-10 16:31:17.446 +0100  ptg20@auchentoshan
+$$ C:\Bruker\cam-ts3\par\reference/HSQC_edited.ref/outd
+$$ process C:\Bruker\TopSpin3.8.0\prog\mod\edparproc.exe
+##$CURPLOT= <PDF reDirect v2>
+##$CURPRIN= <$PDF reDirect v2>
+##$DFORMAT= <normdp>
+##$LAYOUT= <+/hsqc_ed.xwp>
+##$LFORMAT= <normlp>
+##$PFORMAT= <normpl>
+##END=

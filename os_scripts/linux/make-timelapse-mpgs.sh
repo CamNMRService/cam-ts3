@@ -7,7 +7,8 @@
 # Removed set -e to prevent early exits
 
 # Configuration
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+#SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="/root/scripts"
 LOG_FILE="${SCRIPT_DIR}/image_processor.log"
 TEMP_DIR="${SCRIPT_DIR}/temp_processing"
 TODAY=$(date +%Y%m%d)
@@ -55,9 +56,10 @@ validate_directory() {
 
 # Function to extract date from filename
 extract_date_from_filename() {
+#capture_20251110_142136.jpg
     local filename="$1"
     # Extract YYYYMMDD from WIN_YYYYMMDD_Hour_Minute_second_Pro.jpg
-    if [[ "$filename" =~ WIN_([0-9]{8})_[0-9]{2}_[0-9]{2}_[0-9]{2}_Pro\.jpg$ ]]; then
+    if [[ "$filename" =~ capture_([0-9]{8})_[0-9]{2}[0-9]{2}[0-9]{2}\.jpg$ ]]; then
         echo "${BASH_REMATCH[1]}"
     else
         echo ""
@@ -144,8 +146,7 @@ create_video_from_images() {
     log_message "INFO" "Running ffmpeg command: ${ffmpeg_cmd[*]}"
     
     # Run ffmpeg and capture both stdout and stderr
-    if "${ffmpeg_cmd[@]}" </dev/null 2>&1 | tee -a "$LOG_FILE" | grep -q "Error\|error\|Error opening\|No such file" && [ ${PIPESTATUS[0]} -ne 0 
-]; then
+    if "${ffmpeg_cmd[@]}" </dev/null 2>&1 | tee -a "$LOG_FILE" | grep -q "Error\|error\|Error opening\|No such file" && [ ${PIPESTATUS[0]} -ne 0 ]; then
         log_message "ERROR" "Failed to create video for date $date_str"
         rm -rf "$temp_img_dir"
         return 1
@@ -236,7 +237,7 @@ process_date_group() {
             echo "${img_file}|${img_name}" >> "$temp_list_file"
             image_count=$((image_count + 1))
         fi
-    done < <(find "$source_dir" -maxdepth 1 -name "WIN_*.jpg" -type f -print0)
+    done < <(find "$source_dir" -maxdepth 1 -name "capture_*.jpg" -type f -print0)
     
     log_message "INFO" "Finished scanning, found $image_count images for date $date_str"
     
@@ -328,7 +329,7 @@ main() {
                 dates_to_process+=("$file_date")
             fi
         fi
-    done < <(find "$source_dir" -maxdepth 1 -name "WIN_*.jpg" -type f -print0)
+    done < <(find "$source_dir" -maxdepth 1 -name "capture_*.jpg" -type f -print0)
     
     if [[ ${#dates_to_process[@]} -eq 0 ]]; then
         log_message "INFO" "No images found to process"
@@ -384,6 +385,4 @@ main() {
 
 # Run main function
 main "$@"
-
-   
 

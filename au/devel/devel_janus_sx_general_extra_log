@@ -895,7 +895,9 @@ while ( finish != TRUE ) //THE MAIN LOOP
 		AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
 		if ( AUERR <0 )
         {
-	       AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
+			II;
+			sleep(30);
+	    	AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
         }
 	
 		if ( AUERR <0 )

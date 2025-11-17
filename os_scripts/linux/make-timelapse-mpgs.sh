@@ -95,7 +95,7 @@ create_video_from_images() {
     
     local mpg_dir="${output_dir}/${formatted_date}/mpg"
     local mpg_file="${mpg_dir}/${formatted_date}.mpg"
-    
+    local mpg_file_tmp="${TEMP_DIR}/${formatted_date}.mpg"
     # Create MPG directory
     mkdir -p "$mpg_dir"
     
@@ -140,7 +140,7 @@ create_video_from_images() {
         -bufsize 64M
         -maxrate 50M
         -f mpeg
-        "$mpg_file"
+        "$mpg_file_tmp"
     )
     
     log_message "INFO" "Running ffmpeg command: ${ffmpeg_cmd[*]}"
@@ -151,18 +151,19 @@ create_video_from_images() {
         rm -rf "$temp_img_dir"
         return 1
     elif [ ${PIPESTATUS[0]} -eq 0 ]; then
-        log_message "INFO" "Successfully created video: $mpg_file"
+        log_message "INFO" "Successfully created video: $mpg_file_tmp"
         
         # Verify video file exists and has size > 0
         if [[ -f "$mpg_file" ]] && [[ -s "$mpg_file" ]]; then
-            log_message "INFO" "Video verification passed for $mpg_file"
-            
+            log_message "INFO" "Video verification passed for $mpg_file_tmp"
+            #made a tmp mpg as writing to a shared directory syning on onedrive lead to unexpected behaviour - pauses
+            cp $mpg_file_tmp $mpg_file
             # Clean up temporary symlinks
             rm -rf "$temp_img_dir"
             
             return 0
         else
-            log_message "ERROR" "Video file is empty or missing: $mpg_file"
+            log_message "ERROR" "Video file is empty or missing: $mpg_file_tmp"
             rm -rf "$temp_img_dir"
             return 1
         fi

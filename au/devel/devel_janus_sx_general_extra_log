@@ -86,7 +86,7 @@ Added extra when creating the junk dataset to set the instrument name and probe 
 //May 2025
 //call poise, hump with global_global_atma flag. Don't do atma before calling poise, hump
 // Dec 2025
-// Add Z shim offset for cases where lock fails
+// Add Z shim offset (start with 400 units) for cases where lock fails
 // Needs #include <inc/bsms_program>    /* must be the first statement ****/
 //Code otherwise as per TSO. Value to add is set directly in the section
 //NB code here is TS3 only - needs modifying for TS4
@@ -921,7 +921,7 @@ while ( finish != TRUE ) //THE MAIN LOOP
 		  // and give it a last try
 		  int z;
 		  GETBSMSVAL(BSN_Z,z)
-		  z+=300;
+		  z+=400;
 		  PUTBSMSVAL(BSN_Z, z)
 		  sleep(5);
 		  AUERR=CPR_exec(tmp_cmd,WAIT_TERM );

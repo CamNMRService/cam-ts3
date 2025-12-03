@@ -56,7 +56,7 @@ int multi_zgvt(const char* curdat)
 {
   char vtlistname[PATH_MAX], vtlistpath[PATH_MAX], line[PATH_MAX];
   char ts_cmd[PATH_MAX]="";
-  sprintf(ts_cmd,"topshim convcomp ordmax=5");
+  sprintf(ts_cmd,"topshim convcomp tunea");
   float acttemp[512], hightemp, lowtemp;
   int startExpno, numtemp, waittime;
   int ret, i1, expTime;

@@ -439,7 +439,7 @@ TIMES(numtemp)
  
 /* autophase all spectra!! */
 
-  EF
+  EFP
 	APKS
   ABSF;
   PP;

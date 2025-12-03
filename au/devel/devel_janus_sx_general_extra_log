@@ -85,6 +85,13 @@ Added extra when creating the junk dataset to set the instrument name and probe 
 //Added code and instrument defaults for test samples in (eg) POS59 & POS60
 //May 2025
 //call poise, hump with global_global_atma flag. Don't do atma before calling poise, hump
+// Dec 2025
+// Add Z shim offset (start with 400 units) for cases where lock fails
+// Needs #include <inc/bsms_program>    /* must be the first statement ****/
+//Code otherwise as per TSO. Value to add is set directly in the section
+//NB code here is TS3 only - needs modifying for TS4
+
+#include <inc/bsms_program>    /* must be the first statement ****/
 
 #pragma region Get Instrument name
 char    instrum_name[255]="spect";
@@ -909,6 +916,23 @@ while ( finish != TRUE ) //THE MAIN LOOP
 	       sprintf(tmp_str, "FAILED_TO_LOCK_%s_%i_%s",solvent, cpos, tmp_fname);
 	     	      // XAU("whoopwhoop",tmp_str)
 		  sampleproblem=1;
+		  // Now try fiddling the shims to see if we can get lock
+		  // If sample is too long we need to increase Z by a few hundred units
+		  // and give it a last try
+		  int z;
+		  GETBSMSVAL(BSN_Z,z)
+		  z+=400;
+		  PUTBSMSVAL(BSN_Z, z)
+		  sleep(5);
+		  AUERR=CPR_exec(tmp_cmd,WAIT_TERM );
+		  if ( AUERR  == 0 )
+		  {
+			// now it locked OK - add message , leave sampleproblems flag set
+			strcat(sampleinfostring, "\n Lock failed initially - probably due to long sample. Consider reducing the amount of solvent used - 600 microlitres / 4.5cm filling height is enough, and for standard (undamaged) 7 inch tubes you can remove as much as is possible with the standard 230mm glass pipettes if you put too much in. \n Talk to the service team if any questions!");
+
+		  }
+
+
         }
 		#pragma endregion Lock solvent
 	    #pragma region Check protocol for X nuclei, if present set ATMAflag=0

@@ -1,0 +1,61 @@
+!! lines starting with !! are comments
+!! lines starting with ## detail the reference parameter set to be read in
+!! all other lines are commands executed with XCMD(cmd)
+!! NB SW (P) and O1P will nbot be changed by paracon, so don;t need to set those
+!! 11/11/2024 set defaults for normal, long and quick proton, carbon, dept
+!! Paracon ca set unhelpful DW values for eg 19F - manually fudge to a number that works...
+
+##j-1h.ref
+!! NB 40 ppm SW to cover more use cases
+sendgui ns 16
+sendgui XAU setaq
+##j-NOAH-BSC.ref
+sendgui d1 1.5
+sendgui XAU setaq
+##j-13c.ref
+sendgui ns 200
+sendgui XAU setaq
+##j-d135.ref
+sendgui ns 128
+sendgui XAU setaq
+##j-d135-q.ref
+sendgui ns 32
+sendgui XAU setaq
+##j-d135-l.ref
+sendgui ns 360
+sendgui XAU setaq
+##j-2h.ref
+sendgui XAU setaq
+##j-13c-l.ref
+!! for the long overnight carbon
+sendgui ns 400
+sendgui XAU setaq
+##j-13c-q.ref
+!! for the short daytime pcd
+sendgui ns 40
+sendgui XAU setaq
+##j-1h-1scan.ref
+!! NB 40 ppm SW to cover more use cases
+!! this is the quick quant experiment. No pulsecal for now
+sendgui XAU setaq
+##Proton-T1.ref
+!! Singel scan proton T1 measurement with gradient
+!! Only setaq required
+sendgui XAU setaq
+##19F-T1.ref
+!! Singel scan proton T1 measurement with gradient
+!! NO SETAQ - do not want to increase TD
+!! can shrink SW here as limited by bandwidth of inversion pulsecal
+!! NB required crp100,0.5,20.1 for 19F, obs in prosol
+sendgui sw 150
+##19Fselective1dHOESY.ref
+!!1d HOESY, selective on 19F vian CNST55
+sendgui XAU setaq
+##j-19F-bb-cpd.ref
+!!1d 19F with BB excitation, currently OPERA45, nb needs bb prosol relations file; dw set explicitly to 3.5 for baseopt compatibility
+sendgui dw 3.5
+sendgui XAU setaq
+##j-31P-bb-cpd.ref
+!!1d 31P with BB excitation, currently OPERA45, nb needs bb prosol relations file
+sendgui XAU setaq
+

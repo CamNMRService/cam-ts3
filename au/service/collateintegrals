@@ -1,0 +1,175 @@
+/*** ^^A -*-C++-*- **********************************************/
+/*	multi_integ3		12.11.2001			*/
+/****************************************************************/
+/*	Short Description :					*/
+/*	AU program for collating integrala of a series of 1D	*/
+/*	spectra with AI calibration. The output is written in	*/
+/*	a format suitable for import in excel or similar	*/
+/*	desktop publishing programs.				*/
+/****************************************************************/
+/*	Keywords :						*/
+/*	integration of a series of data sets			*/
+/****************************************************************/
+/*	Description/Usage :					*/
+/*	AU program for automatic integration of a series of 1D	*/
+/*	spectra with AI calibration. The output is written in	*/
+/*	a format suitable for import in excel or similar	*/
+/*	desktop publishing programs. In addition, a parameter	*/
+/*	has been added to the listing. This allows to correlate	*/
+/*	the integral changes with the change of a parameter.	*/
+/*	The spectra can	either be stored in a series of EXPNOs	*/
+/*	or in a series of PROCNOs.				*/
+/*	The AU program works as follows :			*/
+/*	1. Switch to the first experiment to be integrated. 	*/
+/*	2. Define the integral region(s) you want to use	*/
+/*	   in the interactive integration menu. Calibrate the	*/
+/*	   integrals with an appropriate calibration factor	*/
+/*	   (calibrate button) and store the intrng file (write	*/
+/*	   return button).					*/
+/*	3. Store the intrng file with the 'wmisc' command	*/
+/*	   under a name of your choice.				*/
+/*	5. Start the AU program.				*/
+/*	The individual integration results are stored in the	*/
+/*	file integrals.txt in each dataset, the summary of	*/
+/*	all results is stored in the file dataset-name_int.txt	*/
+/*	in the first dataset.					*/
+/*	If you want to print a different parameter than GPZ 1,	*/
+/*	then you have to change the corresponding lines with	*/
+/*	the FETCHPARS calls. Depending on the parameter type,	*/
+/*	you must also change the variable into which the 	*/
+/*	parameter is read (currently f1 for float). In that	*/
+/*	case, also the following sprintf lines need to be	*/
+/*	changed.						*/
+/****************************************************************/
+/*	Author(s) :						*/
+/*	Name		: Mike Engelhardt			*/
+/*	Organisation	: Bruker BioSpin GmbH			*/
+/*	Email		: eng@bruker.de				*/
+/****************************************************************/
+/*	Name		Date	Modification:			*/
+/*	eng		001011	created				*/
+/*	eng		001214	handle CURPRIN internally	*/
+/*	eng		011112	bug fix 2784			*/
+/*	hbr		230111	wmisc/rmisc supports variable 	*/
+/*				location of parameter files	*/
+/****************************************************************/
+/*
+$Id:$
+*/
+
+char intrngfile[256], printname[256], newline[256];
+char intresult[256], intallresult[256], dummystr[256];
+double intval=0.0;
+int iii, useprocnos=0;
+FILE *fpnt, *fpnt2;
+
+GETCURDATA
+
+GETINT ("Use EXPNOs (0) or PROCNOs (1) :",useprocnos)
+
+i1 = 1;
+if (useprocnos)
+{
+  GETINT ("Enter first processed number :",i1)
+  DATASET(name,expno,i1,disk,user)
+}
+else
+{
+  GETINT ("Enter first experiment number :",i1)
+  DATASET(name,i1,procno,disk,user)
+}
+i2 = 16;
+GETINT ("Enter number of experiments :",i2)
+
+
+
+
+
+STOREPAR("INTSCL",1.0)
+FETCHPAR("CURPRIN",printname)
+STOREPAR("CURPRIN","integrals.txt")
+LI
+STOREPAR("CURPRIN",printname)
+
+strcpy (intresult,PROCPATH("integrals.txt"));
+fpnt=fopen(intresult, "r");
+if(fpnt==NULL)
+{
+  Proc_err(DEF_ERR_OPT, "No integral result file :\n%s\n\
+Maybe CURPRIN is not a filename ?", intresult);
+  ABORT
+}
+(void) sprintf (intallresult,"%s/%s_int.txt",PROCPATH(0),name);
+fpnt2=fopen(intallresult, "wt");
+if(fpnt2==NULL)
+{
+  Proc_err(DEF_ERR_OPT, "No all-integral result file :\n%s",
+							 intallresult);
+  ABORT
+}
+
+/* Get parameter to be written into the result file */
+
+FETCHPARS("GPZ 1",&f1)
+
+/* Discard first five lines of integral result file */
+
+for (iii = 0; iii < 5; iii++)
+  fgets(dummystr, sizeof(dummystr), fpnt);
+
+sprintf (newline,"%d %f ",loopcount1+1,f1);
+
+while (fgets(dummystr, sizeof(dummystr), fpnt) != NULL)
+{
+  sscanf (dummystr,"%*d %*f %*f %lf",&intval);
+  sprintf (dummystr,"%f ",intval);
+  strcat (newline,dummystr);
+}
+strcat (newline,"\n");
+fputs (newline, fpnt2);
+
+fclose (fpnt);
+
+TIMES(i2-1)
+  if (useprocnos)
+  {
+    IPROCNO
+  }
+  else
+  {
+    IEXPNO
+  }
+  STOREPAR("INTSCL",-1.0)
+  FETCHPAR("CURPRIN",printname)
+  STOREPAR("CURPRIN","integrals.txt")
+  LI
+  STOREPAR("CURPRIN",printname)
+  strcpy (intresult,PROCPATH("integrals.txt"));
+  fpnt=fopen(intresult, "r");
+  if(fpnt==NULL)
+  {
+    Proc_err(DEF_ERR_OPT, "No integral result file :\n%s", intresult);
+    return(-1);
+  }
+  /* Discard first five lines of integral result file */
+  for (iii = 0; iii < 5; iii++)
+    fgets(dummystr, sizeof(dummystr), fpnt);
+
+  FETCHPARS("GPZ 1",&f1)
+  sprintf (newline,"%d %f ",loopcount1+2,f1);
+  while (fgets(dummystr, sizeof(dummystr), fpnt) != NULL)
+  {
+    sscanf (dummystr,"%*d %*f %*f %lf",&intval);
+    sprintf (dummystr,"%f ",intval);
+    strcat (newline,dummystr);
+  }
+  strcat (newline,"\n");
+  fputs (newline, fpnt2);
+  fclose (fpnt);
+END
+
+fclose (fpnt2);
+
+(void) sprintf (text,"--- collateintegrals finished ---\n\
+All results summarized in :\n%s",intallresult);
+QUITMSG (text)

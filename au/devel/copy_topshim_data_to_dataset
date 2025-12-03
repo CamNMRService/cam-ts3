@@ -1,0 +1,5 @@
+
+	
+		
+sprintf( tmp_cmd, "7za a  %s\\topshimData_%s_%i.zip C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData\\ > nul",ACQUPATH(0),name,expno,ts_major,ts_minor,ts_patch);
+	

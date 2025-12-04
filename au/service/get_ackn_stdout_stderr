@@ -1,0 +1,14 @@
+//get_ackn_stdout_stderr
+
+GETCURDATA
+
+int ackn;
+int std_out;
+int std_err;
+
+ackn = CPR_exec("setdef ackn ?",WAIT_TERM);
+std_out = CPR_exec("setdef stdout ?",WAIT_TERM);
+std_err = CPR_exec("setdef stderr ?",WAIT_TERM);
+Proc_err( INFO_OPT,"setdef ackn ? is  %d \n setdef stdout ? is  %d\n setdef stderr ? is  %d\n ",ackn,std_out,std_err);
+
+QUIT

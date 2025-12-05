@@ -1,0 +1,51 @@
+//pp_int
+//Peak pick spectrum to find biggest peak and integrate a set region either side of each peak 
+// This version does absf of a region around the peak as well
+//just does one dataset - use serial for more
+// and then collateintegrals
+
+int numPeaks, i;
+double  peakFreqPPM, peakIntensity, maxpsp, maxips, peakplus, peakminus;
+double halfintegral=0.47; //ppm
+
+FILE *fptr;
+char intfile[PATH_MAX];
+PP
+
+numPeaks = readPeakList(PROCPATH(0));
+maxips=0.0;
+maxpsp=0.0;
+for (i=0; i<numPeaks; i++)
+    {
+        peakIntensity = getPeakIntensity(i);
+        peakFreqPPM    = getPeakFreqPPM(i);
+        if (peakIntensity > maxips)
+        {
+            maxips = peakIntensity;
+            maxpsp = peakFreqPPM;
+        }
+    }
+freePeakList();
+
+STOREPAR("ABSF1", maxpsp+5.0)
+STOREPAR("ABSF2", maxpsp-5.0)
+ABSF
+
+strcpy (intfile,PROCPATH("intrng"));
+fptr=fopen(intfile, "w");
+if(fptr==NULL)
+{
+	
+  Proc_err(DEF_ERR_OPT, "Cannot open intnrg file for writing");
+  ABORT
+}
+peakplus=maxpsp+halfintegral;
+peakminus=maxpsp-halfintegral;
+
+fprintf(fptr,"P 0\n");
+fprintf(fptr,"%lf %lf \n", peakplus, peakminus);
+fclose(fptr); 
+STOREPAR("CURPRIN","integrals.txt")
+LI
+
+QUIT

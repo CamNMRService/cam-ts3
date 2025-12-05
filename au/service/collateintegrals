@@ -110,7 +110,7 @@ if(fpnt2==NULL)
 
 /* Get parameter to be written into the result file */
 
-FETCHPARS("GPZ 1",&f1)
+FETCHPARS("PHC0",&f1)
 
 /* Discard first five lines of integral result file */
 
@@ -155,7 +155,7 @@ TIMES(i2-1)
   for (iii = 0; iii < 5; iii++)
     fgets(dummystr, sizeof(dummystr), fpnt);
 
-  FETCHPARS("GPZ 1",&f1)
+  FETCHPARS("PHC0",&f1)
   sprintf (newline,"%d %f ",loopcount1+2,f1);
   while (fgets(dummystr, sizeof(dummystr), fpnt) != NULL)
   {

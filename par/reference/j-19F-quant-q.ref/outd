@@ -1,0 +1,16 @@
+##TITLE= Parameter file, TopSpin 3.8.0
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 2	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= chemist
+$$ 2025-12-05 17:49:24.980 +0000  chemist@lagavulin
+$$ C:\Bruker\cam-ts3\par\reference/j-19F-quant-q.ref/outd
+$$ process C:\Bruker\TopSpin3.8.0\prog\mod\edparproc.exe
+##$CURPLOT= <>
+##$CURPRIN= <$>
+##$DFORMAT= <normdp>
+##$LAYOUT= <+/janus-19f.xwp>
+##$LFORMAT= <normlp>
+##$PFORMAT= <normpl>
+##END=

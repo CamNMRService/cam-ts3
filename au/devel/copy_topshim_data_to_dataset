@@ -11,19 +11,6 @@ int ackn;
 
 ackn = CPR_exec("setdef ackn ?",WAIT_TERM);
 Proc_err( INFO_OPT,"setdef ackn ? is - %d",ackn);
-//quest = CPR_exec("setdef quest ?", WAIT_TERM);
-//switch (quest)
-//    {
-//        case -1:
- //           XCMD("setdef quest no")
-//            break;
-//        case 0:
-//            XCMD("setdef quest ok")
-//            break;
-//        case 1:
-//            XCMD("setdef quest can")
-//            break;
-//    }
 	
 sprintf( tmp_cmd, "7za a  %s\\..\\topshimData_%s_%i.zip C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData\\",ACQUPATH(0),name,expno,ts_major,ts_minor,ts_patch);
 Proc_err ( INFO_OPT,"***Zip command is - %s", tmp_cmd);

@@ -1,5 +1,20 @@
+//copy_topshim_data_to_dataset
 
+GETCURDATA
+
+char tmp_cmd[256]="";
+
+int ts_major = GetTsVersionMajor();
+int ts_minor = GetTsVersionMinor();
+int ts_patch = GetTsVersionPl();
+int ackn;
+
+ackn = CPR_exec("setdef ackn ?",WAIT_TERM);
+Proc_err( INFO_OPT,"setdef ackn ? is - %d",ackn);
 	
-		
-sprintf( tmp_cmd, "7za a  %s\\topshimData_%s_%i.zip C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData\\ > nul",ACQUPATH(0),name,expno,ts_major,ts_minor,ts_patch);
-	
+sprintf( tmp_cmd, "7za a  %s\\..\\topshimData_%s_%i.zip C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData\\",ACQUPATH(0),name,expno,ts_major,ts_minor,ts_patch);
+Proc_err ( INFO_OPT,"***Zip command is - %s", tmp_cmd);
+
+system(tmp_cmd);
+
+QUIT

@@ -1,13 +1,19 @@
-//pp_int
+//pp_absf_int
 //Peak pick spectrum to find biggest peak and integrate a set region either side of each peak 
 // This version does absf of a region around the peak as well
+// takes one argument: width of half the integral region, in ppm (uses 0.47ppm if no argument)
 //just does one dataset - use serial for more
 // and then collateintegrals
 
-int numPeaks, i;
+int numPeaks, i, nargs;
 double  peakFreqPPM, peakIntensity, maxpsp, maxips, peakplus, peakminus;
 double halfintegral=0.47; //ppm
 
+nargs=i_argc - 2;
+if ( nargs > 0 )
+    {
+    	 halfintegral = atof(i_argv[2]);
+    }
 FILE *fptr;
 char intfile[PATH_MAX];
 PP

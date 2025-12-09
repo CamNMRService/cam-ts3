@@ -15,8 +15,8 @@ $$ process C:\Bruker\TopSpin3.8.0\prog\mod\edparproc.exe
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 ##$ANAVPT= 1
 ##$AQSEQ= 0
-##$AQ_mod= 3
-##$AUNM= <au_zg>
+##$AQ_mod= 1
+##$AUNM= <au_zgrgafast>
 ##$AUTOPOS= <>
 ##$BF1= 376.404272
 ##$BF2= 400.03

@@ -4,12 +4,19 @@
 //just does one dataset - use serial for more
 // and then collateintegrals
 
-int numPeaks, i;
+int numPeaks, i,nargs;
 double  peakFreqPPM, peakIntensity, maxpsp, maxips, peakplus, peakminus;
 double halfintegral=0.47; //ppm
 
 FILE *fptr;
 char intfile[PATH_MAX];
+
+nargs=i_argc - 2;
+if ( nargs > 0 )
+    {
+    	 halfintegral = atof(i_argv[2]);
+    }
+    
 PP
 
 numPeaks = readPeakList(PROCPATH(0));

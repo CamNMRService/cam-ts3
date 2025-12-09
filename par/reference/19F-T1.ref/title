@@ -1,7 +1,7 @@
 19F T1 measurement
-Set O1P in centre of required 19F shift range, you can cover about 60 kHz  total (170ppm @400MHz, 140ppm @500MHz)
+Will cover about 300ppm or more with the Seedless_19F_excite and _inv pulses
 
-With broadband inversion pulse for perfect inversion and gradient pulse to remove need for phase cycling
+With broadband excitation pulse, broadband and B1 compensated inversion pulse for ~perfect inversion and gradient pulse to remove need for phase cycling
 With set D1 and vdlist, should be accurate for T1 up to ~10s.If necessary increase D1 and set TD(f1) to 8
 to increase the maximum used recovery delay to 100s
 Use getprosol to set pulses!

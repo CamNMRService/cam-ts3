@@ -56,4 +56,25 @@ sendgui XAU setaq
 ##j-31P-bb-cpd.ref
 !!1d 31P with BB excitation, currently OPERA45, nb needs bb prosol relations file
 sendgui XAU setaq
-
+##19F-T1.ref
+!! Singel scan proton T1 measurement with gradient
+!! NO SETAQ - do not want to increase TD
+!! can shrink SW here as limited by bandwidth of inversion pulsecal
+!! NB required seedless 19F inv and excite for 19F, obs in prosol
+sendgui td 256k
+##19Fselective1dHOESY.ref
+!!1d HOESY, selective on 19F vian CNST55
+sendgui XAU setaq
+##j-19F-bb-cpd.ref
+!!1d 19F with BB excitation, currently OPERA45, nb needs bb prosol relations file; dw set explicitly to 3.5 for baseopt compatibility. Don;t need setaq either
+##j-31P-bb-cpd.ref
+!!1d 31P with BB excitation, currently OPERA45, nb needs bb prosol relations file
+sendgui XAU setaq
+##j-19F-Quant-q.ref
+!!1d Quant 19F with BB excitation, 4 scans, currently OPERA45, nb needs bb prosol relations file; . Don;t need setaq either
+##j-19F-Quant-l.ref
+!!1d Quant 19F with BB excitation, 128 scans, currently OPERA45, nb needs bb prosol relations file;. Don;t need setaq either
+##j-1h-quant.ref
+!! NB 40 ppm SW to cover more use cases. 30s D1, au_zgrgafast
+sendgui ns 16
+sendgui XAU setaq

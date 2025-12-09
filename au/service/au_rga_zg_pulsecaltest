@@ -21,12 +21,13 @@
 /*	eng		980408	created				*/
 // PTG added pulsecal and writing result to a logfile (done after ZG as only care about the pulsecal result for now)
 // Also write P1/S P1 into a file in NAME directory 
+// PTG 2025_12_9 do fast RGA if D1>5s
 /****************************************************************/
 /*
 $Id: au_zgonly,v 1.2 2000/07/12 11:39:40 gsc Exp $
 */
 char solvent[128];
-float p1,statusp1;
+float p1,statusp1, del1;
 char results_content[128];
 char pulsecalcontent[128];
 char results_file_name[PATH_MAX];
@@ -36,7 +37,17 @@ FILE *pulsecalfile = NULL;
 sprintf(results_file_name,"C:\\Bruker\\diskless\\prog\\logfiles\\pulsecallog");
 sprintf(pulsecalfilename,"%s\\%s\\pulsecal",disk,name);
 GETCURDATA
+FETCHPAR("D 1", &del1);
+if (del1>5.0)
+{
+	STOREPAR("D 1", 5.0);
+	RGA
+	STOREPAR("D 1", del1);
+}
+else
+{
 RGA
+}
 ZG
 XAU("pulsecal","quiet")
 FETCHPAR("P 1", &p1)

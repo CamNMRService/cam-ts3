@@ -45,9 +45,10 @@ sendgui XAU setaq
 ##19F-T1.ref
 !! Singel scan proton T1 measurement with gradient
 !! NO SETAQ - do not want to increase TD
-!! can shrink SW here as limited by bandwidth of inversion pulsecal
+!! 
 !! NB required seedless 19F inv and excite for 19F, obs in prosol
-sedgui td 256k
+sendgui td 256k
+sendgui dw 3.5
 ##19Fselective1dHOESY.ref
 !!1d HOESY, selective on 19F vian CNST55
 sendgui XAU setaq

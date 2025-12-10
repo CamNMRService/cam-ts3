@@ -1,0 +1,436 @@
+/*** ^^A -*-C++-*- **********************************************/
+/*      lpopt2             10_12_2025                 */
+/****************************************************************/
+/*      Short Description :                                     */
+/****************************************************************/
+/*      Keywords :                                              */
+/****************************************************************/
+/*      Description/Usage :                                     */
+/*      optimise lock power                                     */
+/****************************************************************/
+/*      Author(s) :                                             */
+/*      Name            : Eric Johnson                          */
+/*      Organisation    : Bruker BioSpin                        */
+/*      Email           : eric.johnson@bruker.com               */
+/****************************************************************/
+/*      Name    Date    Modification:                           */
+/*      ecj     180830  created                                 */
+/*   based on Bermel's lpopt, but usinig a different strategy   */
+/*   for setting lock powers and deciding on optimal            */
+/****************************************************************/
+/*  command line options                                        */
+/*  "lpopt_19.ecj fast"        use fixed delay of 1 second      */
+/*            between setting LOCKPOWER and performing AUTOGAIN */
+/*  "lpopt_19.ecj d<sec>"      use fixed delay of <sec> seconds */
+/*            between setting LOCKPOWER and performing AUTOGAIN */
+/*  "lpopt_19.ecj d2"          use fixed delay of 2 seconds     */
+/*            between setting LOCKPOWER and performing AUTOGAIN */
+/*  "lpopt_19.ecj t<factor>"   use a t1 multiplication factor   */
+/*            of <factor> to calculate a delay of T1*factor     */
+/*            between setting LOCKPOWER and performing AUTOGAIN */
+/*  "lpopt_19.ecj t5"          use t1 multiplication factor 5   */
+/*                                                              */
+/*  Default without command line arguments                      */
+/*  is to use a t1 multiplication factor of 5                   */
+/* PTG: converted to AVIII syntax   */
+/****************************************************************/
+/*
+$Id:$
+*/
+
+char solvent[128], path[PATH_MAX];
+double delay = 5;
+double t1_factor = 5;
+
+float initiallockpower, startlockpower, optlockpower, initiallockgain;
+float lockpower, lockgain, cumulative;
+float optStepsBack, optautogain, startautogain, AG1, AG2;
+float factor;
+float lockpowers[200], lockgains[200], smoothedPowerGainSum[200];
+
+const float optPowerOffset = 4;
+const float diff_pow = 2;
+const float threshold = 1;
+const float nonsat_threshold = 0.2;
+const float startPowerOffset = 2*diff_pow;
+const float min_lockpower = -60;
+const float max_lockpower = 20;
+float minPowerGainSum = 999999;
+int min_index  = 100;
+int max_index  = 100;
+int zero_index = 101;
+int command_line_arg = 0;
+int nonsaturationFound = 0;
+int autoshim;
+int bsmslock;
+int counter;
+FILE *fpo;
+
+#include <inc/lcUtil>
+
+/***** check is system is locked *****/
+//GetBsmsIntValue("LOCK", &bsmslock);
+// Can;t do this on AVIII...
+
+//if (bsmslock != 1)
+//   STOPMSG("sample must be locked");
+//
+
+/*  get solvent from dataset: */
+solvent[0] = 0;
+FETCHPAR("SOLVENT",solvent);
+
+
+
+
+
+/***** solvent T1 aqccording to TopShim *****/
+/* for now, instead of removing '<' and '>' from solvent name from locksolv file, */
+/* include that as part of the solvent name here... */
+//  for aviii remove the <>
+
+if (strcmp (solvent, "Acetic") == 0)             delay = 1.3;
+if (strcmp (solvent, "Acetone") == 0)            delay = 4.6;
+if (strcmp (solvent, "C6D6") == 0)               delay = 1.3;
+if (strcmp (solvent, "CD2Cl2") == 0)             delay = 2.9;
+if (strcmp (solvent, "CD3CN") == 0)              delay = 6.7;
+if (strcmp (solvent, "CD3CN_SPE") == 0)          delay = 6.7;
+if (strcmp (solvent, "CDCl3") == 0)              delay = 1.5;
+if (strcmp (solvent, "CH2Cl2") == 0)             delay = 2.9;
+if (strcmp (solvent, "CH3CN") == 0)              delay = 6.7;
+if (strcmp (solvent, "CH3CN+D2O") == 0)          delay = 0.45;
+if (strcmp (solvent, "CH3OH") == 0)              delay = 0.45;
+if (strcmp (solvent, "CH3OH+D2O") == 0)          delay = 0.45;
+if (strcmp (solvent, "D2O") == 0)                delay = 0.45;
+if (strcmp (solvent, "D2O_salt") == 0)           delay = 0.45;
+if (strcmp (solvent, "DEE") == 0)                delay = 1.5;
+if (strcmp (solvent, "Dioxane") == 0)            delay = 1.0;
+if (strcmp (solvent, "DME") == 0)                delay = 1.5;
+if (strcmp (solvent, "DMF") == 0)                delay = 2.8;
+if (strcmp (solvent, "DMSO") == 0)               delay = 0.6;
+if (strcmp (solvent, "DMSO-H6") == 0)            delay = 0.6;
+if (strcmp (solvent, "EtOD") == 0)               delay = 0.9;
+if (strcmp (solvent, "H2O") == 0)                delay = 0.45;
+if (strcmp (solvent, "H2O+D2O") == 0)            delay = 0.45;
+if (strcmp (solvent, "H2O+D2O_salt") == 0)       delay = 0.45;
+if (strcmp (solvent, "HDMSO") == 0)              delay = 0.6;
+if (strcmp (solvent, "Juice") == 0)              delay = 0.45;
+if (strcmp (solvent, "MeOD") == 0)               delay = 4.4;
+if (strcmp (solvent, "oC6D4Cl2") == 0)           delay = 0.36;
+if (strcmp (solvent, "pC6D4Br2") == 0)           delay = 0.36;
+if (strcmp (solvent, "Plasma") == 0)             delay = 0.45;
+if (strcmp (solvent, "Pyr") == 0)                delay = 1.0;
+if (strcmp (solvent, "TFA") == 0)                delay = 0.14;
+if (strcmp (solvent, "T_H2O+D2O+Me4NCl") == 0)   delay = 0.45;
+if (strcmp (solvent, "T_H2O+D2O+NaAc") == 0)     delay = 0.45;
+if (strcmp (solvent, "T_H2O+D2O+Pivalate") == 0) delay = 0.45;
+if (strcmp (solvent, "THF") == 0)                delay = 3.0;
+if (strcmp (solvent, "THF-H4") == 0)             delay = 3.0;
+if (strcmp (solvent, "T_MeOD") == 0)             delay = 4.4;
+if (strcmp (solvent, "Tol") == 0)                delay = 4.5;
+if (strcmp (solvent, "Tol-H8") == 0)             delay = 4.5;
+if (strcmp (solvent, "Urine") == 0)              delay = 0.45;
+
+
+/***** prepare *****/
+/* look for command line arguments */
+if (i_argc > 2)
+{
+    if (i_argv[2][0] == 't')
+    {
+        sscanf(i_argv[2], "t%i", &command_line_arg);
+        t1_factor = (double)command_line_arg;
+        if (t1_factor < 1)
+            t1_factor = 5;
+    }
+}
+
+delay *= t1_factor;
+
+/* look for command line arguments */
+
+if (i_argc > 2)
+{
+    if (strcmp(i_argv[2], "fast") == 0)
+        delay = 1;
+
+    if (i_argv[2][0] == 'd')
+    {
+        sscanf(i_argv[2], "d%i", &command_line_arg);
+        delay = (double)command_line_arg;
+        if (delay < 1)
+            delay = 1;
+    }
+}
+
+
+sprintf(path,"solvent: %s", solvent);
+Show_status(path);
+sleep(1);
+
+sprintf(path,"t1_factor: %.2f", t1_factor);
+Show_status(path);
+sleep(1);
+
+sprintf(path,"delay: %.2f", delay);
+Show_status(path);
+sleep(1);
+
+
+/***** check for autoshim *****/
+//GetBsmsIntValue("AUTOSHIM", &autoshim);
+
+// for AVIII:
+
+autoshim = check_autoshim();
+
+if (autoshim == 1)
+  { AUTOSHIM_OFF;}
+
+
+/* record initial lockpower and lockgain*/
+
+GETBSMSVAL(BSN_LOCK_POWER, initiallockpower);
+GETBSMSVAL(BSN_LOCK_GAIN, initiallockgain);
+
+AUTOGAIN
+ERRORABORT
+sleep(1);
+
+GETBSMSVAL(BSN_LOCK_GAIN,  startautogain);
+optautogain = startautogain;
+
+
+/*** start with lockpower a couple steps lower than initial value****/
+
+startlockpower = initiallockpower - startPowerOffset;
+if (startlockpower < min_lockpower)
+    startlockpower = min_lockpower;
+
+optlockpower = startlockpower;
+lockpower = startlockpower;
+counter = 100;
+
+PUTBSMSVAL(BSN_LOCK_POWER, lockpower);
+sleep(delay);
+
+
+/* read first lock gain value */
+AUTOGAIN
+ERRORABORT
+sleep(1);
+
+GETBSMSVAL(BSN_LOCK_GAIN, lockgain);
+
+lockpowers[counter] = lockpower;
+lockgains[counter] = lockgain;
+smoothedPowerGainSum[counter] = 9999;
+
+lockpower += diff_pow;
+counter++;
+max_index++;
+
+sprintf(path, "LP: %.0f\tLG: %.1f", lockpower, lockgain);
+Show_status(path);
+
+PUTBSMSVAL(BSN_LOCK_POWER, lockpower);
+sleep(delay);
+
+
+/* read second lock gain value */
+AUTOGAIN
+ERRORABORT
+sleep(1);
+
+GETBSMSVAL(BSN_LOCK_GAIN, lockgain);
+
+lockpowers[counter] = lockpower;
+lockgains[counter] = lockgain;
+smoothedPowerGainSum[counter] = 9999;
+
+lockpower += diff_pow;
+counter++;
+max_index++;
+
+sprintf(path, "LP: %.0f\tLG: %.1f", lockpower, lockgain);
+Show_status(path);
+
+
+for (;;)
+{
+    /* continue increasing lock power and reading lock gain values, and storing smoothed */
+    /* (averaging 3 values) until we reach some threshold */
+
+    PUTBSMSVAL(BSN_LOCK_POWER, lockpower);
+    sleep(delay);
+
+    AUTOGAIN
+    ERRORABORT
+    sleep(1);
+
+    GETBSMSVAL(BSN_LOCK_GAIN, lockgain);
+
+    lockpowers[counter] = lockpower;
+    lockgains[counter] = lockgain;
+    smoothedPowerGainSum[counter] = 9999;
+
+    smoothedPowerGainSum[counter-1] =
+        (lockpowers[counter-2] + lockpowers[counter-1] + lockpowers[counter] +
+         lockgains[counter-2]  + lockgains[counter-1]  + lockgains[counter]) / 3;
+
+    if (smoothedPowerGainSum[counter-1] <= minPowerGainSum)
+    {
+        minPowerGainSum = smoothedPowerGainSum[counter-1];
+        zero_index = counter - 1;
+    }
+
+    cumulative = smoothedPowerGainSum[counter-1] - minPowerGainSum;
+    sprintf(path,"LP: %.0f\tLG: %.1f\tTOTAL: %.3f", lockpower, lockgain, cumulative);
+    Show_status(path);
+
+    /* first smoothedPowerGainSum is at index 101, when counter is 102 */
+    /* At index 104, we'll have 3 smoothedPowerGainSum's stored.  Start at this */
+    /* point to see if we've found a point without saturation. */
+
+    /* If 3 points in a row are all within 0.1 of the minPowerGainSum */
+
+    if (counter > 103)
+    {
+            if (fabs(smoothedPowerGainSum[counter-3]-minPowerGainSum) <= nonsat_threshold &&
+                fabs(smoothedPowerGainSum[counter-2]-minPowerGainSum) <= nonsat_threshold &&
+                fabs(smoothedPowerGainSum[counter-1]-minPowerGainSum) <= nonsat_threshold)
+            {
+                nonsaturationFound = 1;
+            }
+    }
+
+    /* Or, if we've recorded 2 points before the minPowerGainSum value, */
+    /* then this is also an indication of non-saturation. */
+
+    if (zero_index > 102)
+    {
+        nonsaturationFound = 1;
+    }
+
+    if (cumulative > threshold)
+        break;
+
+    lockpower += diff_pow;
+    counter++;
+    max_index++;
+
+    if (lockpower > max_lockpower)
+        break;
+}
+
+
+/* if nonsaturation point wasn't found, start lowering power from starting point */
+if (nonsaturationFound == 0)
+{
+    lockpower = startlockpower;
+    counter = 100;
+
+    for (;;)
+    {
+        /* continue reading lock gain values, and storing smoothed (averaging 3 values) */
+        /* until we've hit a non-saturation point */
+
+        counter--;
+        min_index--;
+        lockpower -= diff_pow;
+
+        if (lockpower < min_lockpower)
+            break;
+
+        PUTBSMSVAL(BSN_LOCK_POWER, lockpower);
+        sleep(delay);
+
+        AUTOGAIN
+        ERRORABORT
+        sleep(1);
+
+        GETBSMSVAL(BSN_LOCK_GAIN, lockgain);
+
+        lockpowers[counter] = lockpower;
+        lockgains[counter] = lockgain;
+        smoothedPowerGainSum[counter] = 9999;
+
+        smoothedPowerGainSum[counter+1] =
+            (lockpowers[counter+2] + lockpowers[counter+1] + lockpowers[counter] +
+             lockgains[counter+2]  + lockgains[counter+1]  + lockgains[counter]) / 3;
+
+        if (smoothedPowerGainSum[counter+1] < minPowerGainSum)
+        {
+            minPowerGainSum = smoothedPowerGainSum[counter+1];
+            zero_index = counter + 1;
+        }
+
+	cumulative = smoothedPowerGainSum[counter+2] - minPowerGainSum;
+	sprintf(path,"LP: %.0f\tLG: %.1f\tTOTAL: %.3f", lockpower, lockgain, cumulative);
+	Show_status(path);
+
+	/* add stuff for finding break point */
+
+	/* If 3 points in a row are all within 0.1 of the minPowerGainSum */
+        if (fabs(smoothedPowerGainSum[counter+1]-minPowerGainSum) <= nonsat_threshold &&
+            fabs(smoothedPowerGainSum[counter+2]-minPowerGainSum) <= nonsat_threshold &&
+            fabs(smoothedPowerGainSum[counter+3]-minPowerGainSum) <= nonsat_threshold)
+        {
+            nonsaturationFound = 1;
+            break;
+        }
+
+        /* Or, if we've recorded 2 points before the minPowerGainSum value, */
+        /* then this is also an indication of non-saturation. */
+
+        if (zero_index > counter+3)
+        {
+            nonsaturationFound = 1;
+            break;
+        }
+    }
+}
+
+for (counter = zero_index; counter <= max_index; counter++)
+{
+    if (smoothedPowerGainSum[counter] - minPowerGainSum > threshold)
+    {
+        /* interpolate to find the lockpower where we hit the threshold */
+        factor = (smoothedPowerGainSum[counter] - minPowerGainSum - threshold) /
+                 (smoothedPowerGainSum[counter] - smoothedPowerGainSum[counter-1]);
+        /* round to the nearest dB */
+        optlockpower = lockpowers[counter] - roundf(factor*diff_pow) - optPowerOffset;
+
+        /* number of steps back to look for lockgain value (because optPowerOffset */
+        /* may not be a mulple of diff_power...) */
+        optStepsBack = (roundf(factor*diff_pow) + optPowerOffset) / diff_pow;
+        AG1 = lockgains[counter - (int)optStepsBack];
+        AG2 = lockgains[counter - (int)optStepsBack - 1];
+        optautogain = AG1 + (AG2 - AG1) * (optStepsBack - (int)optStepsBack);
+        break;
+    }
+}
+
+PUTBSMSVAL(BSN_LOCK_POWER, optlockpower);
+
+#if 0
+Proc_err(INFO_OPT, "%s %s\n%s %.1f",
+                   "solvent:", solvent, "optimized LOCKPOWER:", optlockpower);
+#endif
+
+/* What are the AUTOGAIN levels for the optimized lockpower and the starting lockpower? */
+/* Add the difference of these to the starting lockgain. */
+
+PUTBSMSVAL(BSN_LOCK_GAIN, initiallockgain + optautogain - startautogain);
+
+/* send result to topspin */
+sprintf(path, "%s %.1f", "sendgui _lockpoweradjust", optlockpower);
+AUERR = CPR_exec(path, WAIT_START);
+ERRORABORT
+
+/***** handle autoshim *****/
+
+if (autoshim == 1)
+  { AUTOSHIM_ON;}
+
+QUIT

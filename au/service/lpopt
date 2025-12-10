@@ -121,8 +121,22 @@ if (strcmp (solvent, "Urine") == 0)              delay = 0.45;
 
 /***** prepare *****/
 lockpower = -60.0;
+if (i_argc > 2)
+    {
+        t1_factor = atof(i_argv[2]);
+    }
+    else
+    {
 GETDOUBLE("multiplier for T1 value", t1_factor);
+    }
+if (i_argc > 3)
+    {
+        lockpower = atof(i_argv[3]);
+    }
+    else
+    {
 GETDOUBLE("Initial lock power", lockpower);
+    }
 delay *= t1_factor;
 
 

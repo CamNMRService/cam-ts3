@@ -1,0 +1,53 @@
+#include <inc/sysutil>
+int oexpno, newexpno, total_blocks;
+char new_name[100], filedir[200], testdir[100], old_name[64];
+#include <inc/getdataset>
+
+GETINT("Number of scans per block?", i1)
+oexpno = expno;
+
+while (access(ACQUPATH("fid"), F_OK) == 0) {
+expno++;
+ }
+
+total_blocks = ((expno - oexpno) - (i1 - 1));
+(void) sprintf(new_name, "%s_%s_%d", name, "average", i1);
+(void) sprintf(old_name, "%s", name);
+
+TIMES(total_blocks)
+
+expno = oexpno;
+
+DATASET(old_name, expno, procno, disk, user)
+
+WRPA(new_name, expno, procno, disk, user)
+DATASET(new_name, expno, procno, disk, user)
+DATASET2(new_name, expno, procno, disk, user)
+
+STOREPAR("DC", 1.0)
+STOREPAR("TI", "result of fidadd")
+STOREPARS("TI", "result of fidadd")
+
+TIMES2(i1-1)
+oexpno = oexpno+1;
+
+DATASET3(old_name, oexpno, procno, disk, user)
+ADDFID
+
+END
+oexpno = expno+1;
+
+END
+
+// Delete all processed data in newly created files.
+
+GETCURDATA
+oexpno = expno + i1;
+expno = - total_blocks - (i1-1) + oexpno;
+
+TIMES(oexpno-expno)
+(void) sprintf(filedir, "%s/%s/%d/pdata/%d", disk, new_name, expno++,procno);
+(void) unlinkpr (filedir);
+END
+
+QUITMSG(filedir);

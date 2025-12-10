@@ -83,6 +83,7 @@
 // For NOAH expets check aunmp and if it's splitx_au tehn run it cont_ex
 // PTG 17_09_2024 added setfield/storefield commaands either side of lock, to solve MeOD problems
 //PTG  3_10_2025 Copy wobb curves from junk dataset into first experiment
+// PTG 20Oct2025 Make it do proton pulse calibration in initial tests
 /****************************************/
 /*
 Production version
@@ -351,9 +352,12 @@ if(strcmp(cmd,"skiptest"))
 		// keep first dataset with wobb curves in
 		IEXPNO;
 		XAU("hump_sino_test_b2_01","")
+		expno=20;
+		SETCURDATA
+		XAU("poise_1h_p1_b2_01","")
 		if(strcmp(cmd,"skipcarbon"))
 		{
-			expno=20;
+			expno=30;
 			SETCURDATA
 			XAU("poise_13c_p1_b2_01","")
 		}

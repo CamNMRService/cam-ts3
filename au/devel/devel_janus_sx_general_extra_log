@@ -90,6 +90,9 @@ Added extra when creating the junk dataset to set the instrument name and probe 
 // Needs #include <inc/bsms_program>    /* must be the first statement ****/
 //Code otherwise as per TSO. Value to add is set directly in the section
 //NB code here is TS3 only - needs modifying for TS4
+// PTG dec 2025: moved rot off/on commands in experiment specific atma, to be within the "do real atma" condition
+// 	so it doesn;t do them for atma nowin selectnuc... (this doesn;t need spinning to be off!!)
+
 
 #include <inc/bsms_program>    /* must be the first statement ****/
 
@@ -1051,11 +1054,12 @@ with NMR service team about whether medium or thick wall tubes are more appropri
             #pragma region Logic for tuning
 			if ( (strstr ( experiment, "2h") == NULL) && (strstr ( experiment, "2H") == NULL)) //so if its not 2h, we might tune
 			{
-				strcat(janusinfostring, "ROTOFF \n");
-				ROTOFF
+				
 				if ( (strstr ( experiment, "janus-1h") == NULL) && (ATMAflag==1) && (global_atma_flag !=0) ) //strstr returns a pointer if a match
 				{
 					// stop spinning
+					strcat(janusinfostring, "ROTOFF \n");
+				    ROTOFF
 					sprintf(tmp_cmd,"atma storewobb 700");
 					sprintf(tmp_str,"%s\n",tmp_cmd);
 					strcat(janusinfostring, tmp_str);
@@ -1069,6 +1073,8 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 						strcat(sampleinfostring, "\n ATMA failed - does your sample have high ionic strength? \n Check with NMR service team about whether medium or thick wall tubes are more appropriate for similar samples.");
 
 					// STOPMSG(tmp_str)
+					strcat(janusinfostring, "ROT \n");
+				    ROT // does "ro acqu"
 					}
 				}
 				else
@@ -1077,8 +1083,7 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 				   strcat(janusinfostring, "atma nowin selectnuc\n");
 				   XCMD("atma nowin selectnuc")
 				}
-				strcat(janusinfostring, "ROT \n");
-				ROT // does "ro acqu"
+				
 			}
 			#pragma endregion Logic for tuning
 			#pragma region Prep titlefile

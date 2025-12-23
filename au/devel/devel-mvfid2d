@@ -1,0 +1,109 @@
+/***********************************************-*-C++-*-********/
+/*	devel-mvfid2d		06.05.2024				*/
+/****************************************************************/
+/*	Short Description :					*/
+/*	Executes signal-averaging on a series of increasing     */
+/*	slices of a pseudo-2D with an averaging size chosen by the user */
+/*	and makes a new pseudo-2D dataset with each row being an average. */
+/*	Averaging is performed using a moving average', which 	*/
+/*	maintains the temporal resolution with which the spectra*/
+/*	were originally acquired whilst increasing S/N.		*/
+/****************************************************************/
+/*	Keywords :						*/
+/*	signal averaging, monitoring, SN			*/
+/****************************************************************/
+/*	Description/Usage :					*/
+/*	This AU program performs signal averaging on a series 	*/
+/*	of increasing experiment numbers acquired as a pseudo-2D 	*/
+/*	experiment. The averaged spectra are saved in a new 	*/
+/*	experiment. If the folder does not yet exist, it is created.*/
+/*	If the folder exists, the data inside is overwritten.	*/
+/*	parameters are copied. If the data sets already exist,	*/
+/*	then the experiments are executed as they are.		*/
+
+/*	This AU program can be used in place of applying 	*/
+/*	signal-averaging at during acquisition.			*/
+/*	NOTE: This program must read and write from multiple	*/
+/*	files and will take time. Recommendation: if applied	*/
+/*	to more than 500 experiments, be prepared to have a 	*/
+/*	coffee break.						*/
+/****************************************************************/
+/*	Author(s) :						*/
+/*	Name		: Peter Gierth			*/
+/*	Organisation	University of Cambridge	*/
+/*	ptg20@cam.ac.uk */
+/****************************************************************/
+/*	Name		Date	Modification:			*/
+/*	axf		060524	modified from mvfid (a 		*/
+/*				derivation of fidadd		*/
+/*				(Bruker Standard AU Library)	*/
+/*  ptg     15_12_2025  Modified from Edinburgh version which works on expnos */
+/****************************************************************/
+
+#include <inc/sysutil>
+int  oexpno, newexpno, total_blocks, td1, i, j, oprocno, k;
+int decim=1;
+char new_name[100], filedir[200], testdir[100], old_name[64], title_path[PATH_MAX];
+FILE *fptr;
+//#include <inc/getdataset>
+GETCURDATA
+oexpno=expno;
+oprocno=procno;
+FETCHPAR1S("TD", &td1)
+
+GETINT("Number of scans per block?", i1)
+GETINT("Number of rows to use?", td1)
+GETINT("Decimation factor - if an integer greater than 1 will create a result \n with lower time resolution than the original data: \n eg 2 means every other time point is kept", decim)
+
+Proc_err(DEF_ERR_OPT,"This AU program will overwrite raw data!! \n Make sure you are working on a copy of the original data!!");
+
+sprintf(title_path, PROCPATH("title"));
+
+
+
+//(void) sprintf(new_name, "%s_%s_%d", name, "average", i1);
+//(void) sprintf(old_name, "%s", name);
+
+//WRPA(new_name, expno, procno, disk, user)
+//DATASET(new_name, expno, procno, disk, user)
+SETCURDATA
+
+total_blocks = ((td1) - (i1 - 1))/decim;
+
+fptr=fopen(title_path,"a");
+
+if(fptr==NULL)
+{
+    Proc_err(DEF_ERR_OPT,"cannot open title file %s for writing", title_path);
+}
+else
+{
+    fprintf(fptr, "Averaging applied with fixed average, %d fids per block to create %d total new fids", i1,total_blocks);
+    fclose(fptr);
+}
+
+Proc_err(DEF_ERR_OPT,"scans=%d, blocks=%d",i1, total_blocks);
+
+for (i=1; i<=total_blocks; i++)
+{
+	  k=1+(decim*(i-1));
+    DATASET(name,oexpno,oprocno,disk,user)
+    RSER(k, 1000, 1) // read the first row of the block into the first dummy expno
+    DATASET(name,1000,1,disk,user)  // move to the dummy procno
+    DATASET2(name,1000,1,disk,user) // set dataset2 as dummy expno
+    STOREPAR("DC", 1.0)
+
+    for (j=1; j<i1; j++)
+    {
+        DATASET(name,oexpno,oprocno,disk,user)
+        RSER(k+j, 1001, 1) // read a subsequent row
+        DATASET(name,1000,1,disk,user)  // move to the dummy procno
+        DATASET3(name,1001,1,disk,user) // set dataset3 as dummy expno
+        ADDFID
+    }
+
+    WSER(i, name, oexpno, oprocno, disk, user)
+
+}
+
+QUIT

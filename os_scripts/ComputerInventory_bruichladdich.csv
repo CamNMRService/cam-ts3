@@ -1,0 +1,2 @@
+ComputerName,OperatingSystem,IPAddress,MACAddress,Manufacturer,CPUType,RAMSize_GB
+"bruichladdich","Ubuntu 24.04.3 LTS","192.168.200.250","10:98:19:25:92:03","Dell Inc.","Intel(R) Core(TM) i9-14900K","62.48"

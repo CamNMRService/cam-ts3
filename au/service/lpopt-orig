@@ -1,0 +1,285 @@
+/*** ^^A -*-C++-*- **********************************************/
+/*      lpopt_6                      01.02.2018                 */
+/****************************************************************/
+/*      Short Description :                                     */
+/****************************************************************/
+/*      Keywords :                                              */
+/****************************************************************/
+/*      Description/Usage :                                     */
+/*      setup pseudo 2D (syszg2d)                               */
+/*      make sure there is no droop in peak intenisty           */
+/*      start Au program                                        */
+/****************************************************************/
+/*      Author(s) :                                             */
+/*      Name            : Wolfgang Bermel                       */
+/*      Organisation    : Bruker BioSpin GmbH                   */
+/*      Email           : wolfgang.bermel@bruker.com            */
+/****************************************************************/
+/*      Name            Date    Modification:                   */
+/*      ber             941222  created                         */
+/*      ber             151102  modified for TS3.0              */
+/*      ber             170802  modified for TS4                */
+/*      ber             171005  added output to text file       */
+/*                                 changed to 1dB steps         */
+/*      ber             180125  starting value changed to -60   */
+/*      ber             180131  autophase before initialising   */
+/*                                 power and gain               */
+/*      ber             180201  loop to achieve min LGain (SiNo)*/
+/*                              reducing LPower bey -6          */
+/*                              requesing multiplier instead of */
+/*                                 delay                        */
+/*     ptg								180209	Ask for start gain */
+/*     ptg							180214   AVIII version , added loopadj stuff*/
+/****************************************************************/
+/*
+$Id: $
+*/
+#include <inc/bsms_program>    /* must be the first statement ****/
+AUERR = lpopt(curdat);
+QUIT
+
+
+int lpopt(const char* curdat)
+{
+char solvent[100], text[PATH_MAX], outfile[PATH_MAX];
+
+double delay,delay1, t1_factor, threshold, t1_factor2;
+
+double lockpower, lockgain, prevlockgain, loopgain, looptime;
+int loopfilter;
+double diff, diff_old, diff_pow;
+double delta_power;
+double aa, bb, cc, dd, ee, xx;
+int counter, num_val;
+
+FILE *fpo;
+
+
+solvent[0] = 0;
+FETCHPAR("SOLVENT",solvent);
+
+
+/***** initialise defaults ******/
+
+delay = 30.0;
+
+num_val = 5;
+
+t1_factor = 10.0;
+t1_factor2 = 10.0;
+threshold = 0.75;
+
+diff_pow = 1.0;
+
+delta_power = 6.0;
+
+
+/***** solvent T1 aqccording to TopShim *****/
+
+if (strcmp (solvent, "Acetic") == 0)             delay = 1.3;
+if (strcmp (solvent, "Acetone") == 0)            delay = 4.6;
+if (strcmp (solvent, "C6D6") == 0)               delay = 1.3;
+if (strcmp (solvent, "CD2Cl2") == 0)             delay = 2.9;
+if (strcmp (solvent, "CD3CN") == 0)              delay = 6.7;
+if (strcmp (solvent, "CD3CN_SPE") == 0)          delay = 6.7;
+if (strcmp (solvent, "CDCl3") == 0)              delay = 1.5;
+if (strcmp (solvent, "CH2Cl2") == 0)             delay = 2.9;
+if (strcmp (solvent, "CH3CN") == 0)              delay = 6.7;
+if (strcmp (solvent, "CH3CN+D2O") == 0)          delay = 0.45;
+if (strcmp (solvent, "CH3OH") == 0)              delay = 0.45;
+if (strcmp (solvent, "CH3OH+D2O") == 0)          delay = 0.45;
+if (strcmp (solvent, "D2O") == 0)                delay = 0.45;
+if (strcmp (solvent, "D2O_salt") == 0)           delay = 0.45;
+if (strcmp (solvent, "DEE") == 0)                delay = 1.5;
+if (strcmp (solvent, "Dioxane") == 0)            delay = 1.0;
+if (strcmp (solvent, "DME") == 0)                delay = 1.5;
+if (strcmp (solvent, "DMF") == 0)                delay = 2.8;
+if (strcmp (solvent, "DMSO") == 0)               delay = 0.6;
+if (strcmp (solvent, "DMSO-H6") == 0)            delay = 0.6;
+if (strcmp (solvent, "EtOD") == 0)               delay = 0.9;
+if (strcmp (solvent, "H2O") == 0)                delay = 0.45;
+if (strcmp (solvent, "H2O+D2O") == 0)            delay = 0.45;
+if (strcmp (solvent, "H2O+D2O_salt") == 0)       delay = 0.45;
+if (strcmp (solvent, "HDMSO") == 0)              delay = 0.6;
+if (strcmp (solvent, "Juice") == 0)              delay = 0.45;
+if (strcmp (solvent, "MeOD") == 0)               delay = 4.4;
+if (strcmp (solvent, "oC6D4Cl2") == 0)           delay = 0.36;
+if (strcmp (solvent, "pC6D4Br2") == 0)           delay = 0.36;
+if (strcmp (solvent, "Plasma") == 0)             delay = 0.45;
+if (strcmp (solvent, "Pyr") == 0)                delay = 1.0;
+if (strcmp (solvent, "TFA") == 0)                delay = 0.14;
+if (strcmp (solvent, "T_H2O+D2O+Me4NCl") == 0)   delay = 0.45;
+if (strcmp (solvent, "T_H2O+D2O+NaAc") == 0)     delay = 0.45;
+if (strcmp (solvent, "T_H2O+D2O+Pivalate") == 0) delay = 0.45;
+if (strcmp (solvent, "THF") == 0)                delay = 3.0;
+if (strcmp (solvent, "THF-H4") == 0)             delay = 3.0;
+if (strcmp (solvent, "T_MeOD") == 0)             delay = 4.4;
+if (strcmp (solvent, "Tol") == 0)                delay = 4.5;
+if (strcmp (solvent, "Tol-H8") == 0)             delay = 4.5;
+if (strcmp (solvent, "Urine") == 0)              delay = 0.45;
+
+
+/***** prepare *****/
+lockpower = -60.0;
+if (i_argc > 2)
+    {
+        t1_factor = atof(i_argv[2]);
+    }
+    else
+    {
+GETDOUBLE("multiplier for T1 value", t1_factor);
+    }
+if (i_argc > 3)
+    {
+        lockpower = atof(i_argv[3]);
+    }
+    else
+    {
+GETDOUBLE("Initial lock power", lockpower);
+    }
+delay *= t1_factor;
+
+
+diff = diff_pow;
+
+
+lockgain = 133.0;
+PUTBSMSVAL(BSN_LOCK_GAIN,lockgain);
+sleep(5);
+
+
+PUTBSMSVAL(BSN_LOCK_POWER,lockpower);
+sleep(delay);
+
+
+AUTOGAIN
+ERRORABORT
+sleep(delay);
+
+GETBSMSVAL(BSN_LOCK_GAIN,lockgain);
+
+
+for (;;)
+   {
+   if (lockgain <= 135.0 )
+      break;
+
+   lockpower += 1.0;
+   PUTBSMSVAL(BSN_LOCK_POWER,lockpower);
+   sleep(delay);
+
+   AUTOGAIN
+   ERRORABORT
+   sleep(delay);
+
+   GETBSMSVAL(BSN_LOCK_GAIN,lockgain);
+   }
+
+
+AUTOPHASE
+ERRORABORT
+
+
+GETBSMSVAL(BSN_LOCK_GAIN,lockgain);
+
+/***** check and open outfile *****/
+
+sprintf(outfile,"%s", ACQUPATH("lpopt.txt") );
+
+fpo = fopen(outfile,"wt");
+
+if ( fpo == NULL )
+   {
+   (void)sprintf(text,"cannot open output file:\n%s",outfile);
+   }
+
+fprintf(fpo,"solvent: %s\n\n", solvent);
+fprintf(fpo,"delay: %.4lf\n\n", delay);
+fprintf(fpo,"lockpow\tlockgn\tdiff\n");
+
+
+/***** execute loop *****/
+
+for(;;)
+{
+   prevlockgain = lockgain;
+
+   diff_old = diff;
+
+
+   lockpower += diff_pow;
+   PUTBSMSVAL(BSN_LOCK_POWER,lockpower);
+   sleep(delay);
+
+
+   AUTOGAIN
+   ERRORABORT
+
+   GETBSMSVAL(BSN_LOCK_GAIN,lockgain);
+
+
+   diff = prevlockgain - lockgain;
+
+   fprintf(fpo,"%.lf\t%.1f\t%.2f\n", lockpower, lockgain, diff);
+
+
+   if (diff < (diff_old * threshold))
+      break;
+}
+
+lockpower-= delta_power;
+PutBsmsFloatValue(BSMS_LOCK_POWER, lockpower);
+sleep(delay);
+
+AUTOPHASE
+AUTOGAIN
+ERRORABORT
+
+GETBSMSVAL(BSN_LOCK_GAIN,lockgain);
+
+if(lockgain<120.0)
+{
+
+/* Equation for loopfilter= aa X Lock Gain ^ ( bb / Lock Gain ) */
+
+aa = 2.6743515e-05;
+bb = 337.53647;
+xx=lockgain;
+loopfilter = (aa*pow(xx,(bb/xx)));
+PUTBSMSVAL(BSN_LOOP_FILTER,loopfilter);
+
+/* Equation for loopgain = aa - bb X Lock Gain */
+
+aa =93.318454;
+bb =0.93188816;
+loopgain =aa-(bb*xx);
+PUTBSMSVAL(BSN_LOOP_GAIN, loopgain);
+
+/* Equation for looptime = aa - ( bb X lock gain ) + ( cc * lock gain ) - ( dd X lock gain ^3 ) */
+
+aa = 11.767976;
+bb = 0.35032894;
+cc = 0.0033479054;
+dd = 9.9817562e-06;
+
+looptime = aa-(bb*xx)+(cc*xx*xx)-(dd*xx*xx*xx);
+PUTBSMSVAL(BSN_LOOP_TIME, looptime);
+sprintf (text, "lpopt finished\n\nlockpower %.1f dB\nlockgain: %.1f \n loopgain: %.2lf \n looptime: %.2lf \n loopfilter: %d\n", lockpower, lockgain, loopgain, looptime, loopfilter);
+
+
+fprintf(fpo,"lockpower: %.1f\nlockgain: %.2f\n loopgain: %.2lf \n looptime: %.2lf \n loopfilter: %d\n", lockpower, lockgain, loopgain, looptime, loopfilter);
+
+
+}
+else
+{
+sprintf (text, "lpopt finished\n\nlockpower %.1f dB\nlockgain: %.1f \n Lockgain out of range for loopadj, set loop parameters \n manually with lock.n macros (e.g. lock.1)", lockpower, lockgain);
+
+
+fprintf(fpo,"lockpower: %.1f\nlockgain: %.2f\n Lockgain out of range for loopadj \n", lockpower, lockgain);
+}
+
+(void)fclose(fpo);
+
+
+QUITMSG(text)

@@ -1,0 +1,2 @@
+ComputerName,OperatingSystem,IPAddress,MACAddress,Manufacturer,CPUType,RAMSize_GB
+"balblair","Ubuntu 24.04.3 LTS","192.168.200.133","f8:b1:56:d8:af:14","Dell Inc.","Intel(R) Core(TM) i5-3470 CPU @ 3.20GHz","3.71"

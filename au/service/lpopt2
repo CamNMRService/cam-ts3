@@ -39,8 +39,6 @@ $Id:$
 */
 #include <inc/bsms_program>
 
-#include <inc/bsms_program>    /* must be the first statement ****/
-
 char solvent[128], path[PATH_MAX];
 double delay = 5;
 double t1_factor = 5;
@@ -69,11 +67,7 @@ int bsmslock;
 int counter;
 FILE *fpo;
 
-<<<<<<< HEAD
-
-=======
 //#include <inc/lcUtil>
->>>>>>> c1afe2e81d1c766675c61b0778caa54d86339846
 
 /***** check is system is locked *****/
 //GetBsmsIntValue("LOCK", &bsmslock);
@@ -187,17 +181,12 @@ sleep(1);
 /***** check for autoshim *****/
 //GetBsmsIntValue("AUTOSHIM", &autoshim);
 
-<<<<<<< HEAD
-// for AVIII: just reomve as causing problems...
-
-=======
 // for AVIII:
 // turn off check for now...
 //autoshim = check_autoshim();
 
 //if (autoshim == 1)
  // { AUTOSHIM_OFF;}
->>>>>>> c1afe2e81d1c766675c61b0778caa54d86339846
 
 
 /* record initial lockpower and lockgain*/
@@ -435,15 +424,14 @@ Proc_err(INFO_OPT, "%s %s\n%s %.1f",
 
 PUTBSMSVAL(BSN_LOCK_GAIN, initiallockgain + optautogain - startautogain);
 
-
+/* send result to topspin */
+sprintf(path, "%s %.1f", "sendgui _lockpoweradjust", optlockpower);
+AUERR = CPR_exec(path, WAIT_START);
+ERRORABORT
 
 /***** handle autoshim *****/
 
-<<<<<<< HEAD
-// or don't, as problematic
-=======
 //if (autoshim == 1)
  // { AUTOSHIM_ON;}
->>>>>>> c1afe2e81d1c766675c61b0778caa54d86339846
 
 QUIT

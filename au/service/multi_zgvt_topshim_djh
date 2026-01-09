@@ -156,8 +156,8 @@ int multi_zgvt(const char* curdat)
     TEREADY(waittime,0.2)
     ATMA
    // XCMD("topshim convcomp tuneaxyz")
-   XCMD( "tune tunezz2");
- //XCMD("topshim convcomp ordmax=6")
+  // XCMD( "tune tunezz2");
+    XCMD("topshim convcomp ordmax=5")
     ZG_OVERWRITE
     IEXPNO
   END

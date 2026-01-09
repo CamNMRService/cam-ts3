@@ -37,16 +37,17 @@
 /*
 $Id:$
 */
+#include <inc/bsms_program>
 
 char solvent[128], path[PATH_MAX];
 double delay = 5;
 double t1_factor = 5;
 
-float initiallockpower, startlockpower, optlockpower, initiallockgain;
-float lockpower, lockgain, cumulative;
-float optStepsBack, optautogain, startautogain, AG1, AG2;
+double initiallockpower, startlockpower, optlockpower, initiallockgain;
+double lockpower, lockgain, cumulative;
+double optStepsBack, optautogain, startautogain, AG1, AG2;
 float factor;
-float lockpowers[200], lockgains[200], smoothedPowerGainSum[200];
+double lockpowers[200], lockgains[200], smoothedPowerGainSum[200];
 
 const float optPowerOffset = 4;
 const float diff_pow = 2;
@@ -66,7 +67,7 @@ int bsmslock;
 int counter;
 FILE *fpo;
 
-#include <inc/lcUtil>
+//#include <inc/lcUtil>
 
 /***** check is system is locked *****/
 //GetBsmsIntValue("LOCK", &bsmslock);
@@ -181,11 +182,11 @@ sleep(1);
 //GetBsmsIntValue("AUTOSHIM", &autoshim);
 
 // for AVIII:
+// turn off check for now...
+//autoshim = check_autoshim();
 
-autoshim = check_autoshim();
-
-if (autoshim == 1)
-  { AUTOSHIM_OFF;}
+//if (autoshim == 1)
+ // { AUTOSHIM_OFF;}
 
 
 /* record initial lockpower and lockgain*/
@@ -430,7 +431,7 @@ ERRORABORT
 
 /***** handle autoshim *****/
 
-if (autoshim == 1)
-  { AUTOSHIM_ON;}
+//if (autoshim == 1)
+ // { AUTOSHIM_ON;}
 
 QUIT

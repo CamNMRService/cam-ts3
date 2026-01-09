@@ -31,7 +31,7 @@ sendgui ns 400
 sendgui XAU setaq
 ##j-13c-q.ref
 !! for the short daytime pcd
-sendgui ns 40
+sendgui ns 64
 sendgui XAU setaq
 ##j-1h-1scan.ref
 !! NB 40 ppm SW to cover more use cases
@@ -52,7 +52,7 @@ sendgui sw 150
 sendgui XAU setaq
 ##j-19F-bb-cpd.ref
 !!1d 19F with BB excitation, currently OPERA45, nb needs bb prosol relations file
-sendgui XAU setaq
+ 
 ##j-31P-bb-cpd.ref
 !!1d 31P with BB excitation, currently OPERA45, nb needs bb prosol relations file
 sendgui XAU setaq
@@ -67,13 +67,16 @@ sendgui td 256k
 sendgui XAU setaq
 ##j-19F-bb-cpd.ref
 !!1d 19F with BB excitation, currently OPERA45, nb needs bb prosol relations file; dw set explicitly to 3.5 for baseopt compatibility. Don;t need setaq either
+
 ##j-31P-bb-cpd.ref
 !!1d 31P with BB excitation, currently OPERA45, nb needs bb prosol relations file
 sendgui XAU setaq
 ##j-19F-Quant-q.ref
 !!1d Quant 19F with BB excitation, 4 scans, currently OPERA45, nb needs bb prosol relations file; . Don;t need setaq either
+
 ##j-19F-Quant-l.ref
 !!1d Quant 19F with BB excitation, 128 scans, currently OPERA45, nb needs bb prosol relations file;. Don;t need setaq either
+
 ##j-1h-quant.ref
 !! NB 40 ppm SW to cover more use cases. 30s D1, au_zgrgafast
 sendgui ns 16

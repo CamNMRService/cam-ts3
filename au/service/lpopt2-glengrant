@@ -37,6 +37,7 @@
 /*
 $Id:$
 */
+#include <inc/bsms_program>
 
 #include <inc/bsms_program>    /* must be the first statement ****/
 
@@ -68,7 +69,11 @@ int bsmslock;
 int counter;
 FILE *fpo;
 
+<<<<<<< HEAD
 
+=======
+//#include <inc/lcUtil>
+>>>>>>> c1afe2e81d1c766675c61b0778caa54d86339846
 
 /***** check is system is locked *****/
 //GetBsmsIntValue("LOCK", &bsmslock);
@@ -182,8 +187,17 @@ sleep(1);
 /***** check for autoshim *****/
 //GetBsmsIntValue("AUTOSHIM", &autoshim);
 
+<<<<<<< HEAD
 // for AVIII: just reomve as causing problems...
 
+=======
+// for AVIII:
+// turn off check for now...
+//autoshim = check_autoshim();
+
+//if (autoshim == 1)
+ // { AUTOSHIM_OFF;}
+>>>>>>> c1afe2e81d1c766675c61b0778caa54d86339846
 
 
 /* record initial lockpower and lockgain*/
@@ -425,6 +439,11 @@ PUTBSMSVAL(BSN_LOCK_GAIN, initiallockgain + optautogain - startautogain);
 
 /***** handle autoshim *****/
 
+<<<<<<< HEAD
 // or don't, as problematic
+=======
+//if (autoshim == 1)
+ // { AUTOSHIM_ON;}
+>>>>>>> c1afe2e81d1c766675c61b0778caa54d86339846
 
 QUIT

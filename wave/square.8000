@@ -1,11 +1,11 @@
-##TITLE= Parameter file, TopSpin 3.6.4
+##TITLE= Parameter file, TopSpin 3.8.0
 ##JCAMPDX= 5.0
 ##DATATYPE= Parameter Values
 ##ORIGIN= Bruker BioSpin GmbH
-##OWNER= agh58
-$$ 2024-12-05 11:21:51.672 +0000  agh58@auchentoshan
+##OWNER= es2167
+$$ 2025-11-04 12:38:11.727 +0000  es2167@auchentoshan
 $$ C:/Bruker/cam-ts3/wave/square.8000
-$$ process C:\Bruker\TopSpin3.6.4\prog\mod\xwinshape.exe
+$$ process C:\Bruker\TopSpin3.8.0\prog\mod\xwinshape.exe
 ##MINX= 100.00000000
 ##MAXX= 100.00000000
 ##MINY= 0.00000000

@@ -1,0 +1,2 @@
+ComputerName,OperatingSystem,IPAddress,MACAddress,Manufacturer,CPUType,RAMSize_GB
+"bunnahabhain","Ubuntu 24.04.3 LTS","192.168.200.87","b8:ca:3a:ba:7b:d3","Dell Inc.","Intel(R) Core(TM) i3-3240 CPU @ 3.40GHz","7.64"

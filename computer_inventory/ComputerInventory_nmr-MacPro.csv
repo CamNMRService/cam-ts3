@@ -1,0 +1,2 @@
+ComputerName,OperatingSystem,IPAddress,MACAddress,Manufacturer,CPUType,RAMSize_GB
+"nmr-MacPro","Ubuntu 22.04.5 LTS","192.168.200.121","e8:06:88:ca:aa:cd","Apple Inc.","Intel(R) Xeon(R) CPU E5520 @ 2.27GHz","15.60"

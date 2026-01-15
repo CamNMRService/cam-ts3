@@ -1,20 +1,21 @@
-"ComputerName","OperatingSystem","IPAddress","MACAddress","Manufacturer","CPUType","RAMSize_GB"
-"ABERLOUR","Microsoft Windows 11 Pro for Workstations","192.168.200.151","5C:60:BA:34:46:51","HP","Intel(R) Xeon(R) W-2223 CPU @ 3.60GHz","15.73"
-"ARRAN","Microsoft Windows 11 Pro for Workstations","192.168.200.9","CC:96:E5:2A:25:19","Dell Inc.","Intel(R) Xeon(R) W-2223 CPU @ 3.60GHz","15.69"
-"AUCHENTOSHAN","Microsoft Windows 11 Pro N","192.168.200.154","CC:96:E5:25:FA:86","Dell Inc.","Intel(R) Xeon(R) W-2223 CPU @ 3.60GHz","15.69"
-"balblair","Ubuntu 24.04.3 LTS","192.168.200.133","f8:b1:56:d8:af:14","Dell Inc.","Intel(R) Core(TM) i5-3470 CPU @ 3.20GHz","3.71"
-"BALMENACH","Microsoft Windows 11 Pro","192.168.200.213","E8:CF:83:49:E2:06","Dell Inc.","AMD Ryzen 5 PRO 8500G w/ Radeon 740M Graphics  ","31.14"
-"bruichladdich","Ubuntu 24.04.3 LTS","192.168.200.250","10:98:19:25:92:03","Dell Inc.","Intel(R) Core(TM) i9-14900K","62.48"
-"bunnahabhain","Ubuntu 24.04.3 LTS","192.168.200.87","b8:ca:3a:ba:7b:d3","Dell Inc.","Intel(R) Core(TM) i3-3240 CPU @ 3.40GHz","7.64"
-"CRAIGDUFF","Microsoft Windows 11 Pro","192.168.200.132","E8:CF:83:49:E1:8A","Dell Inc.","AMD Ryzen 5 PRO 8500G w/ Radeon 740M Graphics  ","31.14"
-"GLENFAIRN","Microsoft Windows 11 Pro for Workstations","192.168.200.156","C8:D9:D2:12:C9:3F","HP","Intel(R) Xeon(R) W-2123 CPU @ 3.60GHz","15.73"
-"glenfarclas","Ubuntu 24.04.3 LTS","192.168.200.247","6c:2b:59:cf:e4:1a","Dell Inc.","Intel(R) Core(TM) i5-8500 CPU @ 3.00GHz","15.41"
-"GLENGRANT","Microsoft Windows 11 Pro N","192.168.200.13","CC:96:E5:29:E6:32","Dell Inc.","Intel(R) Xeon(R) W-2223 CPU @ 3.60GHz","15.69"
-"glenlivet2","CentOS Linux 7 (Core)","192.168.200.153","e8:39:35:33:c3:3b","Hewlett-Packard","Intel(R) Xeon(R) CPU W3505 @ 2.53GHz","7.62"
-"jura","Ubuntu 24.04.3 LTS","192.168.200.41","f8:b1:56:d8:b0:f6","Dell Inc.","Intel(R) Core(TM) i5-3470 CPU @ 3.20GHz","3.71"
-"LAGAVULIN","Microsoft Windows 11 Pro N","192.168.200.150","10:98:19:31:42:9F","Dell Inc.","Intel(R) Xeon(R) w3-2423","15.25"
-"LAPHROIAG","Microsoft Windows 11 Pro N","192.168.200.15","10:98:19:31:42:51","Dell Inc.","Intel(R) Xeon(R) w3-2423","15.25"
-"lochnagar","Ubuntu 24.04.3 LTS","192.168.200.134","f8:b1:56:d8:aa:52","Dell Inc.","Intel(R) Core(TM) i5-3470 CPU @ 3.20GHz","7.64"
-"nmr-MacPro","Ubuntu 22.04.5 LTS","192.168.200.121","e8:06:88:ca:aa:cd","Apple Inc.","Intel(R) Xeon(R) CPU E5520 @ 2.27GHz","15.60"
-"TOBERMORY","Microsoft Windows 11 Pro for Workstations","192.168.200.161","10:98:19:31:40:62","Dell Inc.","Intel(R) Xeon(R) w3-2423","15.25"
-"tomatin","Ubuntu 24.04.3 LTS","192.168.200.135","f8:b1:56:d8:b1:82","Dell Inc.","Intel(R) Core(TM) i5-3470 CPU @ 3.20GHz","7.64"
+ComputerName,OperatingSystem,IPAddress,MACAddress,Manufacturer,CPUType,RAMSize_GB,Tanium Running
+ABERLOUR,Microsoft Windows 11 Pro for Workstations,192.168.200.151,5C:60:BA:34:46:51,HP,Intel(R) Xeon(R) W-2223 CPU @ 3.60GHz,15.73,Yes
+ARRAN,Microsoft Windows 11 Pro for Workstations,192.168.200.9,CC:96:E5:2A:25:19,Dell Inc.,Intel(R) Xeon(R) W-2223 CPU @ 3.60GHz,15.69,Yes
+AUCHENTOSHAN,Microsoft Windows 11 Pro N,192.168.200.154,CC:96:E5:25:FA:86,Dell Inc.,Intel(R) Xeon(R) W-2223 CPU @ 3.60GHz,15.69,Yes
+balblair,Ubuntu 24.04.3 LTS,192.168.200.133,f8:b1:56:d8:af:14,Dell Inc.,Intel(R) Core(TM) i5-3470 CPU @ 3.20GHz,3.71,Yes
+BALMENACH,Microsoft Windows 11 Pro,192.168.200.213,E8:CF:83:49:E2:06,Dell Inc.,AMD Ryzen 5 PRO 8500G w/ Radeon 740M Graphics  ,31.14,Yes
+bruichladdich,Ubuntu 24.04.3 LTS,192.168.200.250,10:98:19:25:92:03,Dell Inc.,Intel(R) Core(TM) i9-14900K,62.48,Yes
+bunnahabhain,Ubuntu 24.04.3 LTS,192.168.200.87,b8:ca:3a:ba:7b:d3,Dell Inc.,Intel(R) Core(TM) i3-3240 CPU @ 3.40GHz,7.64,Yes
+CRAGGANMORE,Microsoft Windows 11 Pro N,192.168.200.159,4C:D7:17:A9:85:43,Dell Inc.,Intel(R) Xeon(R) w3-2423,31.25,Yes
+CRAIGDUFF,Microsoft Windows 11 Pro,192.168.200.132,E8:CF:83:49:E1:8A,Dell Inc.,AMD Ryzen 5 PRO 8500G w/ Radeon 740M Graphics  ,31.14,Yes
+GLENFAIRN,Microsoft Windows 11 Pro for Workstations,192.168.200.156,C8:D9:D2:12:C9:3F,HP,Intel(R) Xeon(R) W-2123 CPU @ 3.60GHz,15.73,Yes
+glenfarclas,Ubuntu 24.04.3 LTS,192.168.200.247,6c:2b:59:cf:e4:1a,Dell Inc.,Intel(R) Core(TM) i5-8500 CPU @ 3.00GHz,15.41,Yes
+GLENGRANT,Microsoft Windows 11 Pro N,192.168.200.13,CC:96:E5:29:E6:32,Dell Inc.,Intel(R) Xeon(R) W-2223 CPU @ 3.60GHz,15.69,Yes
+glenlivet2,CentOS Linux 7 (Core),192.168.200.153,e8:39:35:33:c3:3b,Hewlett-Packard,Intel(R) Xeon(R) CPU W3505 @ 2.53GHz,7.62,Exemption required
+jura,Ubuntu 24.04.3 LTS,192.168.200.41,f8:b1:56:d8:b0:f6,Dell Inc.,Intel(R) Core(TM) i5-3470 CPU @ 3.20GHz,3.71,Yes
+LAGAVULIN,Microsoft Windows 11 Pro N,192.168.200.150,10:98:19:31:42:9F,Dell Inc.,Intel(R) Xeon(R) w3-2423,15.25,Yes
+LAPHROIAG,Microsoft Windows 11 Pro N,192.168.200.15,10:98:19:31:42:51,Dell Inc.,Intel(R) Xeon(R) w3-2423,15.25,Yes
+lochnagar,Ubuntu 24.04.3 LTS,192.168.200.134,f8:b1:56:d8:aa:52,Dell Inc.,Intel(R) Core(TM) i5-3470 CPU @ 3.20GHz,7.64,Yes
+nmr-MacPro,Ubuntu 22.04.5 LTS,192.168.200.121,e8:06:88:ca:aa:cd,Apple Inc.,Intel(R) Xeon(R) CPU E5520 @ 2.27GHz,15.6,Yes
+TOBERMORY,Microsoft Windows 11 Pro for Workstations,192.168.200.161,10:98:19:31:40:62,Dell Inc.,Intel(R) Xeon(R) w3-2423,15.25,Yes
+tomatin,Ubuntu 24.04.3 LTS,192.168.200.135,f8:b1:56:d8:b1:82,Dell Inc.,Intel(R) Core(TM) i5-3470 CPU @ 3.20GHz,7.64,Yes

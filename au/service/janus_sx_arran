@@ -102,6 +102,8 @@ Then it will skip the 2 min delay, the systems tests, and the initial ii
 and just crack on with the experiments . Also "skipcarbon" to skip just the carbonn test but do the rest
 
 Short delay before shim in vain hope it will minimise the odd failures...
+
+2026_01_27 temporarily add shim email to us in case of *any* shim failure, because of seemingly recurrent issues
 */
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 char def_file[255]="e:/chemist/defaults-csv.txt"; //janus software defaults
@@ -631,6 +633,8 @@ if (AUERR<0)
 		In this case resubmit with correct SAmple ID- only letters, numbers, underscores, dashes and full stops allowed", solvent);
 		strcat(sampleinfostring,tmp_str);
 	}
+	  // temporarily add shim email to us in case of *any* shim failure, because of seemingly recurrent issues
+	  XAU("whoopwhoop",tmp_str);
     strcat(sampleinfostring,"Failed to shim: check spectrum quality - lineshape may be bad. Check sample is clear, check sample filling is >40mm, check for precipitate at the bottom.\n");
     sampleproblem=1;
 }

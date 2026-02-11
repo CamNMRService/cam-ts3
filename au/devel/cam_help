@@ -1,0 +1,30 @@
+int ts_major = GetTsVersionMajor();
+int ts_minor = GetTsVersionMinor();
+int ts_patch = GetTsVersionPl();
+
+char repo_name[40]="cam-ts"; //Set this to be the name of your repository
+
+
+char sourcedir[PATHMAX];
+int num= 100;
+char flist[128][128];
+
+#ifdef HAS_WINDOWS_FEATURES
+   sprintf(sourcedir"C:\\Bruker\\%s%i\\cam_help\",repo_name,ts_major);
+
+#else //Not actually checked this on linux... We have no linux xpectrometers
+ 		sprintf(defaults_file_name,"/opt/%s%i/cam_help/service_poise_1h_p1_defaults_%s-%s-%s.txt",repo_name,ts_major);
+
+#endif
+
+
+if (i1 = FileSelect(sourcedir, flist, &num, 0)< 0)
+Proc_err(DEF_ERR_OPT, "Error - no help files found);
+{
+}
+else
+{
+    Proc_err(DEF_ERR_OPT,"Help file selected - ", flist[0]);
+       RSH(flist[0])
+}
+QUIT

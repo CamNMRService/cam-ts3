@@ -1,3 +1,6 @@
+#include <stdio.h>
+#include <time.h>
+
 int ts_major = GetTsVersionMajor();
 int ts_minor = GetTsVersionMinor();
 int ts_patch = GetTsVersionPl();
@@ -5,26 +8,33 @@ int ts_patch = GetTsVersionPl();
 char repo_name[40]="cam-ts"; //Set this to be the name of your repository
 
 
-char sourcedir[PATHMAX];
+char sourcedir[PATH_MAX];
 int num= 100;
 char flist[128][128];
+char tmp_str[PATH_MAX]="";
+GETCURDATA
+
+sprintf(sourcedir,"/opt/%s%i/cam_help/",repo_name,ts_major);
 
 #ifdef HAS_WINDOWS_FEATURES
-   sprintf(sourcedir"C:\\Bruker\\%s%i\\cam_help\",repo_name,ts_major);
+   sprintf(sourcedir,"C:\\Bruker\\%s%i\\cam_help\\",repo_name,ts_major);
 
 #else //Not actually checked this on linux... We have no linux xpectrometers
- 		sprintf(defaults_file_name,"/opt/%s%i/cam_help/service_poise_1h_p1_defaults_%s-%s-%s.txt",repo_name,ts_major);
+ 		sprintf(sourcedir,"/opt/%s%i/cam_help/",repo_name,ts_major);
 
 #endif
-
-
+Proc_err(DEF_ERR_OPT, "sourcedir variable is - %s",sourcedir);
+//if (i1 = FileSelect("/opt/cam-ts3/cam_help", flist, &num, 0)< 0)
 if (i1 = FileSelect(sourcedir, flist, &num, 0)< 0)
-Proc_err(DEF_ERR_OPT, "Error - no help files found);
 {
+
+Proc_err(DEF_ERR_OPT, "Error - no help files found");
 }
+
 else
 {
-    Proc_err(DEF_ERR_OPT,"Help file selected - ", flist[0]);
-       RSH(flist[0])
+   sprintf(tmp_str,"%s",flist[0]);
+   //Proc_err(DEF_ERR_OPT,"Help file selected - %s", flist[0]);
+   Proc_err(DEF_ERR_OPT,"Help file selected - %s", tmp_str);
 }
 QUIT

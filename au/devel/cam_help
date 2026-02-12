@@ -25,19 +25,19 @@ sprintf(sourcedir,"/opt/%s%i/cam_help/",repo_name,ts_major);
  		sprintf(sourcedir,"/opt/%s%i/cam_help/",repo_name,ts_major);
 
 #endif
-Proc_err(DEF_ERR_OPT, "sourcedir variable is - %s",sourcedir);
-//if (i1 = FileSelect("/opt/cam-ts3/cam_help", flist, &num, 0)< 0)
+//Proc_err(DEF_ERR_OPT, "sourcedir variable is - %s",sourcedir);
+
 if (i1 = FileSelect(sourcedir, flist, &num, 0)< 0)
 {
 
-Proc_err(DEF_ERR_OPT, "Error - no help files found");
+//Proc_err(DEF_ERR_OPT, "Error - no help files found");
 }
 
 else
 {
    sprintf(help_file,"%s",flist[0]);
    //Proc_err(DEF_ERR_OPT,"Help file selected - %s", flist[0]);
-   Proc_err(DEF_ERR_OPT,"Help file selected - %s", help_file);
+   //Proc_err(DEF_ERR_OPT,"Help file selected - %s", help_file);
    #ifdef HAS_WINDOWS_FEATURES
         sprintf(sys_cmd,"start chrome \"%s%s\" ",sourcedir,help_file);
 
@@ -45,7 +45,7 @@ else
  		sprintf(sys_cmd,"open -a \"Google Chrome\" %s%s ",sourcedir,help_file);
 
    #endif
-   Proc_err(DEF_ERR_OPT,"sys_cmd - %s", sys_cmd);
+   //Proc_err(DEF_ERR_OPT,"sys_cmd - %s", sys_cmd);
    system(sys_cmd);
 }
 QUIT

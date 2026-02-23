@@ -6,8 +6,12 @@ char szTypeOfData[20] = "";
 char cmdstr[200] = "";
 char procnoPath[PATH_MAX] = "";
 char pdfname[PATH_MAX]="";
+char pul[255],nuc1[7];
 float baselev=128.0;
 GETCURDATA
+FETCHPAR("PULPROG", &pul)
+FETCHPAR("NUC1",nuc1)
+
 STOREPAR("mdd_mod",1);
 XCMD("serv_projref")
 STOREPAR("lev0", baselev)
@@ -18,7 +22,7 @@ XAU("clev",cmd);
 STOREPAR("layout", "+/service-cosy.xwp")
 while (finish==0)
 {
-	sprintf( pdfname, "%s/%s-cosy-%d.pdf",PROCPATH(0),name,suffix);
+	sprintf( pdfname, "%s/%s-%s-%s-%d.pdf",PROCPATH(0),name, pul, nuc1, suffix);
 	//sprintf(pdfname, "%s%s/%s/%d/pdata/%d/%s-%d.pdf", disk, user, name, expno, procno, name,suffix );
 	if(access(pdfname, R_OK) != 0) // if we can't read pdf file assume its not there
 	{

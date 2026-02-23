@@ -11,8 +11,11 @@ Modded by djh 2012
 int finish=0,suffix=1;
 float hsr;
 char pdfname[PATH_MAX]="";
-char pul[64];
+char pul[255],nuc1[7];
 GETCURDATA
+
+FETCHPAR("PULPROG", &pul)
+FETCHPAR("NUC1",nuc1)
 STOREPAR("mdd_mod",1);
 XCMD("serv_projref")
 
@@ -24,8 +27,7 @@ STOREPAR("layout", "+/service-hmbc.xwp")
 
 /*process it*/	
 XFB
-FETCHPAR("PULPROG", &pul);
-if (strstr(pul, "hmbcet")||(strstr(pul, "impact"))) /*all constant time?*/
+if (strstr(pul, "hmbcet")||(strstr(pul, "impact"))) 
  			{
  				XF2M;
  			}
@@ -34,7 +36,7 @@ ABS2
 XAU("clev",cmd)
 while (finish==0)
 {
-	sprintf( pdfname, "%s/%s-hmbc-%d.pdf",PROCPATH(0),name,suffix);
+	sprintf( pdfname, "%s/%s-%s-%s-%d.pdf",PROCPATH(0),name, pul, nuc1, suffix);
 	//sprintf(pdfname, "%s%s/%s/%d/pdata/%d/%s-%d.pdf", disk, user, name, expno, procno, name,suffix );
 	if(access(pdfname, R_OK) != 0) // if we can't read pdf file assume its not there
 	{

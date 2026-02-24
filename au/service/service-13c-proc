@@ -11,7 +11,7 @@ char titlefile[PATH_MAX], titletext[512], titletextnew[512];
 char pdfname[PATH_MAX]="";
 char auproc[127]="null_proc";
 char up1[127];
-
+char pul[255],nuc1[7];
 int ts_major = GetTsVersionMajor();
 int ts_minor = GetTsVersionMinor();
 int ts_patch = GetTsVersionPl();
@@ -24,6 +24,8 @@ if (*cmd != '\0') bp = atoi(cmd);
 GETCURDATA
 orig_exp=expno;
 FETCHPAR("USERP1",&up1)
+FETCHPAR("PULPROG", &pul)
+FETCHPAR("NUC1",nuc1)
 STOREPAR("layout", "+/service-carbon.xwp")
 /*convert the data into exp+6000, and backwards predict the first 16 points*/
 VIEWDATA_SAMEWIN
@@ -93,7 +95,7 @@ else
 PP
 while (finish==0)
 {
-	sprintf( pdfname, "%s/%s-13c-%d.pdf",PROCPATH(0),name,suffix);
+	sprintf( pdfname, "%s/%s-%s-%s-%d.pdf",PROCPATH(0),name, pul, nuc1, suffix);
 	//sprintf(pdfname, "%s%s/%s/%d/pdata/%d/%s-%d.pdf", disk, user, name, expno, procno, name,suffix );
 	if(access(pdfname, R_OK) != 0) // if we can't read pdf file assume its not there
 	{
@@ -116,9 +118,8 @@ DATASET(name,orig_exp,procno,disk,user);
 VIEWDATA_SAMEWIN
 //XAU("service-13cref",""); //depreceated
 EFP
-if ( ((ts_major>=4) && (ts_minor>1) )
-   || ((ts_major==4) && (ts_minor==0) && (ts_patch>=6))
-   || ((ts_major==3) && (ts_minor>0) && (ts_patch>=6))
+if ( 
+     ((ts_major>=4) && (ts_minor>2) )
    ) 
 {
    // Proc_err(DEF_ERR_OPT,"doing apbk as we have  ts_major=%i and ts_minor=%i",ts_major,ts_minor);

@@ -3,6 +3,7 @@
 /* now with added orig file parsing!*/
 /* plan to munge unique id from iconnmr with sample name to make a useful, unique id for */
 /* a database say*/
+// Set email address from orig
 
 //#include <time.h>
 #include <inc/exptUtil>
@@ -40,6 +41,7 @@ char line5[PATH_MAX]="";
 char sample_name[1024]="UNKNOWN_SAMPLE_NAME"; //lets have so decent defauts to scan
 char group[1024]="UNKNOWN_GROUP";          //for if we can't red orig file
 char crsid[40]="UNKNOWN_CRS_ID";
+char email_address[512];
 time_t now_s, dtime_s, cdtime_s;     /* seconds since 1970 */
 struct tm *now;     /* structure with year, month etc. */
 
@@ -111,7 +113,7 @@ if(verbose == 1){
 #endif
 */
 
-sprintf( orig_path,"%sorig",ACQUPATH(0) );
+sprintf( orig_path,ACQUPATH("orig") );
 if (verbose ==1) {
    Proc_err(INFO_OPT,"orig file location - %s",orig_path);
 }
@@ -145,6 +147,9 @@ if (verbose ==1) {
  	 Proc_err(INFO_OPT," line1 - %s \n line3 - %s \n line5 - %s",line1, line3, line5);
    Proc_err(INFO_OPT," group - %s \n crsid - %s \n sample_name - %s",group, crsid, sample_name);
 }
+// set email address
+sprintf(email_address,"%s@cam.ac.uk", crsid);
+STOREPAR("USERP1",email_address);
 
 //Now open report file and write to it.
 report_file_pointer = fopen(report_filename,"a+");

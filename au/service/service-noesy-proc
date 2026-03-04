@@ -46,7 +46,7 @@ if ( (!strcmp(nuc1,"1H")) &&  ( (!strcmp(nuc2,"off")) || (!strcmp(nuc2,"off"))) 
 		/*Now create the pdf name. If there's a pdf already there, don't overwrite it*/
 		while (finish==0)
 		{
-			sprintf( pdfname, "%s/%s-%s-%d.pdf",PROCPATH(0),name,exp_type,suffix);
+			sprintf( pdfname, "%s/%s-%s-%s-%d.pdf",PROCPATH(0),name, pul, nuc1, suffix);
 			if(access(pdfname, R_OK) != 0) // if we can't read pdf file assume its not there
 			{
 				finish=1;

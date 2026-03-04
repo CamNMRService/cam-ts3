@@ -1,0 +1,2 @@
+ComputerName,OperatingSystem,IPAddress,MACAddress,Manufacturer,CPUType,RAMSize_GB
+"glenfarclas","Ubuntu 24.04.3 LTS","192.168.200.247","6c:2b:59:cf:e4:1a","Dell Inc.","Intel(R) Core(TM) i5-8500 CPU @ 3.00GHz","15.41"

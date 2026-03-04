@@ -1,0 +1,122 @@
+//stripvtlog
+// read just one value from a vtu log with VTC_TEMP_MEAS set
+
+
+//Variables:
+
+
+char logfilepath[PATH_MAX];
+char logfilename[PATH_MAX];
+char resultfilepath[PATH_MAX];
+char temp[PATH_MAX];
+char day[32], time[32];
+char line[256];
+char sensor[32], channel[32], type[32], name[32], temperature[256];
+char *begin, *end;
+char *op = NULL;
+FILE *logfile, *resultfile;
+
+double f1p, f2p;
+float width, lqf,b0stdev, envelope;// width from hwcal and lineshape quality factor from topshim report
+
+//ask for log file name
+
+GETSTRING("log file?", logfilename)
+
+// Build path to logfile
+
+sprintf(logfilepath, "%s/logfiles/%s", PathXWinNMRProg(),logfilename);
+
+// make path to and open result file
+
+sprintf(resultfilepath, "%s/logfiles/%s_regulation2", PathXWinNMRProg(),logfilename);
+
+if ( ( resultfile = fopen (resultfilepath, "wt") ) == NULL) 
+{
+	Proc_err(INFO_OPT, "could not open file %s for writing", resultfilepath);
+ABORT
+}
+
+
+// open logfile
+
+
+if ( ( logfile = fopen (logfilepath, "r") ) == NULL)
+{
+	Proc_err(INFO_OPT, "could not open file %s", logfilepath);
+ABORT
+}
+
+ 
+
+// exctract the temperature from the  from the "regulation2" line
+while (fgets(line, sizeof line,logfile) != NULL) /* read a line */
+    {   
+    	  // find line containing time
+      	if (strstr(line, "<temperature>") != NULL)
+  		  {
+    	  	strcpy(temp, line);
+    	  	// ditch last char
+    	  	i1=strlen(temp);
+    	  	if (i1 > 2) 
+    	  	{
+    	  		temp[i1-1] = '\0';
+    	  		temp[i1-2] = ' ';
+    	  	}
+    	  }
+    	
+    	  if (strstr(line, "adapter") != NULL)
+    	  {
+    	  	sscanf(line, "%s %s %s %s %s", sensor, channel, type, name, temperature);
+ //   	  Proc_err(QUESTION_OPT, "%s %s %s %s %s", sensor, channel, type, name, temperature);
+       // look for first quote in temparature string
+       		begin=strstr(temperature,"\"");
+       		begin+=1;
+       		end=strstr(begin, "\"");
+       		op=malloc(end- begin+ 1 );
+       		if (op==NULL)
+       		{
+       			Proc_err(ERROR_OPT, "error in memory allocation");
+       			ABORT
+       		}
+       		else
+       		{
+       			memcpy(op, begin, end - begin);
+          	op[end-begin] = '\0';
+          	strcat(temp, " ,adapter, ");
+          	strcat(temp, op);
+       		}
+    	  }
+    	
+    	  if (strstr(line, "regulation1") != NULL)
+    	  {
+    	  	sscanf(line, "%s %s %s %s %s", sensor, channel, type, name, temperature);
+ //   	  Proc_err(QUESTION_OPT, "%s %s %s %s %s", sensor, channel, type, name, temperature);
+       // look for first quote in temparature string
+       		begin=strstr(temperature,"\"");
+       		begin+=1;
+       		end=strstr(begin, "\"");
+       		op=malloc(end- begin+ 1 );
+       		if (op==NULL)
+       		{
+       			Proc_err(ERROR_OPT, "error in memory allocation");
+       			ABORT
+       		}
+       		else
+       		{
+       			memcpy(op, begin, end - begin);
+          	op[end-begin] = '\0';
+          	strcat(temp, " ,regulation, ");
+          	strcat(temp, op);
+          	strcat(temp, "\n");
+       		}
+       		fputs (temp, resultfile);
+    	  }
+    }
+
+fclose(logfile);
+
+fclose(resultfile);
+
+
+QUIT

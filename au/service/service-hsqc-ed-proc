@@ -5,9 +5,12 @@ Sept 2018. Removed legacy code. Logic to not phase NUS data as it takes too long
 */
 int finish=0,suffix=1,nus_or_not=1;
 char pdfname[PATH_MAX]="";
+char pul[255],nuc1[7];
 
 GETCURDATA 
 FETCHPAR("FNTYPE",&nus_or_not)
+FETCHPAR("PULPROG", &pul)
+FETCHPAR("NUC1",nuc1)
 if (nus_or_not<2)
 	{
 	XAU("proc_2dphf2het",cmd)
@@ -26,7 +29,7 @@ STOREPAR("layout", "+/service-hsqc-ed.xwp")
 
 while (finish==0)
 {
-	sprintf( pdfname, "%s/%s-13c-ed-%d.pdf",PROCPATH(0),name,suffix);
+	sprintf( pdfname, "%s/%s-%s-%s-%d.pdf",PROCPATH(0),name, pul, nuc1, suffix);
 
 	if(access(pdfname, R_OK) != 0) // if we can't read pdf file assume its not there
 	{

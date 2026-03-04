@@ -19,14 +19,13 @@
 /****************************************************************/
 /*	Name		Date	Modification:			*/
 /*	eng		980408	created				*/
-// PTG added pulsecal and writing result to a logfile (done after ZG as only care about the pulsecal result for now)
-// Also write P1/S P1 into a file in NAME directory 
+// PTG Pulsecal done before ZG; pulsecal file written - nb p1 should be set by getprosol before running this!!
 /****************************************************************/
 /*
 $Id: au_zgonly,v 1.2 2000/07/12 11:39:40 gsc Exp $
 */
 char solvent[128];
-float p1,statusp1;
+float newp1,origp1;
 char results_content[128];
 char pulsecalcontent[128];
 char results_file_name[PATH_MAX];
@@ -36,15 +35,15 @@ FILE *pulsecalfile = NULL;
 sprintf(results_file_name,"C:\\Bruker\\diskless\\prog\\logfiles\\pulsecallog");
 sprintf(pulsecalfilename,"%s\\%s\\pulsecal",disk,name);
 GETCURDATA
+FETCHPAR("P 1", &origp1)
 XAU("pulsecal","quiet")
 RGA
 ZG
-FETCHPAR("P 1", &p1)
-FETCHPARS("P 1", &statusp1)
+FETCHPARS("P 1", &newp1)
 FETCHPARS("SOLVENT",solvent)
-sprintf(results_content,"%s %s %f\n",name,solvent,p1);
-sprintf(pulsecalcontent,"%f %f",p1,statusp1);
-if ((pulsecalfile = fopen(pulsecalfilename, "a+")) == 0)
+sprintf(results_content,"%s %s %f\n",name,solvent,newp1);
+sprintf(pulsecalcontent,"%f %f",newp1,origp1);
+if ((pulsecalfile = fopen(pulsecalfilename, "w")) == 0)
 {
 	
 } else {

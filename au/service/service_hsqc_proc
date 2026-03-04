@@ -9,9 +9,15 @@ modified by djh35@cam.ac.uk to output a pdf
 */
 
 float hsr;
+int suffix=1;
+int finish=0;
 char pdfname[PATH_MAX]="";
+char pul[255],nuc1[7];
 
 GETCURDATA
+FETCHPAR("PULPROG", &pul)
+FETCHPAR("NUC1",nuc1)
+
 STOREPAR("mdd_mod",1);
 XCMD("proc_2dphf2het")
 XCMD("serv_projref")
@@ -31,7 +37,20 @@ if ( expno3 != expno)
 	{
 	STOREPAR("layout", "+/hsqc-ed.xwp")
 	}
-sprintf( pdfname, "%s/%s.pdf",PROCPATH(0),name);
+		
+while (finish==0)
+{
+	sprintf( pdfname, "%s/%s-%s-%s-%d.pdf",PROCPATH(0),name, pul, nuc1, suffix);
+	if(access(pdfname, R_OK) != 0) // if we can't read pdf file assume its not there
+	{
+		finish=1;
+	}
+	else
+	{
+		suffix++;
+		
+	}
+}
 
 //sprintf( pdfname, "%s%s/%s/%d/pdata/%d/%s.pdf", disk, user, name, expno, procno, name );
 AUTOPLOT_TO_FILE(pdfname);

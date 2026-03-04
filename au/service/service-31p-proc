@@ -2,6 +2,7 @@
 int new_exp,finish=0,suffix=1;
 char titlefile[512], titletext[512], titletextnew[512]; 
 char pdfname[PATH_MAX]="";
+char pul[255],nuc1[7];
 float absf1,absf2;
 FILE *ftitle = NULL;
 
@@ -27,7 +28,7 @@ PP
 
 while (finish==0)
 {
-	sprintf( pdfname, "%s/%s-31p-%d.pdf",PROCPATH(0),name,suffix);
+	sprintf( pdfname, "%s/%s-%s-%s-%d.pdf",PROCPATH(0),name, pul, nuc1, suffix);
 	//sprintf(pdfname, "%s%s/%s/%d/pdata/%d/%s-%d.pdf", disk, user, name, expno, procno, name,suffix );
 	if(access(pdfname, R_OK) != 0) // if we can't read pdf file assume its not there
 	{

@@ -105,5 +105,5 @@ for (i=1; i<=total_blocks; i++)
     WSER(i, name, oexpno, oprocno, disk, user)
 
 }
-
+STOREPAR1("TDEFF", total_blocks)
 QUIT

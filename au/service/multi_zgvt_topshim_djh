@@ -1,5 +1,5 @@
 /*** ^^A -*-C++-*- **********************************************/
-/*	multi_zgvt 		18.05.2000			*/
+/*	multi_zgvt_topshim_djh 		18.05.2000			*/
 /****************************************************************/
 /*	Short Description :					*/
 /*	Performs multiple acquisitions on increasing expnos	*/
@@ -157,8 +157,14 @@ int multi_zgvt(const char* curdat)
     ATMA
    // XCMD("topshim convcomp tuneaxyz")
   // XCMD( "tune tunezz2");
-    XCMD("topshim convcomp ordmax=5")
+<<<<<<< HEAD
+    XCMD("topshim convcomp ordmax=8")
+    ZG_OVERWRITE 
+    XMAC("tit")
+=======
+    XCMD("topshim convcomp")
     ZG_OVERWRITE
+>>>>>>> 7e3af5cd21880b24b22c2ebe4a941e27a3b7ec70
     IEXPNO
   END
 

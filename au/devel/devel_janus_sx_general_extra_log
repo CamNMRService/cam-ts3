@@ -975,7 +975,7 @@ while ( finish != TRUE ) //THE MAIN LOOP
                ATMA
                if ( AUERR <0 )
 		       {
-		           sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
+		           sprintf(tmp_str, "ATMA_ERROR_%i_%s",cpos, tmp_fname);
 		           Proc_err ( INFO_OPT,"tmp_str",tmp_str);
 	               XAU("whoopwhoop",tmp_str)
 		   	       sampleproblem=1;

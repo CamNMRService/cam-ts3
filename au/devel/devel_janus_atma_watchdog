@@ -1,0 +1,80 @@
+//devel_janus_atma_watchdog
+//AU program to run atma, and kill it after a while if not done.
+
+
+// based on topshim watchdog
+
+//example usage :- 
+//devel_janus_janus_watchdog 
+// emailing is handled by main AU so no arg handling here
+//  AUERR should be -1 if atma fails, so main janus AU will interpret the result correctly
+
+
+char command[PATH_MAX];
+char experiment[100];
+char tmp_str[PATH_MAX]; 
+
+char lockpath[PATH_MAX];
+char pidpath[PATH_MAX];
+
+
+int pid;
+
+
+FILE *pidfile;
+FILE *lockfile;
+FILE *fbat=NULL;
+
+
+
+
+
+GETCURDATA 
+
+// 
+
+
+// write lock file
+sprintf(lockpath, "%s/%s/atma_lockfile", PathXWinNMRProg(),PathXWinNMRCurDir());
+lockfile = fopen(lockpath, "wt");
+fclose(lockfile);
+
+// start the watchdog AU and then carry on
+
+CPR_exec("xau atmakiller", WAIT_START); 
+
+
+
+// storewob 700 to keep wobb curves for later copying
+// Could add coarse but not much help here I think
+AUERR=XCMD("atma storewob 700");
+
+
+
+
+
+// delete the lockfile  *and kill the killer program!!!!!* if topshim completes OK
+
+remove(lockpath);  // get rid of the kill file!
+
+sprintf(pidpath, "%s/%s/atma_pidfile", PathXWinNMRProg(),PathXWinNMRCurDir());
+
+/* try and open the file */
+if (pidfile = fopen(pidpath, "rt")) 
+{
+
+	/* read the PID number */
+	fscanf(pidfile, "%d", &pid);
+	fclose(pidfile);
+
+	/* kill the process! */
+	Proc_err(INFO_OPT, "killing PID = %d !", pid);
+	sprintf(command, "kill %d", pid);
+	CPR_exec(command, CONT_EX);
+
+}
+ 
+
+
+
+QUIT

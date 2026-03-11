@@ -47,7 +47,7 @@ CPR_exec("xau atmakiller", WAIT_START);
 
 // storewob 700 to keep wobb curves for later copying
 // Could add coarse but not much help here I think
-AUERR=XCMD("atma storewob 700");
+XCMD("atma storewobb 700");
 
 
 

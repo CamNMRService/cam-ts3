@@ -96,7 +96,7 @@ Added extra when creating the junk dataset to set the instrument name and probe 
 
 #include <inc/bsms_program>    /* must be the first statement ****/
 
-#pragma region Get Instrument name
+//#region Get Instrument name
 char    instrum_name[255]="spect";
 char    probe_name[255]="unknown";
 
@@ -117,7 +117,7 @@ ZG_OVERWRITE
 FETCHPARS("INSTRUM", instrum_name)
 FETCHPARS("PROBHD", probe_name)
 /*end of get instrument and probe name*/
-#pragma endregion Get Instrument Name
+// #endregion Get Instrument Name
 #pragma region Set Instrument Global Variables
 /*initial gobal variables to change for each instrument*/
    char def_file[PATH_MAX]="d:/chemist/defaults-csv.txt"; //janus software defaults

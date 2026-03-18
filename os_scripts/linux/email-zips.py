@@ -34,17 +34,17 @@ from logging.handlers import RotatingFileHandler
 # CONFIGURATION — Edit these to match your environment
 # ================================================================
 REMOTE_DIR          = "/data/recent-nmr/glenlivet2"          # Mounted remote dir to watch
-LOCAL_OUTPUT_DIR    = "/home/djh35/zip_email_processing"           # Local working directory
-LOCAL_ZIP_DIR       = "/home/djh35/zip_email_processing/zipped"    # Renamed zips stored here
-PROCESSED_DB_FILE   = "/home/djh35/zip_email_processing/.processed_files.json"
-#LOG_FILE            = "/var/log/nmr_processor/nmr_processor.log"
-LOG_FILE            = "/home/djh35/zip_email_processing/log/nmr_processor.log"
-#LOCK_FILE           = "/var/run/nmr_processor.lock"
-LOCK_FILE           = "/home/djh35/zip_email_processing/lock/nmr_processor.lock"
+LOCAL_OUTPUT_DIR    = "/var/lib/nmrservices/zip_email_processing"           # Local working directory
+LOCAL_ZIP_DIR       = "/var/lib/nmrservices/zip_email_processing/zipped"    # Renamed zips stored here
+PROCESSED_DB_FILE   = "/var/lib/nmrservices/zip_email_processing/processed_files.json"
+LOG_FILE            = "/var/log/nmrservices/zip_email_processing/nmr_processor.log"
+#LOG_FILE            = "/home/djh35/zip_email_processing/log/nmr_processor.log"
+LOCK_FILE           = "/var/log/nmrservices/zip_email_processing/nmr_processor.lock"
+#LOCK_FILE           = "/home/djh35/zip_email_processing/lock/nmr_processor.lock"
 
 SCAN_INTERVAL_SECS  = 60
 FILE_SETTLE_SECS    = 5
-CLEANUP_AGE_DAYS    = 30
+CLEANUP_AGE_DAYS    = 3
 
 SMTP_SERVER         = "localhost"
 SMTP_PORT           = 25
@@ -660,21 +660,21 @@ if __name__ == "__main__":
 
 """
 
-## systemd Service Unit — `nmr-zip-processor.service`
+## systemd Service Unit — `nmr-zip-email-processor.service`
 
 Place this in `/etc/systemd/system/`:
 
-```ini
+
 [Unit]
-Description=NMR Zip File Processor
+Description=NMR Zip to Email File Processor
 After=network-online.target remote-fs.target
 Wants=network-online.target
 
 [Service]
 Type=simple
-User=nmr
-Group=nmr
-ExecStart=/usr/bin/python3 /opt/nmr_processor/nmr_zip_processor.py
+User=nmrservices
+Group=nmrservices
+ExecStart=/usr/bin/python3 /var/lib/nmrservices/email_zips.py
 Restart=on-failure
 RestartSec=30
 StandardOutput=journal
@@ -683,8 +683,9 @@ StandardError=journal
 # Hardening
 NoNewPrivileges=true
 ProtectSystem=strict
-ReadWritePaths=/home/nmr/processing /var/log/nmr_processor /var/run
-ReadOnlyPaths=/mnt/remote/nmr_data
+#ReadWritePaths=/home/nmr/processing /var/log/nmrservices/nmr_processor /var/run
+ReadWritePaths=/var/lib/nmrservices/zip_email_processing /var/log/zip_email_processing/ /var/run
+ReadOnlyPaths=/data/recent-nmr/
 PrivateTmp=true
 
 [Install]
@@ -695,10 +696,10 @@ Enable and start with:
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable --now nmr-zip-processor.service
-sudo systemctl status nmr-zip-processor.service
+sudo systemctl enable --now nmr-zip-email-processor.service
+sudo systemctl status nmr-zip-email-processor.service
 # Live logs:
-sudo journalctl -fu nmr-zip-processor.service
+sudo journalctl -fu nmr-zip-email-processor.service
 ```
 
 ---

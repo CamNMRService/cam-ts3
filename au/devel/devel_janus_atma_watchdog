@@ -13,7 +13,7 @@
 
 char command[PATH_MAX];
 char experiment[100];
-char atmacommand[100]
+char atmacommand[100];
 char tmp_str[PATH_MAX]; 
 
 char lockpath[PATH_MAX];

@@ -51,7 +51,7 @@ CPR_exec("xau atmakiller", WAIT_START);
 // Could add coarse but not much help here I think
 // add the contents of CMD to the command then run it
 sprintf(atmacommand, "atma storewobb 700 %s", cmd);
-XCMD(atmacmd);
+XCMD(atmacommand);
 
 
 

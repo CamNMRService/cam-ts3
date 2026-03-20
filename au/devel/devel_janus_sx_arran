@@ -105,6 +105,10 @@ Short delay before shim in vain hope it will minimise the odd failures...
 
 2026_01_27 temporarily add shim email to us in case of *any* shim failure, because of seemingly recurrent issues
 2026_02_05 Might be good to have a pause function at the start of the janus loop? Put a couple of place holder variables in
+
+2026_3_20 Added timeout for ATMA, and made atma do proton only for DAY PROTON
+			Also add short delay after topshim to minimise the number of failures when the lock 
+			doesn;t recover quickly
 */
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 char def_file[255]="e:/chemist/defaults-csv.txt"; //janus software defaults
@@ -592,8 +596,17 @@ sampleproblem=0;
 
 		// move atma to here for Arran (only), as we clearly only need to tune once!!
 		// and better to have before topshim. NB junk/10/1 must be a proton/carbon dataset
-		// replave with call to atma watchdog
-	    XAU("devel_janus_atma_watchdog","")
+		// replace with call to atma watchdog
+		// If it's just a proton (protocol = DAY PROTON) need to atma proton channel only - pass proton as arg to watchdog au
+		//
+		if (strcmp(protocol, "DAY PROTON") == 0)
+		{
+			XAU("devel_janus_atma_watchdog","proton")
+		}
+		else
+		{
+			XAU("devel_janus_atma_watchdog","")
+		}
 		if ( AUERR <0 )
 		{
 			sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
@@ -616,7 +629,7 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 //janus_topshim_watchdog should also take care of the whoopwhoop email
 
 //trying to make the shimming better...
-sleep(30);
+sleep(10);
 
 sprintf(tmp_str,"janus_topshim_watchdog_arran TOPSHIM_FAILED_%s_%i",tmp_fname,cpos);
 XCMD(tmp_str);
@@ -645,6 +658,11 @@ else
 		strcat(sampleinfostring,tmp_str);
 	}
 }
+
+
+// wait a bit to make sure lock is going to be OK>..
+
+sleep(10);
 
 //old way of calling topshim below
 //CPR_exec("janus_topshim_watchdog",WAIT_TERM);

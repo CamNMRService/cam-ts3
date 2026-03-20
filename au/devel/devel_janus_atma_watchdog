@@ -6,12 +6,14 @@
 
 //example usage :- 
 //devel_janus_janus_watchdog 
-// emailing is handled by main AU so no arg handling here
+// emailing is handled by main AU 
+// But we want an option - just take cmd and add to base atma command
 //  AUERR should be -1 if atma fails, so main janus AU will interpret the result correctly
 
 
 char command[PATH_MAX];
 char experiment[100];
+char atmacommand[100]
 char tmp_str[PATH_MAX]; 
 
 char lockpath[PATH_MAX];
@@ -47,7 +49,9 @@ CPR_exec("xau atmakiller", WAIT_START);
 
 // storewob 700 to keep wobb curves for later copying
 // Could add coarse but not much help here I think
-XCMD("atma storewobb 700");
+// add the contents of CMD to the command then run it
+sprintf(atmacommand, "atma storewobb 700 %s", cmd);
+XCMD(atmacmd);
 
 
 

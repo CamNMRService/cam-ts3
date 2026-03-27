@@ -1,0 +1,16 @@
+##TITLE= Parameter file, TopSpin 3.8.0
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= chemist
+$$ 2026-03-26 14:36:11.211 +0000  chemist@lagavulin
+$$ C:\Bruker\cam-ts3\par\reference/j-31P-bb-coupled.ref/outd
+$$ process C:\Bruker\TopSpin3.8.0\prog\mod\edparproc.exe
+##$CURPLOT= <>
+##$CURPRIN= <$>
+##$DFORMAT= <normdp>
+##$LAYOUT= <+/1D_BB.xwp>
+##$LFORMAT= <normlp>
+##$PFORMAT= <normpl>
+##END=

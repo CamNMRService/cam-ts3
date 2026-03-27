@@ -64,3 +64,16 @@ sendgui SW 398.536
 ##j-19F-Quant-l.ref
 !!1d Quant 19F with BB excitation, 128 scans, currently OPERA45, nb needs bb prosol relations file; Have to set SW explicitly for baseopt compatibility. Don;t need setaq either
 sendgui SW 398.536
+sendgui ns 32
+##j-19F-bb-coupled.ref
+!!1d 19F with BB excitation, currently OPERA45, nb needs bb prosol relations file; Have to set SW explicitly to some number so DW comes out right  for baseopt compatibility. Don;t need setaq either
+sendgui SW 398.536
+sendgui ns 32
+##j-31P-bb-cpd.ref
+!!1d 31P with BB excitation, currently OPERA45, nb needs bb prosol relations file
+sendgui XAU setaq
+sendgui ns 32
+##j-31P-bb-coupled.ref
+!!1d 31P with BB excitation, currently OPERA45, nb needs bb prosol relations file
+sendgui XAU setaq
+sendgui ns 32

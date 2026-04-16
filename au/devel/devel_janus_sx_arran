@@ -609,7 +609,7 @@ sampleproblem=0;
 		}
 		if ( AUERR <0 )
 		{
-			sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd,cpos, tmp_fname);
+			sprintf(tmp_str, "ATMA_ERROR_%i_%s",cpos, tmp_fname);
 			XAU("whoopwhoop",tmp_str)
 			sampleproblem=1;
 			strcat(sampleinfostring, "\n ATMA failed - does your sample have high ionic strength? \n Check \

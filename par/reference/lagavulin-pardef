@@ -86,3 +86,9 @@ sendgui SW 398.536
 ##j-11B-bs.ref
 !!128 scan 1d 11B with background suppression with hard pulses. LB set to 10Hz as a default compromise
 
+##j-31P-bb-cpd-long.ref
+!!1d 31P with BB excitation, currently OPERA45, nb needs bb prosol relations file
+
+##j-31P-bb-coupled-long.ref
+!!1d 31P with BB excitation, currently OPERA45, nb needs bb prosol relations file
+

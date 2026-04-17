@@ -1,16 +1,16 @@
 ##TITLE= Parameter file, TopSpin 3.8.0
 ##JCAMPDX= 5.0
 ##DATATYPE= Parameter Values
-##NPOINTS= 2	$$ modification sequence number
+##NPOINTS= 1	$$ modification sequence number
 ##ORIGIN= Bruker BioSpin GmbH
 ##OWNER= chemist
-$$ 2026-04-17 10:54:38.073 +0100  chemist@lagavulin
-$$ C:\Bruker\cam-ts3\par\reference/j-1h-quant.ref/outd
+$$ 2026-04-17 10:46:45.572 +0100  chemist@lagavulin
+$$ C:\Bruker\cam-ts3\par\reference/j-19F-HMBC.ref/outd
 $$ process C:\Bruker\TopSpin3.8.0\prog\mod\edparproc.exe
-##$CURPLOT= <>
-##$CURPRIN= <$>
+##$CURPLOT= <PDF reDirect v2>
+##$CURPRIN= <$PDF reDirect v2>
 ##$DFORMAT= <normdp>
-##$LAYOUT= <+/janus-proton.xwp>
+##$LAYOUT= <+/janus-hmbc.xwp>
 ##$LFORMAT= <normlp>
 ##$PFORMAT= <normpl>
 ##END=

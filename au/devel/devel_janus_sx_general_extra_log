@@ -92,7 +92,7 @@ Added extra when creating the junk dataset to set the instrument name and probe 
 //NB code here is TS3 only - needs modifying for TS4
 // PTG dec 2025: moved rot off/on commands in experiment specific atma, to be within the "do real atma" condition
 // 	so it doesn;t do them for atma nowin selectnuc... (this doesn;t need spinning to be off!!)
-
+// PTG apr 2026: changed dummy 11B parset it reads  appropriate j-11B-bs parset
 
 #include <inc/bsms_program>    /* must be the first statement ****/
 
@@ -255,6 +255,7 @@ char    janusinfostring[3072];// to contain all the command/info for the current
 char    pulsecalfilename[PATH_MAX];
 char    pulsecalcontent[128];
 char    pulsecalerror[256];
+char 		boronparset[128];
 
 
 FILE    *pulsecalfile = NULL;
@@ -958,8 +959,9 @@ while ( finish != TRUE ) //THE MAIN LOOP
             ATMAflag=0;
         }
 		else if ( strstr ( protocol, "11B") != NULL )
-        {
-            RPAR("janus-11b.bbf", "all") // need this to get 1H to tune
+        { 
+            sprintf(boronparset, "j-11B-bs-%s", instrum_name);
+            RPAR(boronparset, "all") // need this to get 1H to tune
             ATMAflag=0;
         }
 		#pragma endregion Check protocol for X nuclei & set ATMAflag=0

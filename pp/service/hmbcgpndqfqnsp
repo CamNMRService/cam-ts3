@@ -1,4 +1,4 @@
-;hmbcgpndqfsp
+;hmbcgpndqfqnsp
 ;avance-version (12/01/11)
 ;HMBC
 ;2D H-1/X correlation via heteronuclear zero and double quantum
@@ -7,6 +7,8 @@
 ;no decoupling during acquisition
 ;using gradient pulses for selection
 ;Using shaped 90 degree pulses on f2 channel
+; With QNP switching commands for 19F (these don't do anything if switch 
+; not installed so this can be used for any 19F experiment)
 ;$CLASS=HighRes
 ;$DIM=2D
 ;$TYPE=
@@ -16,11 +18,11 @@
 
 #include <Avance.incl>
 #include <Grad.incl>
-  
+#include <Delay.incl>
 prosol relations=<triple_na>
 "p2=p1*2"
 "d6=1s/(cnst13*2)"
-
+"d11=30m"
 
 "d0=3u"
 
@@ -28,18 +30,20 @@ prosol relations=<triple_na>
 
 
 1 ze 
+  d11 QNP_X
+  4u SWITO_H 
 2 d1 
 3 p1 ph1
-  d6
+  d6 SWITO_F
   (p13:sp2 ph3):f2
   d0
   50u UNBLKGRAD
   p16:gp1
-  d16
+  d16 SWITO_H
   p2 ph2
   50u
   p16:gp2
-  d16
+  d16 SWITO_F
   d0
   (p13:sp2 ph4):f2
   4u

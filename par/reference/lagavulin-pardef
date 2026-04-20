@@ -77,3 +77,18 @@ sendgui ns 32
 !!1d 31P with BB excitation, currently OPERA45, nb needs bb prosol relations file
 sendgui XAU setaq
 sendgui ns 32
+##j-19F-HMBC.ref
+!! 19F HMBC with BB 19F excitation, using seedless pulse, nb needs shape 23 on F2 (19F) to be set to Seedless_19F_excite; No SW fiddling needed for 19F in indirect 
+
+##j-19F-bb-cpd-long.ref
+!!512 scan 1d 19F with BB excitation, currently OPERA45, nb needs bb prosol relations file; Have to set SW explicitly to some number so DW comes out right  for baseopt compatibility. Don;t need setaq either
+sendgui SW 398.536
+##j-11B-bs.ref
+!!128 scan 1d 11B with background suppression with hard pulses. LB set to 10Hz as a default compromise
+
+##j-31P-bb-cpd-long.ref
+!!1d 31P with BB excitation, currently OPERA45, nb needs bb prosol relations file
+
+##j-31P-bb-coupled-long.ref
+!!1d 31P with BB excitation, currently OPERA45, nb needs bb prosol relations file
+

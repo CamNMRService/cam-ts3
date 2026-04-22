@@ -154,8 +154,9 @@ int multi_zgvt(const char* curdat)
     TESET
     TEREADY(waittime,0.1)
     ATMA
-    XCMD("topshim convcomp tuneaxyz");
+    XCMD("topshim convcomp tunea plotall");
     ZG_OVERWRITE
+    XMAC("tit")
     IEXPNO
   END
 

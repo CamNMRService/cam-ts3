@@ -127,7 +127,9 @@ if (orig_file_pointer == NULL)
   //  exit(1); // don't exit here, best to write something to the report probably.
   //handle/report the error though somehow
   sprintf(group,"ORIG_FILE_ERROR"); 
-  sprintf(crsid,"ORIG_FILE_ERROR");
+ 	//removed the original file error for the email at the moment - AM
+ /* sprintf(crsid,"ORIG_FILE_ERROR");
+  */
   sprintf(sample_name,"ORIG_FILE_ERROR");
 }
 else {

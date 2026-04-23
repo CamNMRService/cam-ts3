@@ -94,3 +94,8 @@ sendgui ns 768
 ##j-1h-128.ref
 !! NB 40 ppm SW to cover more use cases
 sendgui ns 128
+##j-7li-coupled.ref
+!! Standard day lithium
+
+##j-7li-cpg.ref
+!! Long D1 for overnight multi expt for CPG group

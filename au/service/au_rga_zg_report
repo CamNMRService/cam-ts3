@@ -28,5 +28,8 @@ mod by djh35 to add adding to report after ZG
 GETCURDATA
 RGA
 ZG
+/*
 XAU("devel-expt-report","")
+*/
+XAU("email-auto","")
 QUIT

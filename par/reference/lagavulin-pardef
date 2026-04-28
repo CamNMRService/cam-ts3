@@ -93,3 +93,6 @@ sendgui SW 398.536
 ##j-31P-bb-coupled-long.ref
 !!1d 31P with BB excitation, currently OPERA45, nb needs bb prosol relations file
 
+##j-1h-para.ref
+!! 900 ppm at 400
+

@@ -1,10 +1,10 @@
 ##TITLE= Parameter file, TopSpin 3.8.0
 ##JCAMPDX= 5.0
 ##DATATYPE= Parameter Values
-##NPOINTS= 1	$$ modification sequence number
+##NPOINTS= 2	$$ modification sequence number
 ##ORIGIN= Bruker BioSpin GmbH
 ##OWNER= chemist
-$$ 2026-04-17 15:48:20.950 +0100  chemist@Glenfairn
+$$ 2026-04-29 12:14:20.011 +0100  ptg20@DESKTOP-3IJF6FR
 $$ C:\Bruker\cam-ts3\par\reference/j-1h-128.ref/acqu
 $$ process C:\Bruker\TopSpin3.8.0\prog\mod\edparproc.exe
 ##$ACQT0= 0
@@ -56,7 +56,7 @@ $$ process C:\Bruker\TopSpin3.8.0\prog\mod\edparproc.exe
 ##$DSPFIRM= 4
 ##$DSPFVS= 0
 ##$DTYPA= 0
-##$EXP= <j-1h-glenfairn>
+##$EXP= <j-1h-128.ref>
 ##$FCUCHAN= (0..9)
 0 2 0 0 0 0 0 0 0 0
 ##$FL1= 0
@@ -159,7 +159,7 @@ $$ process C:\Bruker\TopSpin3.8.0\prog\mod\edparproc.exe
 ##$NusSPTYPE= 0
 ##$NusT2= 1
 ##$NusTD= 0
-##$O1= 4001.712
+##$O1= 2501.07
 ##$O2= 4001.712
 ##$O3= 4001.712
 ##$O4= 4001.712
@@ -229,7 +229,7 @@ $$ process C:\Bruker\TopSpin3.8.0\prog\mod\edparproc.exe
 83 83 83 83 83 83 83 83
 ##$SELREC= (0..9)
 0 0 0 0 0 0 0 0 0 0
-##$SFO1= 500.218001712
+##$SFO1= 500.21650107
 ##$SFO2= 500.218001712
 ##$SFO3= 500.218001712
 ##$SFO4= 500.218001712
@@ -269,7 +269,7 @@ $$ process C:\Bruker\TopSpin3.8.0\prog\mod\edparproc.exe
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 ##$SUBNAM= (0..9)
 <> <> <> <> <> <> <> <> <> <>
-##$SW= 39.9825674636855
+##$SW= 39.9826874107882
 ##$SWIBOX= (0..19)
 0 0 3 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 ##$SW_h= 20000

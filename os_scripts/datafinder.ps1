@@ -2,6 +2,7 @@
 # To find data for a given nucleus use NUC1= <11B> or whatever
 # Note that searching for NUC1= <1H> will find proton, cosy , HSQC, HMBC...
 # Can optionally add second string - just hit return if not needed.
+# Copies directories two levels above the found files to a specified destination.
 
 # Prompt for filename (default: acqus)
 $filename = Read-Host "Enter the filename to search for (default: acqus)"
@@ -19,8 +20,21 @@ if ([string]::IsNullOrWhiteSpace($searchString1)) {
 # Prompt for the second search string (optional)
 $searchString2 = Read-Host "Enter the second string to search for (optional)"
 
-# Search logic
-Get-ChildItem -Recurse -Filter $filename -File | Where-Object {
+# Prompt for destination directory
+$destinationDir = Read-Host "Enter the destination directory path to copy the directories to"
+if ([string]::IsNullOrWhiteSpace($destinationDir)) {
+    Write-Host "Destination directory is required. Exiting." -ForegroundColor Red
+    exit
+}
+
+# Create destination directory if it doesn't exist
+if (-not (Test-Path -Path $destinationDir)) {
+    New-Item -ItemType Directory -Path $destinationDir -Force | Out-Null
+    Write-Host "Created destination directory: $destinationDir" -ForegroundColor Green
+}
+
+# Search logic and copy directories
+$foundFiles = Get-ChildItem -Recurse -Filter $filename -File | Where-Object {
     $path = $_.FullName
     $match1 = Select-String -Path $path -Pattern $searchString1 -Quiet
     if (-not $match1) { return $false }
@@ -31,7 +45,35 @@ Get-ChildItem -Recurse -Filter $filename -File | Where-Object {
     }
 
     return $true
-} | Select-Object -ExpandProperty FullName
+}
+
+# Track unique directories to avoid duplicate copies
+$copiedDirs = @{}
+
+foreach ($file in $foundFiles) {
+    Write-Host "Found: $($file.FullName)" -ForegroundColor Cyan
+    
+    # Get directory two levels above the found file
+    $parentDir = $file.Directory.Parent
+    if ($parentDir -ne $null) {
+        $dirToCopy = $parentDir.FullName
+            
+            # Only copy if we haven't already copied this directory
+            if (-not $copiedDirs.ContainsKey($dirToCopy)) {
+                $destPath = Join-Path -Path $destinationDir -ChildPath $targetDir.Name
+                
+                try {
+                    Copy-Item -Path $dirToCopy -Destination $destPath -Recurse -Force
+                    Write-Host "Copied: $dirToCopy -> $destPath" -ForegroundColor Green
+                    $copiedDirs[$dirToCopy] = $true
+                } catch {
+                    Write-Host "Error copying $dirToCopy : $_" -ForegroundColor Red
+                }
+            }
+        } else {
+            Write-Host "Warning: Cannot go two levels up from $($file.FullName)" -ForegroundColor Yellow
+        }
+    }
 
 
-
+Write-Host "`nCopy operation completed. Total directories copied: $($copiedDirs.Count)" -ForegroundColor Green

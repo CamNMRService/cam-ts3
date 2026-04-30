@@ -31,5 +31,5 @@ ZG
 /*
 XAU("devel-expt-report","")
 */
-XAU("email-auto","")
+//XAU("email-auto","")
 QUIT

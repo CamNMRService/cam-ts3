@@ -23,6 +23,8 @@
 
 // 13/5/2024 added TSO for samples whose solvent name contains D2O (strictly capitals, so use d2o for solvents where d2o is not supposed to be the lock peak)
 
+// PTG 2026-04-30 Added loop value setting without autophase; 5 s delay after topshim as well
+
 #include <time.h>
 time_t now_s, dtime_s;		  	/* seconds since 1970 */
 struct tm *now;	  		/* structure with year, month etc. */
@@ -118,7 +120,8 @@ else
 }
 
 
-
+// short delay to make sure lock really reestablished
+sleep(5);
 
 
 // delete the lockfile  *and kill the killer program!!!!!* if topshim completes OK
@@ -148,5 +151,7 @@ sprintf( command, "robocopy C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData /S C:
  //sprintf(command,"xcopy C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData_%s\\ /E /H \n", ts_major,ts_minor,ts_patch,ts_major,ts_minor,ts_patch,datestamp);
 system(command);
 
+// Now set loop params without doing autophase
+XAU("loopadj_fallback","quiet");
 
 QUIT

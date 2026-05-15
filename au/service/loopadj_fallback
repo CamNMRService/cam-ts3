@@ -1,5 +1,5 @@
 /*** ^^A -*-C++-*- **********************************************/
-/*	loopadjnew		28.07.1999			*/
+/*	loopadj_fallback		28.07.1999			*/
 /****************************************************************/
 /*	Short Description :					*/
 /*	Parameter optimization au program which calculates	*/
@@ -51,6 +51,7 @@
 /*	meb		990728  equations modified 		*/
 /*								*/
 // fallback to weak regulation if gain >120 
+/*  ptg 2026-04-30 Command line options: if you want autophase, specify as an argument. Autogain always done */
 /****************************************************************/
 /*
 $Id:$
@@ -60,9 +61,11 @@ float loopgain, lockgain, looptime;
 int loopfilter;
 double aa, bb, cc, dd, ee, xx;
 
-/* First, optimize lock phase and lock gain */
-XCMD("autophase");
-XCMD("autogain");
+/* First, optimize lock phase (if set as argument) and lock gain */
+if(strstr(cmd,"autophase"))
+{
+	XCMD("autophase");
+}XCMD("autogain");
 
 /* Test for proper input, lock gain between 120 and 84 */
 
@@ -103,6 +106,12 @@ PutBsmsFloatValue(BSMS_LOOP_TIME, looptime);
 		"Loop Gain   = %6.2f\n"
 		"Loop Time   = %6.2f",loopfilter, loopgain, looptime);
 
-QUITMSG(text);
+if(!strstr(cmd,"quiet"))
+{
+	STOPMSG(text);
+}
+
+
+QUIT
 
 /* stat of sub-routines for adjustment of lock phase and lock gain */

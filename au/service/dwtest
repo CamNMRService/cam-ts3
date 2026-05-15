@@ -1,0 +1,8 @@
+float dw; 
+int td, newtd;
+FETCHPAR("DW", &dw)
+FETCHPAR("TD", &td)
+Proc_err(DEF_ERR_OPT, "dw=%f", dw);
+newtd=2000000/dw;
+STOREPAR("TD", newtd)
+QUIT

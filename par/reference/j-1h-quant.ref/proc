@@ -1,10 +1,10 @@
 ##TITLE= Parameter file, TopSpin 3.8.0
 ##JCAMPDX= 5.0
 ##DATATYPE= Parameter Values
-##NPOINTS= 1	$$ modification sequence number
+##NPOINTS= 2	$$ modification sequence number
 ##ORIGIN= Bruker BioSpin GmbH
 ##OWNER= chemist
-$$ 2025-12-09 12:18:07.783 +0000  chemist@Glenfairn
+$$ 2026-04-17 10:54:38.065 +0100  chemist@lagavulin
 $$ C:\Bruker\cam-ts3\par\reference/j-1h-quant.ref/proc
 $$ process C:\Bruker\TopSpin3.8.0\prog\mod\edparproc.exe
 ##$ABSF1= 10
@@ -85,7 +85,7 @@ $$ process C:\Bruker\TopSpin3.8.0\prog\mod\edparproc.exe
 ##$NSP= 1
 ##$NTH_PI= 0
 ##$NZP= 0
-##$OFFSET= 119.6986
+##$OFFSET= 20.46582
 ##$PC= 1.5
 ##$PHC0= -40.25995
 ##$PHC1= 0
@@ -117,7 +117,7 @@ $$ process C:\Bruker\TopSpin3.8.0\prog\mod\edparproc.exe
 ##$SSB= 0
 ##$STSI= 0
 ##$STSR= 0
-##$SW_p= 178571.428571274
+##$SW_p= 9973.40425531916
 ##$SYMM= 0
 ##$S_DEV= 0
 ##$TDeff= 0

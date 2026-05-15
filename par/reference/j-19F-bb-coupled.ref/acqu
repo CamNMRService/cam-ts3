@@ -141,7 +141,7 @@ $$ process C:\Bruker\TopSpin3.8.0\prog\mod\edparproc.exe
 ##$NC= 0
 ##$NLOGCH= 2
 ##$NOVFLW= 0
-##$NS= 64
+##$NS= 128
 ##$NUC1= <19F>
 ##$NUC2= <off>
 ##$NUC3= <off>

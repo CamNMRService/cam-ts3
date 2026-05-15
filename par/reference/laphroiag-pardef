@@ -25,16 +25,25 @@ sendgui XAU setaq
 !! 
 !! NB required seedless 19F inv and excite for 19F, obs in prosol
 sendgui td 256k
-
+sendgui SW 398.536
 ##19Fselective1dHOESY.ref
 !!1d HOESY, selective on 19F vian CNST55
 sendgui XAU setaq
 ##j-19F-bb-cpd.ref
 !!1d 19F with BB excitation, currently OPERA45, nb needs bb prosol relations file; dw set explicitly to 3.5 for baseopt compatibility. Don;t need setaq either
 sendgui ns 16
+sendgui SW 398.536
+sendgui zgoptns  
+sendgui cnst0 0
 ##j-19F-Quant-q.ref
 !!1d Quant 19F with BB excitation, 4 scans, currently OPERA45, nb needs bb prosol relations file; dw set explicitly to 3.5 for baseopt compatibility. Don;t need setaq either
-
+sendgui SW 398.536
 ##j-19F-Quant-l.ref
 !!1d Quant 19F with BB excitation, 128 scans, currently OPERA45, nb needs bb prosol relations file; dw set explicitly to 3.5 for baseopt compatibility. Don;t need setaq either
+sendgui SW 398.536
+##j-1h-para.ref
+!! 900 ppm at 400
 
+##j-1h-128.ref
+!! NB 40 ppm SW to cover more use cases
+sendgui ns 128

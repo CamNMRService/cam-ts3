@@ -1,0 +1,2 @@
+XCMD("halt");
+QUIT

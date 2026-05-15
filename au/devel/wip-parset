@@ -1,6 +1,8 @@
 
 //sketching out a parameter set definer/copyier
 
+//PTG 2026-4-17 Added sendgui paracon at the end to remind that this is essential!
+
 #define MAX_LINE_LENGTH 256
 GETCURDATA
 SETCURDATA
@@ -98,6 +100,10 @@ while (fgets(line, sizeof(line), pardef_file))
     
 // Close the file
 fclose(pardef_file);
+
+// Now call paracon so we don;t forget to do it and end up with bogus parsets...
+
+XCMD("sendgui paracon")
 
 return 0;//end of main procedure
 }

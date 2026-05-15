@@ -25,10 +25,13 @@
 // NUS: reads VDLIST from dataset! for HSQC. 
 // Fix the bugs: don't call proc_noah in this case
 // Janus version: don't actually process, but put some extra info in the title file
+// PTG 2026-04-30 Update to cover both TS3 and TS4 cases, ie different storage of the list files
+//  in the dataset. In TS3 it's just stored as (for the HSQC) vdlist; in TS4 
+//  it's in lists/vc under it's original name
 
 char zgoptns[256];
 FILE* fptr1;
-char vclistname[PATH_MAX], vclistpath[PATH_MAX], line[PATH_MAX];
+char vclistname[PATH_MAX], vclistpath[PATH_MAX], line[PATH_MAX],vdlist[256];
 int listentry[4096];
 int numpts, ret, fidsf1, maxfid, fntp;
 char titlefile[PATH_MAX], titletext[1024];
@@ -40,8 +43,23 @@ FETCHPARS("ZGOPTNS", zgoptns);
 if (strstr(zgoptns,"-DNUS"))
 {
 
-strcpy(vclistpath,ACQUPATH("vdlist"));
-dircp(vclistpath, ACQUPATH("nuslist"));
+//  check for NEO and act accordingly:
+switch(is_blade_system())
+    {
+    case 0:
+    		// AVIII: for HSQC the list is just "vdlist" in acqu dir
+        strcpy(vclistpath,ACQUPATH("vdlist"));
+        dircp(vclistpath, ACQUPATH("nuslist"));
+    case 1:
+    		// neo system, fish it out of the lists/vc subdir
+        FETCHPARS("VDLIST", &vdlist);
+        strcpy(vclistpath,ACQUPATH("lists/vc/"));
+        strcat(vclistpath,vdlist);
+        dircp(vclistpath, ACQUPATH("nuslist"));
+    default:
+    		
+;
+    }
 	
 	if ( (fptr1 = fopen (ACQUPATH("nuslist"),"r")) == NULL )
     {

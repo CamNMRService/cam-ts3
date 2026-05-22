@@ -43,6 +43,8 @@
 /* ptg 				2023-09-08 added setdef to inhibit trouble error messages from bt_calibrate_o1 and changed bt_calibrate_o1 settings*/
 /* ptg 			2024-05-15 replace AUTOPHASE with loopadj_fallback to take care of cases where user selects a fully deuterated solvent but it's only partly deuterated*/
 /* ptg 2024-11-1 proper handling of fixRG, ie no rga done!! */
+/* ptg 2026-04-30 Reharmonise TS3 and TS4 versions. FastRG option in both with 5s D1 */
+
 /****************************************************************/
 
 
@@ -60,8 +62,8 @@ char solvent[100];
 char o1string[100];
 int expnosave;
 float p1, pl1, pl9, cnst9;
-int o1cal=0, reducepresat=0, tso=0, maxRG=0, reduceRG=0, fixRG=0, nopcal=0, wvm=0, debug=0;
-float rg,rgorig, rffactor;
+int o1cal=0, reducepresat=0, tso=0, maxRG=0, reduceRG=0, fixRG=0, nopcal=0, wvm=0, debug=0, fastRG=0;
+float rg,rgorig, rffactor, del1;
 double f1p, f2p;
 double bf;
 double peakFreqHz, peakFreqPPM, peakIntensity;
@@ -113,6 +115,12 @@ if ((strstr(cmd, "fixRG") != 0) || (strstr(USERA1Set, "fixRG") != 0))
     fixRG =1 ;
 }
 
+// fastRG option
+if ((strstr(cmd, "fastRG") != 0) || (strstr(USERA1Set, "fastRG") != 0))
+{
+    fastRG =1 ;
+}
+
 // Don't do pulsecal:
 if ((strstr(cmd, "nopcal") != 0) || (strstr(USERA1Set, "nopcal") != 0))
 {
@@ -156,11 +164,11 @@ if(tso)
         fprintf(fptr, "Topshim done with offset \n");
     }
 }
-//autophase - probably a good option if new algorithm is available
+//Loopadj-fallback - now need to give autophase option in this case
 // Do this before anything else!!!
 
 sleep(3);
-XAU("loopadj_fallback","")
+XAU("loopadj_fallback","autophase quiet")
 sleep(3);
 
 FETCHPAR("RG", &rgorig)
@@ -365,7 +373,17 @@ if(fixRG)
         fprintf(fptr, "RG fixed to original value %f \n", rgorig, rg);
 	  }
 }
-else
+else if(fastRG)
+{
+	FETCHPAR("D 1", &del1);
+	STOREPAR("D 1", 5.0);
+	RGA
+	STOREPAR("D 1", del1);	
+	if (debug)
+	  {
+        fprintf(fptr, "RGA was done with 5s D1, orig value %f , new value %f \n", rgorig, rg);
+	  }	
+}
 {
 	RGA 
 	FETCHPAR("RG", &rg)

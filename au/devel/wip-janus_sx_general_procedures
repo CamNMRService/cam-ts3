@@ -53,7 +53,8 @@ static FILE    *pulsecalfile = NULL;
 static float   p1, statusp1;
 
 static char    *env_name, *file_data, *field, *ed;
-static FILE    *fprod = NULL, *facqu = NULL, *ferror = NULL, *fwarn = NULL;
+static FILE    *fprod = NULL, *facqu = NULL;
+static FILE    *ferror = NULL, *fwarn = NULL;
 static FILE    *fshim = NULL, *fwait = NULL, *ftitle = NULL, *fsx = NULL;
 static FILE    *fexpt = NULL, *fprot = NULL, *flog = NULL, *fdef = NULL;
 static FILE    *fjup = NULL, *fexpts = NULL, *pidfile = NULL, *fawm = NULL;

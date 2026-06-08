@@ -1,6 +1,6 @@
 #include <inc/bsms_program>    /* must be the first statement ****/
 
-AUERR = run_janus(curdat, cmd);
+AUERR = run_janus (curdat);
 QUIT
 
 /*-----------------------------------------------------------------*/
@@ -53,8 +53,7 @@ static FILE    *pulsecalfile = NULL;
 static float   p1, statusp1;
 
 static char    *env_name, *file_data, *field, *ed;
-static FILE    *fprod = NULL, *facqu = NULL;
-static FILE    *ferror = NULL, *fwarn = NULL;
+static FILE    *fprod = NULL, *facqu = NULL, *ferror_fp = NULL, *fwarn = NULL;
 static FILE    *fshim = NULL, *fwait = NULL, *ftitle = NULL, *fsx = NULL;
 static FILE    *fexpt = NULL, *fprot = NULL, *flog = NULL, *fdef = NULL;
 static FILE    *fjup = NULL, *fexpts = NULL, *pidfile = NULL, *fawm = NULL;
@@ -90,7 +89,7 @@ static char    curdat[PATH_MAX];
 /*-----------------------------------------------------------------*/
 /*--- Subroutine Prototypes ---------------------------------------*/
 /*-----------------------------------------------------------------*/
-static int  run_janus(const char* my_curdat, const char* my_cmd);
+//static int  run_janus(const char* my_curdat, const char* my_cmd);
 static void get_instrument_info(void);
 static void set_instrument_defaults(void);
 static void read_defaults_file(void);
@@ -107,9 +106,9 @@ static void post_expt_actions(void);
 /*--- Subroutine Implementations ----------------------------------*/
 /*-----------------------------------------------------------------*/
 
-static int run_janus(const char* my_curdat, const char* my_cmd)
+int run_janus (const char *curdat)
 {
-    strcpy(curdat, my_curdat);
+    //strcpy(curdat, my_curdat);
 
     ts_major = GetTsVersionMajor();
     ts_minor = GetTsVersionMinor();
@@ -171,9 +170,9 @@ static int run_janus(const char* my_curdat, const char* my_cmd)
             }
             Proc_err ( INFO_OPT, "***ERROR - No data on line***" );
             sleep( delaytime );
-            ferror = fopen(errorfile, "w");
-            fputs("Prod file format error", ferror);
-            fclose( ferror );
+            ferror_fp = fopen(errorfile, "w");
+            fputs("Prod file format error", ferror_fp);
+            fclose( ferror_fp );
             flog = fopen(logfile, "a+");
             fputs("PROD FILE ERROR\n", flog);
             fclose( flog );

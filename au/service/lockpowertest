@@ -1,0 +1,15 @@
+#include <inc/bsms_program>    /* must be the first statement ****/
+double  lockshift=0, lockpower=0, lockgain;
+float   lockpower_par;
+char solvent[256];
+
+
+
+// get current numbers from BSMS
+GETBSMSVAL(BSN_LOCK_SHIFT, lockshift);
+GETBSMSVAL(BSN_LOCK_GAIN,lockgain);
+
+GET_LOCK_POWER(lockpower);
+Proc_err(DEF_ERR_OPT,"lockpower=%lf", lockpower);
+STOREPAR("CNST 31", lockpower);
+QUIT

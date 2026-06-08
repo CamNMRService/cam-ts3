@@ -1,0 +1,6 @@
+#include <inc/bsms_program>    /* must be the first statement ****/
+
+#pragma region Get Instrument name
+char    instrum_name[255]="spect";
+char    probe_name[255]="unknown"
+QUIT

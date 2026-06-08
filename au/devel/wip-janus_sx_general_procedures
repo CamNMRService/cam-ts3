@@ -1,0 +1,1109 @@
+#include <inc/bsms_program>    /* must be the first statement ****/
+
+AUERR = run_janus(curdat, cmd);
+QUIT
+
+/*-----------------------------------------------------------------*/
+/*--- Global Variables (File-scope Static) ------------------------*/
+/*-----------------------------------------------------------------*/
+static char    instrum_name[255] = "spect";
+static char    probe_name[255] = "unknown";
+static char    def_file[PATH_MAX] = "d:/chemist/defaults-csv.txt";
+static char    interrupt_file_path[PATH_MAX] = "d:\\chemist\\interrupt.csv";
+static char    changer_ip[16] = "null";
+static char    ts_arg[32] = "none";
+static char    test_parset[256] = "PROTON";
+static int     test_pos = 60;
+static int     protocol_pos_a = 59;
+static int     protocol_pos_b = 60;
+static char    protocol_str_a[256] = "POS59";
+static char    protocol_str_b[256] = "POS60";
+static int     global_atma_flag = 1;
+
+static float   delaytime = 1.0;
+static int     expt = 1, curloop = 1, cpos, specno, jexpt, jsolv, finish = FALSE, i = 1;
+static int     LastSample, FatalError = FALSE, nexpt, parmo, proderrcount, sthou;
+static int     skipsample, pid, x, proc_or_not = 0, sampleproblem = 0;
+static int     ATMAflag = 1;
+
+static char    oi[80], juser[50], suser[40], in_data[1024], tmp_fname[1024];
+static char    shimfile[80], acqufile[80];
+static char    experiment[155], solvent[40], tunefile[40], sxfile[80];
+static char    tmp_str[2000], titlefile[80], titletext[80];
+static char    exptfile[80], diskunit[40];
+static char    prefix[40], shimset[40], defaultsfile[80], hdwerr[80];
+static char    archpath[80], archive[20], jcmd_str[1024], outpath[1024];
+static char    janusup[80], expttime[40], exptsfile[80], protocol[80];
+static char    sxcmd[255], gradshim[20], comments[1024], command[1024], snostr[1024], tmp_cmd[1024];
+static char    statusstr[1024], awmfile[80], tmparchpath[1024], fidpath[1024], procau[1024];
+static char    proclist[1024], procinstruct[1024];
+static char    reportdest[PATH_MAX];
+static char    reportsource[PATH_MAX];
+static char    januskillfile[PATH_MAX];
+static char    sampleinfofile[PATH_MAX];
+static char    janusinfofile[PATH_MAX];
+static char    sampleinfostring[2048];
+static char    janusinfostring[3072];
+static char    pulsecalfilename[PATH_MAX];
+static char    pulsecalcontent[128];
+static char    pulsecalerror[256];
+static char    boronparset[128];
+
+static FILE    *pulsecalfile = NULL;
+static float   p1, statusp1;
+
+static char    *env_name, *file_data, *field, *ed;
+static FILE    *fprod = NULL, *facqu = NULL, *ferror = NULL, *fwarn = NULL;
+static FILE    *fshim = NULL, *fwait = NULL, *ftitle = NULL, *fsx = NULL;
+static FILE    *fexpt = NULL, *fprot = NULL, *flog = NULL, *fdef = NULL;
+static FILE    *fjup = NULL, *fexpts = NULL, *pidfile = NULL, *fawm = NULL;
+static FILE    *sname = NULL;
+static FILE    *fbat = NULL;
+static FILE    *plist = NULL;
+static FILE    *sampleinfo = NULL;
+static FILE    *janusinfo = NULL;
+
+static char    samplename[80], snamefile[255];
+
+static char    batfile[127], batcmd[127];
+static char    prodfile[255];
+static char    prodfiletxt[255];
+static char    errorfile[255];
+static char    warnfile[255];
+static char    waitfile[255];
+static char    protfile[255];
+static char    logfile[255];
+static char    email[80] = "camnmrservice@gmail.com";
+
+static int     ts_major;
+static int     ts_minor;
+static int     ts_patch;
+
+static time_t  lt;
+static struct  tm *ltstruc;
+static char    datestamp[256];
+static char    testdata[256];
+
+static char    curdat[PATH_MAX];
+
+/*-----------------------------------------------------------------*/
+/*--- Subroutine Prototypes ---------------------------------------*/
+/*-----------------------------------------------------------------*/
+static int  run_janus(const char* my_curdat, const char* my_cmd);
+static void get_instrument_info(void);
+static void set_instrument_defaults(void);
+static void read_defaults_file(void);
+static void check_janus_kill(void);
+static void run_interrupt_tests(void);
+static void insert_sample(void);
+static void lock_solvent(void);
+static void tune_sample(void);
+static void shim_sample(void);
+static void run_expts(void);
+static void post_expt_actions(void);
+
+/*-----------------------------------------------------------------*/
+/*--- Subroutine Implementations ----------------------------------*/
+/*-----------------------------------------------------------------*/
+
+static int run_janus(const char* my_curdat, const char* my_cmd)
+{
+    strcpy(curdat, my_curdat);
+
+    ts_major = GetTsVersionMajor();
+    ts_minor = GetTsVersionMinor();
+    ts_patch = GetTsVersionPl();
+
+    get_instrument_info();
+    set_instrument_defaults();
+    read_defaults_file();
+    check_janus_kill();
+
+    Proc_err ( INFO_OPT, "Waiting for sample...");
+    sprintf(diskunit, "%sdata\\%s\\nmr\\", diskunit, suser);
+
+    finish = FALSE;
+    proderrcount = 0;
+
+    while ( finish != TRUE )
+    {
+        Show_status("Waiting for sample...");
+        sleep(10);
+
+        check_janus_kill();
+        run_interrupt_tests();
+
+        if ( access(prodfile, R_OK) != 0)
+        {
+            sleep( delaytime );
+            Show_status("is running...");
+            curloop++;
+            continue;
+        }
+
+        curloop = 1;
+        skipsample = 0;
+
+        Show_status("About to read data from prod file");
+        fprod = fopen(prodfile, "r");
+        sleep( delaytime );
+        file_data = fgets(in_data, 1024, fprod);
+        Proc_err ( INFO_OPT, "prod file contains :- %s", in_data);
+        sprintf(tmp_str, "Prod_file contains - %s\n", in_data);
+        sprintf(janusinfostring, "log\n");
+        strcat(janusinfostring, tmp_str);
+
+        if ( file_data == NULL )
+        {
+            XCMD("setdef ackn no");
+            fclose( fprod );
+            proderrcount++;
+            if (proderrcount > 2)
+            {
+                sprintf( tmp_str, "del %s", prodfiletxt );
+                Proc_err ( INFO_OPT, "tmp_str", tmp_str);
+                fbat = fopen(batcmd, "w");
+                fputs( tmp_str, fbat);
+                fclose(fbat);
+                system(batcmd);
+                proderrcount = 0;
+            }
+            Proc_err ( INFO_OPT, "***ERROR - No data on line***" );
+            sleep( delaytime );
+            ferror = fopen(errorfile, "w");
+            fputs("Prod file format error", ferror);
+            fclose( ferror );
+            flog = fopen(logfile, "a+");
+            fputs("PROD FILE ERROR\n", flog);
+            fclose( flog );
+            exit(1);
+        }
+
+        proderrcount = 0;
+        field = strtok( in_data, "," );
+        sscanf( field, "%d", &cpos );
+
+        field = strtok(NULL, "," );
+        strcpy( tmp_fname, field );
+
+        field = strtok(NULL, "," );
+        strcpy( oi, field );
+
+        field = strtok( NULL, "," );
+        strcpy( juser, field );
+
+        field = strtok( NULL, "," );
+        strcpy( solvent, field );
+
+        field = strtok( NULL, "," );
+        strcpy( protocol, field );
+
+        while( field != NULL )
+        {
+            if (strchr(field, '@') != NULL)
+            {
+                strcpy( comments, field);
+            }
+            field = strtok( NULL, ",");
+        }
+        STOREPAR("USERP5", comments);
+        Proc_err ( INFO_OPT, "***comments from prod is :- %s", comments);
+        comments[strlen(comments)-1] = '\0';
+
+        flog = fopen(logfile, "a+");
+        lt = time(NULL);
+        sprintf(expttime, ctime(&lt));
+        fputs( expttime, flog);
+        sprintf( tmp_str, " Specno: %s,Sample: %s, User: %s, Sol= %s, Expt= %s, Cpos= %d\n", tmp_fname, oi, juser, solvent, protocol, cpos);
+        strcat(janusinfostring, tmp_str);
+        Proc_err ( INFO_OPT, "tmp_str", tmp_str);
+        fputs( tmp_str, flog);
+        fclose( flog );
+
+        sprintf( fidpath, "%s%s/%s/%d/fid", disk, user, tmp_fname, expno );
+        if( access( fidpath, R_OK ) == 0 )
+        {
+           Proc_err ( INFO_OPT, "%s", fidpath);
+           sprintf(tmp_str, "OVERWRITE_FID_ERROR_%i_%s", cpos, tmp_fname);
+           Proc_err ( INFO_OPT, "tmp_str", tmp_str);
+           XAU("whoopwhoop", tmp_str)
+           exit(1);
+        }
+
+        if ( strstr ( protocol, protocol_str_a) != NULL )
+        {
+           cpos = protocol_pos_a;
+        }
+        if ( strstr ( protocol, protocol_str_b) != NULL )
+        {
+            cpos = protocol_pos_b;
+        }
+
+        insert_sample();
+
+        if (skipsample == 0)
+        {
+            DATASET ( "junk", 10, 1, diskunit, suser)
+            GETCURDATA
+            RPAR("PROTONRO", "all")
+            ATMAflag = 1;
+            STOREPAR( "SOLVENT", solvent)
+
+            sprintf(tmp_cmd, "rsh %s", shimset);
+            Proc_err ( INFO_OPT, "***tmp_cmd - %s", tmp_cmd);
+            sprintf(tmp_str, "%s\n", tmp_cmd);
+            strcat(janusinfostring, tmp_str);
+            AUERR = CPR_exec(tmp_cmd, WAIT_TERM);
+            if ( AUERR < 0 )
+            {
+               sprintf(tmp_str, "FAILED_TO_READ_SHIMS_%s_%i_%s", shimset, cpos, tmp_fname);
+               XAU("whoopwhoop", tmp_str)
+            }
+
+            lock_solvent();
+            tune_sample();
+
+            strcat(janusinfostring, "ROT\n");
+            ROT
+            if ( AUERR < 0 )
+            {
+               sprintf(tmp_str, "ROT_FAILED_%i_%s Doing ROT again", cpos, tmp_fname);
+               Proc_err ( INFO_OPT, "tmp_str", tmp_str);
+               strcat(janusinfostring, tmp_str);
+               ROT
+            }
+
+            shim_sample();
+            run_expts();
+            post_expt_actions();
+        }
+
+        if (skipsample != 0)
+        {
+            fclose( fprod );
+            Proc_err ( INFO_OPT, "trying to delete prod file.");
+            sprintf( tmp_str, "del %s", prodfiletxt );
+            fbat = fopen(batcmd, "w");
+            fputs( tmp_str, fbat);
+            fclose(fbat);
+            system(batcmd);
+            Proc_err ( INFO_OPT, "by running command %s", tmp_str);
+            flog = fopen(logfile, "a+");
+            fputs("Sample missing and skipped...\n", flog);
+            fclose( flog );
+        }
+
+        Proc_err ( INFO_OPT, "Waiting for sample...");
+    }
+
+    Show_status("Program aborted!");
+    return 0;
+}
+
+static void get_instrument_info(void)
+{
+    /*Get instrument and probe name*/
+    DATASET("junk", 1, 10, disk, user)
+    GETCURDATA
+    RPAR("PROTON", "all")
+    GETPROSOL
+    GETCURDATA
+    SETCURDATA
+    VIEWDATA_SAMEWIN
+    //Use not a lot of power on this probably untuned/absent sample
+    STOREPAR("P 1", 1.0)
+    STOREPAR("PLW 1", 0.01)
+    STOREPAR("NS", 1)
+    STOREPAR("DS", 0)
+    ZG_OVERWRITE
+    FETCHPARS("INSTRUM", instrum_name)
+    FETCHPARS("PROBHD", probe_name)
+    /*end of get instrument and probe name*/
+}
+
+static void set_instrument_defaults(void)
+{
+    /*initial gobal variables to change for each instrument*/
+    strcpy(def_file, "d:/chemist/defaults-csv.txt"); //janus software defaults
+    strcpy(interrupt_file_path, "d:\\chemist\\interrupt.csv");//location of interrupt file, if it exist, contains a list of commands
+    strcpy(changer_ip, "null");
+    strcpy(ts_arg, "none");
+    strcpy(test_parset, "PROTON"); //assume this is going to be ok
+    test_pos = 60;
+    protocol_pos_a = 59;
+    protocol_pos_b = 60;
+    strcpy(protocol_str_a, "POS59");
+    strcpy(protocol_str_b, "POS60");
+    global_atma_flag = 1; //if zero, never do atma  
+       
+    if (strcmp(instrum_name, "cragganmore") == 0) {
+       /*cragganmore dependent global variables!!!!!!*/
+       sprintf(def_file, "d:/chemist/defaults-csv.txt"); //janus software defaults file
+       sprintf(interrupt_file_path, "d:\\chemist\\interrupt.csv");//location of interrupt file, if it exist, contains a list of commands
+       sprintf(changer_ip, "NULL");
+       sprintf(ts_arg, " ordmax=5");
+       sprintf(test_parset, "PROTON"); //has got an untunable QNP probe
+       test_pos = 16;
+       global_atma_flag = 0; //if zero, never do atma  
+    }
+    else if (strcmp(instrum_name, "laphroiag") == 0) {
+       /*laphroiag dependent global variables!!!!!!*/
+       sprintf(def_file, "f:/chemist/defaults-csv.txt"); //janus software defaults file
+       sprintf(interrupt_file_path, "f:\\chemist\\interrupt.csv");//location of interrupt file, if it exist, contains a list of commands
+       sprintf(changer_ip, "NULL");
+       sprintf(ts_arg, "ordmax=5");
+       sprintf(test_parset, "PROTON"); //has got a broken probe and can only do 1H and 19F
+       test_pos = 60;
+       protocol_pos_a = 59;
+       protocol_pos_b = 60;
+       sprintf(protocol_str_a, "POS59");
+       sprintf(protocol_str_b, "POS60");
+       global_atma_flag = 0; //if zero, never do atma  
+    }
+    else if (strcmp(instrum_name, "tobermory") == 0) {
+       /*tobermory dependent global variables!!!!!!*/
+       sprintf(def_file, "d:/chemist/defaults-csv.txt"); //janus software defaults file
+       sprintf(interrupt_file_path, "d:\\chemist\\interrupt.csv");//location of interrupt file, if it exist, contains a list of commands
+       sprintf(changer_ip, "NULL");
+       sprintf(ts_arg, "ordmax=5");
+       sprintf(test_parset, "C13CPD");
+       test_pos = 96;
+       protocol_pos_a = 95;
+       protocol_pos_b = 96;
+       sprintf(protocol_str_a, "POS95");
+       sprintf(protocol_str_b, "POS96");
+       global_atma_flag = 0; //if zero, never do atma 
+    }
+    else if (strcmp(instrum_name, "lagavulin") == 0) {
+       sprintf(def_file, "f:/chemist/defaults-csv.txt"); //janus software defaults file
+       sprintf(interrupt_file_path, "f:\\chemist\\interrupt.csv");//location of interrupt file, if it exist, contains a list of commands
+       sprintf(changer_ip, "NULL");
+       sprintf(ts_arg, "ordmax=5");
+       sprintf(test_parset, "C13CPD");
+       test_pos = 60;
+       protocol_pos_a = 59;
+       protocol_pos_b = 60;
+       sprintf(protocol_str_a, "POS59");
+       sprintf(protocol_str_b, "POS60");
+       global_atma_flag = 1; //if zero, never do atma 
+    }
+    else if (strcmp(instrum_name, "glenfairn") == 0) {
+        /*glenfairn dependent global variables!!!!!!*/
+       sprintf(def_file, "d:/chemist/defaults-csv.txt"); //janus software defaults file
+       sprintf(interrupt_file_path, "d:\\chemist\\interrupt.csv");//location of interrupt file, if it exist, contains a list of commands
+       sprintf(changer_ip, "NULL");
+       sprintf(ts_arg, " ");
+       sprintf(test_parset, "C13CPD");
+       test_pos = 60;
+       protocol_pos_a = 59;
+       protocol_pos_b = 60;
+       sprintf(protocol_str_a, "POS59");
+       sprintf(protocol_str_b, "POS60");
+       global_atma_flag = 1; //if zero, never do atma 
+    }
+    else if (strcmp(instrum_name, "arran") == 0) {
+        /*arran dependent global variables!!!!!!*/
+       sprintf(def_file, "d:/chemist/defaults-csv.txt"); //janus software defaults file
+       sprintf(interrupt_file_path, "d:\\chemist\\interrupt.csv");//location of interrupt file, if it exist, contains a list of commands
+       sprintf(changer_ip, "NULL");
+       sprintf(ts_arg, "ordmax=5");
+       sprintf(test_parset, "C13CPD");
+       test_pos = 41;
+       protocol_pos_a = 59;
+       protocol_pos_b = 60;
+       sprintf(protocol_str_a, "POS59");
+       sprintf(protocol_str_b, "POS60");
+       global_atma_flag = 0; //if zero, never do atma 
+    }
+    else {
+        Proc_err ( INFO_OPT, "***Instrument is unknown - %s", instrum_name);
+    }
+    
+    Proc_err ( INFO_OPT, "***Instrument is %s", instrum_name);
+    Proc_err ( INFO_OPT, "***def_file - %s", def_file);
+    Proc_err ( INFO_OPT, "***interrupt_file_path - %s", interrupt_file_path);
+    Proc_err ( INFO_OPT, "***changer_ip - %s", changer_ip);
+    Proc_err ( INFO_OPT, "***ts_arg - %s", ts_arg);
+    Proc_err ( INFO_OPT, "***global_atma_flag - %i", global_atma_flag);
+}
+
+static void read_defaults_file(void)
+{
+    /*--------------------------------------------------------------*/
+    /*--- Get defaults from the defaults file ----------------------*/
+    strcpy( defaultsfile, def_file );
+    fdef = fopen( defaultsfile, "r" );
+    Proc_err ( INFO_OPT, "reading defaults");
+    strcpy( defaultsfile, def_file );
+    fdef = fopen( defaultsfile, "r" );
+    Proc_err( INFO_OPT, "reading defaults");
+    Proc_err ( INFO_OPT, "***file is not empty, so do something");
+    rewind(fdef); //go to begining of file
+    file_data = fgets(in_data, 1024, fdef); //read in file as a continuous string
+    fclose(fdef); //close the file
+    Proc_err ( INFO_OPT, "***parsing %s file", proclist);
+    //file is open, read data
+    field = strtok(in_data, ",");
+    strcpy( prefix, field);
+    Proc_err ( INFO_OPT, "***prefix is %s", prefix);
+    field = strtok(NULL, ",");
+    sscanf(field, "%s", diskunit);
+    Proc_err ( INFO_OPT, "***diskunit is %s", diskunit);
+    field = strtok(NULL, ",");
+    sscanf(field, "%s", suser);
+    Proc_err ( INFO_OPT, "***suser is %s", suser);
+    field = strtok(NULL, ",");
+    sscanf(field, "%s", tunefile);
+    Proc_err ( INFO_OPT, "***tunefile is %s", tunefile);
+    field = strtok(NULL, ",");
+    sscanf(field, "%s", shimset);
+    Proc_err ( INFO_OPT, "***shimset is %s", shimset);
+    field = strtok(NULL, ",");
+    sscanf(field, "%s", archpath);
+    Proc_err ( INFO_OPT, "***archpath is %s", archpath);
+    field = strtok(NULL, ",");
+    sscanf(field, "%s", archive);
+    Proc_err ( INFO_OPT, "***archive is %s", archive);
+    field = strtok(NULL, ",");
+    sscanf(field, "%s", gradshim);
+    Proc_err ( INFO_OPT, "***gradshim is %s", gradshim);
+    Proc_err ( INFO_OPT, "***parsed file");
+
+    Proc_err ( INFO_OPT, "finished reading defaults");
+    
+    /*--- Assign filenames for signalling etc.----------------------*/
+    /*set to be the diskunit, then a folder in that called the user usually chemist*/
+    sprintf(batfile, "%s%s\\janus-bat.bat", diskunit, suser);
+    sprintf(batcmd, "%s%s\\janus-bat.bat", diskunit, suser);
+    sprintf(prodfile, "%s%s\\prod.txt", diskunit, suser);
+    sprintf(prodfiletxt, "%s%s\\prod.txt", diskunit, suser);
+    sprintf(errorfile, "%s%s\\error.txt", diskunit, suser);
+    sprintf(warnfile, "%s%s\\warn.txt", diskunit, suser);
+    sprintf(waitfile, "%s%s\\wait.txt", diskunit, suser);
+    sprintf(protfile, "%s%s\\prot.txt", diskunit, suser);
+    sprintf(logfile, "%s%s\\jchlog.txt", diskunit, suser);
+    sprintf(januskillfile, "%s%s\\killjanus.txt", diskunit, suser);
+
+    Proc_err ( INFO_OPT, "%s", batfile);
+    Proc_err ( INFO_OPT, "%s", batcmd);
+    Proc_err ( INFO_OPT, "%s", prodfile);
+    Proc_err ( INFO_OPT, "%s", prodfiletxt);
+    Proc_err ( INFO_OPT, "%s", warnfile);
+    Proc_err ( INFO_OPT, "%s", waitfile);
+    Proc_err ( INFO_OPT, "%s", protfile);
+    Proc_err ( INFO_OPT, "%s", logfile);
+}
+
+static void check_janus_kill(void)
+{
+    if ( access(januskillfile, F_OK) == 0) // file found
+    {
+        Proc_err ( INFO_OPT, "Stopping kiosk mode!");
+        remove(januskillfile);  // get rid of the kil file!
+        XCMD("sendgui icon -start")   // start the IconNMR run 
+        sleep(5);
+        STOPMSG("janus finished, IconNMR started")
+    }
+}
+
+static void run_interrupt_tests(void)
+{
+    FILE *interrupt_file;
+    char line[1024];
+    char field2[256] = "";
+    char field3[256] = "";
+    char *token;
+    char dataset_name[PATH_MAX] = "";
+    int number;
+    int loop = 1;
+    
+    interrupt_file = fopen(interrupt_file_path, "r");
+    if (interrupt_file != NULL) 
+    {
+        // now make systest dataset
+        lt = time(NULL);
+        ltstruc = localtime(&lt);
+        sprintf(datestamp, "%d_%d_%d_%d_%d_%d", ltstruc->tm_year + 1900, ltstruc->tm_mon + 1, ltstruc->tm_mday, ltstruc->tm_hour, ltstruc->tm_min, ltstruc->tm_sec);
+        sprintf(dataset_name, "Systest_%s", datestamp);
+        DATASET(dataset_name, 10, 1, diskunit, suser);
+        Proc_err ( INFO_OPT, "***diskunit=%s", diskunit);
+        Proc_err ( INFO_OPT, "***disk=%s", disk);
+        SETCURDATA
+        VIEWDATA_SAMEWIN
+        RPAR(test_parset, "all")
+        GETPROSOL
+        
+        //Now get the test sample in
+        sprintf(tmp_cmd, "ii");
+        Proc_err ( INFO_OPT, "***tmp_cmd - %s", tmp_cmd);
+        AUERR = CPR_exec(tmp_cmd, WAIT_TERM);
+        if ( AUERR < 0 )
+        {
+            sprintf(tmp_str, "INITIAL_II_ERROR"); 
+            Proc_err ( INFO_OPT, "%s", tmp_str);
+            STOPMSG("Janus stopped - initial ii error")
+        }
+
+        sprintf(tmp_cmd, "sx %i", test_pos);
+        Proc_err ( INFO_OPT, "***tmp_cmd - %s", tmp_cmd);
+        AUERR = CPR_exec(tmp_cmd, WAIT_TERM);
+        if (strcmp(changer_ip, "NULL") != 0) {
+            sprintf(tmp_cmd, "wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", changer_ip);
+            system(tmp_cmd);
+        }
+        if ( AUERR < 0 )
+        {
+            if (strcmp(changer_ip, "NULL") != 0) {
+                XAU("parse_sexpress_web", "")
+            }
+            sprintf(tmp_str, "INTERRUPT_SAMPLE_SX_%i_ERROR", test_pos);
+        } 
+        else 
+        {
+            RPAR(test_parset, "all")
+            sleep(60);
+            sprintf(tmp_cmd, "atma storeWobb 700");
+            STOREPAR("RO", 0)
+            if ( (global_atma_flag != 0) ) 
+            {
+               Proc_err ( INFO_OPT, "***tmp_cmd - %s", tmp_cmd);
+               AUERR = CPR_exec(tmp_cmd, WAIT_TERM);
+               if ( AUERR < 0 )
+               {
+                   sprintf(tmp_str, "INTERRUPT_TEST_SAMPLE_ATMA_ERROR"); 
+                   XAU("whoopwhoop", tmp_str)
+                   STOPMSG("Janus stopped - initial atma error")
+               }
+            }
+            sprintf(tmp_cmd, "rsh %s", shimset);
+            Proc_err ( INFO_OPT, "***tmp_cmd - %s", tmp_cmd);
+            AUERR = CPR_exec(tmp_cmd, WAIT_TERM);
+            sprintf(tmp_cmd, "lock CD3CN");
+            Proc_err ( INFO_OPT, "***tmp_cmd - %s", tmp_cmd);
+            XCMD(tmp_cmd)
+            Proc_err ( INFO_OPT, "ts_arg - %s", ts_arg);
+            sprintf(tmp_cmd, "janus_topshim_watchdog TOPSHIM_FAILED_%s %s", name, ts_arg);
+            Proc_err ( INFO_OPT, "***tmp_cmd - %s, ts_arg - %s", tmp_cmd, ts_arg);
+            XCMD(tmp_cmd);
+            if (AUERR < 0)
+            {
+                XAU("whoopwhoop", tmp_cmd);
+            }
+            // keep first dataset with wobb curves in
+            IEXPNO;
+            //Ok, now to parse the interrupt file.
+            while (fgets(line, sizeof(line), interrupt_file)) 
+            {
+                // Skip comments
+                if (strncmp(line, "!!", 2) == 0) {
+                    continue; //exit out of while loop
+                }
+                // Remove newline if present
+                line[strcspn(line, "\n")] = 0;
+                // Initialize field count
+                int field_count = 0;
+                // Get first token
+                token = strtok(line, ",");
+                // Process all tokens
+                while (token != NULL && field_count < 3) {
+                    // Remove leading/trailing whitespace
+                    while (*token == ' ') token++;
+                    char *end = token + strlen(token) - 1;
+                    while (end > token && *end == ' ') end--;
+                    *(end + 1) = 0;
+                    
+                    // Process based on field number
+                    switch (field_count) {
+                        case 0:
+                            number = atoi(token);
+                            break;
+                        case 1:
+                            strncpy(field2, token, 255);
+                            field2[255] = '\0';
+                            break;
+                        case 2:
+                            strncpy(field3, token, 255);
+                            field3[255] = '\0';
+                            break;
+                    } //end of switch
+                    field_count++;
+                    token = strtok(NULL, ",");
+                } //end of token read while loop
+                sleep(number);
+                if (strstr(field3, "shim") != NULL) {
+                    sprintf(tmp_cmd, "janus_topshim_watchdog TOPSHIM_FAILED_%s %s", name, ts_arg);
+                    Proc_err ( INFO_OPT, "***tmp_cmd - %s", tmp_cmd);
+                    XCMD(tmp_cmd); 
+                }
+                if (strstr(field2, "poise_1h") != NULL) {
+                    expno = expno + 10;
+                    DATASET(dataset_name, expno, 1, diskunit, suser);
+                    GETCURDATA
+                    VIEWDATA_SAMEWIN
+                    sprintf(tmp_cmd, "atma storeWobb 700");
+                    sprintf(tmp_cmd, "poise_1h_p1_b2_01 %i", global_atma_flag);
+                    XCMD(tmp_cmd)
+                    XCMD("setdef ackn no");
+                    XCMD("setdef stdout on");
+                    XCMD("setdef stderr on");  
+                }
+                if (strstr(field2, "poise_13c") != NULL) {
+                    expno = expno + 10;
+                    DATASET(dataset_name, expno, 1, diskunit, suser);
+                    GETCURDATA
+                    VIEWDATA_SAMEWIN
+                    sprintf(tmp_cmd, "atma storeWobb 700");
+                    sprintf(tmp_cmd, "poise_13c_p1_b2_01 %i", global_atma_flag);
+                    XCMD(tmp_cmd)
+                    XCMD("setdef ackn no");
+                    XCMD("setdef stdout on");
+                    XCMD("setdef stderr on");
+                }
+                if (strstr(field2, "poise_31p") != NULL) {
+                    expno = expno + 10;
+                    DATASET(dataset_name, expno, 1, diskunit, suser);
+                    GETCURDATA
+                    VIEWDATA_SAMEWIN
+                    sprintf(tmp_cmd, "atma storeWobb 700");
+                    sprintf(tmp_cmd, "poise_31p_p1_b2_01 %i", global_atma_flag);
+                    XCMD(tmp_cmd)
+                    XCMD("setdef ackn no");
+                    XCMD("setdef stdout on");
+                    XCMD("setdef stderr on");
+                }
+                if (strstr(field2, "poise_19f") != NULL) {
+                    expno = expno + 10;
+                    DATASET(dataset_name, expno, 1, diskunit, suser);
+                    GETCURDATA
+                    VIEWDATA_SAMEWIN
+                    sprintf(tmp_cmd, "atma storeWobb 700");
+                    sprintf(tmp_cmd, "poise_19f_p1_b2_01 %i", global_atma_flag);
+                    XCMD(tmp_cmd)
+                    XCMD("setdef ackn no");
+                    XCMD("setdef stdout on");
+                    XCMD("setdef stderr on");
+                }
+                if (strstr(field2, "hump") != NULL) {
+                    expno = expno + 10;
+                    DATASET(dataset_name, expno, 1, diskunit, suser);
+                    GETCURDATA
+                    VIEWDATA_SAMEWIN
+                    sprintf(tmp_cmd, "atma storeWobb 700");
+                    Proc_err ( INFO_OPT, "***tmp_cmd - %s", tmp_cmd);
+                    sprintf(tmp_str, "%s %i", ts_arg, global_atma_flag);
+                    sprintf(tmp_cmd, "hump_sino_test_b2_01 %s", tmp_str);
+                    XCMD(tmp_cmd)
+                    XCMD("setdef ackn no");
+                    XCMD("setdef stdout on");
+                    XCMD("setdef stderr on");
+                }
+                loop++;
+            } //end of reading interrupt.csv while loop
+        }
+        fclose(interrupt_file);
+        sprintf( tmp_str, "del %s", interrupt_file_path );
+        Proc_err ( INFO_OPT, "tmp_str", tmp_str);
+        fbat = fopen(batcmd, "w");
+        fputs( tmp_str, fbat);
+        fclose(fbat);
+        system(batcmd);
+        Proc_err (INFO_OPT, "ran all those commands in %s", interrupt_file_path);
+    }
+    if (strcmp(changer_ip, "null") != 0){
+       XAU("parse_sexpress_web", "")
+    }
+}
+
+static void insert_sample(void)
+{
+    sprintf( tmp_cmd, "sx %d", cpos);
+    Proc_err ( INFO_OPT, "***tmp_cmd - %s", tmp_cmd);
+    AUERR = CPR_exec(tmp_cmd, WAIT_TERM);
+    sprintf(tmp_str, "%s\n", tmp_cmd);
+    strcat(janusinfostring, tmp_str);
+    if (strcmp(changer_ip, "NULL") != 0) {
+       sprintf(tmp_cmd, "wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", changer_ip);
+       system(tmp_cmd);
+    }
+    /* initialse sample info string:*/
+    sprintf(sampleinfostring, "Problems occurred while running this sample:\n");
+    sampleproblem = 0;
+
+    if ( AUERR < 0 )
+    {
+        sprintf( hdwerr, "SAMPLE CHANGER ERROR! Error: %d, trying again...\n", AUERR);
+        flog = fopen(logfile, "a+");
+        fputs( hdwerr, flog);
+        fclose( flog );
+        sleep( 60 );
+        sprintf(sxcmd, "sx %d ", cpos);
+        sprintf(tmp_str, "%s\n", sxcmd);
+        strcat(janusinfostring, tmp_str);
+        Proc_err ( INFO_OPT, "***sxcmd - %s", sxcmd);
+        AUERR = CPR_exec(sxcmd, WAIT_TERM);
+        if (strcmp(changer_ip, "NULL") != 0) {
+           sprintf(tmp_cmd, "wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", changer_ip);
+           system(tmp_cmd);
+        }
+    }
+    if ( AUERR < 0 )
+    {
+      sprintf(statusstr, "***Warning - could not find samples(%d)***", AUERR);
+      Show_status(statusstr );
+      fwarn = fopen( warnfile, "w" );
+      sprintf( hdwerr, "Could not find sample: %d\n", AUERR);
+      fputs( hdwerr, fwarn );
+      fclose( fwarn );
+      flog = fopen(logfile, "a+");
+      fputs( hdwerr, flog);
+      fclose( flog );
+      skipsample = 1;
+      if (strcmp(changer_ip, "NULL") != 0) 
+      {
+         sprintf(tmp_cmd, "wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", changer_ip);
+         system(tmp_cmd);
+         XAU("parse_sexpress_web", "")
+      }
+      sprintf(tmp_str, "SX_INSERT_ERROR_%i_%s", cpos, tmp_fname);
+      XAU("whoopwhoop", tmp_str)
+    }
+    if (strcmp(changer_ip, "NULL") != 0) {
+        XAU("parse_sexpress_web", "")
+    }
+}
+
+static void lock_solvent(void)
+{
+    sprintf(tmp_cmd, "lock %s", solvent);
+    Proc_err ( INFO_OPT, "***tmp_cmd -%s", tmp_cmd);
+    sprintf(tmp_str, "%s\n", tmp_cmd);
+    strcat(janusinfostring, tmp_str);
+    AUERR = CPR_exec(tmp_cmd, WAIT_TERM );
+    if ( AUERR < 0 )
+    {
+        II;
+        sleep(30);
+        AUERR = CPR_exec(tmp_cmd, WAIT_TERM );
+    }
+
+    if ( AUERR < 0 )
+    {
+        sprintf(tmp_str, "FAILED_TO_LOCK_%s_%i_%s", solvent, cpos, tmp_fname);
+        sampleproblem = 1;
+        int z;
+        GETBSMSVAL(BSN_Z, z)
+        z += 400;
+        PUTBSMSVAL(BSN_Z, z)
+        sleep(5);
+        AUERR = CPR_exec(tmp_cmd, WAIT_TERM );
+        if ( AUERR == 0 )
+        {
+            strcat(sampleinfostring, "\n Lock failed initially - probably due to long sample. Consider reducing the amount of solvent used - 600 microlitres / 4.5cm filling height is enough, and for standard (undamaged) 7 inch tubes you can remove as much as is possible with the standard 230mm glass pipettes if you put too much in. \n Talk to the service team if any questions!");
+        }
+    }
+}
+
+static void tune_sample(void)
+{
+    sprintf(tmp_str, "protocol - %s, experiment - % s, ATMA\n", protocol, experiment);
+    strcat(janusinfostring, tmp_str);
+    if ( strstr ( protocol, "19F") != NULL )
+    {
+        RPAR("F19CPD", "all")
+        ATMAflag = 0;
+    }
+    else if ( strstr ( protocol, "31P") != NULL )
+    {
+        RPAR("P31CPD", "all")
+        ATMAflag = 0;
+    }
+    else if ( strstr ( protocol, "13C") != NULL )
+    {
+        RPAR("C13CPD", "all")
+        ATMAflag = 0;
+    }
+    else if ( strstr ( protocol, "11B") != NULL )
+    { 
+        sprintf(boronparset, "j-11B-bs-%s", instrum_name);
+        RPAR(boronparset, "all")
+        ATMAflag = 0;
+    }
+    
+    if ( (strstr ( experiment, "2h") == NULL) && (strstr ( experiment, "2H") == NULL)) 
+    {
+       if ( ((ATMAflag == 0) && (global_atma_flag != 0)) || (strcmp(instrum_name, "tobermory") == 0) ) 
+       {
+            sprintf(tmp_str, "protocol - %s, experiment - % s, ATMA\n", protocol, experiment);
+            strcat(janusinfostring, tmp_str);
+            strcat(janusinfostring, "ATMA");
+            ATMA
+            if ( AUERR < 0 )
+            {
+                sprintf(tmp_str, "ATMA_ERROR_%i_%s", cpos, tmp_fname);
+                Proc_err ( INFO_OPT, "tmp_str", tmp_str);
+                XAU("whoopwhoop", tmp_str)
+                sampleproblem = 1;
+                strcat(sampleinfostring, "\n ATMA failed - does your sample have high ionic strength? \n Check with NMR service team about whether medium or thick wall tubes are more appropriate for similar samples. \n");
+            }
+       }
+    }
+}
+
+static void shim_sample(void)
+{
+    sprintf(tmp_cmd, "janus_topshim_watchdog TOPSHIM_FAILED_%s_%i %s", tmp_fname, cpos, ts_arg);
+    Proc_err ( INFO_OPT, "***tmp_cmd - %s", tmp_cmd);
+    sprintf(tmp_str, "%s\n", tmp_cmd);
+    strcat(janusinfostring, tmp_str);
+    XCMD(tmp_cmd);
+    if (AUERR < 0)
+    {
+        if (sampleproblem == 1)
+        {
+            XAU("whoopwhoop", tmp_cmd);
+            sprintf(tmp_str, "\n Failed to lock: check sample is clear, sample filling is >40mm, solvent is deuterated\n Solvent is listed as %s, if this is not as expected there is probably a rogue character in the Sample ID such as a comma.\n In this case resubmit with correct Sample ID- only letters, numbers, underscores, dashes and full stops allowed. \n \n", solvent);
+            strcat(sampleinfostring, tmp_str);
+        }
+        strcat(sampleinfostring, "Failed to shim: check spectrum quality - lineshape may be bad. Check sample is clear, check sample filling is >40mm, check for precipitate at the bottom.\n");
+        sampleproblem = 1;
+    }
+    else
+    {
+        if (sampleproblem == 1)
+        {
+            sprintf(tmp_str, "\n Sample failed to lock, but shimmed OK: check spectrum is OK and shfts are sensible.\n Solvent is listed as %s, if this is not as expected there is probably a rogue character in the Sample ID such as a comma.\n In this case if necessary resubmit with correct Sample ID- only letters, numbers, underscores, dashes and full stops allowed", solvent);
+            strcat(sampleinfostring, tmp_str);
+        }
+    }
+}
+
+static void run_expts(void)
+{
+    nexpt = 10;
+    while ((fgets( experiment, 155, fprod) != NULL) && (strlen(experiment) > 2))
+    {
+        experiment[strlen(experiment)-1] = '\0';
+        sprintf(statusstr, "Sample: %s, Expt: %s, solvent: %s", oi, experiment, solvent);
+        sprintf(tmp_str, "%s\n", statusstr);
+        strcat(janusinfostring, tmp_str);
+        Show_status(statusstr );
+        sleep(delaytime);
+        DATASET ( tmp_fname, nexpt, 1, diskunit, suser)
+        GETCURDATA
+        RPAR( experiment, "all" )
+        GETCURDATA
+        STOREPAR( "SOLVENT", solvent )
+        GETPROSOL
+        
+        if ( (strstr ( experiment, "2h") == NULL) && (strstr ( experiment, "2H") == NULL)) 
+        {
+            if ( (strstr ( experiment, "janus-1h") == NULL) && (ATMAflag == 1) && (global_atma_flag != 0) ) 
+            {
+                strcat(janusinfostring, "ROTOFF \n");
+                ROTOFF
+                sprintf(tmp_cmd, "atma storewobb 700");
+                sprintf(tmp_str, "%s\n", tmp_cmd);
+                strcat(janusinfostring, tmp_str);
+                Proc_err ( INFO_OPT, "***tmp_cmd - %s", tmp_cmd);
+                AUERR = CPR_exec(tmp_cmd, WAIT_TERM);
+                if ( AUERR < 0 )
+                {
+                    sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd, cpos, tmp_fname);
+                    XAU("whoopwhoop", tmp_str)
+                    sampleproblem = 1;
+                    strcat(sampleinfostring, "\n ATMA failed - does your sample have high ionic strength? \n Check with NMR service team about whether medium or thick wall tubes are more appropriate for similar samples.");
+                    strcat(janusinfostring, "ROT \n");
+                    ROT
+                }
+            }
+            else
+            { 
+               sprintf(tmp_str, "%s\n", tmp_cmd);
+               strcat(janusinfostring, "atma nowin selectnuc\n");
+               XCMD("atma nowin selectnuc")
+            }
+        }
+        
+        sprintf( titlefile, "%s%s/%s/%d/pdata/1/title", diskunit, user, tmp_fname, nexpt );
+        ftitle = fopen( titlefile, "w" ); 
+        fputs ( " ", ftitle );
+        fclose ( ftitle );
+        
+        sprintf(tmp_cmd, "xaua");
+        sprintf(tmp_str, "%s\n", tmp_cmd);
+        strcat(janusinfostring, tmp_str);
+        Proc_err ( INFO_OPT, "***tmp_cmd - %s", tmp_cmd);
+        XCMD("setdef ackn no");
+        AUERR = CPR_exec(tmp_cmd, WAIT_TERM);
+        if ( AUERR < 0 )
+        {
+            Show_status( "***Acquisition failed***" );
+            fwarn = fopen(warnfile, "w");
+            fputs( "Acquisition failed", fwarn);
+            fclose( fwarn );
+            flog = fopen(logfile, "a+");
+            fputs( "ACQUISITION FAILED!\n", flog);
+            fclose( flog );
+            sprintf(tmp_str, "%s_ERROR_%i_%s", tmp_cmd, cpos, tmp_fname);
+            XAU("whoopwhoop", tmp_str)
+            STOPMSG("XAUA Failed. Maybe check IPSO")
+        }
+        
+        lt = time(NULL);
+        sprintf(expttime, ctime(&lt));
+        expttime[strlen(expttime)-1] = '\0';
+        sprintf(janusup, "%s%s\\jup.txt", diskunit, suser);
+        Show_status( "opening local janusup to append");
+        sleep(delaytime);
+        fjup = fopen(janusup, "a+");
+        sprintf( tmp_str, "%s,%d,%s,%s,%s,%s,%d,%s,%s\n", tmp_fname, nexpt, oi, juser, solvent, experiment, cpos, expttime, protocol);
+        fputs( tmp_str, fjup);
+        fclose( fjup );
+        
+        sprintf( titlefile, "%s%s/%s/%d/pdata/1/title", diskunit, user, tmp_fname, nexpt );
+        ftitle = fopen( titlefile, "a" );
+        sprintf( titletext, "%s\n%s\n%s\n%s\n%s\nPosition: %d\n%s", tmp_fname, oi, juser, experiment, solvent, cpos, comments );
+        fputs ( titletext, ftitle );
+        fclose ( ftitle );
+        
+        sprintf( samplename, "%s", oi );
+        for( i = 0; i < strlen(samplename); i++ )
+        {
+            if( samplename[i] == '\\' || samplename[i] == '/' || samplename[i] == ':' || samplename[i] == '*' ||
+                samplename[i] == '?' || samplename[i] == '\"' || samplename[i] == '<' || samplename[i] == '>' ||
+                samplename[i] == '#' || samplename[i] == '$' || samplename[i] == '%' || samplename[i] == '^' || samplename[i] == '&' ||
+                samplename[i] == '=' || samplename[i] == '+' || samplename[i] == ' ' ||
+                samplename[i] == '(' || samplename[i] == ')' || samplename[i] == '{' || samplename[i] == '}' || samplename[i] == '[' ||
+                samplename[i] == ']' || samplename[i] == ';' || samplename[i] == '@' || samplename[i] == '~' || samplename[i] == '!' || samplename[i] == '`')
+                {
+                    samplename[i] = '_';
+                }
+        }
+        sprintf(snamefile, PROCPATH("samplename"));
+        sname = fopen(snamefile, "w");
+        fprintf(sname, "%s", samplename);
+        fclose(sname);
+        STOREPAR("USERP2", samplename);
+        
+        FETCHPAR ("AUNMP", &procau)
+        if(strcmp(procau, "janus_splitx_au") == 0)
+        {
+            CPR_exec(procau, WAIT_TERM);
+        }
+        else
+        {
+           if ( nexpt == 10 )
+           {
+                XCMD("service-def-proc")
+           }
+        }
+        
+        STOREPAR("USERP5", comments);
+        if (strchr(comments, '@') == NULL)
+        {
+            sprintf(comments, "%s", email);
+        }
+
+        if (strchr(comments, '@') != NULL)
+        {
+            STOREPAR("USERP1", comments);
+        }
+        nexpt++;
+    }
+}
+
+static void post_expt_actions(void)
+{
+    fclose(fprod);
+    LastSample = FALSE;
+    
+    strcpy(reportdest, ACQUPATH("topshim_report.txt"));
+    sprintf(reportsource, "%s/%s/topshim_report.txt", PathXWinNMRProg(), PathXWinNMRCurDir());
+    dircp(reportsource, reportdest);
+    
+    if ( access(waitfile, R_OK) != 0)
+    {
+        AUERR = CPR_exec("sx ej", WAIT_TERM);
+        if (strcmp(changer_ip, "NULL") != 0) {
+            sprintf(tmp_cmd, "wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", changer_ip);
+            system(tmp_cmd);
+        }
+        
+        if ( AUERR < 0 )
+        {
+            if (strcmp(changer_ip, "NULL") != 0) {
+                XAU("parse_sexpress_web", "")
+            }
+            sprintf(tmp_cmd, "SX_EJECT_ERROR_%i_%s", cpos, tmp_fname);
+            XAU("whoopwhoop", tmp_cmd)
+            STOPMSG(tmp_cmd)
+        }
+        if (strcmp(changer_ip, "NULL") != 0) 
+        {
+            XAU("parse_sexpress_web", "")
+        } 
+        LastSample = TRUE;
+        sleep( delaytime );
+    }
+    
+    sprintf(pulsecalfilename, "%s\\%s\\pulsecal", disk, name);
+    if ((pulsecalfile = fopen(pulsecalfilename, "r")) != 0)
+    {
+        if( fgets(pulsecalcontent, 128, pulsecalfile) != NULL)
+        {
+            sscanf(pulsecalcontent, "%f %f", &p1, &statusp1);
+            if (p1/statusp1 > 1.5)
+            {
+                sampleproblem = 1;
+                sprintf(pulsecalerror, "\n Measured proton pulse %.2fus is more than 50%% longer than the reference pulse length %.2fus - data quality may be compromised.\n Does your sample have high ionic strength?\n Please talk to the NMR service team about whether medium or thick wall tubes are more suitable for similar samples. \n \n", p1, statusp1);
+                strcat(sampleinfostring, pulsecalerror);
+            }
+        } 
+        fclose(pulsecalfile);
+    } 
+    
+    if(sampleproblem == 1)
+    {
+        strcat(sampleinfostring, "\n Please contact the NMR service team in case of any questions! \n nmr@ch.cam.ac.uk");
+        strcpy(sampleinfofile, ACQUPATH("SampleProblems.txt"));
+        sampleinfo = fopen (sampleinfofile, "w");
+        if (sampleinfo == NULL)
+        {
+            Proc_err(INFO_OPT, "Can't open %s to write sample problem info", sampleinfofile);
+        } else
+        {
+            fputs(sampleinfostring, sampleinfo);
+            fclose(sampleinfo);
+        }
+    }
+    
+    strcpy(janusinfofile, ACQUPATH("/../janus_commands_run.txt"));
+    janusinfo = fopen (janusinfofile, "w");
+    if (janusinfo == NULL)
+    {
+        Proc_err(INFO_OPT, "Can't open %s to write janus command/status - %s", janusinfofile);
+    } else
+    {
+        fputs(janusinfostring, janusinfo);
+        fclose(janusinfo);
+    }
+    
+    sprintf(tmp_cmd, "janus-email %s", def_file);
+    XCMD(tmp_cmd);
+    
+    XCMD("setdef ackn no");
+    
+    sprintf( tmp_cmd, "7za a  %s\\topshimData_%s_%i.zip C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData\\ > nul", ACQUPATH(0), name, expno, ts_major, ts_minor, ts_patch);
+    Proc_err(INFO_OPT, tmp_cmd);
+    system(tmp_cmd); 
+    
+    sprintf( tmp_str, "del %s", prodfiletxt );
+    fbat = fopen(batcmd, "w");
+    fputs( tmp_str, fbat);
+    fclose(fbat);
+    system(batcmd);
+    
+    flog = fopen(logfile, "a+");
+    fputs( "Sample completed...\n", flog);
+    fclose( flog );
+}

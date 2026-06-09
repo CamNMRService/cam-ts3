@@ -112,7 +112,7 @@ static void post_expt_actions(void);
 int run_janus (const char *curdat)
 
 {
-    strcpy(curdat, my_curdat);
+    //strcpy(curdat, my_curdat);
     /* initialse sample info string:*/
     sprintf(sampleinfostring, "Problems occurred while running this sample:\n");
     sampleproblem = 0;

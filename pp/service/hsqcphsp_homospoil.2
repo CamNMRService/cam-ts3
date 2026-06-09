@@ -33,7 +33,7 @@
 "DELTA=d0*2+p44"
 "DELTA1=d4-p16-d16-(p14/2)"
 "DELTA2=d4-p16-d16-p3-de-(p1*2/3.14159)-51u-(p14/2)"
-
+"DELTA5=p3"
 1 ze 
   d11 pl12:f2
 2 d11 do:f2
@@ -89,7 +89,22 @@
   d16
   50u BLKGRAD
   DELTA2 pl2:f2
-  (p3 ph10):f2
+# ifndef nopurge 
+# ifdef oddpurge
+   if "nsdone %2 == 0"
+     {
+     (p3 ph10):f2
+     }
+  else
+     {
+     DELTA5
+     }
+# else
+ (p3 ph10):f2
+# endif
+# else
+ DELTA5
+# endif
   1u pl12:f2 
   go=2 ph31 cpd2:f2 
   d11 do:f2 mc #0 to 2 F1PH(calph(ph6, +90) & calph(ph9, +90), caldel(d0, +in0))

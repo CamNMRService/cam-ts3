@@ -22,7 +22,6 @@ fi
 
 HOME="/home/$(whoami)"
 LOCALDIR="$HOME/nmr-in/"
-IGNORE="$HOME/scripts/ignore"
 
 # --- INTERACTIVE PROMPTS ---
 changetime_hours=$1
@@ -49,6 +48,20 @@ fi
 echo "Finding and copying $changetime_hours hours of data..."
 mkdir -p "$LOCALDIR"
 
+# --- EMBEDDED IGNORE LIST ---
+IGNORE_FILE="/tmp/nmr_ignore_$$"
+cat << 'EOF' > "$IGNORE_FILE"
+1i
+1r
+2rr
+2ri
+2ir
+2ii
+3rrr
+dsp
+dsp.hdr
+EOF
+
 # --- MOUNT PROCESS ---
 if command -v gio &> /dev/null; then
     echo "Mounting network share..."
@@ -70,6 +83,7 @@ fi
 if [ -z "$MOUNT" ] || [ ! -d "$MOUNT" ]; then
     echo "Error: Could not mount or locate the network directory."
     echo "Please verify your network connection, username, domain, and password."
+    rm -f "$IGNORE_FILE"
     exit 1
 fi
 
@@ -90,11 +104,14 @@ for share_path in \
     if cd "$REMOTEDIR" 2>/dev/null; then
         echo "Copying from :- $REMOTEDIR"
         # FIXED: -maxdepth 1 is now placed before -cmin
-        find . -maxdepth 1 -cmin -"$changetime_minutes" \( ! -iname ".*" \) -exec rsync --progress -za --exclude-from="$IGNORE" '{}' "$LOCALDIR" ';'
+        find . -maxdepth 1 -cmin -"$changetime_minutes" \( ! -iname ".*" \) -exec rsync --progress -za --exclude-from="$IGNORE_FILE" '{}' "$LOCALDIR" ';'
     else
         echo "Warning: Could not access $REMOTEDIR (Skipping)"
     fi
 done
+
+# --- CLEANUP ---
+rm -f "$IGNORE_FILE"
 
 if command -v spd-say &> /dev/null; then
     spd-say "Data transfer complete."

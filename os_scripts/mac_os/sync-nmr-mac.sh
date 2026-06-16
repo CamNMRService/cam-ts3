@@ -2,7 +2,9 @@
 
 # --- CONFIGURATION ---
 # Replace UNDEFINED with your actual username (e.g., djh35)
-USERNAME="UNDEFINED"
+USERNAME="djh35"
+# Optional: If your network requires a domain (e.g., ad), enter it below. Leave blank if not.
+DOMAIN="ad"
 
 # --- USERNAME CHECK ---
 if [ "$USERNAME" = "UNDEFINED" ]; then
@@ -20,7 +22,6 @@ fi
 
 HOME="/Users/$(whoami)"
 LOCALDIR="$HOME/nmr-in/"
-IGNORE="$HOME/scripts/ignore"
 
 # --- INTERACTIVE PROMPTS ---
 changetime_hours=$1
@@ -30,26 +31,47 @@ if [ -z "$changetime_hours" ]; then
     read -p "Enter the number of hours of data to copy: " changetime_hours
 fi
 
-# Ensure hours is actually a number
 if ! [[ "$changetime_hours" =~ ^[0-9]+$ ]]; then
     echo "Error: Hours must be a whole number."
     exit 1
 fi
 
 if [ -z "$PASSWORD" ]; then
-    # -s hides the typing for security
-    read -s -p "Enter your password for $USERNAME: " PASSWORD
+    if [ -n "$DOMAIN" ]; then
+        read -s -p "Enter your password for ${DOMAIN}\\${USERNAME}: " PASSWORD
+    else
+        read -s -p "Enter your password for $USERNAME: " PASSWORD
+    fi
     echo "" 
 fi
 
 echo "Finding and copying $changetime_hours hours of data..."
 mkdir -p "$LOCALDIR"
 
-# Mount the drive using the dynamic username and password variables
-open "smb://${USERNAME}:${PASSWORD}@nmr-current.ch.private.cam.ac.uk/NMRshares"
+# --- EMBEDDED IGNORE LIST ---
+IGNORE_FILE="/tmp/nmr_ignore_$$"
+cat << 'EOF' > "$IGNORE_FILE"
+1i
+1r
+2rr
+2ri
+2ir
+2ii
+3rrr
+dsp
+dsp.hdr
+EOF
+
+# Construct URL correctly using a semicolon if a domain is specified
+if [ -n "$DOMAIN" ]; then
+    SMB_URI="smb://${DOMAIN};${USERNAME}:${PASSWORD}@nmr-current.ch.private.cam.ac.uk/NMRshares"
+else
+    SMB_URI="smb://${USERNAME}:${PASSWORD}@nmr-current.ch.private.cam.ac.uk/NMRshares"
+fi
+
+open "$SMB_URI"
 sleep 10
 
-# Convert hours to minutes for accurate find targeting
 changetime_minutes=$((changetime_hours * 60))
 
 for share_path in \
@@ -66,10 +88,13 @@ for share_path in \
     
     if cd "$REMOTEDIR" 2>/dev/null; then
         echo "Copying from :- $REMOTEDIR"
-        find . -cmin -"$changetime_minutes" -maxdepth 1 \( ! -iname ".*" \) -exec rsync --progress -za --exclude-from="$IGNORE" '{}' "$LOCALDIR" ';'
+        find . -cmin -"$changetime_minutes" -maxdepth 1 \( ! -iname ".*" \) -exec rsync --progress -za --exclude-from="$IGNORE_FILE" '{}' "$LOCALDIR" ';'
     else
         echo "Warning: Could not access $REMOTEDIR (Is it mounted?)"
     fi
 done
+
+# --- CLEANUP ---
+rm -f "$IGNORE_FILE"
 
 say -v Trinoids "Data transfer complete."

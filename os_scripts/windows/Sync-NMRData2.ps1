@@ -37,7 +37,11 @@ if (-not $PlainPassword) {
 }
 
 $LocalDir = "$HOME\nmr-in"
-$IgnoreFile = "$HOME\scripts\ignore"
+
+# --- EMBEDDED IGNORE LIST ---
+# Using Regular Expressions natively supports the exact names as well as the "*.zip" wildcard
+#$IgnoreRegex = "^(1i|1r|2rr|2ri|2ir|2ii|3rrr|dsp|dsp\.hdr|.*\.zip)$"
+$IgnoreRegex = "^(1i|1r|2rr|2ri|2ir|2ii|3rrr|dsp|dsp\.hdr)$"
 
 if (-not (Test-Path $LocalDir)) { New-Item -ItemType Directory -Path $LocalDir | Out-Null }
 
@@ -48,9 +52,6 @@ $NetworkPath = "\\nmr-current.ch.private.cam.ac.uk\NMRshares"
 net use $NetworkPath $PlainPassword /user:$Username *>$null
 
 $CutoffDate = (Get-Date).AddHours(-$ChangetimeHours)
-
-$IgnoreList = @()
-if (Test-Path $IgnoreFile) { $IgnoreList = Get-Content $IgnoreFile }
 
 $Shares = @(
     "aberlour\nmrservice\nmr",
@@ -72,7 +73,7 @@ foreach ($Share in $Shares) {
         Get-ChildItem -Path $RemoteDir | Where-Object {
             $_.LastWriteTime -gt $CutoffDate -and 
             $_.Name -notlike ".*" -and
-            $IgnoreList -notcontains $_.Name
+            $_.Name -notmatch $IgnoreRegex
         } | ForEach-Object {
             $Item = $_
             

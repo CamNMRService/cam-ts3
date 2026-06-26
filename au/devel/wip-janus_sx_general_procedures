@@ -1,10 +1,11 @@
 #include <inc/bsms_program>    /* must be the first statement ****/
 
-AUERR = run_janus(curdat, cmd);
+AUERR = run_janus(curdat);
 QUIT
 
 /*-----------------------------------------------------------------*/
 /*--- Global Variables (File-scope Static) ------------------------*/
+/*--- Some initial defaults set------------------------------------*/
 /*-----------------------------------------------------------------*/
 static char    instrum_name[255] = "spect";
 static char    probe_name[255] = "unknown";
@@ -53,8 +54,7 @@ static FILE    *pulsecalfile = NULL;
 static float   p1, statusp1;
 
 static char    *env_name, *file_data, *field, *ed;
-static FILE    *fprod = NULL, *facqu = NULL;
-static FILE    *ferror = NULL, *fwarn = NULL;
+static FILE    *fprod = NULL, *facqu = NULL, *ferror_fp = NULL, *fwarn = NULL;
 static FILE    *fshim = NULL, *fwait = NULL, *ftitle = NULL, *fsx = NULL;
 static FILE    *fexpt = NULL, *fprot = NULL, *flog = NULL, *fdef = NULL;
 static FILE    *fjup = NULL, *fexpts = NULL, *pidfile = NULL, *fawm = NULL;
@@ -88,9 +88,9 @@ static char    testdata[256];
 static char    curdat[PATH_MAX];
 
 /*-----------------------------------------------------------------*/
-/*--- Subroutine Prototypes ---------------------------------------*/
+/*--- Proceedure definitions --------------------------------------*/
 /*-----------------------------------------------------------------*/
-static int  run_janus(const char* my_curdat, const char* my_cmd);
+//static int  run_janus(const char* my_curdat; //don't need this, compiler fails
 static void get_instrument_info(void);
 static void set_instrument_defaults(void);
 static void read_defaults_file(void);
@@ -104,12 +104,18 @@ static void run_expts(void);
 static void post_expt_actions(void);
 
 /*-----------------------------------------------------------------*/
-/*--- Subroutine Implementations ----------------------------------*/
+/*--- Proceedures from   here on ----------------------------------*/
 /*-----------------------------------------------------------------*/
 
-static int run_janus(const char* my_curdat, const char* my_cmd)
+//** Main janus loop
+
+int run_janus (const char *curdat)
+
 {
-    strcpy(curdat, my_curdat);
+    //strcpy(curdat, my_curdat);
+    /* initialse sample info string:*/
+    sprintf(sampleinfostring, "Problems occurred while running this sample:\n");
+    sampleproblem = 0;
 
     ts_major = GetTsVersionMajor();
     ts_minor = GetTsVersionMinor();
@@ -171,9 +177,9 @@ static int run_janus(const char* my_curdat, const char* my_cmd)
             }
             Proc_err ( INFO_OPT, "***ERROR - No data on line***" );
             sleep( delaytime );
-            ferror = fopen(errorfile, "w");
-            fputs("Prod file format error", ferror);
-            fclose( ferror );
+            ferror_fp = fopen(errorfile, "w");
+            fputs("Prod file format error", ferror_fp);
+            fclose( ferror_fp );
             flog = fopen(logfile, "a+");
             fputs("PROD FILE ERROR\n", flog);
             fclose( flog );
@@ -301,9 +307,11 @@ static int run_janus(const char* my_curdat, const char* my_cmd)
     return 0;
 }
 
+//** end of main janus loop
+
 static void get_instrument_info(void)
 {
-    /*Get instrument and probe name*/
+    //**Get instrument and probe name
     DATASET("junk", 1, 10, disk, user)
     GETCURDATA
     RPAR("PROTON", "all")
@@ -319,12 +327,12 @@ static void get_instrument_info(void)
     ZG_OVERWRITE
     FETCHPARS("INSTRUM", instrum_name)
     FETCHPARS("PROBHD", probe_name)
-    /*end of get instrument and probe name*/
+    
 }
 
 static void set_instrument_defaults(void)
 {
-    /*initial gobal variables to change for each instrument*/
+    //**initial (global) variables to change for each instruments
     strcpy(def_file, "d:/chemist/defaults-csv.txt"); //janus software defaults
     strcpy(interrupt_file_path, "d:\\chemist\\interrupt.csv");//location of interrupt file, if it exist, contains a list of commands
     strcpy(changer_ip, "null");
@@ -430,8 +438,7 @@ static void set_instrument_defaults(void)
 
 static void read_defaults_file(void)
 {
-    /*--------------------------------------------------------------*/
-    /*--- Get defaults from the defaults file ----------------------*/
+    //**--- Get defaults from the defaults file
     strcpy( defaultsfile, def_file );
     fdef = fopen( defaultsfile, "r" );
     Proc_err ( INFO_OPT, "reading defaults");
@@ -497,6 +504,7 @@ static void read_defaults_file(void)
 
 static void check_janus_kill(void)
 {
+    //** If there is a januskillfile, stop janus and start iconnmr
     if ( access(januskillfile, F_OK) == 0) // file found
     {
         Proc_err ( INFO_OPT, "Stopping kiosk mode!");
@@ -509,6 +517,7 @@ static void check_janus_kill(void)
 
 static void run_interrupt_tests(void)
 {
+    //** If there is a interrupt file, stop what we're doing and run whats in the interrupt file (usually tests)
     FILE *interrupt_file;
     char line[1024];
     char field2[256] = "";
@@ -717,6 +726,7 @@ static void run_interrupt_tests(void)
 
 static void insert_sample(void)
 {
+    //** Put the sample in
     sprintf( tmp_cmd, "sx %d", cpos);
     Proc_err ( INFO_OPT, "***tmp_cmd - %s", tmp_cmd);
     AUERR = CPR_exec(tmp_cmd, WAIT_TERM);
@@ -726,9 +736,6 @@ static void insert_sample(void)
        sprintf(tmp_cmd, "wget -q -t 1 http://%s/ewp/device/main/Changer_Overview/ -O C:\\Bruker\\Diskless\\prog\\logfiles\\sexpress-index.html", changer_ip);
        system(tmp_cmd);
     }
-    /* initialse sample info string:*/
-    sprintf(sampleinfostring, "Problems occurred while running this sample:\n");
-    sampleproblem = 0;
 
     if ( AUERR < 0 )
     {

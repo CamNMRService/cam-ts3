@@ -1,25 +1,26 @@
 //topshim_watchdog
 //AU program to run topshim, and kill it after a while if not done.
-//if it fails or is killed move the topshimdata
-//to a folder with the name of the current experiment
+//Data always copied to a folder with the name of the current experiment
 //So that you can look at the data and see what might have gone wrong
 
-//ptg 2022/03/08 correct path to curdir for lock file, and properly get it to delete file - argument is file path not FILE pointer
-//djh35 2022/09/20 Add option to send messsage according to commandline option
-//do output to correct version directory
+// Calling option for this AU program:
+// If 1 argument, this is taken as a message (no spaces allowed as this is argument separator!)
+// If more than 1 argument, the others should be taken as topshim options
 
-//ptg 2023_03_07 temporarily disable emailing as we get too many!!
-//djh 2023_04_18 - change ren to xcopy for the topshimData - allows janus to zip topshimData to dataset.
 
 //example usage :- 
 //janus_topshim_watchdog THIS_IS_A_MESSAGE_TO_SEND ordmax=8
 //NB the message can't have spaces in... Ortherwise would look like more command line options.
 
-// PTG 2023_06_08 ABORT when it fails so returns auerr=-1
+// Emailing or otherwise on error is to be handled by calling AU program
+// After shimming we do loopadj_fallback - this is to accout for the generally unknown amount
+// of deuterated solvent in open access samples. No autophase is done here in order to save time
+// and because in general we don;t have "new autophase" available.
 
-// PTG 2026-04-30 Added loop value setting without autophase; 5 s delay after topshim as well
 
-// PTG 2026-06-26 Fix AUERR handling so loopadj_fallback doesn;t effectively force to be 0
+// PTG 2026_06_29 testing in new branch.. Tidying up some commands and the comments
+
+// option specification handling needs changing - not just error message plus one other argument!
 
 #include <time.h>
 time_t now_s, dtime_s;		  	/* seconds since 1970 */
@@ -36,7 +37,6 @@ char lockpath[PATH_MAX];
 char pidpath[PATH_MAX];
 char message[1023];
 char topshim_option[255];
-char bat_cmd_path[PATH_MAX]="NULL";
 int pid;
 int ts_major = GetTsVersionMajor();
 int ts_minor = GetTsVersionMinor();
@@ -44,12 +44,10 @@ int ts_patch = GetTsVersionPl();
 
 FILE *pidfile;
 FILE *lockfile;
-FILE *fbat=NULL;
 
-//sprintf(bat_cmd_path,"C:\\Bruker\\TopSpin%i.%i.%i\\data\\xcopy_tsData.bat",ts_major,ts_minor,ts_patch);
-sprintf(bat_cmd_path,"F:\\chemist\\xcopy_tsData.bat",ts_major,ts_minor,ts_patch);
+
+
 //set topshim_option to just a blank character - will this prevent errors?
-
 
 sprintf(topshim_option," ");
 
@@ -68,7 +66,6 @@ if (i_argc > 4 ){
 }
 GETCURDATA 
 
-// 
 
 /* get current time for timestamping the copy - can't use experiment name here because kiosk */
 now_s=time(NULL);
@@ -85,9 +82,8 @@ fclose(lockfile);
 CPR_exec("xau topshimkiller", WAIT_START); 
 
 
+// execute topshim as desired - nb convcomp as default
 
-// execute topshim as desired
-//sprintf(tscommand,"topshim plotall convcomp %s", cmd); //not sure why cmd is here...
 sprintf(tscommand,"topshim plotall convcomp %s",topshim_option);
 XCMD(tscommand);
 
@@ -115,11 +111,16 @@ if (pidfile = fopen(pidpath, "rt"))
 
 }
  
-//test 
+// copy the topshim data locally - is this really needed given the janus AU is zipping up the data??
 
 sprintf( command, "robocopy C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData /S C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData_%s > nul",ts_major,ts_minor,ts_patch,ts_major,ts_minor,ts_patch,datestamp);
- //sprintf(command,"xcopy C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData_%s\\ /E /H \n", ts_major,ts_minor,ts_patch,ts_major,ts_minor,ts_patch,datestamp);
 system(command);
+
+
+// Check if it thinks it failed, and if so make sure it ABORTs to set the right value of AUERR
+// so that the sampleproblems handling works
+
+
 Proc_err(DEF_ERR_OPT,"AUERR=%d", AUERR);
 if (AUERR)
 {
@@ -129,7 +130,7 @@ if (AUERR)
 }
 else
 {
-	// Now set loop params without doing autophase, but don;t abort as shim was OK
+	// Now set loop params without doing autophase, but don't abort as shim was OK
 	XAU("loopadj_fallback","quiet");
 }
 QUIT

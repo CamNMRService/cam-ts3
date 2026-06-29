@@ -1,0 +1,8 @@
+/* motd                         */
+/* AU program to display a message set for the current spectrometer */
+/* reads instrum from the curinst file */
+/* Messages saved as motd.glengrant etc in the root cam-ts3 directory */
+
+char instrum[256];
+char motdfile[PATH_MAX];
+file *fptr;

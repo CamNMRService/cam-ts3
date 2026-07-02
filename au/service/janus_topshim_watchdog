@@ -15,7 +15,7 @@
 // Emailing or otherwise on error is to be handled by calling AU program
 // After shimming we do loopadj_fallback - this is to accout for the generally unknown amount
 // of deuterated solvent in open access samples. No autophase is done here in order to save time
-// and because in general we don;t have "new autophase" available.
+// and because in general we don't have "new autophase" available.
 
 
 // PTG 2026_06_29 testing in new branch.. Tidying up some commands and the comments
@@ -45,7 +45,7 @@ int ts_patch = GetTsVersionPl();
 FILE *pidfile;
 FILE *lockfile;
 
-
+int debug=1; // set to 1 for testing 
 
 //set topshim_option to just a blank character - will this prevent errors?
 
@@ -121,7 +121,10 @@ system(command);
 // so that the sampleproblems handling works
 
 
-Proc_err(DEF_ERR_OPT,"AUERR=%d", AUERR);
+if (debug)
+{
+	Proc_err(DEF_ERR_OPT,"AUERR before loopadj=%d", AUERR);
+}
 if (AUERR)
 {
 	// Now set loop params without doing autophase, and ABORT because shim failed
@@ -133,4 +136,5 @@ else
 	// Now set loop params without doing autophase, but don't abort as shim was OK
 	XAU("loopadj_fallback","quiet");
 }
+
 QUIT

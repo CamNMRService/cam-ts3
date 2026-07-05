@@ -1,26 +1,24 @@
-//topshim_watchdog
+//janus_topshim_watchdog
 //AU program to run topshim, and kill it after a while if not done.
 //Data always copied to a folder with the name of the current experiment
 //So that you can look at the data and see what might have gone wrong
 
 // Calling option for this AU program:
-// If 1 argument, this is taken as a message (no spaces allowed as this is argument separator!)
-// If more than 1 argument, the others should be taken as topshim options
+// options are just topshim options as per topshim on command line
 
 
 //example usage :- 
-//janus_topshim_watchdog THIS_IS_A_MESSAGE_TO_SEND ordmax=8
-//NB the message can't have spaces in... Ortherwise would look like more command line options.
+//janus_topshim_watchdog ordmax=8 tunea
 
 // Emailing or otherwise on error is to be handled by calling AU program
 // After shimming we do loopadj_fallback - this is to accout for the generally unknown amount
 // of deuterated solvent in open access samples. No autophase is done here in order to save time
 // and because in general we don't have "new autophase" available.
 
+// handles need for TSO according to INSTRUM and solvent:
+// If INSTRUM is arran (or in principle tobermory) AND solvent name contains D2O, 
+// Then it will execute TSO rather than normal topshim
 
-// PTG 2026_06_29 testing in new branch.. Tidying up some commands and the comments
-
-// option specification handling needs changing - not just error message plus one other argument!
 
 #include <time.h>
 time_t now_s, dtime_s;		  	/* seconds since 1970 */
@@ -37,6 +35,8 @@ char lockpath[PATH_MAX];
 char pidpath[PATH_MAX];
 char message[1023];
 char topshim_option[255];
+char instrum_name[256];
+char solvent[256];
 int pid;
 int ts_major = GetTsVersionMajor();
 int ts_minor = GetTsVersionMinor();
@@ -45,32 +45,12 @@ int ts_patch = GetTsVersionPl();
 FILE *pidfile;
 FILE *lockfile;
 
-int debug=1; // set to 1 for testing 
+int debug=0; // set to 1 for testing 
 
-//set topshim_option to just a blank character - will this prevent errors?
 
-sprintf(topshim_option," ");
 
-if (i_argc == 3 ) { //assume the argument is a message to send
-    sprintf(message,"%s",i_argv[2]); 
-}
-
-if (i_argc == 4) {
-   sprintf(message,"%s",i_argv[2]); 
-   sprintf(topshim_option,"%s",i_argv[3]); 
-}
-
-if (i_argc > 4 ){
-    sprintf(tmp_str,"Too many arguments passed to %s",i_argv[0]);
-    STOPMSG(tmp_str)
-}
 GETCURDATA 
 
-
-/* get current time for timestamping the copy - can't use experiment name here because kiosk */
-now_s=time(NULL);
-now = localtime(&now_s);
-sprintf(datestamp, "%d_%d_%d_%d_%d_%d", now->tm_year+1900, 1+now->tm_mon, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
 
 // write lock file
 sprintf(lockpath, "%s/%s/topshim_lockfile", PathXWinNMRProg(),PathXWinNMRCurDir());
@@ -81,11 +61,21 @@ fclose(lockfile);
 
 CPR_exec("xau topshimkiller", WAIT_START); 
 
+//check if we need tso and either do that or normal topshim
+FETCHPARS("INSTRUM",instrum_name)
+FETCHPAR("SOLVENT", solvent);
+if((strstr(solvent, "D2O")!=0) && ((strcmp(instrum_name, "tobermory") == 0) || (strcmp(instrum_name, "arran") == 0)) )
+{
+	XAU("tso","");
+}
+else
+{
+	
+	sprintf(tscommand,"topshim plotall convcomp %s", cmd);
+	XCMD(tscommand);
+}
 
-// execute topshim as desired - nb convcomp as default
 
-sprintf(tscommand,"topshim plotall convcomp %s",topshim_option);
-XCMD(tscommand);
 
 // short delay to make sure lock really reestablished
 sleep(5);
@@ -111,10 +101,7 @@ if (pidfile = fopen(pidpath, "rt"))
 
 }
  
-// copy the topshim data locally - is this really needed given the janus AU is zipping up the data??
 
-sprintf( command, "robocopy C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData /S C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData_%s > nul",ts_major,ts_minor,ts_patch,ts_major,ts_minor,ts_patch,datestamp);
-system(command);
 
 
 // Check if it thinks it failed, and if so make sure it ABORTs to set the right value of AUERR

@@ -96,6 +96,8 @@ Added extra when creating the junk dataset to set the instrument name and probe 
 // PTG 5 jun 2026: skip atma on standard 1h experiment handling needs to be changed. We shoulo check against  the protocol
 //			rather than the individual experiment. Also fixed the point at which spinning is turned back on so it happens even if no error in ATMA!
 
+// ptg 2026/07/03  change args to janus_topshim_watchdog as this now only takes topshim args not message
+
 #include <inc/bsms_program>    /* must be the first statement ****/
 
 #pragma region Get Instrument name
@@ -516,7 +518,7 @@ while ( finish != TRUE ) //THE MAIN LOOP
 			Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
 			XCMD(tmp_cmd)
 			Proc_err ( INFO_OPT,"ts_arg - %s",ts_arg);
-			sprintf(tmp_cmd,"janus_topshim_watchdog TOPSHIM_FAILED_%s %s",name, ts_arg);
+			sprintf(tmp_cmd,"janus_topshim_watchdog %s",ts_arg);
 			Proc_err ( INFO_OPT,"***tmp_cmd - %s, ts_arg - %s",tmp_cmd,ts_arg);
 			XCMD(tmp_cmd);
 			if (AUERR<0)
@@ -568,7 +570,7 @@ while ( finish != TRUE ) //THE MAIN LOOP
 		   sleep(number);
            #pragma region Deal with the contents of the line read in - ie run test
 			if (strstr(field3, "shim") != NULL) {
-				sprintf(tmp_cmd,"janus_topshim_watchdog TOPSHIM_FAILED_%s %s",name, ts_arg);
+				sprintf(tmp_cmd,"janus_topshim_watchdog %s",ts_arg);
 				Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
 				XCMD(tmp_cmd); 
 			}
@@ -968,12 +970,10 @@ while ( finish != TRUE ) //THE MAIN LOOP
         }
 		#pragma endregion Check protocol for X nuclei & set ATMAflag=0
 		#pragma region Check if experiment is not a 2H and ATMA on PROTONRO parset
-        if ( (strstr ( experiment, "2h") == NULL) && (strstr ( experiment, "2H") == NULL)) // So this means "the string 2h is not present AND the string 2H is not present"
-		//only do the below if its not 2H
-		{
-           if ( ((ATMAflag==0) && (global_atma_flag !=0)) || (strcmp(instrum_name, "tobermory") == 0) ) //OR for tobermory here - if its tobermory, always tune
-           {
-            sprintf(tmp_str,"protocol - %s, experiment - % s, ATMA\n",protocol,experiment);
+       
+        if ( ((ATMAflag==0) && (global_atma_flag !=0)) || (strcmp(instrum_name, "tobermory") == 0) ) //OR for tobermory here - if its tobermory, always tune
+        {
+        	sprintf(tmp_str,"protocol - %s, experiment - % s, ATMA\n",protocol,experiment);
             strcat(janusinfostring, tmp_str);
             strcat(janusinfostring,"ATMA");
                ATMA
@@ -986,8 +986,8 @@ while ( finish != TRUE ) //THE MAIN LOOP
 			       strcat(sampleinfostring, "\n ATMA failed - does your sample have high ionic strength? \n Check \
 with NMR service team about whether medium or thick wall tubes are more appropriate for similar samples. \n");
 		       }
-           }
-	    }
+        }
+	    
 		#pragma endregion ~Check if experiment is not a 2H and ATMA if appropriate
         #pragma region Rotate sample
 		strcat(janusinfostring, "ROT\n");
@@ -1004,19 +1004,18 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 		//topshim has to be here, as we only want to do it once per sample, have to do atma each exp, or put more logic in.
         #pragma region Shim the sample
 		// use topshim_watchdog to force timeout and to save topshim data in case of failure
-		//NB janus_topshim_watchdog can take an option for an additional option to pass to topshim
-		//should be called with janus_topshim_watchdog MESSAGE_NO_SPACES_OR_DASHES ordmax=5
-		//janus_topshim_watchdog should also take care of the whoopwhoop email
-		sprintf(tmp_cmd,"janus_topshim_watchdog TOPSHIM_FAILED_%s_%i %s",tmp_fname,cpos,ts_arg);
+		// Arguments to topshim are just passed as arguments to janus_topshim_watchdog
+		// Error emailing handled by main janus AU
+		sprintf(tmp_cmd,"janus_topshim_watchdog %s",ts_arg);
 		Proc_err ( INFO_OPT,"***tmp_cmd - %s",tmp_cmd);
-		sprintf(tmp_str,"%s\n",tmp_cmd);
+		sprintf(tmp_str,"janus_topshim_watchdog TOPSHIM_FAILED_%s_%i %s \n",tmp_fname,cpos,ts_arg);
 		strcat(janusinfostring, tmp_str);
 		XCMD(tmp_cmd);
 		if (AUERR<0)
 		{
 			if (sampleproblem==1)
 			{
-				XAU("whoopwhoop",tmp_cmd);
+				XAU("whoopwhoop",tmp_str);
 				sprintf(tmp_str,"\n Failed to lock: check sample is clear, sample filling is >40mm, solvent is deuterated\n \
 				Solvent is listed as %s, if this is not as expected there is probably a rogue character in the Sample ID such as a comma.\n \
 				In this case resubmit with correct Sample ID- only letters, numbers, underscores, dashes and full stops allowed. \n \n", solvent);

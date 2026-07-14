@@ -46,7 +46,7 @@ $$ process C:\Bruker\TopSpin3.8.0\prog\mod\edparproc.exe
 ##$INTBC= 1
 ##$INTSCL= 1
 ##$ISEN= 128
-##$LB= 5
+##$LB= 10
 ##$LEV0= 0
 ##$LPBIN= 0
 ##$MAXI= 80

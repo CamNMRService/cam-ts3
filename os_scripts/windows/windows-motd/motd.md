@@ -1,9 +1,8 @@
 # System Message of the Day
 
-## Welcome to Glengrant.
+## Welcome to Auchentoshan.
 
 ###**Problems**
-- The probe sometimes loses it's tuning position.
-- If you get an error during ATMA, contact us
+- None at present
 
 If you experience any other issues, please contact nmr@ch.cam.ac.uk

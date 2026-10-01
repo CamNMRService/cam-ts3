@@ -246,7 +246,7 @@ if ( temptarget == 0.0 )  //something other than temp setting requested
 					chill_strength);
 				GETSTRING(prompt, chill_strength)
 				VTU_PUSH_PARAM("VTC_CHILL_TARG_STRENGTH",chill_strength)
-				sleep(5);
+				sleep(10); // maybe needs this long to register??
 				VTU_GET_PARAM("VTC_CMD_STAT",newstate)
 				if(DEBUG){Proc_err(ERROR_OPT, "Manual chiller setting: desired strength is %s, current chill strength is %s",chill_strength, newstate);}
 				if ( strcmp ( newstate, chill_strength ))
@@ -338,7 +338,7 @@ if ( chilltype == 1 )
 	}
 
 		/* set chiller power */
-	sleep(5);  // so it has time to change parameters
+	sleep(10);  // so it has time to change parameters
 	VTU_GET_PARAM(teTarget,value);
 	/* protect the contents of value */
 	strcpy(value2, value);

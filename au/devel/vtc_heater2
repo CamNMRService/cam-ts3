@@ -242,7 +242,7 @@ if ( temptarget == 0.0 )  //something other than temp setting requested
 				sprintf(prompt, "Your current chiller type is %s (where 0 = no chiller, 1 = BCU-I, and 2 = BCU-II).\n"
 					"  The current chiller strength is %s (for a BCU, 0 = off, 1 = weak, 2 = medium \n;"
 					"  for a BCU-II, 0 = off, 1 = weak, 2 = medium , 3 = strong\n;"
-					" for a BCU-05, 0 = off, 1 = weak ).  Enter the desired chiller strength: ", chill_type,
+					" for a BCU-05, 0 = off, 1 = weak perhaps?? ).  Enter the desired chiller strength: ", chill_type,
 					chill_strength);
 				GETSTRING(prompt, chill_strength)
 				VTU_PUSH_PARAM("VTC_CHILL_TARG_STRENGTH",chill_strength)

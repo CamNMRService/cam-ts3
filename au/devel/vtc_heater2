@@ -307,16 +307,20 @@ TESET
 /* and very especially if turning BCU-II on from warm state, so should be avoided if possible */
 if ( chilltype == 1 )
 	{
-		if ( temptarget > LOWTEMPWEAKCHILL )  //target can be reached with medium chiller setting of BCU-I
+		if ( temptarget > LOWTEMPNOCHILL )  //target can be reached with no chiller setting of BCU-I
+		{
+			strcpy ( newval2, "0" ) ;
+		}
+		else if ( temptarget > LOWTEMPWEAKCHILL )//target is too low for no chiller setting so we are forced to change
 		{
 			strcpy ( newval2, "1" ) ;
 		}
-		else //target is too low for medium chiller setting so we are forced to change
+		else //target is too low for no chiller setting so we are forced to change
 		{
 			strcpy ( newval2, "2" ) ;
 		}
 		VTU_PUSH_PARAM("VTC_CHILL_TARG_STRENGTH",newval2);  // set desired chiller state
-		if(DEBUG){Proc_err(ERROR_OPT, "Trying to set chiller state to  %s",newval2);}
+		if(DEBUG){Proc_err(ERROR_OPT, "BCU-I: Trying to set chiller state to  %s",newval2);}
 		
 	}
 	else if ( chilltype == 2 )

@@ -80,7 +80,7 @@ const char* ccp;
 int returnvalue, heaterstatus, chillstatus, chilltype ;
 int returnstatus = 0 ;
 
-int DEBUG=1; // set to 1 to show debugging messages, 0 to not
+int DEBUG=0; // set to 1 to show debugging messages, 0 to not
 
 
 // get ID of installed probe for self tune setting 

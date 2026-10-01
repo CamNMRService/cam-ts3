@@ -56,7 +56,7 @@ const char *value;
 const char *chill_strength;
 const char *chill_type;
 static char teTarget[64] = "VTC_TARG_TEMP_CH";
-char prompt[256];
+char prompt[2000];
 float flow_target, temptarget;
 float flow_measured;
 char newval[16], newval2[16], acttemp[16], value2[16];

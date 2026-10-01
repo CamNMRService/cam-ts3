@@ -1,5 +1,5 @@
 /********************************************** ^^A -*-C++-*- ***/
-/*	vtc_heater2             03.03.2011                          */
+/*	vtc_heater2             01.10.2026                          */
 /****************************************************************/
 /*      Short Description : Use to turn BSVT on and off         */
 /*      and to set temperature with appropriate chiller power   */
@@ -12,22 +12,36 @@
 /*                               off, -1 if error               */
 /*  xau vtc_heater2 bsvt 0 : turn BSVT off                      */
 /*  xau vtc_heater2 bsvt 1 : turn BSVT on                       */
-/*  xau vtc_heater2 bscu check : return 0 if BSCU is off, 1 if  */
+/*  xau vtc_heater2 bscu check : return 0 if BCU is off, 1 if  */
 /*                               on weak, 2 if on high power    */
 /*  xau vtc_heater2 <temperature> : set desired temperature and */
 /*                                chiller power, if appropriate */
+/*	The compiler definitions LOWTEMPNOCHILL etc should be set	*/
+/*		as desired - eg if you want the chiller off for about RT*/
+/*		and above set LOWTEMPNOCHILL to eg 297 and 				*/
+/*		LOWTEMPWEAKCHILL to eg 290 								*/
+/*	For automated setting of self tune parameters, you need 	*/
+/*		to save self tune files "<probeId>_RT" etc 				*/
+/*		_RT is used if T above LOWTEMPWEAKCHILL but below eg 328*/
+/*		which can be changed in that section */
 /****************************************************************/
 /*      Author(s) :                                             */
 /*      Name            : Gabriella Schmidt                     */
-/*	Organisation	: Bruker BioSpin GmbH			                    */
+/*	Organisation	: Bruker BioSpin GmbH			            */
 /*      Email           : gabriella.schmidt@bruker-biospin.de   */
 /****************************************************************/
 /*      Name            Date      Modification:                 */
 /*      rss             20091110  created                       */
-/*      ptg					20201210 modified to not changechiller state*/
-/*										except for low T													*/
-/*			ptg						2021-01-26 Added setting of selftune			*/ 
-/*										parameters NB this seems to need ch 0  ?? */
+/*		ptg				2021-01-26 Added setting of selftune	*/ 
+/*					parameters NB this seems to need ch 0??	    */
+/*      ptg             2026-10-01 Overhaul , inc some			 */
+/*  				 mods made by rss:							*/
+/*						Use  CNST49 to store return value as 	*/
+/* 						AUERR can only be 0 or -1				*/
+/*						Sorted chiller states bit in manual mode*/
+/*			Added DEBUG flag to allow it to give error messages */
+/*			Now with low temp limits for no, weak, med  chiller	*/
+/*			All instances of BSCU changed to BCU				*/
 /****************************************************************/
 /*
 $Id: vtc_example,v 1.1.2.1 2009/12/11 15:10:36 gsc Exp $
@@ -53,51 +67,60 @@ char selftunefile[100];
 char  cur_probeInfo[4][PATH_MAX];
 const char* ccp;
 
+// Temperature limits for chiller states
+// If the temo is above lowtempnochill, the chiller will be set to off,
+// if between LOWTEMPNOCHILL and LOWTEMPWEAKCHILL will be set to low
+// if between LOWTEMPWEAKCHILL and LOWTEMPMEDCHILL will be set to medium
+// and if below that will be set to strong
+
+#define LOWTEMPNOCHILL 353
 #define LOWTEMPWEAKCHILL 290
 #define LOWTEMPMEDCHILL 273
 
 int returnvalue, heaterstatus, chillstatus, chilltype ;
 int returnstatus = 0 ;
 
+int DEBUG=1; // set to 1 to show debugging messages, 0 to not
+
+
 // get ID of installed probe for self tune setting 
 // Use TS3 compatible syntax using CALL_PROBESERVER!!
 
-
-
-
-	CALL_PROBESERVER("probe_client getParams getInstalledProbe", ccp);
+CALL_PROBESERVER("probe_client getParams getInstalledProbe", ccp);
 	
-	i1 = 0;
-	do
-	{
-	    size_t field_len = strcspn(ccp, ",");
-	    snprintf(cur_probeInfo[i1], sizeof(cur_probeInfo[i1]), "%.*s",
+i1 = 0;
+do
+{
+	size_t field_len = strcspn(ccp, ",");
+	snprintf(cur_probeInfo[i1], sizeof(cur_probeInfo[i1]), "%.*s",
 		     (int)field_len, ccp);
-	    i1++;
-	    ccp += field_len;
-	}
-	while (*ccp++ && i1 < 4);
+	i1++;
+	ccp += field_len;
+}
+while (*ccp++ && i1 < 4);
 
-	if (i1 < 4)
-	    strcpy(probeId, "unknown");
-	else
-	    strcpy(probeId,  cur_probeInfo[0]);
+if (i1 < 4)
+	strcpy(probeId, "unknown");
+else
+	strcpy(probeId,  cur_probeInfo[0]);
 		     
-	//	     Proc_err(ERROR_OPT, "probe is %s", probeId);
+if(DEBUG){Proc_err(ERROR_OPT, "probe is %s", probeId);}
 		     
 
 
-/* checking what probe channel to use for setting temperature */
+/* checking what current probe channel is - currently not used but here for reference */
 VTU_GET_PARAM("VTC_PROBE_CH",probe_ch);
 if (!AUERR)
 {
 	/* append found channel to VTC_TARG_TEMP_CH */
 	strcat(teTarget,probe_ch);
 }
-else
-{
-	STOPMSG("Cannot find probe channel.")
-}
+if(DEBUG){Proc_err(ERROR_OPT, "current channel is %s", probe_ch);}
+// Could have it stop here but I don;t think this is needed if we are using TESET to set temperature.
+// else
+//{
+//	STOPMSG("Cannot find probe channel.")
+//}
  
 /* checking what chiller, if any, is installed */
 VTU_GET_PARAM("VTC_CHILL_TYPE", chill_type)
@@ -106,40 +129,42 @@ if(!AUERR)
 	chilltype = atoi(chill_type);  // 0 for no chiller, 1 for BCU-I, 2 for BCU-II
 }
 
+if(DEBUG){Proc_err(ERROR_OPT, "Chiller type is %s", chill_type);}
+
 if ( i_argc > 2 )  //user provided argumet, so check if first argument is temperature
 {
 	temptarget = atof(i_argv[2]);  //read first argument and convert to float
 	if ( temptarget == 0.0 )  //if argument is not a number atof returns 0.0, if this is the case check the arg is BSVT or BSCU (only devices we can control here)
 	{
 		strcpy ( device, i_argv[2] );
-		if ( strcasecmp ( device, "BSCU" ) && strcasecmp ( device, "Bsvt" ) )
+		if ( strcasecmp ( device, "BCU" ) && strcasecmp ( device, "Bsvt" ) )
 		{
 			STOPMSG("Could not understand what device to control.\n"
-			"Can only control BSVT and BSCU.")
+			"Can only control BSVT and BCU.")
 		}
 	} 
 }
 else //user provided no argument so ask questions
 {
 	returnstatus = 1 ;
-	strcpy(device, "BSCU");
-	GETSTRING("Type BSVT to turn it off or on, type BSCU to check whether it is on "
+	strcpy(device, "BCU");
+	GETSTRING("Type BSVT to turn it off or on, type BCU to check whether it is on "
 		"or type the temperature in K you want to set", device)
 	temptarget = atof(device);
 	if ( temptarget == 0.0 )
 	{
-		if ( strcasecmp ( device, "BSCU" ) && strcasecmp ( device, "Bsvt" ) )
+		if ( strcasecmp ( device, "BCU" ) && strcasecmp ( device, "Bsvt" ) )
 		{
  			strcpy(device, "BSVT");
-			GETSTRING("Type BSVT to turn it off or on, type BSCU to check whether it is on "
+			GETSTRING("Type BSVT to turn it off or on, type BCU to check whether it is on "
 				"or type the temperature in K you want to set", device)
 			temptarget = atof(device);
 			if ( temptarget == 0.0 )
 			{
-	 			if ( strcasecmp ( device, "BSCU" ) && strcasecmp ( device, "Bsvt" ) )
+	 			if ( strcasecmp ( device, "BCU" ) && strcasecmp ( device, "Bsvt" ) )
  				{
  				STOPMSG("Could not understand what device to control.\n"
- 					"Can only control BSVT and BSCU.")
+ 					"Can only control BSVT and BCU.")
  				}
 			}
 		}
@@ -153,11 +178,12 @@ if ( temptarget == 0.0 )  //something other than temp setting requested
 		/* dealing with BSVT here */
 		if ( i_argc > 3 )
 		{
-			if ( !strcasecmp ( "check", i_argv[3] ) )  //if second arg is "check" then reoort status
+			if ( !strcasecmp ( "check", i_argv[3] ) )  //if second arg is "check" then report status
 			{
 				VTU_GET_PARAM("VTC_CMD_STAT",onoff);
 				heaterstatus = atoi(onoff);
 				returnvalue = heaterstatus ;
+				if(DEBUG){Proc_err(ERROR_OPT, "Check: heater status is %s", onoff);}
 			}
 			else  //if second arg is not check then we are turning the bsvt on or off
 			{
@@ -165,6 +191,7 @@ if ( temptarget == 0.0 )  //something other than temp setting requested
 				VTU_PUSH_PARAM("VTC_CMD_STAT",newval)  //set bsvt state
 				sleep(5);
 				VTU_GET_PARAM("VTC_CMD_STAT",newstate) //read bsvt state
+				if(DEBUG){Proc_err(ERROR_OPT, "On/off: desired state is %s, final state is %s",newval,newstate);}
 				if ( strcmp ( newval, newstate ))				//check for consistency and returnsuccess or failure
 				{
 					returnvalue = -1 ;   // failed
@@ -185,6 +212,7 @@ if ( temptarget == 0.0 )  //something other than temp setting requested
 			VTU_PUSH_PARAM("VTC_CMD_STAT",onoff)
 			sleep(5);
 			VTU_GET_PARAM("VTC_CMD_STAT",newstate)
+			if(DEBUG){Proc_err(ERROR_OPT, "Manual On/off: desired state is %s, final state is %s",onoff,newstate);}
 			if ( strcmp ( newstate, onoff ))
 			{
 				sprintf(stopmessage, "Unable to turn VT unit on or off.");
@@ -194,30 +222,33 @@ if ( temptarget == 0.0 )  //something other than temp setting requested
 	}
 	else
 	{
-		/* dealing with BSCU here */
+		/* dealing with BCU here */
 		if ( i_argc > 3 )
 		{
-			if ( !strcasecmp ( "check", i_argv[3] ) )  //user asked to check BSCU status
+			if ( !strcasecmp ( "check", i_argv[3] ) )  //user asked to check BCU status
 			{
 				VTU_GET_PARAM("VTC_CHILL_ACT_STRENGTH",chill_strength);
 				chillstatus = atoi(chill_strength) ;
 				returnvalue = chillstatus ;
+				if(DEBUG){Proc_err(ERROR_OPT, "BCU check: current chill strength is %s",chill_strength);}
 			}
 		}
-		else //ask user what to do with BSCU
+		else //ask user what to do with BCU
 		{
 			VTU_GET_PARAM("VTC_CHILL_ACT_STRENGTH",chill_strength);
 			chillstatus = atoi(chill_strength) ;
 			if(!AUERR)
 			{
-				sprintf(prompt, "Your current chiller type is %s (where 0 = no chiller, 1 = BSCU, and ???).\n"
-					"  The current chiller strength is %s (for a BSCU, 0 = off, 1 = weak, 2 = standard \n;"
-					" for a BCU, 0 = off, 1 = weak ).  Enter the desired chiller strength: ", chill_type,
+				sprintf(prompt, "Your current chiller type is %s (where 0 = no chiller, 1 = BCU-I, and 2 = BCU-II).\n"
+					"  The current chiller strength is %s (for a BCU, 0 = off, 1 = weak, 2 = medium \n;"
+					"  for a BCU-II, 0 = off, 1 = weak, 2 = medium , 3 = strong\n;"
+					" for a BCU-05, 0 = off, 1 = weak ).  Enter the desired chiller strength: ", chill_type,
 					chill_strength);
 				GETSTRING(prompt, chill_strength)
 				VTU_PUSH_PARAM("VTC_CHILL_ACT_STRENGTH",chill_strength)
 				sleep(5);
 				VTU_GET_PARAM("VTC_CMD_STAT",newstate)
+				if(DEBUG){Proc_err(ERROR_OPT, "Manual chiller setting: desired strength is %s, current chill strength is %s",chill_strength, newstate);}
 				if ( strcmp ( newstate, chill_strength ))
 				{
 					sprintf(stopmessage, "Unable to change chiller unit heater power.");
@@ -254,7 +285,7 @@ else
 strcat(selftunefile, "_RT");
 }
 
-
+if(DEBUG){Proc_err(ERROR_OPT, "Trying to set selftune file: %s",selftunefile);}
 	
 VTU_SET_SELFTUNE_SETTINGS(selftunefile, 0)			
 	
@@ -270,11 +301,11 @@ STOREPAR("TE", temptarget);
 
 TESET
 
-		/* working out what chiller power setting to use */
-	/* at the moment, this is done only for BCUI/II */
-	/* NB changin the chiller setting causes a long equilibration time, especially for BCU-II */
-	/* and very especially if turning BCU-II on from warm state, so should be avoided if possible */
-		if ( chilltype == 1 )
+/* working out what chiller power setting to use */
+/* at the moment, this is done only for BCUI/II */
+/* NB changin the chiller setting causes a long equilibration time, especially for BCU-II */
+/* and very especially if turning BCU-II on from warm state, so should be avoided if possible */
+if ( chilltype == 1 )
 	{
 		if ( temptarget > LOWTEMPWEAKCHILL )  //target can be reached with medium chiller setting of BCU-I
 		{
@@ -285,6 +316,8 @@ TESET
 			strcpy ( newval2, "2" ) ;
 		}
 		VTU_PUSH_PARAM("VTC_CHILL_TARG_STRENGTH",newval2);  // set desired chiller state
+		if(DEBUG){Proc_err(ERROR_OPT, "Trying to set chiller state to  %s",newval2);}
+		
 	}
 	else if ( chilltype == 2 )
 	{
@@ -301,6 +334,7 @@ TESET
 			strcpy ( newval2, "3" ) ;
 		}
 		VTU_PUSH_PARAM("VTC_CHILL_TARG_STRENGTH",newval2);
+		if(DEBUG){Proc_err(ERROR_OPT, "Trying to set chiller state to  %s",newval2);}
 	}
 
 		/* set chiller power */
@@ -310,6 +344,7 @@ TESET
 	strcpy(value2, value);
 //		Proc_err(DEF_ERR_OPT, "newval: %s, value: %s, strcmp ( newval, value ): %d, value2: %s ", newval, value, strcmp(newval, value), value2);
 	VTU_GET_PARAM("VTC_CHILL_ACT_STRENGTH",chill_strength);
+	if(DEBUG){Proc_err(ERROR_OPT, "After setting, chiller strength is  %s, should be %s",chill_strength,newval2);}
 	if ( ( newval[0] != value2[0] ) || ( newval[1] != value2[1] ) || ( newval[2] != value2[2] ) )
 	{
 		if ( returnstatus != 0 )
@@ -349,6 +384,6 @@ TESET
 	}
 }
 
-AUERR = returnvalue ;
+STOREPAR("CNST 49", returnvalue)
 QUIT
 

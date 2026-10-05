@@ -387,7 +387,7 @@ if ( chilltype == 1 )
 		}
 	}
 }
-
+if(DEBUG){Proc_err(DEF_ERR_OPT,"Return value is %d", returnvalue)}
 STOREPAR("CNST 49", returnvalue)
 QUIT
 

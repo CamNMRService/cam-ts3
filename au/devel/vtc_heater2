@@ -44,6 +44,7 @@
 /*			All instances of BSCU changed to BCU				*/
 /* ptg 2026-10-05 Modified to return float as CNST49; also bugfix */
 /*								an insance where it was not reading the chiller status for success test */
+/* NB Still need to update according to Maksim's new syntax for chiller type*/
 /****************************************************************/
 /*
 $Id: vtc_example,v 1.1.2.1 2009/12/11 15:10:36 gsc Exp $

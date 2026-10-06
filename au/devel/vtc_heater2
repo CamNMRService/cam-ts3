@@ -46,6 +46,9 @@
 /*								an insance where it was not reading the chiller status for success test */
 /* ptg 2026-10-06 Modified VTC_CHILL_TYPE to VTC_BCU_CHILL_TYPE */
 /* 				as this correctly distinguishes BCU-I vs BCU-II */
+/*				Also make it only check chill status if ther is chiller...*/
+/* 		and removed checking of set temperature, because you */
+/*		 can only read the set thermocouple temp not set corrected temp!*/
 /****************************************************************/
 /*
 $Id: vtc_example,v 1.1.2.1 2009/12/11 15:10:36 gsc Exp $
@@ -356,47 +359,35 @@ if ( chilltype == 1 )
 
 		/* set chiller power */
 	sleep(10);  // so it has time to change parameters
-	VTU_GET_PARAM(teTarget,value);
-	/* protect the contents of value */
-	strcpy(value2, value);
-//		Proc_err(DEF_ERR_OPT, "newval: %s, value: %s, strcmp ( newval, value ): %d, value2: %s ", newval, value, strcmp(newval, value), value2);
-	VTU_GET_PARAM("VTC_CHILL_ACT_STRENGTH",chill_strength);
-	if(DEBUG){Proc_err(ERROR_OPT, "After setting, chiller strength is  %s, should be %s",chill_strength,newval2);}
-	if ( ( newval[0] != value2[0] ) || ( newval[1] != value2[1] ) || ( newval[2] != value2[2] ) )
+	
+	if (chilltype==1 || chilltype==2)
 	{
-		if ( returnstatus != 0 )
+		VTU_GET_PARAM("VTC_CHILL_ACT_STRENGTH",chill_strength);
+		if(DEBUG){Proc_err(ERROR_OPT, "After setting, chiller strength is  %s, should be %s",chill_strength,newval2);}
+		if ( strcmp (newval2, chill_strength)) 
 		{
-			sprintf(stopmessage, "newval: %s. value2: %s. Could not set desired temperature to %f.", newval, value2, temptarget);
-			STOPMSG(stopmessage)
+			if ( returnstatus != 0 )
+			{
+				sprintf(stopmessage, "Could not change chiller output strength.  Desired strength is %s\n"
+				"and actual strength is %s.  Is chiller in remote mode?", newval, chill_strength);
+				STOPMSG(stopmessage)
+			}
+			else
+			{
+				returnvalue = -1 ;
+			}
 		}
 		else
 		{
-			returnvalue = -1 ;
-		}
-	}
-	if ( strcmp (newval2, chill_strength)) 
-	{
-		if ( returnstatus != 0 )
-		{
-			sprintf(stopmessage, "Could not change chiller output strength.  Desired strength is %s\n"
-			"and actual strength is %s.  Is chiller in remote mode?", newval, chill_strength);
-			STOPMSG(stopmessage)
-		}
-		else
-		{
-			returnvalue = -1 ;
-		}
-	}
-	else
-	{
-		if ( returnstatus != 0 )
-		{
-			Proc_err(DEF_ERR_OPT, "Chiller output strength has successfully been changed to %s\n"
-			" and the temperature has been set to %s", chill_strength, value2);
-		}
-		else
-		{
-			returnvalue = temptarget ;
+			if ( returnstatus != 0 )
+			{
+				Proc_err(DEF_ERR_OPT, "Chiller output strength has successfully been changed to %s\n"
+				" and the temperature has been set to %s", chill_strength, value2);
+			}
+			else
+			{
+				returnvalue = temptarget ;
+			}
 		}
 	}
 }

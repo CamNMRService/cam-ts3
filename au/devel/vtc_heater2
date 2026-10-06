@@ -49,6 +49,7 @@
 /*				Also make it only check chill status if ther is chiller...*/
 /* 		and removed checking of set temperature, because you */
 /*		 can only read the set thermocouple temp not set corrected temp!*/
+/*		Also "bsvt check" option sets AUERR, to 0 if vt on, -1 if VT off*/
 /****************************************************************/
 /*
 $Id: vtc_example,v 1.1.2.1 2009/12/11 15:10:36 gsc Exp $
@@ -139,7 +140,7 @@ if(!AUERR)
 
 if(DEBUG){Proc_err(ERROR_OPT, "Chiller type is %s", chill_type);}
 
-if ( i_argc > 2 )  //user provided argumet, so check if first argument is temperature
+if ( i_argc > 2 )  //user provided argument, so check if first argument is temperature
 {
 	temptarget = atof(i_argv[2]);  //read first argument and convert to float
 	if ( temptarget == 0.0 )  //if argument is not a number atof returns 0.0, if this is the case check the arg is BSVT or BSCU (only devices we can control here)
@@ -191,6 +192,7 @@ if ( temptarget == 0.0 )  //something other than temp setting requested
 				VTU_GET_PARAM("VTC_CMD_STAT",onoff);
 				heaterstatus = atoi(onoff);
 				returnvalue = heaterstatus ;
+				AUERR=heaterstatus-1;
 				if(DEBUG){Proc_err(ERROR_OPT, "Check: heater status is %s, return %f", onoff, returnvalue);}
 			}
 			else  //if second arg is not check then we are turning the bsvt on or off

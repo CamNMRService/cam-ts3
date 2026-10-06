@@ -44,7 +44,8 @@
 /*			All instances of BSCU changed to BCU				*/
 /* ptg 2026-10-05 Modified to return float as CNST49; also bugfix */
 /*								an insance where it was not reading the chiller status for success test */
-/* NB Still need to update according to Maksim's new syntax for chiller type*/
+/* ptg 2026-10-06 Modified VTC_CHILL_TYPE to VTC_BCU_CHILL_TYPE */
+/* 				as this correctly distinguishes BCU-I vs BCU-II */
 /****************************************************************/
 /*
 $Id: vtc_example,v 1.1.2.1 2009/12/11 15:10:36 gsc Exp $
@@ -127,7 +128,7 @@ if(DEBUG){Proc_err(ERROR_OPT, "current channel is %s", probe_ch);}
 //}
  
 /* checking what chiller, if any, is installed */
-VTU_GET_PARAM("VTC_CHILL_TYPE", chill_type)
+VTU_GET_PARAM("VTC_BCU_CHILL_TYPE", chill_type)
 if(!AUERR)
 {
 	chilltype = atoi(chill_type);  // 0 for no chiller, 1 for BCU-I, 2 for BCU-II
@@ -319,9 +320,13 @@ if ( chilltype == 1 )
 		{
 			strcpy ( newval2, "1" ) ;
 		}
-		else //target is too low for no chiller setting so we are forced to change
+		else if ( temptarget > LOWTEMPMEDCHILL )//target is too low for weak chiller setting so we are forced to change
 		{
 			strcpy ( newval2, "2" ) ;
+		}
+		else
+		{
+			Proc_err(ERROR_OPT, "BCU-I: Desired temperature %fK is lower than the lower limit for medium chiller setting %fK", temptarget);
 		}
 		VTU_PUSH_PARAM("VTC_CHILL_TARG_STRENGTH",newval2);  // set desired chiller state
 		if(DEBUG){Proc_err(ERROR_OPT, "BCU-I: Trying to set chiller state to  %s",newval2);}
@@ -329,7 +334,11 @@ if ( chilltype == 1 )
 	}
 	else if ( chilltype == 2 )
 	{
-	  if ( temptarget > LOWTEMPWEAKCHILL )
+		if ( temptarget > LOWTEMPNOCHILL )  //target can be reached with no chiller setting of BCU-I
+		{
+			strcpy ( newval2, "0" ) ;
+		}
+	    else if ( temptarget > LOWTEMPWEAKCHILL )
 		{
 			strcpy ( newval2, "1" ) ;
 		}

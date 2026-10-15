@@ -1,0 +1,115 @@
+;t1satrecgradient2.ptg
+
+;saturation recovery T1 experiment
+;written by STE, 28.11.2002
+;pulse program is for 2D acquisition
+;establish suitable vd list
+;uses mc syntax, so that it can be used in 1D mode forchecking saturation
+;
+;Modified for Hig-res operation by ptg - uses gradients for saturation.
+; Saturation train is as per WET: 90-gradient-90-gradient-90-gradient-90-gradient
+;where the gradient strengths are reduced by a factor of 2 from the previous one 
+ 
+; Entries in VDlist get corrected in pulse program for length of final gradient pulse 
+; and gradient recovery delay, so first entry must be > p16+16
+; 
+;usign p0 for read pulse so you can use small flip angle in case of radiation damping
+
+; NB complete saturation is not achieved - some signal from the ends of the sample remains.
+;To fit data in dynamics centre, use a userdefined fit function, and in the "start parameters" tab
+; you can enter the function:
+; y = p[0]*(1-((1-p[1])*exp(-x/p[2])))
+;(make sure no spaces before the y)
+; You need to set default start values - p[0] is the equilibrium signal intensity, which you can see from
+; a fit curve, p[1] is the residual unsaturated signal, 0.02 is a good guess, and p[2]  is T1,
+; and in many cases a guess of 1 should be OK.
+; Set the units to none,none, s
+; In general you probably need to fit integrals, because if radiation damping is present the linewidth
+; will depend on the size of the coherent magnetization so will increase as the signal recovers.
+; For good precision, the maximum recovery delay does need to be somewhat longer than T1.
+
+; with 4x pulse / gradient combo at the beginning
+;Avance II+ version
+;parameters:
+;d1 : recycle delay -can be set very small (eg 0.1s)
+;d16 : gradient recovery delay 
+;vdlist : list containing tau delays
+;p1 : f1 channel -  high power 90 degree pulse
+;p0 : f1 channel - variable flip angle pulse 
+;p16 : gradient pulse length [1msec]
+;pcpd2 : pulse length in decoupling sequence
+;pl1 : f1 channel - power level for pulse (default)
+;pl2 : =119 dB, not used
+;pl12 : power level for decoupling if used
+;FnMode : QF (QF No Frequency for AVNeo)
+
+
+
+;$COMMENT=saturation recovery T1 experiment
+;$CLASS=highres
+;$DIM=pseudo 2D
+;$TYPE=direct excitation
+;$SUBTYPE=T1/T2
+
+;$OWNER=Bruker
+;cnst11 : to adjust t=0 for acquisition, if digmod = baseopt
+"acqt0=-tan((p0/p1)*(PI/4))*p1*2/PI"
+
+#include <Avance.incl>
+#include <Grad.incl>
+#include <Delay.incl>
+1 ze
+2 10m 
+  "TAU=vd-p16-d16"
+  10m BLKGRAD   
+#ifdef dec
+  1u pl12:f2
+  d1 do:f2		;recycle delay, decoupler off in go-loop
+#else
+  d1
+#endif /* dec */
+  1u pl1:f1
+  10u UNBLKGRAD
+3 p1 ph4
+  p16:gp1
+  d16 
+  p1 ph5
+  p16:gp1*0.5 
+  d16
+  p1 ph5
+  p16:gp1*0.25
+  d16
+  p1 ph5
+  p16:gp1*0.125
+  d16 BLKGRAD 
+  TAU			;recovery delay
+  p0  ph1
+#ifdef dec
+  1u cpds2:f2
+#endif /* dec */
+  go=2 ph31
+#ifdef dec
+  1m do:f2
+#endif /* dec */
+  10m mc #0 to 2 F1QF(ivd)
+
+exit
+
+ph1= 0 2 1 3
+ph4= 0
+ph5= 1
+ph31= 0 2 1 3 
+
+
+
+;for z-only gradients:
+;gpz1: 40%
+
+;use gradient files:   
+;gpnam1: SMSQ10.100
+
+                                          ;preprocessor-flags-start
+;dec: for decoupling during acquisition start experiment with 
+;             option -Ddec (eda: ZGOPTNS)
+                                          ;preprocessor-flags-end
+

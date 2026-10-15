@@ -39,6 +39,11 @@ RPAR("PROTON","all");
 II;
 sleep(5);
 // reset lock power and put lock back on
+// check power is not artificially high!!
+if(lockpower > -8.9) 
+{
+	lockpower=lockpower-10.0;
+}
 SET_LOCK_POWER(lockpower);
 sleep(5);
 LOCK_ON_AFTER_HOLD; /* waits while LOCK PENDING */

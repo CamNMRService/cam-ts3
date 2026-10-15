@@ -22,6 +22,7 @@
 "p2=p1*2"
 "TAU=de+(tan((p0/p1)*(PI/4))*p1*2/PI)"
 "acqt0=0"
+"d11=10m"
 baseopt_echo
 
 

@@ -1,18 +1,19 @@
 // init-vt
 // AU program to be called as part of autostart.mac to check and set sensible temperature, gas flow and chiller power
 // For BVT systems just check temperature
-
+//For on/off checking with BSVT, call to vtc_heater2 replaced with direct call of VTU_GET_PARAM("VTC_CMD_STAT",onoff);
 
 // Defaults:
 
 float defaulttemp=298.0;
-float tempdiff, settemp;
+float tempdiff, settemp, returnvalue;
 char*   default_flow;
 int origheater;
 int defaultchiller=1; //minimal chiller power by default 
 char bscuargs[32];
 char xw_home[PATH_MAX];
 char tempdisk[PATH_MAX];
+const char *onoff;
 debug=0; //set to 1 for debug messages
  
 
@@ -83,13 +84,15 @@ sleep(5);
 
 if ( isVTU==2 )
 {
-	XAU("vtc_heater2", "bsvt check")
+	VTU_GET_PARAM("VTC_CMD_STAT",onoff);
+	origheater = atoi(onoff);
 }
 else
 {
 	XAU("vtu_heater2", "check")
+	origheater = AUERR;  /* 0 = off, 1=on, -1=error! */
 }
-origheater = AUERR;  /* 0 = off, 1=on, -1=error! */
+
 
 if(debug)
 Proc_err(DEF_ERR_OPT,"origheater=%d", origheater);
@@ -165,9 +168,10 @@ else
 	if (fabs(settemp-defaulttemp) >10)
 	{
 		Proc_err(DEF_ERR_OPT,"VT initialisation check: Temperature is currently set to %f which is VERY different from default temperature %f. \
-		\n On clicking Close the temperature will be reset to %f K \
+		\n On clicking Close the temperature will be reset to %f K and flow to %s l/hr\
 		\n You may need to wait some time for the system to stabilise before shimming \
-		\n Contact NMR Service team if any questions!", settemp, defaulttemp, defaulttemp);
+		\n Contact NMR Service team if any questions! \
+		\n If you don';'t want the temperature to get changed, kill the init-vt AU program!", settemp, defaulttemp, defaulttemp, default_flow);
 		sleep(5); 
 		Proc_err(INFO_OPT,"VT initialisation : temperature is being set. Please wait for confirmation message before proceeding" );
 		STOREPAR("TE", defaulttemp)				
@@ -191,7 +195,8 @@ else
 	else if (fabs(settemp-defaulttemp) >0.2)
 	{
 		Proc_err(DEF_ERR_OPT,"VT initialisation check: Temperature is currently set to %f which is different from default temperature %f. \
-		\n On clicking Close the temperature will be reset to %f K	\n COntact NMR Service team if any questions!", settemp, defaulttemp, defaulttemp);
+		\n On clicking Close the temperature will be reset to %f K and flow to %s l/hr	\n Contact NMR Service team if any questions! \
+		\n If you don''t want the temperature to get changed, kill the init-vt AU program!", settemp, defaulttemp, defaulttemp, default_flow);
 		sleep(5); 
 		Proc_err(INFO_OPT,"VT initialisation : temperature is being set. Please wait for confirmation message before proceeding");
 		STOREPAR("TE", defaulttemp)				

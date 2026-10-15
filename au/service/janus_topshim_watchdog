@@ -19,6 +19,8 @@
 
 // PTG 2026-04-30 Added loop value setting without autophase; 5 s delay after topshim as well
 
+// PTG 2026-06-26 Fix AUERR handling so loopadj_fallback doesn;t effectively force to be 0
+
 #include <time.h>
 time_t now_s, dtime_s;		  	/* seconds since 1970 */
 struct tm *now;	  		/* structure with year, month etc. */
@@ -118,8 +120,16 @@ if (pidfile = fopen(pidpath, "rt"))
 sprintf( command, "robocopy C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData /S C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData_%s > nul",ts_major,ts_minor,ts_patch,ts_major,ts_minor,ts_patch,datestamp);
  //sprintf(command,"xcopy C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData C:\\Bruker\\TopSpin%i.%i.%i\\data\\topshimData_%s\\ /E /H \n", ts_major,ts_minor,ts_patch,ts_major,ts_minor,ts_patch,datestamp);
 system(command);
-
-// Now set loop params without doing autophase
-XAU("loopadj_fallback","quiet");
-
+Proc_err(DEF_ERR_OPT,"AUERR=%d", AUERR);
+if (AUERR)
+{
+	// Now set loop params without doing autophase, and ABORT because shim failed
+	XAU("loopadj_fallback","quiet");
+	ABORT
+}
+else
+{
+	// Now set loop params without doing autophase, but don;t abort as shim was OK
+	XAU("loopadj_fallback","quiet");
+}
 QUIT

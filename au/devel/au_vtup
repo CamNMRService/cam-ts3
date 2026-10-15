@@ -1,0 +1,261 @@
+/*
+au_vtup
+Au-acquisition program for 1D spectra  
+with temperature set for aquisition, NO RETURN TO AMBIENT!!
+Desired temperature is compared to solvent and lowered if 
+too high, or raised if too low (only relevent for low T work!)
+
+Adjust NOVT, MINVT, MAXVT and SolvData to suit!
+
+***This program requires TS 3 or TS 4and additional AU programs***
+***vtc_heater2 and vtu_heater2 to work***
+User must set flag for whether a BSVT or BVT is present.
+MINVT should be set to the minimum allowable temp in absence of a chiller 
+(or for BVT systems with chiller always on this can be changed to the lowest workable temperature)
+MINVT_BCU1 should be set to the limit for a BCU-I (eg 0C)
+MINVT_BCU2 should be set to the limit for a BCU-II (eg -40C)
+All users must set EQUILIBTIME, MAXVT, and NOVT flags.
+
+NB chiller power setting may be changed by vtc_heater2 -  make sure the 
+LOWTEMPNOCHILL etc variables in vtc_heater2 are set as you want!
+*/
+
+// CARE: MUST RETURN TEMPERATURE TO RT BEFORE NEXT SAMPLE!
+// Run a last experiment with TE set to RT!
+// Set preinsertion set/check as well in IconNMR for safety - 
+// Use "first experiments te parameter " (to avoid Icon resetting 
+// TE in the first experiment!)
+
+
+/*
+Usage:                      
+The temperature is set from the parameter TE
+After the experiment is finished the final temperature is 
+written back to the parameters and to the plot title
+
+andrew.gibbs@bruker.co.uk
+980811
+010411 turn on heater if required, return to previous status!
+010821 check field and abort if long way off (wrong solvent!)
+020225 use modified version of vtu_heater from Guenther Schmidt
+030820 check with 3.5 (needs updated vtu_heater2!)
+110303 update for TS 3 / BSVT
+2026-10-06 PTG Correct handling of chiller type and associated setting of MINVT
+        Also new handling of heater status checking. Needs vtc_heater2 which has this update in:
+
+         ptg 2026-10-06 Modified VTC_CHILL_TYPE to VTC_BCU_CHILL_TYPE 
+			as this correctly distinguishes BCU-I vs BCU-II 
+				Also make it only check chill status if ther is chiller...
+		    and removed checking of set temperature, because you 
+	     can only read the set thermocouple temp not set corrected temp!
+           Also "bsvt check" option sets AUERR, to 0 if vt on, -1 if VT off
+*/
+
+/************** configuration options **************************/
+/* temperature to set for unknown solvents, i.e. the standard  */
+/* operating temperature of the VT for a 'non VT' sample       */
+#define NOVT 25.0
+
+/* minimum operating temperature - adjust for use with chiller */
+/* this should be high enough to allow the VT to regulate!     */
+/* For BSVT it will check what chiller is present and use MINVT_BCU1 or MINVT_BCU2 as appropriate     */
+float MINVT = 25.0;
+float MINVT_BCU1 = 0.0;
+float MINVT_BCU2 = -35.0;
+/* maximum operating temperature - probe limit typically 150,  */
+/* plastic spinners should not really be used above 70-80!     */
+/* reduce this if working with a BVT and a chiller             */
+#define MAXVT 150.0
+
+/* equilibration time (seconds) once temperature reached       */
+#define EQUILIBTIME 60
+
+/* do checkfield to check if entered solvent is correct?       */
+/* set TRUE or FALSE to compare the current FIELD value to the */
+/* edlock default value (for further information and to        */
+/* adjust sensitivity see checkfield AU program).               */
+#define CHECKFIELD FALSE
+
+/* whether a BSVT is present (1) or a BVT is present (0)       */
+#define ISBSVT 1
+
+/* Set your desired shimming and acquisition options here      */
+/* (a COMMAND can be left blank if not needed)		     */
+
+#define COMMAND1  ATMA     
+#define COMMAND2  XCMD("topshim convcomp tuneaxyz")
+#define COMMAND3  RGA
+#define COMMAND4  ZG 
+#define COMMAND5
+#define COMMAND6
+
+/*****************end of configuration options******************/
+
+/* other definitions */
+#define CtoK 273.16
+#define USE_SXUTIL
+#define USE_LIBACQ
+#define USE_LIBRRS
+
+float te, temp, curtemp;
+char solvent[20];
+char message[200];
+char command[500];
+char bscuargs[20];
+FILE *title;
+struct SolvData {
+	char name[15];
+	float hight;
+	float lowt;
+};
+int i,j;
+int origheater, chiller;
+const char *chill_type;
+
+/* if a BSVT is present, check whether a chiller is present    */
+/* if a BCU-I (1) or BCU-2 (2)  is present, then modify MINVT */
+// Minvt_BCU1=0C is probably sensible for BCU-I, or maybe down to -10 
+// -40 may be sensible for BCU-II
+
+if ( ISBSVT )
+{
+	VTU_GET_PARAM("VTC_BCU_CHILL_TYPE",chill_type);
+	chiller = atoi(chill_type);
+	if ( chiller == 1 )
+	{
+		MINVT = MINVT_BCU1 ;
+	}
+	else if ( chiller == 2 )
+	{
+	    MINVT = MINVT_BCU2 ;
+	}
+}
+
+/* solvent list - edit to suit!
+   name is as used in the 'edsolv' table
+   first number is the temperature (C) for maximum high temperature
+   (default here is 10 degrees less than bp.) and second is minimum
+   temperature (here 5 degree above mp.)
+
+   Always finish the list with "\0"!
+*/
+struct SolvData solvdata[30] = { "Acetic",	118.0,	 23.0,	\
+				 "Aceton",	 47.0,	-89.0,	\
+				 "Acetone",	 47.0,	-89.0,	\
+				 "CD3CN",	 72.0,	-40.0,	\
+				 "CD3CN-DMF",	 72.0,	-40.0, \
+				 "C6D6",	 70.0,	 10.0,	\
+				 "CDCl3",	 52.0,	-59.0,	\
+				 "D2O",		 91.4,	  8.8,	\
+				 "DMF",		143.0,	-56.0,	\
+				 "DMSO",	179.0,	 23.0,	\
+				 "Dioxan",	 91.0,	 17.0,	\
+				 "Dioxane",	 91.0,	 17.0,	\
+				 "EtOH",	 69.0, -130.0,	\
+				 "EtOD",	 69.0, -130.0,	\
+				 "H2O",		 90.0,	  5.0,	\
+				 "H2O+D2O",	 90.0,	  5.0,	\
+				 "MeOH",	 55.0,	-93.0,	\
+				 "MeOD",	 55.0,	-93.0,	\
+				 "CD2Cl2",	 30.0,	-90.0,	\
+				 "Pyr",		106.0,	-37.0,	\
+				 "TCE",   137.0, -38.0, \
+				 "THF",    	 56.0, -104.0,	\
+				 "Tol",    	101.0,	-91.0,	\
+				 "TFA",    	62.0,	-10.0,	\
+				 "ACND2O", 	72.0,	  5.0,	\
+				 "CH3CN+D2O", 	72.0,	  5.0,	\
+				 "\0",0.0,0.0 } ;
+
+
+/* Start of AU program */
+GETCURDATA
+
+if (CHECKFIELD)
+{
+	XAU("checkfield", "")
+	if (AUERR==-2)  /* -2 == field out of range */
+	{
+		ABORT
+	}
+}
+
+/* see whether VT unit is on */
+if ( ISBSVT )
+{
+	XAU("vtc_heater2", "bsvt check")
+    origheater = AUERR+1;  /* AUERR =-1 means  off, 0=on so add 1 to get to comparable values  */
+}
+else
+{
+	XAU("vtu_heater2", "check")
+    origheater = AUERR;  /* AUERR = 0 means off here, =1 menas on */
+}
+
+
+
+FETCHPAR("TE", &te)
+te = te - CtoK;
+FETCHPAR("SOLVENT", solvent)
+
+/* start with default temperature */
+temp=NOVT;
+
+/* check against valid solvents */
+i=0;
+do
+{
+	if ( !strcmp(solvent, solvdata[i].name) )
+	{
+		/* matched solvent, TE becomes valid */
+		temp = te;
+		if (solvdata[i].hight < temp) temp = solvdata[i].hight;
+		if (solvdata[i].lowt > temp)  temp = solvdata[i].lowt;
+	}
+}
+while( solvdata[++i].name[0] != '\0' );
+
+/* and finally against system limits */
+if (temp < MINVT) temp = MINVT;
+if (temp > MAXVT) temp = MAXVT;
+
+/* turn heater on, if necessary */
+if (origheater==0)
+{
+	if ( ISBSVT ) XAU("vtc_heater2", "bsvt 1")
+	else
+	{
+		XAU("vtu_heater2","on")
+		sleep(3);
+		XAU("vtu_heater2","check")
+	}
+	if (AUERR!=1) 
+	{
+		Proc_err(ERROR_OPT, "Could not turn heater on?");
+		ABORT
+	}
+}
+
+STOREPAR("TE", temp + CtoK)
+
+if ( ISBSVT )
+{
+	sprintf(bscuargs, "%f", temp + CtoK );
+	XAU( "vtc_heater2", bscuargs )
+}
+else TESET
+
+TEREADY(EQUILIBTIME,0.2)
+
+COMMAND1
+COMMAND2
+COMMAND3
+COMMAND4
+COMMAND5
+COMMAND6
+
+TEGET
+
+/* NO RETURN TO RT!! */
+
+QUIT

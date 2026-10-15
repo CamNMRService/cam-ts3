@@ -93,6 +93,8 @@ Added extra when creating the junk dataset to set the instrument name and probe 
 // PTG dec 2025: moved rot off/on commands in experiment specific atma, to be within the "do real atma" condition
 // 	so it doesn;t do them for atma nowin selectnuc... (this doesn;t need spinning to be off!!)
 // PTG apr 2026: changed dummy 11B parset it reads  appropriate j-11B-bs parset
+// PTG 5 jun 2026: skip atma on standard 1h experiment handling needs to be changed. We shoulo check against  the protocol
+//			rather than the individual experiment. Also fixed the point at which spinning is turned back on so it happens even if no error in ATMA!
 
 #include <inc/bsms_program>    /* must be the first statement ****/
 
@@ -1056,8 +1058,8 @@ with NMR service team about whether medium or thick wall tubes are more appropri
             #pragma region Logic for tuning
 			if ( (strstr ( experiment, "2h") == NULL) && (strstr ( experiment, "2H") == NULL)) //so if its not 2h, we might tune
 			{
-				
-				if ( (strstr ( experiment, "janus-1h") == NULL) && (ATMAflag==1) && (global_atma_flag !=0) ) //strstr returns a pointer if a match
+				// For this check we need to check the protocol is not the standard 1H expt PROTON, rather than checking the individual parameter set
+				if ( (strcmp ( protocol, "PROTON") != 0) && (ATMAflag==1) && (global_atma_flag !=0) ) //strstr returns a pointer if a match
 				{
 					// stop spinning
 					strcat(janusinfostring, "ROTOFF \n");
@@ -1074,10 +1076,11 @@ with NMR service team about whether medium or thick wall tubes are more appropri
 						sampleproblem=1;
 						strcat(sampleinfostring, "\n ATMA failed - does your sample have high ionic strength? \n Check with NMR service team about whether medium or thick wall tubes are more appropriate for similar samples.");
 
-					// STOPMSG(tmp_str)
+					
+					
+					} 
 					strcat(janusinfostring, "ROT \n");
-				    ROT // does "ro acqu"
-					}
+				  ROT // does "ro acqu", this has to not be within the "if error" brackets!
 				}
 				else
 				{ 

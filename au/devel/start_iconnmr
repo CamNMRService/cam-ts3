@@ -1,0 +1,101 @@
+/* start_iconnmr */
+/* AU program to make killfile to stop janus after current sample completed */
+/* janus_sx_pid will actually start the IconNMR run */
+
+char def_file[255]="e:/chemist/defaults-csv.txt"; //janus software defaults
+
+int     expt=1, curloop=1, cpos, specno, jexpt, jsolv, finish=FALSE,i=1;
+int     LastSample, FatalError=FALSE, nexpt, parmo, proderrcount, sthou;
+int     skipsample, pid, x, proc_or_not=1;
+
+char    oi[20], juser[50], suser[40], in_data[1024], tmp_fname[1024];
+char    shimfile[80], acqufile[80];
+char    experiment[155], solvent[40], tunefile[40], sxfile[80];
+char    tmp_str[180], titlefile[80], titletext[80];
+char    exptfile[80], diskunit[40];
+char    prefix[40], shimset[40], defaultsfile[80], hdwerr[80];
+char    archpath[80], archive[20], jcmd_str[1024], outpath[1024];
+char    janusup[80], expttime[40], exptsfile[80], protocol[80];
+char    sxcmd[80], gradshim[20], comments[1024], command[1024], snostr[1024], tmpcmd[256];
+char    statusstr[1024], awmfile[80],tmparchpath[1024],fidpath[1024],procau[1024];
+char	proclist[1024],procinstruct[1024];
+
+char   *env_name, *file_data, *field, *ed;
+FILE   *fprod = NULL, *facqu = NULL, *ferror = NULL, *fwarn = NULL;
+FILE   *fshim = NULL, *fwait = NULL, *ftitle = NULL, *fsx = NULL;
+FILE   *fexpt = NULL, *fprot = NULL, *flog = NULL, *fdef = NULL;
+FILE   *fjup = NULL, *fexpts = NULL, *pidfile = NULL, *fawm = NULL;
+FILE  *sname = NULL;
+FILE 	*fbat=NULL;
+FILE	*plist=NULL;
+FILE	*pornot=NULL; 
+FILE *januslockfile=NULL;
+FILE *fkill=NULL;
+char batfile[127],batcmd[127];
+char prodfile[255];
+char prodfiletxt[255];
+char errorfile[255];
+char warnfile[255];
+char waitfile[255];
+char protfile[255];
+char pornotfile[255];
+char logfile[255];
+char januspidfile[255];
+char januskillfile[255];
+GETCURDATA
+
+/*--- Get defaults from the defaults file ----------------------*/
+strcpy( defaultsfile, def_file );
+fdef = fopen( defaultsfile, "r" );
+Proc_err ( INFO_OPT, "reading defaults");
+strcpy( defaultsfile, def_file );
+fdef = fopen( defaultsfile, "r" );
+Proc_err( INFO_OPT, "reading defaults");
+Proc_err(INFO_OPT,"file is not empty, so do something");
+rewind(fdef); //go to begining of file
+file_data = fgets(in_data, 1024, fdef); //read in file as a continuous string
+fclose(fdef); //close the file
+Proc_err(INFO_OPT,"parsing %s file",proclist);
+//file is open, read data
+field = strtok(in_data, ",");
+strcpy( prefix,field);
+Proc_err(INFO_OPT,"prefix is %s",prefix);
+field = strtok(NULL, ",");
+sscanf(field, "%s", &diskunit);
+	Proc_err(INFO_OPT,"diskunit is %s",diskunit);
+field = strtok(NULL, ",");
+sscanf(field,"%s", &suser);
+	Proc_err(INFO_OPT,"suser is %s",suser);
+field = strtok(NULL,",");
+sscanf(field,"%s",&tunefile);
+	Proc_err(INFO_OPT,"tunefile is %s", tunefile);
+field = strtok(NULL,",");
+sscanf(field,"%s",&shimset);
+	Proc_err(INFO_OPT,"shimset is %s", shimset);
+field = strtok(NULL,",");
+sscanf(field,"%s",&archpath);
+	Proc_err(INFO_OPT,"archpath is %s", archpath);
+field = strtok(NULL,",");
+sscanf(field,"%s",&archive);
+	Proc_err(INFO_OPT,"archive is %s", archive);
+field = strtok(NULL,",");
+sscanf(field,"%s",&gradshim);
+	Proc_err(INFO_OPT,"gradshim is %s", gradshim);
+Proc_err(INFO_OPT,"parsed file");
+/*file should contain something like but separated with commas instead of newline:-
+Z		-prefix
+f:\	-diskunit
+chemist		-user for data
+qnpshim		-autotune algorithm
+QNP.work	-shimfile to load
+f:\zips		-archive path
+false		-wether to archive or not
+true		-wheter to gradshim/topshim or not
+*/
+
+sprintf(januskillfile,"%s%s\\killjanus.txt",diskunit,suser);
+fkill=fopen(januskillfile, "wt");
+fputs("kill janus!", fkill);
+fclose( fkill );
+
+QUIT

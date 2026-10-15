@@ -351,7 +351,7 @@ if (aqtest == 0)
     ATMA
     // add topshim here with full tunea - maybe important if it's run all the otehr tests first
     // and also we want to make sure it adjusts XZ/YZ
-    XCMD("topshim plotall tunea convcomp")
+    XCMD("topshim plotall tunea convcomp ordmax=7")
     ZG
     if ( (ts_major=4) && (ts_minor>=0) && (ts_patch>=6) ) {
     FP
@@ -507,22 +507,22 @@ if ((results_file = fopen(results_file_name, "a+")) == 0)
 {
 	Proc_err(DEF_ERR_OPT, "Cannot open file for writing:\n%s", results_file_name);
 	//debating wether to put the Proc_err below th if... But don't want automation to stop.
-      if (verbose !=1) {
-         XCMD("setdef ackn ok");
-         XCMD("setdef stdout on");
-         XCMD("setdef stderr on");
-      }
+ //     if (verbose !=1) {
+ //        XCMD("setdef ackn ok");
+ //        XCMD("setdef stdout on");
+ //        XCMD("setdef stderr on");
+ //     }
    exit(1);
 } else {
      fputs(results_content, results_file);
      fclose(results_file);
 }
 
-if (verbose !=1) {
-   XCMD("setdef ackn ok");
-   XCMD("setdef stdout on");
-   XCMD("setdef stderr on");
-}
+//if (verbose !=1) {
+//   XCMD("setdef ackn ok");
+//   XCMD("setdef stdout on");
+//   XCMD("setdef stderr on");
+//}
 
 
 QUIT

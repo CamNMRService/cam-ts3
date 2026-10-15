@@ -21,7 +21,7 @@
 baseopt_echo
 
 1 ze
-2 30m
+2 10m
   d1
   (p0 ph1):f1
   2u
@@ -30,7 +30,7 @@ baseopt_echo
   TAU
   (p2 ph3):f1
   go=2 ph31
-  30m mc #0 to 2 F0(zd)
+  10m mc #0 to 2 F0(zd)
 exit
 
 

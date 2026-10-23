@@ -26,7 +26,7 @@ baseopt_echo
 
 
 1 ze
-2 30m 
+2 10m 
   d1 pl1:f1
   (p0 ph1):f1 
   d3
@@ -37,7 +37,7 @@ baseopt_echo
   (p44:sp30 ph3):f1
   d3
   go=2 ph31 
-  30m mc #0 to 2 F0(zd)
+  10m mc #0 to 2 F0(zd)
 exit
 
 

@@ -109,6 +109,10 @@ Short delay before shim in vain hope it will minimise the odd failures...
 2026_3_20 Added timeout for ATMA, and made atma do proton only for DAY PROTON
 			Also add short delay after topshim to minimise the number of failures when the lock 
 			doesn;t recover quickly
+
+2026_05_27 Added "start_iconnmnr" functionality as per tobermory. Au program "start_iconnmr" generates
+					a file which is checked for at the start of each sample loop; if found Janus will be stopped and 
+					IconNMR started. This is a bit safer than simply starting Icon  from a kiosk experiment and leaving the kiosk running.
 */
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 char def_file[255]="e:/chemist/defaults-csv.txt"; //janus software defaults
@@ -149,7 +153,7 @@ FILE	*pornot=NULL;
 FILE    *sampleinfo=NULL;
 FILE   *fpause=NULL;
 char  samplename[80], snamefile[255];
-
+char januskillfile[255];
 
 /*--- Assign filenames for signalling etc.----------------------*/
 
@@ -163,6 +167,7 @@ char protfile[255];
 char pornotfile[255];
 char logfile[255];
 char pausefile[PATH_MAX]; //file name for pause file
+
 
 char email[80]="camnmrservice@gmail.com";
 int get_proc_or_not_val(FILE *pornot);
@@ -263,7 +268,7 @@ sprintf(protfile, "%s%s\\prot.txt",diskunit,suser);
 sprintf(logfile, "%s%s\\jchlog.txt",diskunit,suser);
 sprintf(proclist, "%s%s\\proclist.txt",diskunit,suser);
 sprintf(pornotfile, "%s%s\\proc_or_not.txt", diskunit,suser);
-
+sprintf(januskillfile,"%s%s\\killjanus.txt",diskunit,suser);
 /*now write what kind of processing we're doing*/
 pornot = fopen (pornotfile,"w");
 if (pornot == NULL)
@@ -393,6 +398,18 @@ while ( finish != TRUE ) //THE MAIN LOOP
 /*	Proc_err ( INFO_OPT, "Waiting for sample...Loop(%d)",curloop); */
  
 	sleep(10);
+
+		// Check for kill file that will be used to start IconNMR
+
+	if ( access(januskillfile,F_OK) == 0) // file found
+	{
+		Proc_err ( INFO_OPT, "Stopping kiosk mode!");
+		remove(januskillfile);  // get rid of the kil file!
+		XCMD("sendgui icon -start")   // start the IconNMR run 
+		sleep(5);
+		STOPMSG("janus finished, IconNMR started")
+	}	
+	
 	/*------------------------------------------------*/
 	if ( access(prodfile,R_OK)!=0)
 	{
@@ -831,7 +848,7 @@ if (proc_or_not==1)
 
 		fclose(fprod);
 		LastSample=FALSE;
-
+		XCMD("setdef ackn no");
 		// Copy procnos 700 and 701 from the junk dataset to this last dataset
 
 		strcpy(wobbdest,  ACQUPATH("pdata/700"));

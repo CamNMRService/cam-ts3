@@ -10,6 +10,8 @@
 // But we want an option - just take cmd and add to base atma command
 //  AUERR should be -1 if atma fails, so main janus AU will interpret the result correctly
 
+// 2026-05-30 ptg Added a sendgui stop in case atma command reports auerr
+
 
 char command[PATH_MAX];
 char experiment[100];
@@ -78,7 +80,12 @@ if (pidfile = fopen(pidpath, "rt"))
 
 }
  
-
+// Also send stop via gui if auerr to hopefully catch other failures...
+if (AUERR)
+{
+XCMD("sendgui stop")
+sleep(30);
+}
 
 
 QUIT

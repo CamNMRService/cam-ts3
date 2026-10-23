@@ -25,6 +25,8 @@
 
 // PTG 2026-04-30 Added loop value setting without autophase; 5 s delay after topshim as well
 
+// Test: ordmax=7 and no tuneaxyz
+
 #include <time.h>
 time_t now_s, dtime_s;		  	/* seconds since 1970 */
 struct tm *now;	  		/* structure with year, month etc. */
@@ -111,8 +113,9 @@ sprintf(tscommand,"topshim plotall convcomp %s", topshim_option);
 FETCHPAR("SOLVENT", solvent);
 if(strstr(solvent, "D2O")==0)
 {
-	sprintf(tscommand,"topshim plotall convcomp tuneaxyz %s", topshim_option);
+	sprintf(tscommand,"topshim plotall ordmax=7 convcomp tuneaxyz %s", topshim_option);
 	XCMD(tscommand);
+	AUTOSHIM_ON
 }
 else
 {

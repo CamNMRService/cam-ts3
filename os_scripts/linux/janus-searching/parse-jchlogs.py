@@ -9,6 +9,15 @@ def sanitize_filename(name: str) -> str:
     clean = re.sub(r'_+', '_', clean).strip('_')
     return clean or "query"
 
+def parse_line_timestamp(line_str: str):
+    """Extract YYYY-MM-DD, HH-MM-SS, and Unix timestamp from log date lines."""
+    clean = " ".join(line_str.lstrip("- ").strip().split())
+    try:
+        dt = datetime.strptime(clean, "%a %b %d %H:%M:%S %Y")
+        return dt.strftime("%Y-%m-%d"), dt.strftime("%H-%M-%S"), str(int(dt.timestamp()))
+    except ValueError:
+        return "N/A", "N/A", "N/A"
+
 def parse_log_files():
     folder_input = input("Enter folder path: ").strip()
     pattern_input = input("Enter file pattern to match (e.g., *.txt): ").strip() or "*.txt"
@@ -27,7 +36,6 @@ def parse_log_files():
 
     full_lines = []
     first_portions = []
-
     PREFIX_EXACT = " Specno: "
 
     for file_path in matching_files:
@@ -36,12 +44,12 @@ def parse_log_files():
 
         try:
             with open(file_path, "r", encoding="utf-8", errors="replace") as f:
+                prev_line = ""
                 for line in f:
                     line_str = line.rstrip("\r\n")
 
                     # Match lines starting with " Specno: " (handles standard and non-breaking spaces)
                     if line_str.startswith(PREFIX_EXACT) or line_str.lstrip(" \xa0").startswith("Specno: "):
-                        # Case-insensitive search match
                         if search_term in line_str.lower():
                             # Strip " Specno: " prefix
                             if line_str.startswith(PREFIX_EXACT):
@@ -49,17 +57,21 @@ def parse_log_files():
                             else:
                                 stripped = line_str.lstrip(" \xa0")[len("Specno: "):]
 
-                            # File 1: Full line without " Specno: "
-                            full_lines.append(stripped)
+                            # Extract date, time, and unix timestamp from the preceding line
+                            date_str, time_str, unix_str = parse_line_timestamp(prev_line)
 
-                            # File 2: First portion up to the first comma
+                            # Place date, time, and unix timestamp in the first 3 columns
+                            full_lines.append(f"{date_str}, {time_str}, {unix_str}, {stripped}")
+
                             first_part = stripped.split(",", 1)[0]
-                            first_portions.append(first_part)
+                            first_portions.append(f"{date_str}, {time_str}, {unix_str}, {first_part}")
+
+                    prev_line = line_str
 
         except Exception as e:
             print(f"Skipping {file_path.name} due to read error: {e}")
 
-    # Generate timestamp in format YYYY_MM_DD_HH_MM_SS
+    # Generate timestamp for filename
     timestamp = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
     safe_search_tag = sanitize_filename(search_term_raw)
 

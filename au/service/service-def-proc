@@ -5,7 +5,7 @@
 /*fix unusual dir structure and no pulseprog - better to look for AQQUS*/
 
 #include <stdio.h>
-#include <inc/sysutil>
+//#include <inc/sysutil>
 
 char homepul[128], pul[128], directory[PATH_MAX], data_File[PATH_MAX], nuc1[20], nuc2[20],au_p[128];
 int mode, dexpno, expno, i_limit, Hexpno, Cexpno;
